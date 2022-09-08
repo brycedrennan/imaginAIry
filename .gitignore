@@ -1,0 +1,12 @@
+.idea
+.DS_Store
+__pycache__
+outputs/*
+other
+prolly_delete
+coverage
+downloads
+.coverage
+.coveragerc
+/imaginairy/data/stable-diffusion-v1.yaml
+/imaginairy/data/stable-diffusion-v1-4.ckpt
