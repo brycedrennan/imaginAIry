@@ -1,9 +1,11 @@
 import argparse
+import logging
 import os
 import random
 import re
 import subprocess
 from contextlib import nullcontext
+from functools import lru_cache
 
 import PIL
 import numpy as np
@@ -19,22 +21,21 @@ from imaginairy.models.diffusion.plms import PLMSSampler
 from imaginairy.utils import get_device, instantiate_from_config
 
 LIB_PATH = os.path.dirname(__file__)
+logger = logging.getLogger(__name__)
 
 
 def load_model_from_config(config, ckpt, verbose=False):
-    print(f"Loading model from {ckpt}")
+    logger.info(f"Loading model from {ckpt}")
     pl_sd = torch.load(ckpt, map_location="cpu")
     if "global_step" in pl_sd:
-        print(f"Global Step: {pl_sd['global_step']}")
+        logger.info(f"Global Step: {pl_sd['global_step']}")
     sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
     m, u = model.load_state_dict(sd, strict=False)
     if len(m) > 0 and verbose:
-        print("missing keys:")
-        print(m)
+        logger.info(f"missing keys: {m}")
     if len(u) > 0 and verbose:
-        print("unexpected keys:")
-        print(u)
+        logger.info(f"unexpected keys: {u}")
 
     model.cuda()
     model.eval()
@@ -222,7 +223,7 @@ class ImaginePrompt:
 def load_img(path, max_height=512, max_width=512):
     image = Image.open(path).convert("RGB")
     w, h = image.size
-    print(f"loaded input image of size ({w}, {h}) from {path}")
+    logger.info(f"loaded input image of size ({w}, {h}) from {path}")
     resize_ratio = min(max_width / w, max_height / h)
     w, h = int(w * resize_ratio), int(h * resize_ratio)
     w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 32
@@ -233,23 +234,27 @@ def load_img(path, max_height=512, max_width=512):
     return 2.0 * image - 1.0, w, h
 
 
+@lru_cache()
+def load_model():
+    config = ("data/stable-diffusion-v1.yaml",)
+    ckpt = ("data/stable-diffusion-v1-4.ckpt",)
+    config = OmegaConf.load(f"{LIB_PATH}/{config}")
+    model = load_model_from_config(config, f"{LIB_PATH}/{ckpt}")
+
+    model = model.to(get_device())
+    return model
+
+
 def imagine(
     prompts,
-    config="data/stable-diffusion-v1.yaml",
-    ckpt="data/stable-diffusion-v1-4.ckpt",
     outdir="outputs/txt2img-samples",
-    fixed_code=None,
     latent_channels=4,
     downsampling_factor=8,
     precision="autocast",
     skip_save=False,
     ddim_eta=0.0,
 ):
-    config = OmegaConf.load(f"{LIB_PATH}/{config}")
-    model = load_model_from_config(config, f"{LIB_PATH}/{ckpt}")
-
-    model = model.to(get_device())
-
+    model = load_model()
     os.makedirs(outdir, exist_ok=True)
     outpath = outdir
 
@@ -296,11 +301,6 @@ def imagine(
                     )
 
             start_code = None
-            # if fixed_code:
-            #     start_code = torch.randn(
-            #         [1, latent_channels, prompt.height, prompt.width],
-            #         device=get_device(),
-            #     )
             sampler = get_sampler(prompt.sampler_type, model)
             if prompt.init_image:
                 generation_strength = 1 - prompt.init_image_strength

@@ -6,6 +6,7 @@ setup(
     description='AI imagined images.',
     packages=find_packages("imaginairy"),
     install_requires=[
+        'click',
         'torch',
         'numpy',
         'tqdm',

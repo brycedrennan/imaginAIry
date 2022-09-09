@@ -1,4 +1,5 @@
 # pytorch_diffusion + derived encoder decoder
+import logging
 import math
 
 import numpy as np
@@ -8,6 +9,8 @@ from einops import rearrange
 
 from imaginairy.modules.attention import LinearAttention
 from imaginairy.utils import instantiate_from_config
+
+logger = logging.getLogger(__name__)
 
 
 def get_timestep_embedding(timesteps, embedding_dim):
@@ -193,7 +196,9 @@ class AttnBlock(nn.Module):
 
 def make_attn(in_channels, attn_type="vanilla"):
     assert attn_type in ["vanilla", "linear", "none"], f"attn_type {attn_type} unknown"
-    print(f"making attention of type '{attn_type}' with {in_channels} in_channels")
+    logger.info(
+        f"making attention of type '{attn_type}' with {in_channels} in_channels"
+    )
     if attn_type == "vanilla":
         return AttnBlock(in_channels)
     elif attn_type == "none":
@@ -356,10 +361,8 @@ class Decoder(nn.Module):
         block_in = ch * ch_mult[self.num_resolutions - 1]
         curr_res = resolution // 2 ** (self.num_resolutions - 1)
         self.z_shape = (1, z_channels, curr_res, curr_res)
-        print(
-            "Working with z of shape {} = {} dimensions.".format(
-                self.z_shape, np.prod(self.z_shape)
-            )
+        logger.info(
+            f"Working with z of shape {self.z_shape} = {np.prod(self.z_shape)} dimensions."
         )
 
         # z to block_in
@@ -513,7 +516,7 @@ class Upsampler(nn.Module):
         assert out_size >= in_size
         num_blocks = int(np.log2(out_size // in_size)) + 1
         factor_up = 1.0 + (out_size % in_size)
-        print(
+        logger.info(
             f"Building {self.__class__.__name__} with in_size: {in_size} --> out_size {out_size} and factor {factor_up}"
         )
         self.rescaler = LatentRescaler(
@@ -545,7 +548,7 @@ class Resize(nn.Module):
         self.with_conv = learned
         self.mode = mode
         if self.with_conv:
-            print(
+            logger.info(
                 f"Note: {self.__class__.__name} uses learned downsampling and will ignore the fixed {mode} mode"
             )
             raise NotImplementedError()

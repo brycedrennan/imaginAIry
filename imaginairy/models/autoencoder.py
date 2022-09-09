@@ -1,13 +1,14 @@
-import torch
-import pytorch_lightning as pl
-import torch.nn.functional as F
+import logging
 
+import pytorch_lightning as pl
+import torch
 from taming.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer
 
 from imaginairy.modules.diffusionmodules.model import Encoder, Decoder
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
-
 from imaginairy.utils import instantiate_from_config
+
+logger = logging.getLogger(__name__)
 
 
 class VQModel(pl.LightningModule):
@@ -51,7 +52,7 @@ class VQModel(pl.LightningModule):
             self.monitor = monitor
         self.batch_resize_range = batch_resize_range
         if self.batch_resize_range is not None:
-            print(
+            logger.info(
                 f"{self.__class__.__name__}: Using per-batch resizing in range {batch_resize_range}."
             )
 
@@ -117,10 +118,10 @@ class AutoencoderKL(pl.LightningModule):
         for k in keys:
             for ik in ignore_keys:
                 if k.startswith(ik):
-                    print("Deleting key {} from state_dict.".format(k))
+                    logger.info("Deleting key {} from state_dict.".format(k))
                     del sd[k]
         self.load_state_dict(sd, strict=False)
-        print(f"Restored from {path}")
+        logger.info(f"Restored from {path}")
 
     def encode(self, x):
         h = self.encoder(x)

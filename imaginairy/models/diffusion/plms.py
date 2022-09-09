@@ -1,7 +1,8 @@
 """SAMPLING ONLY."""
+import logging
 
-import torch
 import numpy as np
+import torch
 from tqdm import tqdm
 
 from imaginairy.modules.diffusionmodules.util import (
@@ -10,6 +11,8 @@ from imaginairy.modules.diffusionmodules.util import (
     noise_like,
 )
 from imaginairy.utils import get_device
+
+logger = logging.getLogger(__name__)
 
 
 class PLMSSampler(object):
@@ -118,12 +121,12 @@ class PLMSSampler(object):
             if isinstance(conditioning, dict):
                 cbs = conditioning[list(conditioning.keys())[0]].shape[0]
                 if cbs != batch_size:
-                    print(
+                    logger.warning(
                         f"Warning: Got {cbs} conditionings but batch-size is {batch_size}"
                     )
             else:
                 if conditioning.shape[0] != batch_size:
-                    print(
+                    logger.warning(
                         f"Warning: Got {conditioning.shape[0]} conditionings but batch-size is {batch_size}"
                     )
 
@@ -131,7 +134,7 @@ class PLMSSampler(object):
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
-        print(f"Data shape for PLMS sampling is {size}")
+        logger.info(f"Data shape for PLMS sampling is {size}")
 
         samples, intermediates = self.plms_sampling(
             conditioning,
@@ -204,7 +207,7 @@ class PLMSSampler(object):
             else np.flip(timesteps)
         )
         total_steps = timesteps if ddim_use_original_steps else timesteps.shape[0]
-        print(f"Running PLMS Sampling with {total_steps} timesteps")
+        logger.info(f"Running PLMS Sampling with {total_steps} timesteps")
 
         iterator = tqdm(time_range, desc="PLMS Sampler", total=total_steps)
         old_eps = []

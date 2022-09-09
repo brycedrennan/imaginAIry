@@ -1,23 +1,14 @@
+import clip
+import kornia
 import torch
 import torch.nn as nn
-
-import clip
 from einops import repeat
 from transformers import CLIPTokenizer, CLIPTextModel
-import kornia
 
-from imaginairy.utils import get_device, print_params
-
-
-class AbstractEncoder(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-    def encode(self, *args, **kwargs):
-        raise NotImplementedError
+from imaginairy.utils import get_device
 
 
-class FrozenCLIPEmbedder(AbstractEncoder):
+class FrozenCLIPEmbedder:
     """Uses the CLIP transformer encoder for text (from Hugging Face)"""
 
     def __init__(
@@ -139,8 +130,3 @@ class FrozenClipImageEmbedder(nn.Module):
     def forward(self, x):
         # x is assumed to be in range [-1,1]
         return self.model.encode_image(self.preprocess(x))
-
-
-if __name__ == "__main__":
-    model = FrozenCLIPEmbedder()
-    print_params(model, verbose=True)

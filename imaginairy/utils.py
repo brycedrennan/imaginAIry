@@ -1,7 +1,10 @@
 import importlib
+import logging
 from functools import lru_cache
 
 import torch
+
+logger = logging.getLogger(__name__)
 
 
 @lru_cache()
@@ -14,9 +17,9 @@ def get_device():
         return "cpu"
 
 
-def print_params(model):
+def log_params(model):
     total_params = sum(p.numel() for p in model.parameters())
-    print(f"{model.__class__.__name__} has {total_params * 1.e-6:.2f} M params.")
+    logger.info(f"{model.__class__.__name__} has {total_params * 1.e-6:.2f} M params.")
 
 
 def instantiate_from_config(config):
