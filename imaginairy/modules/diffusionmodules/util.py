@@ -9,9 +9,10 @@
 
 
 import math
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 from einops import repeat
 
 from imaginairy.utils import instantiate_from_config
@@ -52,12 +53,23 @@ def make_beta_schedule(
     return betas.numpy()
 
 
+def frange(start, stop, step):
+    """range but handles floats"""
+    x = start
+    while True:
+        if x >= stop:
+            return
+        yield x
+        x += step
+
+
 def make_ddim_timesteps(
     ddim_discr_method, num_ddim_timesteps, num_ddpm_timesteps, verbose=True
 ):
     if ddim_discr_method == "uniform":
-        c = num_ddpm_timesteps // num_ddim_timesteps
-        ddim_timesteps = np.asarray(list(range(0, num_ddpm_timesteps, c)))
+        c = num_ddpm_timesteps / num_ddim_timesteps
+        ddim_timesteps = [int(i) for i in frange(0, num_ddpm_timesteps - 1, c)]
+        ddim_timesteps = np.asarray(ddim_timesteps)
     elif ddim_discr_method == "quad":
         ddim_timesteps = (
             (np.linspace(0, np.sqrt(num_ddpm_timesteps * 0.8), num_ddim_timesteps)) ** 2

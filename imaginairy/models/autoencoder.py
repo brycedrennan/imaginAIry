@@ -61,7 +61,6 @@ class VQModel(pl.LightningModule):
         self.lr_g_factor = lr_g_factor
 
 
-
 class VQModelInterface(VQModel):
     def __init__(self, embed_dim, *args, **kwargs):
         super().__init__(embed_dim=embed_dim, *args, **kwargs)

@@ -9,4 +9,11 @@ AI imagined images.
 
  - LDM - Latent Diffusion
  - Stable Diffusion
- - 
+
+# Todo
+ - add tests
+ - add docs
+ - remove yaml config
+ - deploy to pypi
+ - add image describe feature
+ 

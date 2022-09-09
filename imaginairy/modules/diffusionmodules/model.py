@@ -80,13 +80,13 @@ class Downsample(nn.Module):
 
 class ResnetBlock(nn.Module):
     def __init__(
-            self,
-            *,
-            in_channels,
-            out_channels=None,
-            conv_shortcut=False,
-            dropout,
-            temb_channels=512,
+        self,
+        *,
+        in_channels,
+        out_channels=None,
+        conv_shortcut=False,
+        dropout,
+        temb_channels=512,
     ):
         super().__init__()
         self.in_channels = in_channels
@@ -204,22 +204,22 @@ def make_attn(in_channels, attn_type="vanilla"):
 
 class Encoder(nn.Module):
     def __init__(
-            self,
-            *,
-            ch,
-            out_ch,
-            ch_mult=(1, 2, 4, 8),
-            num_res_blocks,
-            attn_resolutions,
-            dropout=0.0,
-            resamp_with_conv=True,
-            in_channels,
-            resolution,
-            z_channels,
-            double_z=True,
-            use_linear_attn=False,
-            attn_type="vanilla",
-            **ignore_kwargs,
+        self,
+        *,
+        ch,
+        out_ch,
+        ch_mult=(1, 2, 4, 8),
+        num_res_blocks,
+        attn_resolutions,
+        dropout=0.0,
+        resamp_with_conv=True,
+        in_channels,
+        resolution,
+        z_channels,
+        double_z=True,
+        use_linear_attn=False,
+        attn_type="vanilla",
+        **ignore_kwargs,
     ):
         super().__init__()
         if use_linear_attn:
@@ -321,23 +321,23 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(
-            self,
-            *,
-            ch,
-            out_ch,
-            ch_mult=(1, 2, 4, 8),
-            num_res_blocks,
-            attn_resolutions,
-            dropout=0.0,
-            resamp_with_conv=True,
-            in_channels,
-            resolution,
-            z_channels,
-            give_pre_end=False,
-            tanh_out=False,
-            use_linear_attn=False,
-            attn_type="vanilla",
-            **ignorekwargs,
+        self,
+        *,
+        ch,
+        out_ch,
+        ch_mult=(1, 2, 4, 8),
+        num_res_blocks,
+        attn_resolutions,
+        dropout=0.0,
+        resamp_with_conv=True,
+        in_channels,
+        resolution,
+        z_channels,
+        give_pre_end=False,
+        tanh_out=False,
+        use_linear_attn=False,
+        attn_type="vanilla",
+        **ignorekwargs,
     ):
         super().__init__()
         if use_linear_attn:
@@ -567,24 +567,24 @@ class Resize(nn.Module):
 
 class FirstStagePostProcessor(nn.Module):
     def __init__(
-            self,
-            ch_mult: list,
-            in_channels,
-            pretrained_model: nn.Module = None,
-            reshape=False,
-            n_channels=None,
-            dropout=0.0,
-            pretrained_config=None,
+        self,
+        ch_mult: list,
+        in_channels,
+        pretrained_model: nn.Module = None,
+        reshape=False,
+        n_channels=None,
+        dropout=0.0,
+        pretrained_config=None,
     ):
         super().__init__()
         if pretrained_config is None:
             assert (
-                    pretrained_model is not None
+                pretrained_model is not None
             ), 'Either "pretrained_model" or "pretrained_config" must not be None'
             self.pretrained_model = pretrained_model
         else:
             assert (
-                    pretrained_config is not None
+                pretrained_config is not None
             ), 'Either "pretrained_model" or "pretrained_config" must not be None'
             self.instantiate_pretrained(pretrained_config)
 

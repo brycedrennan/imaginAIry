@@ -218,7 +218,7 @@ class DDIMSampler:
                 )  # TODO: deterministic forward pass?
                 img = img_orig * mask + (1.0 - mask) * img
 
-            outs = self.p_sample_ddim(
+            img, pred_x0 = self.p_sample_ddim(
                 img,
                 cond,
                 ts,
@@ -232,7 +232,6 @@ class DDIMSampler:
                 unconditional_guidance_scale=unconditional_guidance_scale,
                 unconditional_conditioning=unconditional_conditioning,
             )
-            img, pred_x0 = outs
             if callback:
                 callback(i)
             if img_callback:
@@ -341,6 +340,7 @@ class DDIMSampler:
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
         use_original_steps=False,
+        img_callback=None,
     ):
 
         timesteps = (
@@ -361,7 +361,7 @@ class DDIMSampler:
             ts = torch.full(
                 (x_latent.shape[0],), step, device=x_latent.device, dtype=torch.long
             )
-            x_dec, _ = self.p_sample_ddim(
+            x_dec, pred_x0 = self.p_sample_ddim(
                 x_dec,
                 cond,
                 ts,
@@ -370,4 +370,6 @@ class DDIMSampler:
                 unconditional_guidance_scale=unconditional_guidance_scale,
                 unconditional_conditioning=unconditional_conditioning,
             )
+            if img_callback:
+                img_callback(pred_x0, i)
         return x_dec
