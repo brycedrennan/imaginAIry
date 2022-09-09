@@ -5,16 +5,19 @@ setup(
     version='0.0.1',
     description='AI imagined images.',
     packages=find_packages("imaginairy"),
+    entry_points={
+        'console_scripts': ['imagine=imaginairy.cmds:imagine_cmd'],
+    },
     install_requires=[
         'click',
         'torch',
         'numpy',
         'tqdm',
-        "albumentations==0.4.3",
+        # "albumentations==0.4.3",
         "diffusers",
         # opencv-python==4.1.2.30
         "pudb==2019.2",
-        "invisible-watermark",
+        # "invisible-watermark",
         "imageio==2.9.0",
         "imageio-ffmpeg==0.4.2",
         "pytorch-lightning==1.4.2",
