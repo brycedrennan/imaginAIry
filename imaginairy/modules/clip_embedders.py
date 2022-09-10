@@ -8,7 +8,7 @@ from transformers import CLIPTokenizer, CLIPTextModel
 from imaginairy.utils import get_device
 
 
-class FrozenCLIPEmbedder:
+class FrozenCLIPEmbedder(nn.Module):
     """Uses the CLIP transformer encoder for text (from Hugging Face)"""
 
     def __init__(

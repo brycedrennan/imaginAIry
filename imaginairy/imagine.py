@@ -1,7 +1,5 @@
-import argparse
 import logging
 import os
-import random
 import re
 import subprocess
 from contextlib import nullcontext
@@ -18,13 +16,14 @@ from torch import autocast
 
 from imaginairy.models.diffusion.ddim import DDIMSampler
 from imaginairy.models.diffusion.plms import PLMSSampler
+from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import get_device, instantiate_from_config
 
 LIB_PATH = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
 
 
-def load_model_from_config(config, ckpt, verbose=False):
+def load_model_from_config(config, ckpt):
     logger.info(f"Loading model from {ckpt}")
     pl_sd = torch.load(ckpt, map_location="cpu")
     if "global_step" in pl_sd:
@@ -32,64 +31,14 @@ def load_model_from_config(config, ckpt, verbose=False):
     sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
     m, u = model.load_state_dict(sd, strict=False)
-    if len(m) > 0 and verbose:
+    if len(m) > 0:
         logger.info(f"missing keys: {m}")
-    if len(u) > 0 and verbose:
+    if len(u) > 0:
         logger.info(f"unexpected keys: {u}")
 
     model.cuda()
     model.eval()
     return model
-
-
-class WeightedPrompt:
-    def __init__(self, text, weight=1):
-        self.text = text
-        self.weight = weight
-
-    def __str__(self):
-        return f"{self.weight}*({self.text})"
-
-
-class ImaginePrompt:
-    def __init__(
-        self,
-        prompt=None,
-        seed=None,
-        prompt_strength=7.5,
-        sampler_type="PLMS",
-        init_image=None,
-        init_image_strength=0.3,
-        steps=50,
-        height=512,
-        width=512,
-        upscale=True,
-        fix_faces=True,
-        parts=None,
-    ):
-        prompt = prompt if prompt is not None else "a scenic landscape"
-        if isinstance(prompt, str):
-            self.prompts = [WeightedPrompt(prompt, 1)]
-        else:
-            self.prompts = prompt
-        self.init_image = init_image
-        self.init_image_strength = init_image_strength
-        self.prompts.sort(key=lambda p: p.weight, reverse=True)
-        self.seed = random.randint(1, 1_000_000_000) if seed is None else seed
-        self.prompt_strength = prompt_strength
-        self.sampler_type = sampler_type
-        self.steps = steps
-        self.height = height
-        self.width = width
-        self.upscale = upscale
-        self.fix_faces = fix_faces
-        self.parts = parts or {}
-
-    @property
-    def prompt_text(self):
-        if len(self.prompts) == 1:
-            return self.prompts[0].text
-        return "|".join(str(p) for p in self.prompts)
 
 
 def load_img(path, max_height=512, max_width=512):
@@ -108,8 +57,8 @@ def load_img(path, max_height=512, max_width=512):
 
 @lru_cache()
 def load_model():
-    config = ("data/stable-diffusion-v1.yaml",)
-    ckpt = ("data/stable-diffusion-v1-4.ckpt",)
+    config = "data/stable-diffusion-v1.yaml"
+    ckpt = "data/stable-diffusion-v1-4.ckpt"
     config = OmegaConf.load(f"{LIB_PATH}/{config}")
     model = load_model_from_config(config, f"{LIB_PATH}/{ckpt}")
 
@@ -117,24 +66,69 @@ def load_model():
     return model
 
 
-def imagine(
+def imagine_image_files(
     prompts,
-    outdir="outputs/txt2img-samples",
+    outdir,
     latent_channels=4,
     downsampling_factor=8,
     precision="autocast",
-    skip_save=False,
     ddim_eta=0.0,
+    record_steps=False
+):
+    big_path = os.path.join(outdir, "upscaled")
+    os.makedirs(outdir, exist_ok=True)
+    os.makedirs(big_path, exist_ok=True)
+    base_count = len(os.listdir(outdir))
+    step_count = 0
+
+    def _record_steps(samples, i, model, prompt):
+        nonlocal step_count
+        step_count += 1
+        samples = model.decode_first_stage(samples)
+        samples = torch.clamp((samples + 1.0) / 2.0, min=0.0, max=1.0)
+        steps_path = os.path.join(outdir, "steps", f"{base_count:08}_S{prompt.seed}")
+        os.makedirs(steps_path, exist_ok=True)
+        for pred_x0 in samples:
+            pred_x0 = 255.0 * rearrange(pred_x0.cpu().numpy(), "c h w -> h w c")
+            filename = f"{base_count:08}_S{prompt.seed}_step{step_count:04}.jpg"
+            Image.fromarray(pred_x0.astype(np.uint8)).save(
+                os.path.join(steps_path, filename)
+            )
+    img_callback = _record_steps if record_steps else None
+    for result in imagine_images(
+        prompts,
+        latent_channels=latent_channels,
+        downsampling_factor=downsampling_factor,
+        precision=precision,
+        ddim_eta=ddim_eta,
+        img_callback=img_callback,
+    ):
+        prompt = result.prompt
+        img = result.img
+        basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
+        filepath = os.path.join(outdir, f"{basefilename}.jpg")
+
+        img.save(filepath)
+        if prompt.upscale:
+            enlarge_realesrgan2x(
+                filepath,
+                os.path.join(big_path, basefilename) + ".jpg",
+            )
+        base_count += 1
+
+
+def imagine_images(
+    prompts,
+    latent_channels=4,
+    downsampling_factor=8,
+    precision="autocast",
+    ddim_eta=0.0,
+    img_callback=None,
 ):
     model = load_model()
-    os.makedirs(outdir, exist_ok=True)
-    outpath = outdir
-
-    sample_path = os.path.join(outpath)
-    big_path = os.path.join(sample_path, "esrgan")
-    os.makedirs(sample_path, exist_ok=True)
-    os.makedirs(big_path, exist_ok=True)
-    base_count = len(os.listdir(sample_path))
+    prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
+    prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
+    _img_callback = None
 
     precision_scope = autocast if precision == "autocast" else nullcontext
     with (torch.no_grad(), precision_scope("cuda")):
@@ -150,6 +144,9 @@ def imagine(
                     for wp in prompt.prompts
                 ]
             )
+            if img_callback:
+                def _img_callback(samples, i):
+                    img_callback(samples, i, model, prompt)
 
             shape = [
                 latent_channels,
@@ -157,41 +154,29 @@ def imagine(
                 prompt.width // downsampling_factor,
             ]
 
-            def img_callback(samples, i):
-                pass
-                samples = model.decode_first_stage(samples)
-                samples = torch.clamp((samples + 1.0) / 2.0, min=0.0, max=1.0)
-                steps_path = os.path.join(
-                    sample_path, "steps", f"{base_count:08}_S{prompt.seed}"
-                )
-                os.makedirs(steps_path, exist_ok=True)
-                for pred_x0 in samples:
-                    pred_x0 = 255.0 * rearrange(pred_x0.cpu().numpy(), "c h w -> h w c")
-                    filename = f"{base_count:08}_S{prompt.seed}_step{i:04}.jpg"
-                    Image.fromarray(pred_x0.astype(np.uint8)).save(
-                        os.path.join(steps_path, filename)
-                    )
-
             start_code = None
             sampler = get_sampler(prompt.sampler_type, model)
             if prompt.init_image:
                 generation_strength = 1 - prompt.init_image_strength
                 ddim_steps = int(prompt.steps / generation_strength)
                 sampler.make_schedule(
-                    ddim_num_steps=ddim_steps, ddim_eta=ddim_eta, verbose=False
+                    ddim_num_steps=ddim_steps, ddim_eta=ddim_eta
                 )
 
                 t_enc = int(generation_strength * ddim_steps)
                 init_image, w, h = load_img(prompt.init_image)
                 init_image = init_image.to(get_device())
-                init_latent = model.get_first_stage_encoding(
-                    model.encode_first_stage(init_image)
-                )
+                init_latent = model.encode_first_stage(init_image)
+                noised_init_latent = model.get_first_stage_encoding(init_latent)
+                _img_callback(init_latent.mean, 0)
+                _img_callback(noised_init_latent, 0)
 
                 # encode (scaled latent)
                 z_enc = sampler.stochastic_encode(
-                    init_latent, torch.tensor([t_enc]).to(get_device())
+                    noised_init_latent, torch.tensor([t_enc]).to(get_device()),
                 )
+                _img_callback(noised_init_latent, 0)
+
                 # decode it
                 samples = sampler.decode(
                     z_enc,
@@ -199,7 +184,7 @@ def imagine(
                     t_enc,
                     unconditional_guidance_scale=prompt.prompt_strength,
                     unconditional_conditioning=uc,
-                    img_callback=img_callback,
+                    img_callback=_img_callback,
                 )
             else:
 
@@ -208,35 +193,27 @@ def imagine(
                     conditioning=c,
                     batch_size=1,
                     shape=shape,
-                    verbose=False,
                     unconditional_guidance_scale=prompt.prompt_strength,
                     unconditional_conditioning=uc,
                     eta=ddim_eta,
                     x_T=start_code,
-                    img_callback=img_callback,
+                    img_callback=_img_callback,
                 )
 
             x_samples = model.decode_first_stage(samples)
             x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
 
-            if not skip_save:
-                for x_sample in x_samples:
-                    x_sample = 255.0 * rearrange(
-                        x_sample.cpu().numpy(), "c h w -> h w c"
-                    )
-                    basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
-                    filepath = os.path.join(sample_path, f"{basefilename}.jpg")
-                    img = Image.fromarray(x_sample.astype(np.uint8))
-                    if prompt.fix_faces:
-                        img = fix_faces_GFPGAN(img)
-                    img.save(filepath)
-                    if prompt.upscale:
-                        enlarge_realesrgan2x(
-                            filepath,
-                            os.path.join(big_path, basefilename) + ".jpg",
-                        )
-                    base_count += 1
-                    return f"{basefilename}.jpg"
+            for x_sample in x_samples:
+                x_sample = 255.0 * rearrange(x_sample.cpu().numpy(), "c h w -> h w c")
+                img = Image.fromarray(x_sample.astype(np.uint8))
+                if prompt.fix_faces:
+                    img = fix_faces_GFPGAN(img)
+                # if prompt.upscale:
+                #     enlarge_realesrgan2x(
+                #         filepath,
+                #         os.path.join(big_path, basefilename) + ".jpg",
+                #     )
+                yield ImagineResult(img=img, prompt=prompt)
 
 
 def prompt_normalized(prompt):
@@ -287,7 +264,3 @@ def fix_faces_GFPGAN(image):
     res = Image.fromarray(restored_img)
 
     return res
-
-
-if __name__ == "__main__":
-    main()

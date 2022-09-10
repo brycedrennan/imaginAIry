@@ -29,16 +29,13 @@ class PLMSSampler(object):
                 attr = attr.to(torch.float32).to(torch.device(self.device_available))
         setattr(self, name, attr)
 
-    def make_schedule(
-        self, ddim_num_steps, ddim_discretize="uniform", ddim_eta=0.0, verbose=True
-    ):
+    def make_schedule(self, ddim_num_steps, ddim_discretize="uniform", ddim_eta=0.0):
         if ddim_eta != 0:
             raise ValueError("ddim_eta must be 0 for PLMS")
         self.ddim_timesteps = make_ddim_timesteps(
             ddim_discr_method=ddim_discretize,
             num_ddim_timesteps=ddim_num_steps,
             num_ddpm_timesteps=self.ddpm_num_timesteps,
-            verbose=verbose,
         )
         alphas_cumprod = self.model.alphas_cumprod
         assert (
@@ -76,7 +73,6 @@ class PLMSSampler(object):
             alphacums=alphas_cumprod.cpu(),
             ddim_timesteps=self.ddim_timesteps,
             eta=ddim_eta,
-            verbose=verbose,
         )
         self.register_buffer("ddim_sigmas", ddim_sigmas)
         self.register_buffer("ddim_alphas", ddim_alphas)
@@ -109,7 +105,6 @@ class PLMSSampler(object):
         noise_dropout=0.0,
         score_corrector=None,
         corrector_kwargs=None,
-        verbose=True,
         x_T=None,
         log_every_t=100,
         unconditional_guidance_scale=1.0,
@@ -130,7 +125,7 @@ class PLMSSampler(object):
                         f"Warning: Got {conditioning.shape[0]} conditionings but batch-size is {batch_size}"
                     )
 
-        self.make_schedule(ddim_num_steps=S, ddim_eta=eta, verbose=verbose)
+        self.make_schedule(ddim_num_steps=S, ddim_eta=eta)
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
@@ -252,6 +247,7 @@ class PLMSSampler(object):
             if callback:
                 callback(i)
             if img_callback:
+                img_callback(img, i)
                 img_callback(pred_x0, i)
 
             if index % log_every_t == 0 or index == total_steps - 1:

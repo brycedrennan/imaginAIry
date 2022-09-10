@@ -2,7 +2,8 @@
 
 import click
 
-from imaginairy.imagine import ImaginePrompt, imagine as imagine_f
+from imaginairy.imagine import imagine as imagine_f
+from imaginairy.schema import ImaginePrompt
 
 
 @click.command()
@@ -10,7 +11,9 @@ from imaginairy.imagine import ImaginePrompt, imagine as imagine_f
     "prompt_texts", default=None, help="text to render to an image", nargs=-1
 )
 @click.option("--outdir", default="./outputs", help="where to write results to")
-@click.option("-r", "--repeats", default=1, type=int, help="How many times to repeat the renders")
+@click.option(
+    "-r", "--repeats", default=1, type=int, help="How many times to repeat the renders"
+)
 @click.option(
     "-h",
     "--height",
