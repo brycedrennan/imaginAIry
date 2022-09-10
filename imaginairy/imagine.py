@@ -13,19 +13,35 @@ from einops import rearrange
 from omegaconf import OmegaConf
 from pytorch_lightning import seed_everything
 from torch import autocast
+from transformers import cached_path
 
 from imaginairy.models.diffusion.ddim import DDIMSampler
 from imaginairy.models.diffusion.plms import PLMSSampler
 from imaginairy.schema import ImaginePrompt, ImagineResult
-from imaginairy.utils import get_device, instantiate_from_config
+from imaginairy.utils import (
+    get_device,
+    instantiate_from_config,
+    fix_torch_nn_layer_norm,
+)
+
+# from diffusers.pipelines.stable_diffusion.safety_checker import StableDiffusionSafetyChecker
+# from transformers import AutoFeatureExtractor
+
+# load safety model
+# safety_model_id = "CompVis/stable-diffusion-safety-checker"
+# safety_feature_extractor = AutoFeatureExtractor.from_pretrained(safety_model_id)
+# safety_checker = StableDiffusionSafetyChecker.from_pretrained(safety_model_id)
 
 LIB_PATH = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
 
 
-def load_model_from_config(config, ckpt):
-    logger.info(f"Loading model from {ckpt}")
-    pl_sd = torch.load(ckpt, map_location="cpu")
+def load_model_from_config(config):
+    ckpt_path = cached_path(
+        "https://www.googleapis.com/storage/v1/b/aai-blog-files/o/sd-v1-4.ckpt?alt=media"
+    )
+    logger.info(f"Loading model from {ckpt_path}")
+    pl_sd = torch.load(ckpt_path, map_location="cpu")
     if "global_step" in pl_sd:
         logger.info(f"Global Step: {pl_sd['global_step']}")
     sd = pl_sd["state_dict"]
@@ -36,7 +52,7 @@ def load_model_from_config(config, ckpt):
     if len(u) > 0:
         logger.info(f"unexpected keys: {u}")
 
-    model.cuda()
+    model.to(get_device())
     model.eval()
     return model
 
@@ -57,10 +73,9 @@ def load_img(path, max_height=512, max_width=512):
 
 @lru_cache()
 def load_model():
-    config = "data/stable-diffusion-v1.yaml"
-    ckpt = "data/stable-diffusion-v1-4.ckpt"
+    config = "configs/stable-diffusion-v1.yaml"
     config = OmegaConf.load(f"{LIB_PATH}/{config}")
-    model = load_model_from_config(config, f"{LIB_PATH}/{ckpt}")
+    model = load_model_from_config(config)
 
     model = model.to(get_device())
     return model
@@ -73,7 +88,7 @@ def imagine_image_files(
     downsampling_factor=8,
     precision="autocast",
     ddim_eta=0.0,
-    record_steps=False
+    record_steps=False,
 ):
     big_path = os.path.join(outdir, "upscaled")
     os.makedirs(outdir, exist_ok=True)
@@ -94,6 +109,7 @@ def imagine_image_files(
             Image.fromarray(pred_x0.astype(np.uint8)).save(
                 os.path.join(steps_path, filename)
             )
+
     img_callback = _record_steps if record_steps else None
     for result in imagine_images(
         prompts,
@@ -131,7 +147,7 @@ def imagine_images(
     _img_callback = None
 
     precision_scope = autocast if precision == "autocast" else nullcontext
-    with (torch.no_grad(), precision_scope("cuda")):
+    with (torch.no_grad(), precision_scope("cuda"), fix_torch_nn_layer_norm()):
         for prompt in prompts:
             seed_everything(prompt.seed)
             uc = None
@@ -145,6 +161,7 @@ def imagine_images(
                 ]
             )
             if img_callback:
+
                 def _img_callback(samples, i):
                     img_callback(samples, i, model, prompt)
 
@@ -159,9 +176,7 @@ def imagine_images(
             if prompt.init_image:
                 generation_strength = 1 - prompt.init_image_strength
                 ddim_steps = int(prompt.steps / generation_strength)
-                sampler.make_schedule(
-                    ddim_num_steps=ddim_steps, ddim_eta=ddim_eta
-                )
+                sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
 
                 t_enc = int(generation_strength * ddim_steps)
                 init_image, w, h = load_img(prompt.init_image)
@@ -173,7 +188,8 @@ def imagine_images(
 
                 # encode (scaled latent)
                 z_enc = sampler.stochastic_encode(
-                    noised_init_latent, torch.tensor([t_enc]).to(get_device()),
+                    noised_init_latent,
+                    torch.tensor([t_enc]).to(get_device()),
                 )
                 _img_callback(noised_init_latent, 0)
 

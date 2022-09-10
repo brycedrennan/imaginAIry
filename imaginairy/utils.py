@@ -1,8 +1,12 @@
+import os
 import importlib
 import logging
+from contextlib import contextmanager
 from functools import lru_cache
+from typing import List, Optional
 
 import torch
+from torch import Tensor
 
 logger = logging.getLogger(__name__)
 
@@ -38,3 +42,49 @@ def get_obj_from_str(string, reload=False):
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
     return getattr(importlib.import_module(module, package=None), cls)
+
+
+from torch.overrides import has_torch_function_variadic, handle_torch_function
+
+
+def _fixed_layer_norm(
+    input: Tensor,
+    normalized_shape: List[int],
+    weight: Optional[Tensor] = None,
+    bias: Optional[Tensor] = None,
+    eps: float = 1e-5,
+) -> Tensor:
+    r"""Applies Layer Normalization for last certain number of dimensions.
+    See :class:`~torch.nn.LayerNorm` for details.
+    """
+    if has_torch_function_variadic(input, weight, bias):
+        return handle_torch_function(
+            _fixed_layer_norm,
+            (input, weight, bias),
+            input,
+            normalized_shape,
+            weight=weight,
+            bias=bias,
+            eps=eps,
+        )
+    return torch.layer_norm(
+        input.contiguous(),
+        normalized_shape,
+        weight,
+        bias,
+        eps,
+        torch.backends.cudnn.enabled,
+    )
+
+
+@contextmanager
+def fix_torch_nn_layer_norm():
+    """https://github.com/CompVis/stable-diffusion/issues/25#issuecomment-1221416526"""
+    from torch.nn import functional
+
+    orig_function = functional.layer_norm
+    functional.layer_norm = _fixed_layer_norm
+    try:
+        yield
+    finally:
+        functional.layer_norm = orig_function

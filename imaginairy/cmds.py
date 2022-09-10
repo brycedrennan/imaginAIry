@@ -1,15 +1,16 @@
 #!/usr/bin/env python
+import os
+
+os.putenv("PYTORCH_ENABLE_MPS_FALLBACK", "1")
 
 import click
 
-from imaginairy.imagine import imagine as imagine_f
+from imaginairy.imagine import imagine_image_files
 from imaginairy.schema import ImaginePrompt
 
 
 @click.command()
-@click.argument(
-    "prompt_texts", default=None, help="text to render to an image", nargs=-1
-)
+@click.argument("prompt_texts", default=None, nargs=-1)
 @click.option("--outdir", default="./outputs", help="where to write results to")
 @click.option(
     "-r", "--repeats", default=1, type=int, help="How many times to repeat the renders"
@@ -55,6 +56,7 @@ def imagine_cmd(
     sampler_type,
     ddim_eta,
 ):
+    """Render an image"""
     prompts = []
     for _ in range(repeats):
         for prompt_text in prompt_texts:
@@ -66,12 +68,12 @@ def imagine_cmd(
                 height=height,
                 width=width,
                 prompt_strength=prompt_strength,
-                upscale=True,
-                fix_faces=True,
+                upscale=False,
+                fix_faces=False,
             )
             prompts.append(prompt)
 
-    imagine_f(
+    imagine_image_files(
         prompts,
         outdir=outdir,
         ddim_eta=ddim_eta,

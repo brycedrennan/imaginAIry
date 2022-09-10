@@ -10,3 +10,7 @@ downloads
 .coveragerc
 /imaginairy/data/stable-diffusion-v1.yaml
 /imaginairy/data/stable-diffusion-v1-4.ckpt
+build
+dist
+**/*.ckpt
+**/*.egg-info

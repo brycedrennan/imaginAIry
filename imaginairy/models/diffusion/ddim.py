@@ -30,9 +30,7 @@ class DDIMSampler:
                 attr = attr.to(torch.float32).to(torch.device(self.device_available))
         setattr(self, name, attr)
 
-    def make_schedule(
-        self, ddim_num_steps, ddim_discretize="uniform", ddim_eta=0.0
-    ):
+    def make_schedule(self, ddim_num_steps, ddim_discretize="uniform", ddim_eta=0.0):
         self.ddim_timesteps = make_ddim_timesteps(
             ddim_discr_method=ddim_discretize,
             num_ddim_timesteps=ddim_num_steps,
@@ -256,7 +254,7 @@ class DDIMSampler:
         noise_dropout=0.0,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
-        loss_function=None
+        loss_function=None,
     ):
         b, *_, device = *x.shape, x.device
 
@@ -268,8 +266,12 @@ class DDIMSampler:
             t_in = torch.cat([t] * 2)
             c_in = torch.cat([unconditional_conditioning, c])
             # with torch.no_grad():
-            noise_pred_uncond, noise_pred = self.model.apply_model(x_in, t_in, c_in).chunk(2)
-            noise_pred = noise_pred_uncond + unconditional_guidance_scale * (noise_pred - noise_pred_uncond)
+            noise_pred_uncond, noise_pred = self.model.apply_model(
+                x_in, t_in, c_in
+            ).chunk(2)
+            noise_pred = noise_pred_uncond + unconditional_guidance_scale * (
+                noise_pred - noise_pred_uncond
+            )
 
         alphas = self.model.alphas_cumprod if use_original_steps else self.ddim_alphas
         alphas_prev = (
@@ -337,7 +339,7 @@ class DDIMSampler:
         use_original_steps=False,
         img_callback=None,
         score_corrector=None,
-        temperature=1.0
+        temperature=1.0,
     ):
 
         timesteps = (
@@ -367,7 +369,7 @@ class DDIMSampler:
                 use_original_steps=use_original_steps,
                 unconditional_guidance_scale=unconditional_guidance_scale,
                 unconditional_conditioning=unconditional_conditioning,
-                temperature=temperature
+                temperature=temperature,
             )
             # original_loss = ((x_dec - x_latent).abs().mean()*70)
             # sigma_t = torch.full((1, 1, 1, 1), self.ddim_sigmas[index], device=get_device())
