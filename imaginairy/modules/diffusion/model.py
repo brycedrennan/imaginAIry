@@ -8,6 +8,7 @@ import torch.nn as nn
 from einops import rearrange
 
 from imaginairy.modules.attention import LinearAttention
+from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.utils import instantiate_from_config
 
 logger = logging.getLogger(__name__)

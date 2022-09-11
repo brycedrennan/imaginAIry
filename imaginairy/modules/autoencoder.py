@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from einops import rearrange
 
-from imaginairy.modules.diffusionmodules.model import Encoder, Decoder
+from imaginairy.modules.diffusion.model import Encoder, Decoder
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.utils import instantiate_from_config
 

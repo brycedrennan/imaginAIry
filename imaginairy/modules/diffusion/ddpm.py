@@ -16,10 +16,10 @@ from einops import rearrange
 from torchvision.utils import make_grid
 from tqdm import tqdm
 
-from imaginairy.models.autoencoder import (
+from imaginairy.modules.autoencoder import (
     VQModelInterface,
 )
-from imaginairy.modules.diffusionmodules.util import (
+from imaginairy.modules.diffusion.util import (
     make_beta_schedule,
     noise_like,
 )

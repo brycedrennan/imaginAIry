@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from imaginairy.modules.diffusionmodules.util import (
+from imaginairy.modules.diffusion.util import (
     make_ddim_sampling_parameters,
     make_ddim_timesteps,
     noise_like,

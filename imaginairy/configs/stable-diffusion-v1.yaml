@@ -1,6 +1,6 @@
 model:
   base_learning_rate: 1.0e-04
-  target: imaginairy.models.diffusion.ddpm.LatentDiffusion
+  target: imaginairy.modules.diffusion.ddpm.LatentDiffusion
   params:
     linear_start: 0.00085
     linear_end: 0.0120
@@ -26,7 +26,7 @@ model:
         f_min: [ 1. ]
 
     unet_config:
-      target: imaginairy.modules.diffusionmodules.openaimodel.UNetModel
+      target: imaginairy.modules.diffusion.openaimodel.UNetModel
       params:
         image_size: 32 # unused
         in_channels: 4
@@ -43,7 +43,7 @@ model:
         legacy: False
 
     first_stage_config:
-      target: imaginairy.models.autoencoder.AutoencoderKL
+      target: imaginairy.modules.autoencoder.AutoencoderKL
       params:
         embed_dim: 4
         monitor: val/rec_loss

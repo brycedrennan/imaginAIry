@@ -15,8 +15,8 @@ from pytorch_lightning import seed_everything
 from torch import autocast
 from transformers import cached_path
 
-from imaginairy.models.diffusion.ddim import DDIMSampler
-from imaginairy.models.diffusion.plms import PLMSSampler
+from imaginairy.modules.diffusion.ddim import DDIMSampler
+from imaginairy.modules.diffusion.plms import PLMSSampler
 from imaginairy.safety import is_nsfw
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
