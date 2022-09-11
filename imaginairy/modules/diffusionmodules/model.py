@@ -196,7 +196,7 @@ class AttnBlock(nn.Module):
 
 def make_attn(in_channels, attn_type="vanilla"):
     assert attn_type in ["vanilla", "linear", "none"], f"attn_type {attn_type} unknown"
-    logger.info(
+    logger.debug(
         f"making attention of type '{attn_type}' with {in_channels} in_channels"
     )
     if attn_type == "vanilla":
@@ -361,7 +361,7 @@ class Decoder(nn.Module):
         block_in = ch * ch_mult[self.num_resolutions - 1]
         curr_res = resolution // 2 ** (self.num_resolutions - 1)
         self.z_shape = (1, z_channels, curr_res, curr_res)
-        logger.info(
+        logger.debug(
             f"Working with z of shape {self.z_shape} = {np.prod(self.z_shape)} dimensions."
         )
 
@@ -516,7 +516,7 @@ class Upsampler(nn.Module):
         assert out_size >= in_size
         num_blocks = int(np.log2(out_size // in_size)) + 1
         factor_up = 1.0 + (out_size % in_size)
-        logger.info(
+        logger.debug(
             f"Building {self.__class__.__name__} with in_size: {in_size} --> out_size {out_size} and factor {factor_up}"
         )
         self.rescaler = LatentRescaler(

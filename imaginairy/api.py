@@ -37,20 +37,20 @@ logger = logging.getLogger(__name__)
 
 
 def load_model_from_config(config):
-    ckpt_path = cached_path(
-        "https://www.googleapis.com/storage/v1/b/aai-blog-files/o/sd-v1-4.ckpt?alt=media"
-    )
-    logger.info(f"Loading model from {ckpt_path}")
+    url = "https://www.googleapis.com/storage/v1/b/aai-blog-files/o/sd-v1-4.ckpt?alt=media"
+    ckpt_path = cached_path(url)
+    logger.info(f"Loading model onto {get_device()} backend...")
+    logger.debug(f"Loading model from {ckpt_path}")
     pl_sd = torch.load(ckpt_path, map_location="cpu")
     if "global_step" in pl_sd:
-        logger.info(f"Global Step: {pl_sd['global_step']}")
+        logger.debug(f"Global Step: {pl_sd['global_step']}")
     sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
     m, u = model.load_state_dict(sd, strict=False)
     if len(m) > 0:
-        logger.info(f"missing keys: {m}")
+        logger.debug(f"missing keys: {m}")
     if len(u) > 0:
-        logger.info(f"unexpected keys: {u}")
+        logger.debug(f"unexpected keys: {u}")
 
     model.to(get_device())
     model.eval()
@@ -88,13 +88,17 @@ def imagine_image_files(
     downsampling_factor=8,
     precision="autocast",
     ddim_eta=0.0,
-    record_steps=False,
+    record_step_images=False,
+    output_file_extension="jpg",
 ):
     big_path = os.path.join(outdir, "upscaled")
     os.makedirs(outdir, exist_ok=True)
     os.makedirs(big_path, exist_ok=True)
     base_count = len(os.listdir(outdir))
     step_count = 0
+    output_file_extension = output_file_extension.lower()
+    if output_file_extension not in {"jpg", "png"}:
+        raise ValueError("Must output a png or jpg")
 
     def _record_steps(samples, i, model, prompt):
         nonlocal step_count
@@ -110,7 +114,7 @@ def imagine_image_files(
                 os.path.join(steps_path, filename)
             )
 
-    img_callback = _record_steps if record_steps else None
+    img_callback = _record_steps if record_step_images else None
     for result in imagine_images(
         prompts,
         latent_channels=latent_channels,
@@ -120,16 +124,15 @@ def imagine_image_files(
         img_callback=img_callback,
     ):
         prompt = result.prompt
-        img = result.img
         basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
         filepath = os.path.join(outdir, f"{basefilename}.jpg")
 
-        img.save(filepath)
+        result.save(filepath)
+        logger.info(f"    🖼  saved to: {filepath}")
         if prompt.upscale:
-            enlarge_realesrgan2x(
-                filepath,
-                os.path.join(big_path, basefilename) + ".jpg",
-            )
+            bigfilepath = (os.path.join(big_path, basefilename) + ".jpg",)
+            enlarge_realesrgan2x(filepath, bigfilepath)
+            logger.info(f"    upscaled 🖼  saved to: {filepath}")
         base_count += 1
 
 
@@ -146,9 +149,14 @@ def imagine_images(
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
     _img_callback = None
 
-    precision_scope = autocast if precision == "autocast" else nullcontext
-    with (torch.no_grad(), precision_scope("cuda"), fix_torch_nn_layer_norm()):
+    precision_scope = (
+        autocast
+        if precision == "autocast" and get_device() in ("cuda", "cpu")
+        else nullcontext
+    )
+    with (torch.no_grad(), precision_scope(get_device()), fix_torch_nn_layer_norm()):
         for prompt in prompts:
+            logger.info(f"Generating {prompt.prompt_description()}")
             seed_everything(prompt.seed)
             uc = None
             if prompt.prompt_strength != 1.0:

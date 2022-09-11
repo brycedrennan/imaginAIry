@@ -1,6 +1,6 @@
-import os
 import importlib
 import logging
+import platform
 from contextlib import contextmanager
 from functools import lru_cache
 from typing import List, Optional
@@ -21,9 +21,16 @@ def get_device():
         return "cpu"
 
 
+@lru_cache()
+def get_device_name(device_type):
+    if device_type == "cuda":
+        return torch.cuda.get_device_name(0)
+    return platform.processor()
+
+
 def log_params(model):
     total_params = sum(p.numel() for p in model.parameters())
-    logger.info(f"{model.__class__.__name__} has {total_params * 1.e-6:.2f} M params.")
+    logger.debug(f"{model.__class__.__name__} has {total_params * 1.e-6:.2f} M params.")
 
 
 def instantiate_from_config(config):

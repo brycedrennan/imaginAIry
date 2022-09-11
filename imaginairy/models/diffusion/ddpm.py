@@ -77,7 +77,7 @@ class DDPM(pl.LightningModule):
             "x0",
         ], 'currently only supporting "eps" and "x0"'
         self.parameterization = parameterization
-        logger.info(
+        logger.debug(
             f"{self.__class__.__name__}: Running in {self.parameterization}-prediction mode"
         )
         self.cond_stage_model = None
@@ -309,10 +309,10 @@ class LatentDiffusion(DDPM):
     def instantiate_cond_stage(self, config):
         if not self.cond_stage_trainable:
             if config == "__is_first_stage__":
-                logger.info("Using first stage also as cond stage.")
+                logger.debug("Using first stage also as cond stage.")
                 self.cond_stage_model = self.first_stage_model
             elif config == "__is_unconditional__":
-                logger.info(
+                logger.debug(
                     f"Training {self.__class__.__name__} as an unconditional model."
                 )
                 self.cond_stage_model = None

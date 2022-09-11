@@ -129,7 +129,7 @@ class PLMSSampler(object):
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
-        logger.info(f"Data shape for PLMS sampling is {size}")
+        logger.debug(f"Data shape for PLMS sampling is {size}")
 
         samples, intermediates = self.plms_sampling(
             conditioning,
@@ -202,9 +202,9 @@ class PLMSSampler(object):
             else np.flip(timesteps)
         )
         total_steps = timesteps if ddim_use_original_steps else timesteps.shape[0]
-        logger.info(f"Running PLMS Sampling with {total_steps} timesteps")
+        logger.debug(f"Running PLMS Sampling with {total_steps} timesteps")
 
-        iterator = tqdm(time_range, desc="PLMS Sampler", total=total_steps)
+        iterator = tqdm(time_range, desc="    PLMS Sampler", total=total_steps)
         old_eps = []
 
         for i, step in enumerate(iterator):
