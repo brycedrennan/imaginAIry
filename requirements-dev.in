@@ -1,1 +1,7 @@
+black
+coverage
+isort
+pydocstyle
+pylama
+pylint
 pytest
