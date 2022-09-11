@@ -101,6 +101,11 @@ def configure_logging(level="INFO"):
     multiple=True,
     help="Make a video showing the image being created",
 )
+@click.option(
+    "--tile",
+    is_flag=True,
+    help="Any images rendered will be tileable.  Unfortunately cannot be controlled at the per-image level yet",
+)
 def imagine_cmd(
     prompt_texts,
     outdir,
@@ -114,9 +119,11 @@ def imagine_cmd(
     ddim_eta,
     log_level,
     show_work,
+    tile,
 ):
     """Render an image"""
     configure_logging(log_level)
+
     from imaginairy.api import imagine_image_files
     from imaginairy.schema import ImaginePrompt
 
@@ -126,7 +133,7 @@ def imagine_cmd(
     )
 
     prompts = []
-    load_model()
+    load_model(tile_mode=tile)
     for _ in range(repeats):
         for prompt_text in prompt_texts:
             prompt = ImaginePrompt(
@@ -147,8 +154,9 @@ def imagine_cmd(
         outdir=outdir,
         ddim_eta=ddim_eta,
         record_step_images="images" in show_work,
+        tile_mode=tile,
     )
 
 
 if __name__ == "__main__":
-    imagine_cmd()
+    imagine_cmd()  # noqa

@@ -71,6 +71,7 @@ def load_img(path, max_height=512, max_width=512):
 
 
 def patch_conv(**patch):
+    """https://github.com/replicate/cog-stable-diffusion/compare/main...TomMoore515:material_stable_diffusion:main"""
     cls = torch.nn.Conv2d
     init = cls.__init__
 
@@ -103,6 +104,7 @@ def imagine_image_files(
     ddim_eta=0.0,
     record_step_images=False,
     output_file_extension="jpg",
+    tile_mode=False,
 ):
     big_path = os.path.join(outdir, "upscaled")
     os.makedirs(outdir, exist_ok=True)
@@ -135,6 +137,7 @@ def imagine_image_files(
         precision=precision,
         ddim_eta=ddim_eta,
         img_callback=img_callback,
+        tile_mode=tile_mode,
     ):
         prompt = result.prompt
         basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
@@ -156,8 +159,9 @@ def imagine_images(
     precision="autocast",
     ddim_eta=0.0,
     img_callback=None,
+    tile_mode=False,
 ):
-    model = load_model()
+    model = load_model(tile_mode=tile_mode)
     # model = model.half()
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts

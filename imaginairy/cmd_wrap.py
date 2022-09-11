@@ -59,6 +59,6 @@ setup_env()
 
 from imaginairy.cmds import imagine_cmd  # noqa
 
-# imagine_cmd = disable_transformers_logging_mess()(imagine_cmd)
+
 if __name__ == "__main__":
-    imagine_cmd()
+    imagine_cmd()  # noqa

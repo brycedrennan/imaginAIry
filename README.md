@@ -33,7 +33,8 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
  - Generate images either in code or from command line.
  - It just works (if you have the right hardware... and aren't on windows)
  - Noisy logs are gone (which was surprisingly hard to accomplish)
- - WeightedPrompts let you smash together separate prompts ()
+ - WeightedPrompts let you smash together separate prompts (cat-dog)
+ - Tile Mode creates tileable images
 
 # How To
 
@@ -66,6 +67,8 @@ OR
 
 # Improvements from CompVis
  - img2img actually does # of steps you specify
+ - performance optimizations
+ - 
 
 # Models Used
  - CLIP - https://openai.com/blog/clip/
@@ -73,15 +76,17 @@ OR
  - Stable Diffusion 
    - https://github.com/CompVis/stable-diffusion
    - https://huggingface.co/CompVis/stable-diffusion-v1-4
+   - https://laion.ai/blog/laion-5b/
 
 # Todo
- - add docs
  - deploy to pypi
  - add tests
  - set up ci (test/lint/format)
+ - add docs
  - notify https://github.com/CompVis/stable-diffusion/issues/25
  - remove yaml config
- - performance optimizations https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx 
+ - performance optimizations https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
+ - delete more unused code
  - Interface improvements
    - init-image at command line
    - prompt expansion?
@@ -92,6 +97,13 @@ OR
    - image describe feature - https://replicate.com/methexis-inc/img2prompt
    - outpainting
    - inpainting
+     - https://github.com/andreas128/RePaint
+   - add more sampling methods?
+   - img2img but keeps img stable
+     - https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/
+     - https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1
+   - img2img for plms?
+   - images as actual prompts instead of just init images
    - cross-attention control: 
      - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
    - guided generation https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI
@@ -100,5 +112,6 @@ OR
    - image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md
    - textual inversion https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h
    - zooming videos? a la disco diffusion
+   - fix saturation at high CFG https://www.reddit.com/r/StableDiffusion/comments/xalo78/fixing_excessive_contrastsaturation_resulting/
 
  
