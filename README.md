@@ -2,7 +2,7 @@
 
 AI imagined images.
 
-Tested on Linux and OSX(M1).
+"just works" on Linux and OSX(M1).
 
 ```bash
 >> pip install imaginairy
@@ -68,7 +68,7 @@ OR
  - img2img actually does # of steps you specify
 
 # Models Used
- - CLIP
+ - CLIP - https://openai.com/blog/clip/
  - LDM - Latent Diffusion
  - Stable Diffusion 
    - https://github.com/CompVis/stable-diffusion
@@ -89,14 +89,16 @@ OR
  - Image Generation Features
    - upscaling
    - face improvements
-   - image describe feature
+   - image describe feature - https://replicate.com/methexis-inc/img2prompt
    - outpainting
    - inpainting
    - cross-attention control: 
      - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
+   - guided generation https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI
    - tiling
    - output show-work videos
    - image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md
+   - textual inversion https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h
    - zooming videos? a la disco diffusion
 
  

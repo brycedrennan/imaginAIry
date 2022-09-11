@@ -8,6 +8,7 @@ from functools import lru_cache
 import PIL
 import numpy as np
 import torch
+import torch.nn
 from PIL import Image
 from einops import rearrange
 from omegaconf import OmegaConf
@@ -69,8 +70,22 @@ def load_img(path, max_height=512, max_width=512):
     return 2.0 * image - 1.0, w, h
 
 
+def patch_conv(**patch):
+    cls = torch.nn.Conv2d
+    init = cls.__init__
+
+    def __init__(self, *args, **kwargs):
+        return init(self, *args, **kwargs, **patch)
+
+    cls.__init__ = __init__
+
+
 @lru_cache()
-def load_model():
+def load_model(tile_mode=False):
+    if tile_mode:
+        # generated images are tileable
+        patch_conv(padding_mode="circular")
+
     config = "configs/stable-diffusion-v1.yaml"
     config = OmegaConf.load(f"{LIB_PATH}/{config}")
     model = load_model_from_config(config)
@@ -143,6 +158,7 @@ def imagine_images(
     img_callback=None,
 ):
     model = load_model()
+    # model = model.half()
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
     _img_callback = None
@@ -156,6 +172,10 @@ def imagine_images(
         for prompt in prompts:
             logger.info(f"Generating {prompt.prompt_description()}")
             seed_everything(prompt.seed)
+
+            # needed when model is in half mode, remove if not using half mode
+            # torch.set_default_tensor_type(torch.HalfTensor)
+
             uc = None
             if prompt.prompt_strength != 1.0:
                 uc = model.get_learned_conditioning(1 * [""])
