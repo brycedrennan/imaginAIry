@@ -82,6 +82,7 @@ class ImaginePrompt:
 
 class ExifCodes:
     """https://www.awaresystems.be/imaging/tiff/tifftags/baseline.html"""
+
     ImageDescription = 0x010E
     Software = 0x0131
     DateTime = 0x0132

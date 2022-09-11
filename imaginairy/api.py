@@ -17,6 +17,7 @@ from transformers import cached_path
 
 from imaginairy.models.diffusion.ddim import DDIMSampler
 from imaginairy.models.diffusion.plms import PLMSSampler
+from imaginairy.safety import is_nsfw
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     get_device,
@@ -24,16 +25,13 @@ from imaginairy.utils import (
     fix_torch_nn_layer_norm,
 )
 
-# from diffusers.pipelines.stable_diffusion.safety_checker import StableDiffusionSafetyChecker
-# from transformers import AutoFeatureExtractor
-
-# load safety model
-# safety_model_id = "CompVis/stable-diffusion-safety-checker"
-# safety_feature_extractor = AutoFeatureExtractor.from_pretrained(safety_model_id)
-# safety_checker = StableDiffusionSafetyChecker.from_pretrained(safety_model_id)
-
 LIB_PATH = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
+
+
+# leave undocumented. I'd ask that no one publicize this flag
+IMAGINAIRY_ALLOW_NSFW = os.getenv("IMAGINAIRY_ALLOW_NSFW", "False")
+IMAGINAIRY_ALLOW_NSFW = bool(IMAGINAIRY_ALLOW_NSFW == "I AM A RESPONSIBLE ADULT")
 
 
 def load_model_from_config(config):
@@ -230,6 +228,9 @@ def imagine_images(
             for x_sample in x_samples:
                 x_sample = 255.0 * rearrange(x_sample.cpu().numpy(), "c h w -> h w c")
                 img = Image.fromarray(x_sample.astype(np.uint8))
+                if not IMAGINAIRY_ALLOW_NSFW and is_nsfw(img, x_sample):
+                    logger.info("    ⚠️  Filtering NSFW image")
+                    img = Image.new("RGB", img.size, (228, 150, 150))
                 if prompt.fix_faces:
                     img = fix_faces_GFPGAN(img)
                 # if prompt.upscale:

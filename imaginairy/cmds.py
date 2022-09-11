@@ -1,7 +1,7 @@
 import logging.config
 
 import click
-from imaginairy.imagine import load_model
+from imaginairy.api import load_model
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ def imagine_cmd(
 ):
     """Render an image"""
     configure_logging(log_level)
-    from imaginairy.imagine import imagine_image_files
+    from imaginairy.api import imagine_image_files
     from imaginairy.schema import ImaginePrompt
 
     total_image_count = len(prompt_texts) * repeats

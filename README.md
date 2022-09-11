@@ -1,4 +1,4 @@
-# ImaginAIry
+# ImaginAIry 🤖🧠
 
 AI imagined images.
 
@@ -58,11 +58,11 @@ OR
  - Stable Diffusion - https://github.com/CompVis/stable-diffusion
 
 # Todo
- - add safety model - https://github.com/CompVis/stable-diffusion/blob/main/scripts/txt2img.py#L21-L28
  - add docs
  - deploy to pypi
  - add tests
  - set up ci (test/lint/format)
+ - notify https://github.com/CompVis/stable-diffusion/issues/25
  - remove yaml config
  - performance optimizations https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx 
  - Interface improvements
@@ -70,11 +70,11 @@ OR
    - prompt expansion?
    - webserver interface (low priority, this is a library)
  - Image Generation Features
+   - upscaling
+   - face improvements
    - image describe feature
    - outpainting
    - inpainting
-   - face improvements
-   - upscaling
    - cross-attention control: 
      - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
    - tiling
