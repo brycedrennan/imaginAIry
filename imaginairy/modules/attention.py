@@ -1,12 +1,13 @@
-from inspect import isfunction
 import math
+from inspect import isfunction
+
 import torch
 import torch.nn.functional as F
-from torch import nn, einsum
 from einops import rearrange, repeat
+from torch import einsum, nn
 
 from imaginairy.modules.diffusion.util import checkpoint
-from imaginairy.utils import get_device_name, get_device
+from imaginairy.utils import get_device, get_device_name
 
 
 def exists(val):

@@ -1,5 +1,6 @@
-from imaginairy.api import imagine_images, imagine_image_files
+from imaginairy.api import imagine_image_files, imagine_images
 from imaginairy.schema import ImaginePrompt
+
 from . import TESTS_FOLDER
 
 

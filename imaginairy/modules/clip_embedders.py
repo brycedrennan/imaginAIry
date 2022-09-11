@@ -3,7 +3,7 @@ import kornia
 import torch
 import torch.nn as nn
 from einops import repeat
-from transformers import CLIPTokenizer, CLIPTextModel
+from transformers import CLIPTextModel, CLIPTokenizer
 
 from imaginairy.utils import get_device
 

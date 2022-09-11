@@ -51,7 +51,7 @@ def get_obj_from_str(string, reload=False):
     return getattr(importlib.import_module(module, package=None), cls)
 
 
-from torch.overrides import has_torch_function_variadic, handle_torch_function
+from torch.overrides import handle_torch_function, has_torch_function_variadic
 
 
 def _fixed_layer_norm(

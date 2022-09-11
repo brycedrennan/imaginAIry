@@ -59,6 +59,5 @@ setup_env()
 
 from imaginairy.cmds import imagine_cmd  # noqa
 
-
 if __name__ == "__main__":
     imagine_cmd()  # noqa

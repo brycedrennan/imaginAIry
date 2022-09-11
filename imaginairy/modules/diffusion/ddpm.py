@@ -16,15 +16,10 @@ from einops import rearrange
 from torchvision.utils import make_grid
 from tqdm import tqdm
 
-from imaginairy.modules.autoencoder import (
-    VQModelInterface,
-)
-from imaginairy.modules.diffusion.util import (
-    make_beta_schedule,
-    noise_like,
-)
+from imaginairy.modules.autoencoder import VQModelInterface
+from imaginairy.modules.diffusion.util import make_beta_schedule, noise_like
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
-from imaginairy.utils import log_params, instantiate_from_config
+from imaginairy.utils import instantiate_from_config, log_params
 
 logger = logging.getLogger(__name__)
 __conditioning_keys__ = {"concat": "c_concat", "crossattn": "c_crossattn", "adm": "y"}

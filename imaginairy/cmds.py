@@ -1,6 +1,7 @@
 import logging.config
 
 import click
+
 from imaginairy.api import load_model
 
 logger = logging.getLogger(__name__)

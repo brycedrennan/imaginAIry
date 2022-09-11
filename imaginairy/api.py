@@ -5,13 +5,13 @@ import subprocess
 from contextlib import nullcontext
 from functools import lru_cache
 
-import PIL
 import numpy as np
+import PIL
 import torch
 import torch.nn
-from PIL import Image
 from einops import rearrange
 from omegaconf import OmegaConf
+from PIL import Image
 from pytorch_lightning import seed_everything
 from torch import autocast
 from transformers import cached_path
@@ -21,9 +21,9 @@ from imaginairy.modules.diffusion.plms import PLMSSampler
 from imaginairy.safety import is_nsfw
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
+    fix_torch_nn_layer_norm,
     get_device,
     instantiate_from_config,
-    fix_torch_nn_layer_norm,
 )
 
 LIB_PATH = os.path.dirname(__file__)
