@@ -6,7 +6,6 @@ from functools import lru_cache
 from typing import List, Optional
 
 import numpy as np
-import PIL
 import torch
 from PIL import Image
 from torch import Tensor
@@ -102,7 +101,7 @@ def fix_torch_nn_layer_norm():
 
 def img_path_to_torch_image(path, max_height=512, max_width=512):
     image = Image.open(path).convert("RGB")
-    logger.info(f"loaded input image of size {image.size} from {path}")
+    logger.info(f"Loaded input 🖼 of size {image.size} from {path}")
     return pillow_img_to_torch_image(image, max_height=max_height, max_width=max_width)
 
 
@@ -111,7 +110,7 @@ def pillow_img_to_torch_image(image, max_height=512, max_width=512):
     resize_ratio = min(max_width / w, max_height / h)
     w, h = int(w * resize_ratio), int(h * resize_ratio)
     w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 32
-    image = image.resize((w, h), resample=PIL.Image.LANCZOS)
+    image = image.resize((w, h), resample=Image.Resampling.LANCZOS)
     image = np.array(image).astype(np.float32) / 255.0
     image = image[None].transpose(0, 3, 1, 2)
     image = torch.from_numpy(image)
