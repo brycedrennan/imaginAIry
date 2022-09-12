@@ -5,10 +5,15 @@ AI imagined images. Pythonic generation of stable diffusion images.
 "just works" on Linux and OSX(M1).
 
 ## Examples
-### Multiple Prompts
 ```bash
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman"
+```
+
+<details closed>
+<summary>Console Output</summary>
+
+```bash
 🤖🧠 received 4 prompt(s) and will repeat them 1 times to create 4 images.
 Loading model onto mps backend...
 Generating 🖼  : "a scenic landscape" 512x512px seed:557988237 prompt-strength:7.5 steps:40 sampler-type:PLMS
@@ -24,8 +29,11 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
     PLMS Sampler: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 40/40 [00:29<00:00,  1.37it/s]
     🖼  saved to: ./outputs/000004_500686645_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg
 ```
+</details>
+
 <img src="assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256"><img src="assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"  height="256"><br>
 <img src="assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
+
 
 ### Tiled Images
 ```bash
