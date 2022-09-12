@@ -24,10 +24,8 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
     PLMS Sampler: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 40/40 [00:29<00:00,  1.37it/s]
     🖼  saved to: ./outputs/000004_500686645_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg
 ```
-<img src="assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" width="256" height="256">
-<img src="assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg" width="256" height="256">
-<img src="assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" width="256" height="256">
-<img src="assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg" width="256" height="256">
+<img src="assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256"><img src="assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"  height="256">
+<img src="assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
 
 ### Tiled Images
 ```bash
