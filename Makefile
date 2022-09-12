@@ -40,6 +40,7 @@ deploy:  ## Deploy the package to pypi.org
 	pip install twine wheel
 	-git tag $$(python setup.py -V)
 	git push --tags
+	rm -rf dist
 	python setup.py bdist_wheel
 	#python setup.py sdist
 	@echo 'pypi.org Username: '
