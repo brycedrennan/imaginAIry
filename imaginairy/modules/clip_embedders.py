@@ -1,4 +1,3 @@
-import clip
 import kornia
 import torch
 import torch.nn as nn
@@ -6,6 +5,7 @@ from einops import repeat
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from imaginairy.utils import get_device
+from imaginairy.vendored import clip
 
 
 class FrozenCLIPEmbedder(nn.Module):

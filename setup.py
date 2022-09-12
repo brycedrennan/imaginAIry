@@ -22,6 +22,7 @@ setup(
     package_data={"imaginairy": ["configs/*.yaml"]},
     install_requires=[
         "click",
+        "ftfy",  # for vendored clip
         "torch",
         "numpy",
         "tqdm",
@@ -34,7 +35,6 @@ setup(
         "torchmetrics==0.6.0",
         "torchvision>=0.13.1",
         "kornia==0.6",
-        "clip @  git+https://github.com/openai/CLIP",
         # k-diffusion for use with find_noise.py
         # "k-diffusion@git+https://github.com/crowsonkb/k-diffusion.git@71ba7d6735e9cba1945b429a21345960eb3f151c#egg=k-diffusion",
     ],

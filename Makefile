@@ -41,7 +41,7 @@ deploy:  ## Deploy the package to pypi.org
 	-git tag $$(python setup.py -V)
 	git push --tags
 	python setup.py bdist_wheel
-	python setup.py sdist
+	#python setup.py sdist
 	@echo 'pypi.org Username: '
 	@read username && twine upload dist/* -u $$username;
 	rm -rf build
@@ -64,6 +64,16 @@ require_pyenv:
 	else\
 	  echo -e "\033[0;32m ✔️  pyenv-virtualenv installed\033[0m";\
 	fi
+
+vendor_openai_clip:
+	mkdir -p ./downloads
+	-cd ./downloads && git clone git@github.com:openai/CLIP.git
+	cd ./downloads/CLIP && git pull
+	rm -rf ./imaginairy/vendored/clip
+	cp -R ./downloads/CLIP/clip imaginairy/vendored/
+	git --git-dir ./downloads/CLIP/.git rev-parse HEAD | tee ./imaginairy/vendored/clip/clip-commit-hash.txt
+	echo "vendored from git@github.com:openai/CLIP.git" | tee ./imaginairy/vendored/clip/readme.txt
+
 
 help: ## Show this help message.
 	@## https://gist.github.com/prwhite/8168133#gistcomment-1716694
