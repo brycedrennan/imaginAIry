@@ -31,8 +31,8 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 ```
 </details>
 
-<img src="assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256"><img src="assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"  height="256"><br>
-<img src="assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"  height="256"><br>
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
 
 
 ### Tiled Images
@@ -40,18 +40,18 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 >> imagine  "gold coins" "a lush forest" "piles of old books" leaves --tile
 ```
 
-<img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128">
-<img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128">
 <br>
-<img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128">
-<img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128">
 
 ### Image-to-Image
 ```bash
 >> imagine "portrait of a smiling lady. oil painting" --init-image girl_with_a_pearl_earring.jpg
 ```
-<img src="tests/data/girl_with_a_pearl_earring.jpg" height="256"> =>
-<img src="assets/000105_33084057_DDIM40_PS7.5_portrait_of_a_smiling_lady._oil_painting._.jpg" height="256"> 
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/data/girl_with_a_pearl_earring.jpg" height="256"> =>
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000105_33084057_DDIM40_PS7.5_portrait_of_a_smiling_lady._oil_painting._.jpg" height="256"> 
 
 
 ## Features
