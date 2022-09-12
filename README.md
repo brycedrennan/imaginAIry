@@ -1,10 +1,11 @@
 # ImaginAIry 🤖🧠
 
-AI imagined images.
+AI imagined images. Pythonic generation of stable diffusion images.
 
 "just works" on Linux and OSX(M1).
 
 ## Examples
+### Multiple Prompts
 ```bash
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman"
@@ -28,14 +29,26 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" width="256" height="256">
 <img src="assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg" width="256" height="256">
 
+### Tiled Images
+```bash
+>> imagine "Art Nouveau mosaic" --tile
+🤖🧠 received 1 prompt(s) and will repeat them 1 times to create 1 images.
+Loading model onto mps backend...
+Generating 🖼  : "Art Nouveau mosaic" 512x512px seed:658241102 prompt-strength:7.5 steps:40 sampler-type:PLMS
+    PLMS Sampler: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 40/40 [00:31<00:00,  1.28it/s]
+    🖼  saved to: ./outputs/000058_658241102_PLMS40_PS7.5_Art_Nouveau_mosaic.jpg
+```
+
+<img src="assets/000057_802839261_PLMS40_PS7.5_Art_Nouveau_mosaic._ornate,_highly_detailed,_sharp_focus.jpg" width="256" height="256"><img src="assets/000057_802839261_PLMS40_PS7.5_Art_Nouveau_mosaic._ornate,_highly_detailed,_sharp_focus.jpg" width="256" height="256">
 ## Features
  
- - It makes images from text descriptions!
+ - It makes images from text descriptions! 🎉
  - Generate images either in code or from command line.
- - It just works (if you have the right hardware... and aren't on windows)
+ - It just works. Proper requirements installed, model weights automatically downloaded. No huggingface account needed. (if you have the right hardware... and aren't on windows)
  - Noisy logs are gone (which was surprisingly hard to accomplish)
  - WeightedPrompts let you smash together separate prompts (cat-dog)
  - Tile Mode creates tileable images
+ - Prompt metadata saved into image file metadata
 
 ## How To
 

@@ -11,8 +11,6 @@ import torch
 from PIL import Image
 from torch import Tensor
 
-from imaginairy.api import logger
-
 logger = logging.getLogger(__name__)
 
 
