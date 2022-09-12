@@ -6,29 +6,29 @@ from contextlib import nullcontext
 from functools import lru_cache
 
 import numpy as np
-import PIL
 import torch
 import torch.nn
 from einops import rearrange
 from omegaconf import OmegaConf
-from PIL import Image
+from PIL import Image, ImageDraw
 from pytorch_lightning import seed_everything
 from torch import autocast
 from transformers import cached_path
 
 from imaginairy.modules.diffusion.ddim import DDIMSampler
 from imaginairy.modules.diffusion.plms import PLMSSampler
+from imaginairy.modules.find_noise import find_noise_for_latent
 from imaginairy.safety import is_nsfw
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     fix_torch_nn_layer_norm,
     get_device,
+    img_path_to_torch_image,
     instantiate_from_config,
 )
 
 LIB_PATH = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
-
 
 # leave undocumented. I'd ask that no one publicize this flag
 IMAGINAIRY_ALLOW_NSFW = os.getenv("IMAGINAIRY_ALLOW_NSFW", "False")
@@ -54,20 +54,6 @@ def load_model_from_config(config):
     model.to(get_device())
     model.eval()
     return model
-
-
-def load_img(path, max_height=512, max_width=512):
-    image = Image.open(path).convert("RGB")
-    w, h = image.size
-    logger.info(f"loaded input image of size ({w}, {h}) from {path}")
-    resize_ratio = min(max_width / w, max_height / h)
-    w, h = int(w * resize_ratio), int(h * resize_ratio)
-    w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 32
-    image = image.resize((w, h), resample=PIL.Image.LANCZOS)
-    image = np.array(image).astype(np.float32) / 255.0
-    image = image[None].transpose(0, 3, 1, 2)
-    image = torch.from_numpy(image)
-    return 2.0 * image - 1.0, w, h
 
 
 def patch_conv(**patch):
@@ -115,7 +101,7 @@ def imagine_image_files(
     if output_file_extension not in {"jpg", "png"}:
         raise ValueError("Must output a png or jpg")
 
-    def _record_steps(samples, i, model, prompt):
+    def _record_steps(samples, description, model, prompt):
         nonlocal step_count
         step_count += 1
         samples = model.decode_first_stage(samples)
@@ -125,9 +111,10 @@ def imagine_image_files(
         for pred_x0 in samples:
             pred_x0 = 255.0 * rearrange(pred_x0.cpu().numpy(), "c h w -> h w c")
             filename = f"{base_count:08}_S{prompt.seed}_step{step_count:04}.jpg"
-            Image.fromarray(pred_x0.astype(np.uint8)).save(
-                os.path.join(steps_path, filename)
-            )
+            img = Image.fromarray(pred_x0.astype(np.uint8))
+            draw = ImageDraw.Draw(img)
+            draw.text((10, 10), str(description))
+            img.save(os.path.join(steps_path, filename))
 
     img_callback = _record_steps if record_step_images else None
     for result in imagine_images(
@@ -190,10 +177,10 @@ def imagine_images(
                     for wp in prompt.prompts
                 ]
             )
-            if img_callback:
 
-                def _img_callback(samples, i):
-                    img_callback(samples, i, model, prompt)
+            def _img_callback(samples, description):
+                if img_callback:
+                    img_callback(samples, description, model, prompt)
 
             shape = [
                 latent_channels,
@@ -209,19 +196,18 @@ def imagine_images(
                 sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
 
                 t_enc = int(generation_strength * ddim_steps)
-                init_image, w, h = load_img(prompt.init_image)
+                init_image, w, h = img_path_to_torch_image(prompt.init_image)
                 init_image = init_image.to(get_device())
-                init_latent = model.encode_first_stage(init_image)
-                noised_init_latent = model.get_first_stage_encoding(init_latent)
-                _img_callback(init_latent.mean, 0)
-                _img_callback(noised_init_latent, 0)
+                init_latent = model.get_first_stage_encoding(
+                    model.encode_first_stage(init_image)
+                )
+                _img_callback(init_latent, "init_latent")
 
                 # encode (scaled latent)
                 z_enc = sampler.stochastic_encode(
-                    noised_init_latent,
-                    torch.tensor([t_enc]).to(get_device()),
+                    init_latent, torch.tensor([t_enc]).to(get_device())
                 )
-                _img_callback(noised_init_latent, 0)
+                _img_callback(z_enc, "z_enc")
 
                 # decode it
                 samples = sampler.decode(

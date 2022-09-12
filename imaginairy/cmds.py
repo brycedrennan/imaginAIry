@@ -45,6 +45,21 @@ def configure_logging(level="INFO"):
 
 @click.command()
 @click.argument("prompt_texts", nargs=-1)
+@click.option(
+    "--prompt-strength",
+    default=7.5,
+    show_default=True,
+    help="How closely to follow the prompt. Image looks unnatural at higher values",
+)
+@click.option(
+    "--init-image",
+    help="Starting image.",
+)
+@click.option(
+    "--init-image-strength",
+    default=0.3,
+    help="Starting image.",
+)
 @click.option("--outdir", default="./outputs", help="where to write results to")
 @click.option(
     "-r",
@@ -77,12 +92,6 @@ def configure_logging(level="INFO"):
     help="What seed to use for randomness. Allows reproducible image renders",
 )
 @click.option(
-    "--prompt-strength",
-    default=7.5,
-    show_default=True,
-    help="How closely to follow the prompt. Image looks unnatural at higher values",
-)
-@click.option(
     "--sampler-type",
     default="PLMS",
     type=click.Choice(["PLMS", "DDIM"]),
@@ -109,13 +118,15 @@ def configure_logging(level="INFO"):
 )
 def imagine_cmd(
     prompt_texts,
+    prompt_strength,
+    init_image,
+    init_image_strength,
     outdir,
     repeats,
     height,
     width,
     steps,
     seed,
-    prompt_strength,
     sampler_type,
     ddim_eta,
     log_level,
@@ -139,12 +150,14 @@ def imagine_cmd(
         for prompt_text in prompt_texts:
             prompt = ImaginePrompt(
                 prompt_text,
+                prompt_strength=prompt_strength,
+                init_image=init_image,
+                init_image_strength=init_image_strength,
                 seed=seed,
                 sampler_type=sampler_type,
                 steps=steps,
                 height=height,
                 width=width,
-                prompt_strength=prompt_strength,
                 upscale=False,
                 fix_faces=False,
             )

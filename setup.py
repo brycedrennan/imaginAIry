@@ -23,6 +23,8 @@ setup(
         "torchmetrics==0.6.0",
         "torchvision>=0.13.1",
         "kornia==0.6",
-        "clip @  git+https://github.com/openai/CLIP.git@d50d76daa670286dd6cacf3bcd80b5e4823fc8e1#egg=clip",
+        "clip @  git+https://github.com/openai/CLIP",
+        # k-diffusion for use with find_noise.py
+        # "k-diffusion@git+https://github.com/crowsonkb/k-diffusion.git@71ba7d6735e9cba1945b429a21345960eb3f151c#egg=k-diffusion",
     ],
 )

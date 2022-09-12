@@ -4,6 +4,7 @@ AI imagined images.
 
 "just works" on Linux and OSX(M1).
 
+## Examples
 ```bash
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman"
@@ -27,7 +28,7 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" width="256" height="256">
 <img src="assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg" width="256" height="256">
 
-# Features
+## Features
  
  - It makes images from text descriptions!
  - Generate images either in code or from command line.
@@ -36,7 +37,7 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
  - WeightedPrompts let you smash together separate prompts (cat-dog)
  - Tile Mode creates tileable images
 
-# How To
+## How To
 
 ```python
 from imaginairy import imagine_images, imagine_image_files, ImaginePrompt, WeightedPrompt
@@ -79,13 +80,17 @@ OR
    - https://laion.ai/blog/laion-5b/
 
 # Todo
+ - performance optimizations 
+   - https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
+   - https://github.com/neonsecret/stable-diffusion
+   - ✅ https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#
+   - ✅ https://www.reddit.com/r/StableDiffusion/comments/xalaws/test_update_for_less_memory_usage_and_higher/
  - deploy to pypi
  - add tests
  - set up ci (test/lint/format)
  - add docs
  - notify https://github.com/CompVis/stable-diffusion/issues/25
  - remove yaml config
- - performance optimizations https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
  - delete more unused code
  - Interface improvements
    - init-image at command line
@@ -93,7 +98,9 @@ OR
    - webserver interface (low priority, this is a library)
  - Image Generation Features
    - upscaling
+     - https://github.com/lowfuel/progrock-stable
    - face improvements
+     - codeformer
    - image describe feature - https://replicate.com/methexis-inc/img2prompt
    - outpainting
    - inpainting
@@ -110,7 +117,9 @@ OR
    - tiling
    - output show-work videos
    - image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md
-   - textual inversion https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h
+   - textual inversion 
+     - https://www.reddit.com/r/StableDiffusion/comments/xbwb5y/how_to_run_textual_inversion_locally_train_your/
+     - https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h
    - zooming videos? a la disco diffusion
    - fix saturation at high CFG https://www.reddit.com/r/StableDiffusion/comments/xalo78/fixing_excessive_contrastsaturation_resulting/
 

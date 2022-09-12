@@ -378,6 +378,6 @@ class DDIMSampler:
             # x_dec = x_dec.detach() + cond_grad * sigma_t ** 2
             ## x_dec_alt = x_dec + (original_loss * 0.1) ** 2
             if img_callback:
-                img_callback(x_dec, i)
-                img_callback(pred_x0, i)
+                img_callback(x_dec, f"x_dec {i}")
+                img_callback(pred_x0, f"pred_x0 {i}")
         return x_dec
