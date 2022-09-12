@@ -57,7 +57,8 @@ def configure_logging(level="INFO"):
 )
 @click.option(
     "--init-image-strength",
-    default=0.3,
+    default=0.6,
+    show_default=True,
     help="Starting image.",
 )
 @click.option("--outdir", default="./outputs", help="where to write results to")
@@ -143,6 +144,8 @@ def imagine_cmd(
     logger.info(
         f"🤖🧠 received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
     )
+    if init_image and sampler_type != "DDIM":
+        sampler_type = "DDIM"
 
     prompts = []
     load_model(tile_mode=tile)

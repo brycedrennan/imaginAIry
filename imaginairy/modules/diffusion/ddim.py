@@ -128,7 +128,7 @@ class DDIMSampler:
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
-        logger.info(f"Data shape for DDIM sampling is {size}, eta {eta}")
+        logger.debug(f"Data shape for DDIM sampling is {size}, eta {eta}")
 
         samples, intermediates = self.ddim_sampling(
             conditioning,
@@ -351,7 +351,7 @@ class DDIMSampler:
 
         time_range = np.flip(timesteps)
         total_steps = timesteps.shape[0]
-        logger.info(f"Running DDIM Sampling with {total_steps} timesteps")
+        logger.debug(f"Running DDIM Sampling with {total_steps} timesteps")
 
         iterator = tqdm(time_range, desc="Decoding image", total=total_steps)
         x_dec = x_latent

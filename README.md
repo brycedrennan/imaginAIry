@@ -31,20 +31,29 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 
 ### Tiled Images
 ```bash
->> imagine "Art Nouveau mosaic" --tile
-🤖🧠 received 1 prompt(s) and will repeat them 1 times to create 1 images.
-Loading model onto mps backend...
-Generating 🖼  : "Art Nouveau mosaic" 512x512px seed:658241102 prompt-strength:7.5 steps:40 sampler-type:PLMS
-    PLMS Sampler: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 40/40 [00:31<00:00,  1.28it/s]
-    🖼  saved to: ./outputs/000058_658241102_PLMS40_PS7.5_Art_Nouveau_mosaic.jpg
+>> imagine  "gold coins" "a lush forest" "piles of old books" leaves --tile
 ```
 
-<img src="assets/000057_802839261_PLMS40_PS7.5_Art_Nouveau_mosaic._ornate,_highly_detailed,_sharp_focus.jpg" width="256" height="256"><img src="assets/000057_802839261_PLMS40_PS7.5_Art_Nouveau_mosaic._ornate,_highly_detailed,_sharp_focus.jpg" width="256" height="256">
+<img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128">
+<img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128">
+<br>
+<img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128">
+<img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128">
+
+### Image-to-Image
+```bash
+>> imagine "portrait of a smiling lady. oil painting" --init-image girl_with_a_pearl_earring.jpg
+```
+<img src="tests/data/girl_with_a_pearl_earring.jpg" height="256"> =>
+<img src="assets/000105_33084057_DDIM40_PS7.5_portrait_of_a_smiling_lady._oil_painting._.jpg" height="256"> 
+
+
 ## Features
  
  - It makes images from text descriptions! 🎉
  - Generate images either in code or from command line.
- - It just works. Proper requirements installed, model weights automatically downloaded. No huggingface account needed. (if you have the right hardware... and aren't on windows)
+ - It just works. Proper requirements are installed. model weights are automatically downloaded. No huggingface account needed. 
+    (if you have the right hardware... and aren't on windows)
  - Noisy logs are gone (which was surprisingly hard to accomplish)
  - WeightedPrompts let you smash together separate prompts (cat-dog)
  - Tile Mode creates tileable images
@@ -73,18 +82,15 @@ imagine_image_files(prompts, outdir="./my-art")
 
 ```
 
-# Requirements
+## Requirements
+- ~10 gb space for models to download
+- A decent computer with either a CUDA supported graphics card or M1 processor.
 
-- Computer with CUDA supported graphics card. ~10 gb video ram
-OR
-- Apple M1 computer
-
-# Improvements from CompVis
+## Improvements from CompVis
  - img2img actually does # of steps you specify
  - performance optimizations
- - 
 
-# Models Used
+## Models Used
  - CLIP - https://openai.com/blog/clip/
  - LDM - Latent Diffusion
  - Stable Diffusion 
@@ -92,10 +98,13 @@ OR
    - https://huggingface.co/CompVis/stable-diffusion-v1-4
    - https://laion.ai/blog/laion-5b/
 
-# Todo
- - performance optimizations 
-   - https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
-   - https://github.com/neonsecret/stable-diffusion
+## Not Supported
+ - a web interface. this is a python library
+
+## Todo
+ - performance optimizations
+   - https://github.com/neonsecret/stable-diffusion  https://github.com/CompVis/stable-diffusion/pull/177
+   - ✅ https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
    - ✅ https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#
    - ✅ https://www.reddit.com/r/StableDiffusion/comments/xalaws/test_update_for_less_memory_usage_and_higher/
  - deploy to pypi
@@ -106,14 +115,14 @@ OR
  - remove yaml config
  - delete more unused code
  - Interface improvements
-   - init-image at command line
-   - prompt expansion?
-   - webserver interface (low priority, this is a library)
+   - ✅ init-image at command line
+   - prompt expansion
  - Image Generation Features
    - upscaling
      - https://github.com/lowfuel/progrock-stable
    - face improvements
-     - codeformer
+     - gfpgan - https://github.com/TencentARC/GFPGAN
+     - codeformer - https://github.com/sczhou/CodeFormer
    - image describe feature - https://replicate.com/methexis-inc/img2prompt
    - outpainting
    - inpainting
@@ -135,5 +144,3 @@ OR
      - https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h
    - zooming videos? a la disco diffusion
    - fix saturation at high CFG https://www.reddit.com/r/StableDiffusion/comments/xalo78/fixing_excessive_contrastsaturation_resulting/
-
- 

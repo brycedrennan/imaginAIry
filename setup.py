@@ -1,9 +1,16 @@
 from setuptools import find_packages, setup
 
+with open("README.md", "r", encoding="utf-8") as f:
+    readme = f.read()
+
 setup(
-    name="imaginairy",
-    version="0.0.1",
-    description="AI imagined images.",
+    name="imaginAIry",
+    author="Bryce Drennan",
+    author_email="b r y p y d o t io",
+    version="0.7.0",
+    description="AI imagined images. Pythonic generation of stable diffusion images.",
+    long_description=readme,
+    long_description_content_type="text/markdown",
     packages=find_packages(include=("imaginairy", "imaginairy.*")),
     entry_points={
         "console_scripts": ["imagine=imaginairy.cmd_wrap:imagine_cmd"],
