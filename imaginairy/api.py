@@ -252,7 +252,7 @@ def imagine(
                     img, x_sample, half_mode=half_mode
                 ):
                     logger.info("    ⚠️  Filtering NSFW image")
-                    img = img.filter(ImageFilter.GaussianBlur(radius=10))
+                    img = img.filter(ImageFilter.GaussianBlur(radius=40))
 
                 if prompt.fix_faces:
                     logger.info("    Fixing 😊 's in 🖼  using GFPGAN...")

@@ -11,6 +11,7 @@ import requests
 import torch
 from PIL import Image
 from torch import Tensor
+from torch.overrides import handle_torch_function, has_torch_function_variadic
 from transformers import cached_path
 
 logger = logging.getLogger(__name__)
@@ -54,9 +55,6 @@ def get_obj_from_str(string, reload=False):
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
     return getattr(importlib.import_module(module, package=None), cls)
-
-
-from torch.overrides import handle_torch_function, has_torch_function_variadic
 
 
 def _fixed_layer_norm(

@@ -58,12 +58,14 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 ```bash
 >> imagine "a couple smiling" --steps 40 --seed 1 --fix-faces
 ```
-<img src="assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> => <img src="assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> 
+=> 
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
 
 
 ### Upscaling [by RealESRGAN](https://github.com/xinntao/Real-ESRGAN)
-<img src="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg">
-<img src="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" height="512"> 
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" height="128"> =>
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" height="256"> 
 
 ## Features
  
@@ -71,6 +73,7 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
  - Generate images either in code or from command line.
  - It just works. Proper requirements are installed. model weights are automatically downloaded. No huggingface account needed. 
     (if you have the right hardware... and aren't on windows)
+ - No more distorted faces!
  - Noisy logs are gone (which was surprisingly hard to accomplish)
  - WeightedPrompts let you smash together separate prompts (cat-dog)
  - Tile Mode creates tileable images
