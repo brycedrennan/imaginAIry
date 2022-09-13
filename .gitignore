@@ -15,3 +15,4 @@ dist
 **/*.ckpt
 **/*.egg-info
 tests/test_output
+gfpgan/**

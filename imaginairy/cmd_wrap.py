@@ -46,6 +46,12 @@ def filter_torch_warnings():
         category=UserWarning,
         message=r"The operator .*?is not currently supported.*",
     )
+    warnings.filterwarnings(
+        "ignore", category=UserWarning, message=r"The parameter 'pretrained' is.*"
+    )
+    warnings.filterwarnings(
+        "ignore", category=UserWarning, message=r"Arguments other than a weight.*"
+    )
 
 
 def setup_env():

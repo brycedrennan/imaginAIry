@@ -175,7 +175,8 @@ class PLMSSampler(object):
         device = self.model.betas.device
         b = shape[0]
         if x_T is None:
-            img = torch.randn(shape, device=device)
+
+            img = torch.randn(shape, device="cpu").to(device)
         else:
             img = x_T
 

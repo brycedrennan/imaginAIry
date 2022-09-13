@@ -1,14 +1,17 @@
 import importlib
 import logging
+import os.path
 import platform
 from contextlib import contextmanager
 from functools import lru_cache
 from typing import List, Optional
 
 import numpy as np
+import requests
 import torch
 from PIL import Image
 from torch import Tensor
+from transformers import cached_path
 
 logger = logging.getLogger(__name__)
 
@@ -115,3 +118,34 @@ def pillow_img_to_torch_image(image, max_height=512, max_width=512):
     image = image[None].transpose(0, 3, 1, 2)
     image = torch.from_numpy(image)
     return 2.0 * image - 1.0, w, h
+
+
+def get_cache_dir():
+    xdg_cache_home = os.getenv("XDG_CACHE_HOME", None)
+    if xdg_cache_home is None:
+        user_home = os.getenv("HOME", None)
+        if user_home:
+            xdg_cache_home = os.path.join(user_home, ".cache")
+
+    if xdg_cache_home is not None:
+        return os.path.join(xdg_cache_home, "imaginairy", "weights")
+
+    return os.path.join(os.path.dirname(__file__), ".cached-downloads")
+
+
+def get_cached_url_path(url):
+    try:
+        return cached_path(url)
+    except OSError:
+        pass
+    filename = url.split("/")[-1]
+    dest = get_cache_dir()
+    os.makedirs(dest, exist_ok=True)
+    dest_path = os.path.join(dest, filename)
+    if os.path.exists(dest_path):
+        return dest_path
+    r = requests.get(url)
+
+    with open(dest_path, "wb") as f:
+        f.write(r.content)
+    return dest_path

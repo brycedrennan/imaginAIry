@@ -23,7 +23,7 @@ setup(
     install_requires=[
         "click",
         "ftfy",  # for vendored clip
-        "torch",
+        "torch>=1.2.0",
         "numpy",
         "tqdm",
         "diffusers",
@@ -37,5 +37,7 @@ setup(
         "kornia==0.6",
         # k-diffusion for use with find_noise.py
         # "k-diffusion@git+https://github.com/crowsonkb/k-diffusion.git@71ba7d6735e9cba1945b429a21345960eb3f151c#egg=k-diffusion",
+        "realesrgan",
+        "gfpgan>=1.3.7",
     ],
 )

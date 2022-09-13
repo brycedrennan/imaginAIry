@@ -1,4 +1,4 @@
-from imaginairy.api import imagine_image_files, imagine_images
+from imaginairy.api import imagine, imagine_image_files
 from imaginairy.schema import ImaginePrompt
 
 from . import TESTS_FOLDER
@@ -8,7 +8,7 @@ def test_imagine():
     prompt = ImaginePrompt(
         "a scenic landscape", width=512, height=256, steps=20, seed=1
     )
-    result = next(imagine_images(prompt))
+    result = next(imagine(prompt))
     assert result.md5() == "4c5957c498881d365cfcf13014812af0"
     result.img.save(f"{TESTS_FOLDER}/test_output/scenic_landscape.png")
 

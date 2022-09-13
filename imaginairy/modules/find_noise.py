@@ -26,9 +26,7 @@ def pil_img_to_latent(model, img, batch_size=1, device="cuda", half=True):
     return model.get_first_stage_encoding(model.encode_first_stage(init_image))
 
 
-def find_noise_for_image(
-    model, pil_img, prompt, steps=50, cond_scale=1.0, verbose=False, half=True
-):
+def find_noise_for_image(model, pil_img, prompt, steps=50, cond_scale=1.0, half=True):
     img_latent = pil_img_to_latent(
         model, pil_img, batch_size=1, device="cuda", half=half
     )
@@ -38,13 +36,12 @@ def find_noise_for_image(
         prompt,
         steps=steps,
         cond_scale=cond_scale,
-        verbose=verbose,
         half=half,
     )
 
 
 def find_noise_for_latent(
-    model, img_latent, prompt, steps=50, cond_scale=1.0, verbose=False, half=True
+    model, img_latent, prompt, steps=50, cond_scale=1.0, half=True
 ):
     import k_diffusion as K
 
@@ -58,9 +55,6 @@ def find_noise_for_latent(
     s_in = x.new_ones([x.shape[0]])
     dnw = K.external.CompVisDenoiser(model)
     sigmas = dnw.get_sigmas(steps).flip(0)
-
-    if verbose:
-        print(sigmas)
 
     with (torch.no_grad(), _autocast(get_device())):
         for i in range(1, len(sigmas)):

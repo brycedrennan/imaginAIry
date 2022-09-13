@@ -51,7 +51,7 @@ class VectorQuantizer(nn.Module):
             if self.unknown_index == "extra":
                 self.unknown_index = self.re_embed
                 self.re_embed = self.re_embed + 1
-            print(
+            logger.info(
                 f"Remapping {self.n_e} indices to {self.re_embed} indices. "
                 f"Using {self.unknown_index} for unknown indices."
             )

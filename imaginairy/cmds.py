@@ -92,6 +92,12 @@ def configure_logging(level="INFO"):
     type=int,
     help="What seed to use for randomness. Allows reproducible image renders",
 )
+@click.option("--upscale", is_flag=True)
+@click.option(
+    "--upscale-method", default="realesrgan", type=click.Choice(["realesrgan"])
+)
+@click.option("--fix-faces", is_flag=True)
+@click.option("--fix-faces-method", default="gfpgan", type=click.Choice(["gfpgan"]))
 @click.option(
     "--sampler-type",
     default="PLMS",
@@ -128,6 +134,10 @@ def imagine_cmd(
     width,
     steps,
     seed,
+    upscale,
+    upscale_method,
+    fix_faces,
+    fix_faces_method,
     sampler_type,
     ddim_eta,
     log_level,
@@ -142,7 +152,7 @@ def imagine_cmd(
 
     total_image_count = len(prompt_texts) * repeats
     logger.info(
-        f"🤖🧠 received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
+        f"🤖🧠 imaginAIry received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
     )
     if init_image and sampler_type != "DDIM":
         sampler_type = "DDIM"
@@ -161,8 +171,8 @@ def imagine_cmd(
                 steps=steps,
                 height=height,
                 width=width,
-                upscale=False,
-                fix_faces=False,
+                upscale=upscale,
+                fix_faces=fix_faces,
             )
             prompts.append(prompt)
 
@@ -172,6 +182,7 @@ def imagine_cmd(
         ddim_eta=ddim_eta,
         record_step_images="images" in show_work,
         tile_mode=tile,
+        output_file_extension="png",
     )
 
 

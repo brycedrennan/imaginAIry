@@ -1,7 +1,6 @@
 import logging
 import os
 import re
-import subprocess
 from contextlib import nullcontext
 from functools import lru_cache
 
@@ -10,11 +9,13 @@ import torch
 import torch.nn
 from einops import rearrange
 from omegaconf import OmegaConf
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 from pytorch_lightning import seed_everything
 from torch import autocast
 from transformers import cached_path
 
+from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
+from imaginairy.enhancers.upscale_realesrgan import upscale_image
 from imaginairy.modules.diffusion.ddim import DDIMSampler
 from imaginairy.modules.diffusion.plms import PLMSSampler
 from imaginairy.safety import is_nsfw, safety_models
@@ -93,7 +94,7 @@ def imagine_image_files(
 ):
     big_path = os.path.join(outdir, "upscaled")
     os.makedirs(outdir, exist_ok=True)
-    os.makedirs(big_path, exist_ok=True)
+
     base_count = len(os.listdir(outdir))
     step_count = 0
     output_file_extension = output_file_extension.lower()
@@ -116,7 +117,7 @@ def imagine_image_files(
             img.save(os.path.join(steps_path, filename))
 
     img_callback = _record_steps if record_step_images else None
-    for result in imagine_images(
+    for result in imagine(
         prompts,
         latent_channels=latent_channels,
         downsampling_factor=downsampling_factor,
@@ -131,14 +132,15 @@ def imagine_image_files(
 
         result.save(filepath)
         logger.info(f"    🖼  saved to: {filepath}")
-        if prompt.upscale:
-            bigfilepath = (os.path.join(big_path, basefilename) + ".jpg",)
-            enlarge_realesrgan2x(filepath, bigfilepath)
-            logger.info(f"    upscaled 🖼  saved to: {filepath}")
+        if result.upscaled_img:
+            os.makedirs(big_path, exist_ok=True)
+            bigfilepath = os.path.join(big_path, basefilename) + "_upscaled.jpg"
+            result.save_upscaled(bigfilepath)
+            logger.info(f"    Upscaled 🖼  saved to: {bigfilepath}")
         base_count += 1
 
 
-def imagine_images(
+def imagine(
     prompts,
     latent_channels=4,
     downsampling_factor=8,
@@ -149,15 +151,16 @@ def imagine_images(
     half_mode=None,
 ):
     model = load_model(tile_mode=tile_mode)
+
     if not IMAGINAIRY_ALLOW_NSFW:
         # needs to be loaded before we set default tensor type to half
         safety_models()
     # only run half-mode on cuda. run it by default
-    half_mode = True if half_mode is None and get_device() == "cuda" else False
+    half_mode = half_mode is None and get_device() == "cuda"
     if half_mode:
         model = model.half()
         # needed when model is in half mode, remove if not using half mode
-        torch.set_default_tensor_type(torch.HalfTensor)
+        # torch.set_default_tensor_type(torch.HalfTensor)
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
     _img_callback = None
@@ -242,20 +245,23 @@ def imagine_images(
 
             for x_sample in x_samples:
                 x_sample = 255.0 * rearrange(x_sample.cpu().numpy(), "c h w -> h w c")
-                img = Image.fromarray(x_sample.astype(np.uint8))
+                x_sample_8_orig = x_sample.astype(np.uint8)
+                img = Image.fromarray(x_sample_8_orig)
+                upscaled_img = None
                 if not IMAGINAIRY_ALLOW_NSFW and is_nsfw(
                     img, x_sample, half_mode=half_mode
                 ):
                     logger.info("    ⚠️  Filtering NSFW image")
-                    img = Image.new("RGB", img.size, (228, 150, 150))
+                    img = img.filter(ImageFilter.GaussianBlur(radius=10))
+
                 if prompt.fix_faces:
-                    img = fix_faces_GFPGAN(img)
-                # if prompt.upscale:
-                #     enlarge_realesrgan2x(
-                #         filepath,
-                #         os.path.join(big_path, basefilename) + ".jpg",
-                #     )
-                yield ImagineResult(img=img, prompt=prompt)
+                    logger.info("    Fixing 😊 's in 🖼  using GFPGAN...")
+                    img = enhance_faces(img, fidelity=0.2)
+                if prompt.upscale:
+                    logger.info("    Upscaling 🖼  using real-ESRGAN...")
+                    upscaled_img = upscale_image(img)
+
+                yield ImagineResult(img=img, prompt=prompt, upscaled_img=upscaled_img)
 
 
 def prompt_normalized(prompt):
@@ -263,14 +269,6 @@ def prompt_normalized(prompt):
 
 
 DOWNLOADED_FILES_PATH = f"{LIB_PATH}/../downloads/"
-ESRGAN_PATH = DOWNLOADED_FILES_PATH + "realesrgan-ncnn-vulkan/realesrgan-ncnn-vulkan"
-
-
-def enlarge_realesrgan2x(src, dst):
-    process = subprocess.Popen(
-        [ESRGAN_PATH, "-i", src, "-o", dst, "-n", "realesrgan-x4plus"]
-    )
-    process.wait()
 
 
 def get_sampler(sampler_type, model):
@@ -279,30 +277,3 @@ def get_sampler(sampler_type, model):
         return PLMSSampler(model)
     elif sampler_type == "DDIM":
         return DDIMSampler(model)
-
-
-def gfpgan_model():
-    from gfpgan import GFPGANer
-
-    return GFPGANer(
-        model_path=DOWNLOADED_FILES_PATH
-        + "GFPGAN/experiments/pretrained_models/GFPGANv1.3.pth",
-        upscale=1,
-        arch="clean",
-        channel_multiplier=2,
-        bg_upsampler=None,
-        device=torch.device(get_device()),
-    )
-
-
-def fix_faces_GFPGAN(image):
-    image = image.convert("RGB")
-    cropped_faces, restored_faces, restored_img = gfpgan_model().enhance(
-        np.array(image, dtype=np.uint8),
-        has_aligned=False,
-        only_center_face=False,
-        paste_back=True,
-    )
-    res = Image.fromarray(restored_img)
-
-    return res

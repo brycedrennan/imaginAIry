@@ -91,8 +91,9 @@ class ExifCodes:
 
 
 class ImagineResult:
-    def __init__(self, img, prompt: ImaginePrompt):
+    def __init__(self, img, prompt: ImaginePrompt, upscaled_img=None):
         self.img = img
+        self.upscaled_img = upscaled_img
         self.prompt = prompt
         self.created_at = datetime.utcnow().replace(tzinfo=timezone.utc)
         self.torch_backend = get_device()
@@ -113,7 +114,7 @@ class ImagineResult:
             "prompt": self.prompt.as_dict(),
         }
 
-    def save(self, save_path):
+    def _exif(self):
         exif = Exif()
         exif[ExifCodes.ImageDescription] = self.prompt.prompt_description()
         exif[ExifCodes.UserComment] = json.dumps(self.metadata_dict())
@@ -121,4 +122,10 @@ class ImagineResult:
         exif[ExifCodes.Software] = "Imaginairy / Stable Diffusion v1.4"
         exif[ExifCodes.DateTime] = self.created_at.isoformat(sep=" ")[:19]
         exif[ExifCodes.HostComputer] = f"{self.torch_backend}:{self.hardware_name}"
-        self.img.save(save_path, exif=exif)
+        return exif
+
+    def save(self, save_path):
+        self.img.save(save_path, exif=self._exif())
+
+    def save_upscaled(self, save_path):
+        self.upscaled_img.save(save_path, exif=self._exif())

@@ -53,6 +53,17 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/data/girl_with_a_pearl_earring.jpg" height="256"> =>
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000105_33084057_DDIM40_PS7.5_portrait_of_a_smiling_lady._oil_painting._.jpg" height="256"> 
 
+### Face Enhancement [by CodeFormer](https://github.com/sczhou/CodeFormer)
+
+```bash
+>> imagine "a couple smiling" --steps 40 --seed 1 --fix-faces
+```
+<img src="assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> => <img src="assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
+
+
+### Upscaling [by RealESRGAN](https://github.com/xinntao/Real-ESRGAN)
+<img src="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg">
+<img src="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" height="512"> 
 
 ## Features
  
@@ -68,20 +79,20 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 ## How To
 
 ```python
-from imaginairy import imagine_images, imagine_image_files, ImaginePrompt, WeightedPrompt
+from imaginairy import imagine, imagine_image_files, ImaginePrompt, WeightedPrompt
 
 prompts = [
     ImaginePrompt("a scenic landscape", seed=1),
     ImaginePrompt("a bowl of fruit"),
     ImaginePrompt([
-       WeightedPrompt("cat", weight=1),
-       WeightedPrompt("dog", weight=1),
+        WeightedPrompt("cat", weight=1),
+        WeightedPrompt("dog", weight=1),
     ])
 ]
-for result in imagine_images(prompts):
+for result in imagine(prompts):
     # do something
     result.save("my_image.jpg")
-    
+
 # or
 
 imagine_image_files(prompts, outdir="./my-art")
@@ -109,11 +120,12 @@ imagine_image_files(prompts, outdir="./my-art")
 
 ## Todo
  - performance optimizations
-   - https://github.com/neonsecret/stable-diffusion  https://github.com/CompVis/stable-diffusion/pull/177
+   
    - ✅ https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
    - ✅ https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#
    - ✅ https://www.reddit.com/r/StableDiffusion/comments/xalaws/test_update_for_less_memory_usage_and_higher/
- - deploy to pypi
+   - https://github.com/neonsecret/stable-diffusion  https://github.com/CompVis/stable-diffusion/pull/177
+ - ✅ deploy to pypi
  - add tests
  - set up ci (test/lint/format)
  - add docs
@@ -124,11 +136,14 @@ imagine_image_files(prompts, outdir="./my-art")
    - ✅ init-image at command line
    - prompt expansion
  - Image Generation Features
+   - add in all the samplers 
    - upscaling
+     - ✅ realesrgan 
+     - ldm
      - https://github.com/lowfuel/progrock-stable
-   - face improvements
-     - gfpgan - https://github.com/TencentARC/GFPGAN
-     - codeformer - https://github.com/sczhou/CodeFormer
+   - ✅ face enhancers
+     - ✅ gfpgan - https://github.com/TencentARC/GFPGAN
+     - ✅ codeformer - https://github.com/sczhou/CodeFormer
    - image describe feature - https://replicate.com/methexis-inc/img2prompt
    - outpainting
    - inpainting
@@ -148,5 +163,16 @@ imagine_image_files(prompts, outdir="./my-art")
    - textual inversion 
      - https://www.reddit.com/r/StableDiffusion/comments/xbwb5y/how_to_run_textual_inversion_locally_train_your/
      - https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h
+     - https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/stable_diffusion_textual_inversion_library_navigator.ipynb
    - zooming videos? a la disco diffusion
    - fix saturation at high CFG https://www.reddit.com/r/StableDiffusion/comments/xalo78/fixing_excessive_contrastsaturation_resulting/
+   - https://www.reddit.com/r/StableDiffusion/comments/xbrrgt/a_rundown_of_twenty_new_methodsoptions_added_to/
+
+## Noteable Stable Diffusion Implementations
+ - https://github.com/huggingface/diffusers/tree/main/src/diffusers/pipelines/stable_diffusion
+ - https://github.com/lstein/stable-diffusion
+ - https://github.com/AUTOMATIC1111/stable-diffusion-webui
+
+## Further Reading
+ - Differences between samplers
+   - https://www.reddit.com/r/StableDiffusion/comments/xbeyw3/can_anyone_offer_a_little_guidance_on_the/

@@ -174,7 +174,8 @@ class DDIMSampler:
         device = self.model.betas.device
         b = shape[0]
         if x_T is None:
-            img = torch.randn(shape, device=device)
+            # run on CPU for seed consistency. M1/mps runs were not consistent otherwise
+            img = torch.randn(shape, device="cpu").to(device)
         else:
             img = x_T
 

@@ -16,6 +16,7 @@ init: require_pyenv  ## Setup a dev environment for local development.
 	@echo -e "\033[0;32m ✔️  🐍 $(venv_name) virtualenv activated \033[0m"
 	pip install --upgrade pip pip-tools
 	pip-sync requirements-dev.txt
+	pip install -e . --no-deps
 	@echo -e "\nEnvironment setup! ✨ 🍰 ✨ 🐍 \n\nCopy this path to tell PyCharm where your virtualenv is. You may have to click the refresh button in the pycharm file explorer.\n"
 	@echo -e "\033[0;32m"
 	@pyenv which python
@@ -74,6 +75,31 @@ vendor_openai_clip:
 	cp -R ./downloads/CLIP/clip imaginairy/vendored/
 	git --git-dir ./downloads/CLIP/.git rev-parse HEAD | tee ./imaginairy/vendored/clip/clip-commit-hash.txt
 	echo "vendored from git@github.com:openai/CLIP.git" | tee ./imaginairy/vendored/clip/readme.txt
+
+revendorize:
+	make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip
+	make vendorize REPO=git@github.com:xinntao/Real-ESRGAN.git PKG=realesrgan
+
+
+vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
+	mkdir -p ./downloads
+	-cd ./downloads && git clone $(REPO) $(PKG)
+	cd ./downloads/$(PKG) && git pull
+	rm -rf ./imaginairy/vendored/$(PKG)
+	cp -R ./downloads/$(PKG)/$(PKG) imaginairy/vendored/
+	git --git-dir ./downloads/$(PKG)/.git rev-parse HEAD | tee ./imaginairy/vendored/$(PKG)/clip-commit-hash.txt
+	touch ./imaginairy/vendored/$(PKG)/version.py
+	echo "vendored from $(REPO)" | tee ./imaginairy/vendored/$(PKG)/readme.txt
+
+vendorize_whole_repo:
+	mkdir -p ./downloads
+	-cd ./downloads && git clone $(REPO) $(PKG)
+	cd ./downloads/$(PKG) && git pull
+	rm -rf ./imaginairy/vendored/$(PKG)
+	cp -R ./downloads/$(PKG) imaginairy/vendored/
+	git --git-dir ./downloads/$(PKG)/.git rev-parse HEAD | tee ./imaginairy/vendored/$(PKG)/clip-commit-hash.txt
+	touch ./imaginairy/vendored/$(PKG)/version.py
+	echo "vendored from $(REPO)" | tee ./imaginairy/vendored/$(PKG)/readme.txt
 
 
 help: ## Show this help message.
