@@ -7,7 +7,7 @@ setup(
     name="imaginAIry",
     author="Bryce Drennan",
     # author_email="b r y p y d o t io",
-    version="1.0.1",
+    version="1.0.2",
     description="AI imagined images. Pythonic generation of stable diffusion images.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -19,7 +19,7 @@ setup(
     entry_points={
         "console_scripts": ["imagine=imaginairy.cmd_wrap:imagine_cmd"],
     },
-    package_data={"imaginairy": ["configs/*.yaml"]},
+    package_data={"imaginairy": ["configs/*.yaml", "vendored/clip/*.txt.gz"]},
     install_requires=[
         "click",
         "ftfy",  # for vendored clip
