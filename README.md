@@ -58,12 +58,14 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 ```bash
 >> imagine "a couple smiling" --steps 40 --seed 1 --fix-faces
 ```
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> 
-=> 
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> =>
 <img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
 
 
 ### Upscaling [by RealESRGAN](https://github.com/xinntao/Real-ESRGAN)
+```bash
+>> imagine "colorful smoke" --steps 40 --upscale
+```
 <img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" height="128"> =>
 <img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" height="256"> 
 
@@ -123,23 +125,23 @@ imagine_image_files(prompts, outdir="./my-art")
 
 ## Todo
  - performance optimizations
-   
    - ✅ https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
    - ✅ https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#
    - ✅ https://www.reddit.com/r/StableDiffusion/comments/xalaws/test_update_for_less_memory_usage_and_higher/
    - https://github.com/neonsecret/stable-diffusion  https://github.com/CompVis/stable-diffusion/pull/177
  - ✅ deploy to pypi
- - add tests
- - set up ci (test/lint/format)
- - add docs
- - notify https://github.com/CompVis/stable-diffusion/issues/25
- - remove yaml config
- - delete more unused code
+ - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
+ - Development Environment
+   - add tests
+   - set up ci (test/lint/format)
+   - add docs
+   - remove yaml config
+   - delete more unused code
  - Interface improvements
    - ✅ init-image at command line
    - prompt expansion
  - Image Generation Features
-   - add in all the samplers 
+   - add k-diffusion sampling methods
    - upscaling
      - ✅ realesrgan 
      - ldm
@@ -151,23 +153,22 @@ imagine_image_files(prompts, outdir="./my-art")
    - outpainting
    - inpainting
      - https://github.com/andreas128/RePaint
-   - add more sampling methods?
-   - img2img but keeps img stable
+      - img2img but keeps img stable
      - https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/
      - https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1
+   - CPU support
    - img2img for plms?
    - images as actual prompts instead of just init images
    - cross-attention control: 
      - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
    - guided generation https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI
-   - tiling
+   - ✅ tiling
    - output show-work videos
    - image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md
    - textual inversion 
      - https://www.reddit.com/r/StableDiffusion/comments/xbwb5y/how_to_run_textual_inversion_locally_train_your/
      - https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h
      - https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/stable_diffusion_textual_inversion_library_navigator.ipynb
-   - zooming videos? a la disco diffusion
    - fix saturation at high CFG https://www.reddit.com/r/StableDiffusion/comments/xalo78/fixing_excessive_contrastsaturation_resulting/
    - https://www.reddit.com/r/StableDiffusion/comments/xbrrgt/a_rundown_of_twenty_new_methodsoptions_added_to/
 

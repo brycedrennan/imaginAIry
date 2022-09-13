@@ -78,7 +78,8 @@ vendor_openai_clip:
 
 revendorize:
 	make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip
-	make vendorize REPO=git@github.com:xinntao/Real-ESRGAN.git PKG=realesrgan
+	#make vendorize REPO=git@github.com:xinntao/Real-ESRGAN.git PKG=realesrgan
+
 
 
 vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`

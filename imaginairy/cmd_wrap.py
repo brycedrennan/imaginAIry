@@ -40,7 +40,7 @@ def disable_pytorch_lighting_custom_logging():
     _logger.setLevel(logging.NOTSET)
 
 
-def filter_torch_warnings():
+def disable_common_warnings():
     warnings.filterwarnings(
         "ignore",
         category=UserWarning,
@@ -57,13 +57,15 @@ def filter_torch_warnings():
 def setup_env():
     disable_transformers_logging()
     disable_pytorch_lighting_custom_logging()
-    filter_torch_warnings()
+    disable_common_warnings()
 
 
-setup_env()
+def imagine_cmd(*args, **kwargs):
+    setup_env()
+    from imaginairy.cmds import imagine_cmd as imagine_cmd_orig  # noqa
 
+    imagine_cmd_orig(*args, **kwargs)
 
-from imaginairy.cmds import imagine_cmd  # noqa
 
 if __name__ == "__main__":
     imagine_cmd()  # noqa
