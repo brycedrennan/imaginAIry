@@ -141,7 +141,7 @@ imagine_image_files(prompts, outdir="./my-art")
    - ✅ init-image at command line
    - prompt expansion
  - Image Generation Features
-   - add k-diffusion sampling methods
+   - ✅ add k-diffusion sampling methods
    - upscaling
      - ✅ realesrgan 
      - ldm

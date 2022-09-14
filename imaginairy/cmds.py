@@ -100,8 +100,19 @@ def configure_logging(level="INFO"):
 @click.option("--fix-faces-method", default="gfpgan", type=click.Choice(["gfpgan"]))
 @click.option(
     "--sampler-type",
-    default="PLMS",
-    type=click.Choice(["PLMS", "DDIM"]),
+    default="plms",
+    type=click.Choice(
+        [
+            "plms",
+            "ddim",
+            "k_lms",
+            "k_dpm_2",
+            "k_dpm_2_a",
+            "k_euler",
+            "k_euler_a",
+            "k_heun",
+        ]
+    ),
     help="What sampling strategy to use",
 )
 @click.option("--ddim-eta", default=0.0, type=float)
@@ -154,7 +165,7 @@ def imagine_cmd(
     logger.info(
         f"🤖🧠 imaginAIry received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
     )
-    if init_image and sampler_type != "DDIM":
+    if init_image and sampler_type == "DDIM":
         sampler_type = "DDIM"
 
     prompts = []

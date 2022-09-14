@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
+from imaginairy.img_log import log_latent
 from imaginairy.modules.diffusion.util import (
     extract_into_tensor,
     make_ddim_sampling_parameters,
@@ -89,7 +90,7 @@ class DDIMSampler:
     @torch.no_grad()
     def sample(
         self,
-        S,
+        num_steps,
         batch_size,
         shape,
         conditioning=None,
@@ -124,7 +125,7 @@ class DDIMSampler:
                         f"Warning: Got {conditioning.shape[0]} conditionings but batch-size is {batch_size}"
                     )
 
-        self.make_schedule(ddim_num_steps=S, ddim_eta=eta)
+        self.make_schedule(ddim_num_steps=num_steps, ddim_eta=eta)
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
@@ -178,6 +179,7 @@ class DDIMSampler:
             img = torch.randn(shape, device="cpu").to(device)
         else:
             img = x_T
+        log_latent(img, "initial noise")
 
         if timesteps is None:
             timesteps = (
@@ -231,9 +233,9 @@ class DDIMSampler:
             )
             if callback:
                 callback(i)
-            if img_callback:
-                img_callback(pred_x0, i)
-                img_callback(pred_x0, i)
+
+            log_latent(img, "img")
+            log_latent(pred_x0, "pred_x0")
 
             if index % log_every_t == 0 or index == total_steps - 1:
                 intermediates["x_inter"].append(img)
@@ -378,7 +380,7 @@ class DDIMSampler:
             # cond_grad = -torch.autograd.grad(original_loss, x_dec)[0]
             # x_dec = x_dec.detach() + cond_grad * sigma_t ** 2
             ## x_dec_alt = x_dec + (original_loss * 0.1) ** 2
-            if img_callback:
-                img_callback(x_dec, f"x_dec {i}")
-                img_callback(pred_x0, f"pred_x0 {i}")
+
+            log_latent(x_dec, f"x_dec {i}")
+            log_latent(pred_x0, f"pred_x0 {i}")
         return x_dec

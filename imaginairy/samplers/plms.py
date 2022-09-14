@@ -90,7 +90,7 @@ class PLMSSampler(object):
     @torch.no_grad()
     def sample(
         self,
-        S,
+        num_steps,
         batch_size,
         shape,
         conditioning=None,
@@ -125,7 +125,7 @@ class PLMSSampler(object):
                         f"Warning: Got {conditioning.shape[0]} conditionings but batch-size is {batch_size}"
                     )
 
-        self.make_schedule(ddim_num_steps=S, ddim_eta=eta)
+        self.make_schedule(ddim_num_steps=num_steps, ddim_eta=eta)
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
@@ -248,8 +248,8 @@ class PLMSSampler(object):
             if callback:
                 callback(i)
             if img_callback:
-                img_callback(img, i)
-                img_callback(pred_x0, i)
+                img_callback(img, "img")
+                img_callback(pred_x0, "pred_x0")
 
             if index % log_every_t == 0 or index == total_steps - 1:
                 intermediates["x_inter"].append(img)

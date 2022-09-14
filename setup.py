@@ -31,6 +31,7 @@ setup(
         "pytorch-lightning==1.4.2",
         "omegaconf==2.1.1",
         "einops==0.3.0",
+        "torchdiffeq",
         "transformers==4.19.2",
         "torchmetrics==0.6.0",
         "torchvision>=0.13.1",
