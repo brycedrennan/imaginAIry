@@ -7,7 +7,7 @@ setup(
     name="imaginAIry",
     author="Bryce Drennan",
     # author_email="b r y p y d o t io",
-    version="1.0.2",
+    version="1.1.0",
     description="AI imagined images. Pythonic generation of stable diffusion images.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -36,8 +36,6 @@ setup(
         "torchmetrics==0.6.0",
         "torchvision>=0.13.1",
         "kornia==0.6",
-        # k-diffusion for use with find_noise.py
-        # "k-diffusion@git+https://github.com/crowsonkb/k-diffusion.git@71ba7d6735e9cba1945b429a21345960eb3f151c#egg=k-diffusion",
         "realesrgan",
         "gfpgan>=1.3.7",
     ],
