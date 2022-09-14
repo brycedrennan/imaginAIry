@@ -17,7 +17,7 @@ from transformers import cached_path
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
 from imaginairy.img_log import LatentLoggingContext, log_latent
-from imaginairy.safety import is_nsfw, safety_models
+from imaginairy.safety import is_nsfw
 from imaginairy.samplers.base import get_sampler
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
@@ -147,9 +147,6 @@ def imagine(
 ):
     model = load_model(tile_mode=tile_mode)
 
-    if not IMAGINAIRY_ALLOW_NSFW:
-        # needs to be loaded before we set default tensor type to half
-        safety_models()
     # only run half-mode on cuda. run it by default
     half_mode = half_mode is None and get_device() == "cuda"
     if half_mode:
@@ -199,17 +196,17 @@ def imagine(
                     ddim_steps = int(prompt.steps / generation_strength)
                     sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
 
-                    t_enc = int(generation_strength * ddim_steps)
                     init_image, w, h = img_path_to_torch_image(prompt.init_image)
                     init_image = init_image.to(get_device())
                     init_latent = model.get_first_stage_encoding(
                         model.encode_first_stage(init_image)
                     )
-                    log_latent(init_latent, "init_latent")
 
+                    log_latent(init_latent, "init_latent")
                     # encode (scaled latent)
                     z_enc = sampler.stochastic_encode(
-                        init_latent, torch.tensor([t_enc]).to(get_device())
+                        init_latent,
+                        torch.tensor([prompt.steps]).to(get_device()),
                     )
                     log_latent(z_enc, "z_enc")
 
@@ -217,7 +214,7 @@ def imagine(
                     samples = sampler.decode(
                         z_enc,
                         c,
-                        t_enc,
+                        prompt.steps,
                         unconditional_guidance_scale=prompt.prompt_strength,
                         unconditional_conditioning=uc,
                         img_callback=_img_callback,

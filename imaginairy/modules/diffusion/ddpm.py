@@ -36,7 +36,12 @@ def uniform_on_device(r1, r2, shape, device):
 
 
 class DDPM(pl.LightningModule):
-    # classic DDPM with Gaussian diffusion, in image space
+    """
+    classic DDPM with Gaussian diffusion, in image space
+
+    Denoising diffusion probabilistic models
+    """
+
     def __init__(
         self,
         unet_config,

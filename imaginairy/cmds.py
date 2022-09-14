@@ -3,6 +3,7 @@ import logging.config
 import click
 
 from imaginairy.api import load_model
+from imaginairy.samplers.base import SAMPLER_TYPE_OPTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -101,18 +102,7 @@ def configure_logging(level="INFO"):
 @click.option(
     "--sampler-type",
     default="plms",
-    type=click.Choice(
-        [
-            "plms",
-            "ddim",
-            "k_lms",
-            "k_dpm_2",
-            "k_dpm_2_a",
-            "k_euler",
-            "k_euler_a",
-            "k_heun",
-        ]
-    ),
+    type=click.Choice(SAMPLER_TYPE_OPTIONS),
     help="What sampling strategy to use",
 )
 @click.option("--ddim-eta", default=0.0, type=float)

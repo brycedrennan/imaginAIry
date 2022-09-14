@@ -15,7 +15,9 @@ from imaginairy.utils import get_device
 logger = logging.getLogger(__name__)
 
 
-class PLMSSampler(object):
+class PLMSSampler:
+    """probabilistic least-mean-squares"""
+
     def __init__(self, model, schedule="linear", **kwargs):
         super().__init__()
         self.model = model

@@ -119,7 +119,7 @@ def sample_euler_ancestral(
         # Euler method
         dt = sigma_down - sigmas[i]
         x = x + d * dt
-        x = x + torch.randn_like(x) * sigma_up
+        x = x + torch.randn_like(x, device="cpu").to(x.device) * sigma_up
     return x
 
 
@@ -253,7 +253,7 @@ def sample_dpm_2_ancestral(
         denoised_2 = model(x_2, sigma_mid * s_in, **extra_args)
         d_2 = to_d(x_2, sigma_mid, denoised_2)
         x = x + d_2 * dt_2
-        x = x + torch.randn_like(x) * sigma_up
+        x = x + torch.randn_like(x, device="cpu").to(x.device) * sigma_up
     return x
 
 

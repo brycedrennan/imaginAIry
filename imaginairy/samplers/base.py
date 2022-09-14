@@ -6,6 +6,17 @@ from imaginairy.samplers.kdiff import KDiffusionSampler
 from imaginairy.samplers.plms import PLMSSampler
 from imaginairy.utils import get_device
 
+SAMPLER_TYPE_OPTIONS = [
+    "plms",
+    "ddim",
+    "k_lms",
+    "k_dpm_2",
+    "k_dpm_2_a",
+    "k_euler",
+    "k_euler_a",
+    "k_heun",
+]
+
 _k_sampler_type_lookup = {
     "k_dpm_2": "dpm_2",
     "k_dpm_2_a": "dpm_2_ancestral",

@@ -43,7 +43,7 @@ def find_noise_for_image(model, pil_img, prompt, steps=50, cond_scale=1.0, half=
 def find_noise_for_latent(
     model, img_latent, prompt, steps=50, cond_scale=1.0, half=True
 ):
-    import k_diffusion as K
+    from imaginairy.vendored import k_diffusion as K
 
     x = img_latent
 
@@ -89,6 +89,7 @@ def find_noise_for_latent(
             del eps, denoised_uncond, denoised_cond, denoised, d, dt
             # collect_and_empty()
 
+        # return (x / x.std())
         return (x / x.std()) * sigmas[-1]
 
 

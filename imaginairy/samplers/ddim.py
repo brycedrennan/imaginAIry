@@ -18,6 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 class DDIMSampler:
+    """
+    Denoising Diffusion Implicit Models
+
+    https://arxiv.org/abs/2010.02502
+    """
+
     def __init__(self, model, schedule="linear", **kwargs):
         super().__init__()
         self.model = model
@@ -314,7 +320,7 @@ class DDIMSampler:
         return x_prev, pred_x0
 
     @torch.no_grad()
-    def stochastic_encode(self, x0, t, use_original_steps=False, noise=None):
+    def stochastic_encode(self, init_latent, t, use_original_steps=False, noise=None):
         # fast, but does not allow for exact reconstruction
         # t serves as an index to gather the correct alphas
         if use_original_steps:
@@ -325,10 +331,11 @@ class DDIMSampler:
             sqrt_one_minus_alphas_cumprod = self.ddim_sqrt_one_minus_alphas
 
         if noise is None:
-            noise = torch.randn_like(x0)
+            noise = torch.randn_like(init_latent, device="cpu").to(get_device())
         return (
-            extract_into_tensor(sqrt_alphas_cumprod, t, x0.shape) * x0
-            + extract_into_tensor(sqrt_one_minus_alphas_cumprod, t, x0.shape) * noise
+            extract_into_tensor(sqrt_alphas_cumprod, t, init_latent.shape) * init_latent
+            + extract_into_tensor(sqrt_one_minus_alphas_cumprod, t, init_latent.shape)
+            * noise
         )
 
     @torch.no_grad()

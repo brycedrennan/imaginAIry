@@ -142,6 +142,7 @@ imagine_image_files(prompts, outdir="./my-art")
    - prompt expansion
  - Image Generation Features
    - ✅ add k-diffusion sampling methods
+   - why is k-diffusion so slow compared to plms? 2 it/s vs 8 it/s
    - upscaling
      - ✅ realesrgan 
      - ldm
