@@ -39,17 +39,17 @@ class LatentLoggingContext:
         global _CURRENT_LOGGING_CONTEXT
         _CURRENT_LOGGING_CONTEXT = None
 
-    def log_latents(self, samples, description):
+    def log_latents(self, latents, description):
         if not self.img_callback:
             return
-        if samples.shape[1] != 4:
+        if latents.shape[1] != 4:
             # logger.info(f"Didn't save tensor of shape {samples.shape} for {description}")
             return
         self.step_count += 1
-        description = f"{description} - {samples.shape}"
-        samples = self.model.decode_first_stage(samples)
-        samples = torch.clamp((samples + 1.0) / 2.0, min=0.0, max=1.0)
-        for pred_x0 in samples:
-            pred_x0 = 255.0 * rearrange(pred_x0.cpu().numpy(), "c h w -> h w c")
-            img = Image.fromarray(pred_x0.astype(np.uint8))
+        description = f"{description} - {latents.shape}"
+        latents = self.model.decode_first_stage(latents)
+        latents = torch.clamp((latents + 1.0) / 2.0, min=0.0, max=1.0)
+        for latent in latents:
+            latent = 255.0 * rearrange(latent.cpu().numpy(), "c h w -> h w c")
+            img = Image.fromarray(latent.astype(np.uint8))
             self.img_callback(img, description, self.step_count, self.prompt)

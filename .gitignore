@@ -16,3 +16,4 @@ dist
 **/*.egg-info
 tests/test_output
 gfpgan/**
+.python-version

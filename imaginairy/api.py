@@ -30,9 +30,17 @@ from imaginairy.utils import (
 LIB_PATH = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
 
-# leave undocumented. I'd ask that no one publicize this flag
-IMAGINAIRY_ALLOW_NSFW = os.getenv("IMAGINAIRY_ALLOW_NSFW", "False")
-IMAGINAIRY_ALLOW_NSFW = bool(IMAGINAIRY_ALLOW_NSFW == "I AM A RESPONSIBLE ADULT")
+
+class SafetyMode:
+    DISABLED = "disabled"
+    CLASSIFY = "classify"
+    FILTER = "filter"
+
+
+# leave undocumented. I'd ask that no one publicize this flag. Just want a
+# slight barrier to entry. Please don't use this is any way that's gonna cause
+# the press or governments to freak out about AI...
+IMAGINAIRY_SAFETY_MODE = os.getenv("IMAGINAIRY_SAFETY_MODE", SafetyMode.FILTER)
 
 
 def load_model_from_config(config):
@@ -243,11 +251,13 @@ def imagine(
                     x_sample_8_orig = x_sample.astype(np.uint8)
                     img = Image.fromarray(x_sample_8_orig)
                     upscaled_img = None
-                    if not IMAGINAIRY_ALLOW_NSFW and is_nsfw(
-                        img, x_sample, half_mode=half_mode
-                    ):
-                        logger.info("    ⚠️  Filtering NSFW image")
-                        img = img.filter(ImageFilter.GaussianBlur(radius=40))
+                    is_nsfw_img = None
+                    if IMAGINAIRY_SAFETY_MODE != SafetyMode.DISABLED:
+                        if is_nsfw(img, x_sample, half_mode=half_mode):
+                            is_nsfw_img = True
+                        if IMAGINAIRY_SAFETY_MODE == SafetyMode.FILTER:
+                            logger.info("    ⚠️  Filtering NSFW image")
+                            img = img.filter(ImageFilter.GaussianBlur(radius=40))
 
                     if prompt.fix_faces:
                         logger.info("    Fixing 😊 's in 🖼  using GFPGAN...")
@@ -257,7 +267,10 @@ def imagine(
                         upscaled_img = upscale_image(img)
 
                     yield ImagineResult(
-                        img=img, prompt=prompt, upscaled_img=upscaled_img
+                        img=img,
+                        prompt=prompt,
+                        upscaled_img=upscaled_img,
+                        is_nsfw=is_nsfw_img,
                     )
 
 

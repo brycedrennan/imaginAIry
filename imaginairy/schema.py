@@ -91,10 +91,11 @@ class ExifCodes:
 
 
 class ImagineResult:
-    def __init__(self, img, prompt: ImaginePrompt, upscaled_img=None):
+    def __init__(self, img, prompt: ImaginePrompt, is_nsfw, upscaled_img=None):
         self.img = img
         self.upscaled_img = upscaled_img
         self.prompt = prompt
+        self.is_nsfw = is_nsfw
         self.created_at = datetime.utcnow().replace(tzinfo=timezone.utc)
         self.torch_backend = get_device()
         self.hardware_name = get_device_name(get_device())
