@@ -17,6 +17,10 @@ SAMPLER_TYPE_OPTIONS = [
     "k_heun",
 ]
 
+
+
+
+
 _k_sampler_type_lookup = {
     "k_dpm_2": "dpm_2",
     "k_dpm_2_a": "dpm_2_ancestral",
