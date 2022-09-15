@@ -108,6 +108,14 @@ imagine_image_files(prompts, outdir="./my-art")
 - ~10 gb space for models to download
 - A decent computer with either a CUDA supported graphics card or M1 processor.
 
+## Running in Docker
+See example Dockerfile (works on machine where you can pass the gpu into the container)
+```bash
+docker build . -t imaginairy
+# you really want to map the cache or you end up wasting a lot of time and space redownloading the model weights
+docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -v $HOME/.cache/torch:/root/.cache/torch -v `pwd`/outputs:/outputs imaginairy /bin/bash
+```
+
 ## Improvements from CompVis
  - img2img actually does # of steps you specify
  - performance optimizations
