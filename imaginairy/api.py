@@ -23,7 +23,7 @@ from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     fix_torch_nn_layer_norm,
     get_device,
-    img_path_to_torch_image,
+    img_path_or_url_to_torch_image,
     instantiate_from_config,
 )
 
@@ -204,7 +204,7 @@ def imagine(
                     ddim_steps = int(prompt.steps / generation_strength)
                     sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
 
-                    init_image, w, h = img_path_to_torch_image(prompt.init_image)
+                    init_image, w, h = img_path_or_url_to_torch_image(prompt.init_image)
                     init_image = init_image.to(get_device())
                     init_latent = model.get_first_stage_encoding(
                         model.encode_first_stage(init_image)

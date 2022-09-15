@@ -2,6 +2,7 @@ import importlib
 import logging
 import os.path
 import platform
+import urllib.parse
 from contextlib import contextmanager
 from functools import lru_cache
 from typing import List, Optional
@@ -99,10 +100,13 @@ def fix_torch_nn_layer_norm():
     finally:
         functional.layer_norm = orig_function
 
-
-def img_path_to_torch_image(path, max_height=512, max_width=512):
-    image = Image.open(path).convert("RGB")
-    logger.info(f"Loaded input 🖼 of size {image.size} from {path}")
+def img_path_or_url_to_torch_image(path_or_url, max_height=512, max_width=512):
+    is_url = urllib.parse.urlparse(path_or_url).scheme in ('http', 'https',)
+    if (is_url):
+        image = Image.open(requests.get(path_or_url, stream=True).raw).convert("RGB")
+    else:
+        image = Image.open(path_or_url).convert("RGB")
+    logger.info(f"Loaded input 🖼 of size {image.size} from {path_or_url}")
     return pillow_img_to_torch_image(image, max_height=max_height, max_width=max_width)
 
 
