@@ -171,7 +171,7 @@ def imagine(
         if precision == "autocast" and get_device() in ("cuda", "cpu")
         else nullcontext
     )
-    with (torch.no_grad(), precision_scope(get_device()), fix_torch_nn_layer_norm()):
+    with torch.no_grad(), precision_scope(get_device()), fix_torch_nn_layer_norm():
         for prompt in prompts:
             with LatentLoggingContext(
                 prompt=prompt, model=model, img_callback=img_callback
