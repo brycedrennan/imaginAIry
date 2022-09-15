@@ -155,8 +155,9 @@ def imagine_cmd(
     logger.info(
         f"🤖🧠 imaginAIry received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
     )
-    if init_image and sampler_type == "DDIM":
-        sampler_type = "DDIM"
+    if init_image and sampler_type != "ddim":
+        sampler_type = "ddim"
+        logger.info("   Sampler type switched to ddim for img2img")
 
     prompts = []
     load_model(tile_mode=tile)
