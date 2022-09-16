@@ -2,8 +2,10 @@ import logging.config
 
 import click
 
+from imaginairy import LazyLoadingImage
 from imaginairy.api import load_model
 from imaginairy.samplers.base import SAMPLER_TYPE_OPTIONS
+from imaginairy.suppress_logs import suppress_annoying_logs_and_warnings
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +56,7 @@ def configure_logging(level="INFO"):
 )
 @click.option(
     "--init-image",
-    help="Starting image.",
+    help="Starting image. filepath or url",
 )
 @click.option(
     "--init-image-strength",
@@ -146,6 +148,7 @@ def imagine_cmd(
     tile,
 ):
     """Render an image"""
+    suppress_annoying_logs_and_warnings()
     configure_logging(log_level)
 
     from imaginairy.api import imagine_image_files
@@ -159,10 +162,14 @@ def imagine_cmd(
         sampler_type = "ddim"
         logger.info("   Sampler type switched to ddim for img2img")
 
+    if init_image and init_image.startswith("http"):
+        init_image = LazyLoadingImage(url=init_image)
+
     prompts = []
     load_model(tile_mode=tile)
     for _ in range(repeats):
         for prompt_text in prompt_texts:
+
             prompt = ImaginePrompt(
                 prompt_text,
                 prompt_strength=prompt_strength,

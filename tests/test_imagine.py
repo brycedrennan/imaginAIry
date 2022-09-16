@@ -1,5 +1,6 @@
 import pytest
 
+from imaginairy import LazyLoadingImage
 from imaginairy.api import imagine, imagine_image_files
 from imaginairy.schema import ImaginePrompt
 from imaginairy.utils import get_device
@@ -52,6 +53,23 @@ def test_img_to_img():
         width=512,
         height=512,
         steps=5,
+        seed=1,
+        sampler_type="DDIM",
+    )
+    out_folder = f"{TESTS_FOLDER}/test_output"
+    imagine_image_files(prompt, outdir=out_folder)
+
+
+def test_img_to_img_from_url():
+    prompt = ImaginePrompt(
+        "dogs lying on a hot pink couch",
+        init_image=LazyLoadingImage(
+            url="http://images.cocodataset.org/val2017/000000039769.jpg"
+        ),
+        init_image_strength=0.5,
+        width=512,
+        height=512,
+        steps=50,
         seed=1,
         sampler_type="DDIM",
     )

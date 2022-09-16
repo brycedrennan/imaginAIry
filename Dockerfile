@@ -6,5 +6,4 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_ROOT_USER_ACTION=ignore
 
 RUN pip install imaginairy
-
-#RUN #imagine pizza
+RUN imagine --help

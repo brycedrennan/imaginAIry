@@ -17,7 +17,7 @@ setup(
     },
     packages=find_packages(include=("imaginairy", "imaginairy.*")),
     entry_points={
-        "console_scripts": ["imagine=imaginairy.cmd_wrap:imagine_cmd"],
+        "console_scripts": ["imagine=imaginairy.cmds:imagine_cmd"],
     },
     package_data={"imaginairy": ["configs/*.yaml", "vendored/clip/*.txt.gz"]},
     install_requires=[
