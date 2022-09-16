@@ -84,15 +84,20 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 ## How To
 
 ```python
-from imaginairy import imagine, imagine_image_files, ImaginePrompt, WeightedPrompt
+from imaginairy import imagine, imagine_image_files, ImaginePrompt, WeightedPrompt, LazyLoadingImage
 
+url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Thomas_Cole_-_Architect%E2%80%99s_Dream_-_Google_Art_Project.jpg/540px-Thomas_Cole_-_Architect%E2%80%99s_Dream_-_Google_Art_Project.jpg"
 prompts = [
     ImaginePrompt("a scenic landscape", seed=1),
     ImaginePrompt("a bowl of fruit"),
     ImaginePrompt([
         WeightedPrompt("cat", weight=1),
         WeightedPrompt("dog", weight=1),
-    ])
+    ]),
+    ImaginePrompt(
+        "a spacious building", 
+        init_image=LazyLoadingImage(url)
+    )
 ]
 for result in imagine(prompts):
     # do something

@@ -23,8 +23,8 @@ from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     fix_torch_nn_layer_norm,
     get_device,
-    img_path_to_torch_image,
     instantiate_from_config,
+    pillow_img_to_torch_image,
 )
 
 LIB_PATH = os.path.dirname(__file__)
@@ -67,6 +67,7 @@ def load_model_from_config(config):
 def patch_conv(**patch):
     """
     Patch to enable tiling mode
+
     https://github.com/replicate/cog-stable-diffusion/compare/main...TomMoore515:material_stable_diffusion:main
     """
     cls = torch.nn.Conv2d
@@ -204,7 +205,11 @@ def imagine(
                     ddim_steps = int(prompt.steps / generation_strength)
                     sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
 
-                    init_image, w, h = img_path_to_torch_image(prompt.init_image)
+                    init_image, w, h = pillow_img_to_torch_image(
+                        prompt.init_image,
+                        max_height=prompt.height,
+                        max_width=prompt.width,
+                    )
                     init_image = init_image.to(get_device())
                     init_latent = model.get_first_stage_encoding(
                         model.encode_first_stage(init_image)

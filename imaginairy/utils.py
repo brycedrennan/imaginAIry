@@ -107,6 +107,7 @@ def img_path_to_torch_image(path, max_height=512, max_width=512):
 
 
 def pillow_img_to_torch_image(image, max_height=512, max_width=512):
+    image = image.convert("RGB")
     w, h = image.size
     resize_ratio = min(max_width / w, max_height / h)
     w, h = int(w * resize_ratio), int(h * resize_ratio)
