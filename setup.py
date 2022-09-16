@@ -22,6 +22,7 @@ setup(
     package_data={"imaginairy": ["configs/*.yaml", "vendored/clip/*.txt.gz"]},
     install_requires=[
         "click",
+        "protobuf != 3.20.2, != 3.19.5",
         "ftfy",  # for vendored clip
         "torch>=1.2.0",
         "numpy",
