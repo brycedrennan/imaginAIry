@@ -156,6 +156,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
  - Image Generation Features
    - ✅ add k-diffusion sampling methods
    - why is k-diffusion so slow compared to plms? 2 it/s vs 8 it/s
+   - negative prompting
+     - some syntax to allow it in a text string
    - upscaling
      - ✅ realesrgan 
      - ldm
@@ -163,7 +165,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    - ✅ face enhancers
      - ✅ gfpgan - https://github.com/TencentARC/GFPGAN
      - ✅ codeformer - https://github.com/sczhou/CodeFormer
-   - image describe feature - https://replicate.com/methexis-inc/img2prompt
+   - image describe feature - 
+     - https://replicate.com/methexis-inc/img2prompt
+     - https://github.com/KaiyangZhou/CoOp
    - outpainting
    - inpainting
      - https://github.com/andreas128/RePaint
@@ -173,9 +177,16 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    - CPU support
    - img2img for plms?
    - images as actual prompts instead of just init images
+     - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
+     - https://twitter.com/Buntworthy/status/1566744186153484288
+     - https://github.com/justinpinkney/stable-diffusion
+     - https://github.com/LambdaLabsML/lambda-diffusers
+     - https://www.reddit.com/r/MachineLearning/comments/x6k5bm/n_stable_diffusion_image_variations_released/
+     - 
    - cross-attention control: 
      - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
-   - guided generation https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI
+   - guided generation 
+     - https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI
    - ✅ tiling
    - output show-work videos
    - image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md
