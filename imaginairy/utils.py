@@ -11,6 +11,7 @@ import requests
 import torch
 from PIL import Image
 from torch import Tensor
+from torch.nn import functional
 from torch.overrides import handle_torch_function, has_torch_function_variadic
 from transformers import cached_path
 
@@ -21,10 +22,11 @@ logger = logging.getLogger(__name__)
 def get_device():
     if torch.cuda.is_available():
         return "cuda"
-    elif torch.backends.mps.is_available():
+
+    if torch.backends.mps.is_available():
         return "mps"
-    else:
-        return "cpu"
+
+    return "cpu"
 
 
 @lru_cache()
@@ -40,13 +42,13 @@ def log_params(model):
 
 
 def instantiate_from_config(config):
-    if not "target" in config:
+    if "target" not in config:
         if config == "__is_first_stage__":
             return None
-        elif config == "__is_unconditional__":
+        if config == "__is_unconditional__":
             return None
         raise KeyError("Expected key `target` to instantiate.")
-    return get_obj_from_str(config["target"])(**config.get("params", dict()))
+    return get_obj_from_str(config["target"])(**config.get("params", {}))
 
 
 def get_obj_from_str(string, reload=False):
@@ -58,13 +60,15 @@ def get_obj_from_str(string, reload=False):
 
 
 def _fixed_layer_norm(
-    input: Tensor,
+    input: Tensor,  # noqa
     normalized_shape: List[int],
     weight: Optional[Tensor] = None,
     bias: Optional[Tensor] = None,
     eps: float = 1e-5,
 ) -> Tensor:
-    r"""Applies Layer Normalization for last certain number of dimensions.
+    """
+    Applies Layer Normalization for last certain number of dimensions.
+
     See :class:`~torch.nn.LayerNorm` for details.
     """
     if has_torch_function_variadic(input, weight, bias):
@@ -90,8 +94,6 @@ def _fixed_layer_norm(
 @contextmanager
 def fix_torch_nn_layer_norm():
     """https://github.com/CompVis/stable-diffusion/issues/25#issuecomment-1221416526"""
-    from torch.nn import functional
-
     orig_function = functional.layer_norm
     functional.layer_norm = _fixed_layer_norm
     try:
@@ -143,7 +145,7 @@ def get_cached_url_path(url):
     dest_path = os.path.join(dest, filename)
     if os.path.exists(dest_path):
         return dest_path
-    r = requests.get(url)
+    r = requests.get(url)  # noqa
 
     with open(dest_path, "wb") as f:
         f.write(r.content)

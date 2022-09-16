@@ -171,9 +171,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    - outpainting
    - inpainting
      - https://github.com/andreas128/RePaint
-      - img2img but keeps img stable
+     - img2img but keeps img stable
      - https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/
      - https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1
+     - https://github.com/pesser/stable-diffusion/commit/bbb52981460707963e2a62160890d7ecbce00e79
    - CPU support
    - img2img for plms?
    - images as actual prompts instead of just init images

@@ -165,7 +165,6 @@ def imagine(
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
     _img_callback = None
-    step_count = 0
 
     precision_scope = (
         autocast
@@ -185,11 +184,8 @@ def imagine(
                     uc = model.get_learned_conditioning(1 * [""])
                 total_weight = sum(wp.weight for wp in prompt.prompts)
                 c = sum(
-                    [
-                        model.get_learned_conditioning(wp.text)
-                        * (wp.weight / total_weight)
-                        for wp in prompt.prompts
-                    ]
+                    model.get_learned_conditioning(wp.text) * (wp.weight / total_weight)
+                    for wp in prompt.prompts
                 )
 
                 shape = [
@@ -205,7 +201,7 @@ def imagine(
                     ddim_steps = int(prompt.steps / generation_strength)
                     sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
 
-                    init_image, w, h = pillow_img_to_torch_image(
+                    init_image, w, h = pillow_img_to_torch_image(  # noqa
                         prompt.init_image,
                         max_height=prompt.height,
                         max_width=prompt.width,

@@ -3,8 +3,9 @@ import logging.config
 import click
 
 from imaginairy import LazyLoadingImage
-from imaginairy.api import load_model
+from imaginairy.api import imagine_image_files, load_model
 from imaginairy.samplers.base import SAMPLER_TYPE_OPTIONS
+from imaginairy.schema import ImaginePrompt
 from imaginairy.suppress_logs import suppress_annoying_logs_and_warnings
 
 logger = logging.getLogger(__name__)
@@ -96,11 +97,7 @@ def configure_logging(level="INFO"):
     help="What seed to use for randomness. Allows reproducible image renders",
 )
 @click.option("--upscale", is_flag=True)
-@click.option(
-    "--upscale-method", default="realesrgan", type=click.Choice(["realesrgan"])
-)
 @click.option("--fix-faces", is_flag=True)
-@click.option("--fix-faces-method", default="gfpgan", type=click.Choice(["gfpgan"]))
 @click.option(
     "--sampler-type",
     default="plms",
@@ -138,9 +135,7 @@ def imagine_cmd(
     steps,
     seed,
     upscale,
-    upscale_method,
     fix_faces,
-    fix_faces_method,
     sampler_type,
     ddim_eta,
     log_level,
@@ -150,9 +145,6 @@ def imagine_cmd(
     """Render an image"""
     suppress_annoying_logs_and_warnings()
     configure_logging(log_level)
-
-    from imaginairy.api import imagine_image_files
-    from imaginairy.schema import ImaginePrompt
 
     total_image_count = len(prompt_texts) * repeats
     logger.info(

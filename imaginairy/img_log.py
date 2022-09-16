@@ -31,12 +31,12 @@ class LatentLoggingContext:
         self.img_callback = img_callback
 
     def __enter__(self):
-        global _CURRENT_LOGGING_CONTEXT
+        global _CURRENT_LOGGING_CONTEXT  # noqa
         _CURRENT_LOGGING_CONTEXT = self
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        global _CURRENT_LOGGING_CONTEXT
+        global _CURRENT_LOGGING_CONTEXT  # noqa
         _CURRENT_LOGGING_CONTEXT = None
 
     def log_latents(self, latents, description):

@@ -36,7 +36,7 @@ class LazyLoadingImage:
             try:
                 parsed_url = parse_url(url)
             except LocationParseError:
-                raise InvalidUrlError(f"Invalid url: {url}")
+                raise InvalidUrlError(f"Invalid url: {url}")  # noqa
             if parsed_url.scheme not in {"http", "https"} or not parsed_url.host:
                 raise InvalidUrlError(f"Invalid url: {url}")
 
@@ -55,7 +55,7 @@ class LazyLoadingImage:
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_filepath}"
             )
         elif self._lazy_url:
-            self._img = Image.open(requests.get(self._lazy_url, stream=True).raw)
+            self._img = Image.open(requests.get(self._lazy_url, stream=True, timeout=60).raw)
             logger.info(
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_url}"
             )

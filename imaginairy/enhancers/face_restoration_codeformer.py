@@ -60,7 +60,7 @@ def enhance_faces(img, fidelity=0):
     face_helper.align_warp_face()
 
     # face restoration for each cropped face
-    for idx, cropped_face in enumerate(face_helper.cropped_faces):
+    for cropped_face in face_helper.cropped_faces:
         # prepare data
         cropped_face_t = img2tensor(cropped_face / 255.0, bgr2rgb=True, float32=True)
         normalize(cropped_face_t, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)
