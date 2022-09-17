@@ -10,16 +10,12 @@ from imaginairy.modules.diffusion.util import checkpoint
 from imaginairy.utils import get_device, get_device_name
 
 
-def exists(val):
-    return val is not None
-
-
 def uniq(arr):
     return {el: True for el in arr}.keys()
 
 
 def default(val, d):
-    if exists(val):
+    if val is not None:
         return val
     return d() if isfunction(d) else d
 
@@ -50,7 +46,7 @@ class FeedForward(nn.Module):
     def __init__(self, dim, dim_out=None, mult=4, glu=False, dropout=0.0):
         super().__init__()
         inner_dim = int(dim * mult)
-        dim_out = default(dim_out, dim)
+        dim_out = dim_out if dim_out is not None else dim
         project_in = (
             nn.Sequential(nn.Linear(dim, inner_dim), nn.GELU())
             if not glu
@@ -152,7 +148,7 @@ class CrossAttention(nn.Module):
     def __init__(self, query_dim, context_dim=None, heads=8, dim_head=64, dropout=0.0):
         super().__init__()
         inner_dim = dim_head * heads
-        context_dim = default(context_dim, query_dim)
+        context_dim = context_dim if context_dim is not None else query_dim
 
         self.scale = dim_head**-0.5
         self.heads = heads
@@ -172,7 +168,7 @@ class CrossAttention(nn.Module):
         h = self.heads
 
         q = self.to_q(x)
-        context = default(context, x)
+        context = context if context is not None else x
         k = self.to_k(context)
         v = self.to_v(context)
 
@@ -180,7 +176,7 @@ class CrossAttention(nn.Module):
 
         sim = einsum("b i d, b j d -> b i j", q, k) * self.scale
 
-        if exists(mask):
+        if mask is not None:
             mask = rearrange(mask, "b ... -> b (...)")
             max_neg_value = -torch.finfo(sim.dtype).max
             mask = repeat(mask, "b j -> (b h) () j", h=h)

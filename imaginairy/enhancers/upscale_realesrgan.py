@@ -18,10 +18,6 @@ def realesrgan_upsampler():
     model_path = get_cached_url_path(url)
     upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=0)
 
-    if get_device() == "cuda":
-        device = "cuda"
-    else:
-        device = "cpu"
     device = get_device()
 
     upsampler.device = torch.device(device)
@@ -35,7 +31,3 @@ def upscale_image(img):
     np_img = np.array(img, dtype=np.uint8)
     upsampler_output, img_mode = realesrgan_upsampler().enhance(np_img[:, :, ::-1])
     return Image.fromarray(upsampler_output[:, :, ::-1], mode=img_mode)
-
-
-if __name__ == "__main__":
-    realesrgan_upsampler()

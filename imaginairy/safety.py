@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+import numpy as np
 from diffusers.pipelines.stable_diffusion.safety_checker import (
     StableDiffusionSafetyChecker,
 )
@@ -20,6 +21,6 @@ def is_nsfw(img, x_sample):
     clip_input = safety_checker_input.pixel_values
 
     _, has_nsfw_concept = safety_checker(
-        images=x_sample[None, :], clip_input=clip_input
+        images=[np.empty((2, 2))], clip_input=clip_input
     )
     return has_nsfw_concept[0]
