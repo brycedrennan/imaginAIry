@@ -189,6 +189,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
    - guided generation 
      - https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI
+     - https://colab.research.google.com/github/aicrumb/doohickey/blob/main/Doohickey_Diffusion.ipynb#scrollTo=PytCwKXCmPid
+     - https://github.com/mlfoundations/open_clip
    - ✅ tiling
    - output show-work videos
    - image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md

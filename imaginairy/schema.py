@@ -82,19 +82,19 @@ class WeightedPrompt:
 
 class ImaginePrompt:
     def __init__(
-            self,
-            prompt=None,
-            prompt_strength=7.5,
-            init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
-            init_image_strength=0.3,
-            seed=None,
-            steps=50,
-            height=512,
-            width=512,
-            upscale=False,
-            fix_faces=False,
-            sampler_type="PLMS",
-            conditioning=None,
+        self,
+        prompt=None,
+        prompt_strength=7.5,
+        init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
+        init_image_strength=0.3,
+        seed=None,
+        steps=50,
+        height=512,
+        width=512,
+        upscale=False,
+        fix_faces=False,
+        sampler_type="PLMS",
+        conditioning=None,
     ):
         prompt = prompt if prompt is not None else "a scenic landscape"
         if isinstance(prompt, str):

@@ -24,7 +24,7 @@ def get_device():
         return "cuda"
 
     if torch.backends.mps.is_available():
-        return "mps"
+        return "mps:0"
 
     return "cpu"
 

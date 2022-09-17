@@ -239,7 +239,7 @@ def imagine(
                     )
                 else:
 
-                    samples, _ = sampler.sample(
+                    samples = sampler.sample(
                         num_steps=prompt.steps,
                         conditioning=c,
                         batch_size=1,

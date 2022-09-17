@@ -22,6 +22,7 @@ def realesrgan_upsampler():
         device = "cuda"
     else:
         device = "cpu"
+    device = get_device()
 
     upsampler.device = torch.device(device)
     upsampler.model.to(device)

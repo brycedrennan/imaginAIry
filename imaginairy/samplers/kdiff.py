@@ -2,6 +2,7 @@ import torch
 from torch import nn
 
 from imaginairy.img_log import log_latent
+from imaginairy.samplers.base import CFGDenoiser
 from imaginairy.utils import get_device
 from imaginairy.vendored.k_diffusion import sampling as k_sampling
 from imaginairy.vendored.k_diffusion.external import CompVisDenoiser
@@ -27,19 +28,6 @@ class CFGMaskedDenoiser(nn.Module):
             denoised = (img_orig * mask_inv) + (mask * denoised)
 
         return denoised
-
-
-class CFGDenoiser(nn.Module):
-    def __init__(self, model):
-        super().__init__()
-        self.inner_model = model
-
-    def forward(self, x, sigma, uncond, cond, cond_scale):
-        x_in = torch.cat([x] * 2)
-        sigma_in = torch.cat([sigma] * 2)
-        cond_in = torch.cat([uncond, cond])
-        uncond, cond = self.inner_model(x_in, sigma_in, cond=cond_in).chunk(2)
-        return uncond + (cond - uncond) * cond_scale
 
 
 class KDiffusionSampler:
@@ -94,4 +82,4 @@ class KDiffusionSampler:
             callback=callback,
         )
 
-        return samples, None
+        return samples

@@ -8,7 +8,7 @@ from imaginairy.utils import get_device
 from . import TESTS_FOLDER
 
 device_sampler_type_test_cases = {
-    "mps": {
+    "mps:0": {
         ("plms", "b4b434ed45919f3505ac2be162791c71"),
         ("ddim", "b369032a025915c0a7ccced165a609b3"),
         ("k_lms", "b87325c189799d646ccd07b331564eb6"),

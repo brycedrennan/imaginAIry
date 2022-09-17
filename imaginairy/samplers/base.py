@@ -1,9 +1,6 @@
 import torch
 from torch import nn
 
-from imaginairy.samplers.ddim import DDIMSampler
-from imaginairy.samplers.kdiff import KDiffusionSampler
-from imaginairy.samplers.plms import PLMSSampler
 from imaginairy.utils import get_device
 
 SAMPLER_TYPE_OPTIONS = [
@@ -28,6 +25,10 @@ _k_sampler_type_lookup = {
 
 
 def get_sampler(sampler_type, model):
+    from imaginairy.samplers.ddim import DDIMSampler
+    from imaginairy.samplers.kdiff import KDiffusionSampler
+    from imaginairy.samplers.plms import PLMSSampler
+
     sampler_type = sampler_type.lower()
     if sampler_type == "plms":
         return PLMSSampler(model)
@@ -39,6 +40,12 @@ def get_sampler(sampler_type, model):
 
 
 class CFGDenoiser(nn.Module):
+    """
+    Conditional forward guidance wrapper
+
+
+    """
+
     def __init__(self, model):
         super().__init__()
         self.inner_model = model
@@ -64,7 +71,7 @@ class DiffusionSampler:
         self.sampler_func = sampler_func
         self.device = device
 
-    def sample(
+    def zzsample(
         self,
         num_steps,
         text_conditioning,

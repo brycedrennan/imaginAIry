@@ -13,4 +13,8 @@ def test_text_conditioning():
     embedder = FrozenCLIPEmbedder()
     embedder.to(get_device())
     neutral_embedding = embedder.encode([""])
-    assert hash_tensor(neutral_embedding) == "263e5ee7d2be087d816e094b80ffc546"
+    hashed = hash_tensor(neutral_embedding)
+    if "mps" in get_device():
+        assert hashed == "263e5ee7d2be087d816e094b80ffc546"
+    elif "cuda" in get_device():
+        assert hashed == "3d7867d5b2ebf15102a9ca9476d63ebc"

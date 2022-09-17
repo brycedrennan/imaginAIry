@@ -18,11 +18,9 @@ logger = logging.getLogger(__name__)
 class PLMSSampler:
     """probabilistic least-mean-squares"""
 
-    def __init__(self, model, schedule="linear", **kwargs):
-        super().__init__()
+    def __init__(self, model, **kwargs):
         self.model = model
         self.ddpm_num_timesteps = model.num_timesteps
-        self.schedule = schedule
         self.device_available = get_device()
 
     def register_buffer(self, name, attr):
@@ -108,7 +106,6 @@ class PLMSSampler:
         score_corrector=None,
         corrector_kwargs=None,
         x_T=None,
-        log_every_t=100,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
         # this has to come in the same format as the conditioning, # e.g. as encoded tokens, ...
@@ -128,14 +125,10 @@ class PLMSSampler:
                     )
 
         self.make_schedule(ddim_num_steps=num_steps, ddim_eta=eta)
-        # sampling
-        C, H, W = shape
-        size = (batch_size, C, H, W)
-        logger.debug(f"Data shape for PLMS sampling is {size}")
 
-        samples, intermediates = self.plms_sampling(
+        samples = self.plms_sampling(
             conditioning,
-            size,
+            (batch_size, *shape),
             callback=callback,
             img_callback=img_callback,
             quantize_denoised=quantize_x0,
@@ -147,11 +140,10 @@ class PLMSSampler:
             score_corrector=score_corrector,
             corrector_kwargs=corrector_kwargs,
             x_T=x_T,
-            log_every_t=log_every_t,
             unconditional_guidance_scale=unconditional_guidance_scale,
             unconditional_conditioning=unconditional_conditioning,
         )
-        return samples, intermediates
+        return samples
 
     @torch.no_grad()
     def plms_sampling(
@@ -166,7 +158,6 @@ class PLMSSampler:
         mask=None,
         x0=None,
         img_callback=None,
-        log_every_t=100,
         temperature=1.0,
         noise_dropout=0.0,
         score_corrector=None,
@@ -198,7 +189,6 @@ class PLMSSampler:
             )
             timesteps = self.ddim_timesteps[:subset_end]
 
-        intermediates = {"x_inter": [img], "pred_x0": [img]}
         time_range = (
             list(reversed(range(0, timesteps)))
             if ddim_use_original_steps
@@ -253,11 +243,7 @@ class PLMSSampler:
                 img_callback(img, "img")
                 img_callback(pred_x0, "pred_x0")
 
-            if index % log_every_t == 0 or index == total_steps - 1:
-                intermediates["x_inter"].append(img)
-                intermediates["pred_x0"].append(pred_x0)
-
-        return img, intermediates
+        return img
 
     @torch.no_grad()
     def p_sample_plms(
