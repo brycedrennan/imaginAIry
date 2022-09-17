@@ -69,7 +69,7 @@ def test_img_to_img_from_url():
         init_image_strength=0.5,
         width=512,
         height=512,
-        steps=50,
+        steps=5,
         seed=1,
         sampler_type="DDIM",
     )

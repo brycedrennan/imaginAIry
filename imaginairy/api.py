@@ -16,7 +16,7 @@ from transformers import cached_path
 
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
-from imaginairy.img_log import LatentLoggingContext, log_latent
+from imaginairy.img_log import ImageLoggingContext, log_conditioning, log_latent
 from imaginairy.safety import is_nsfw
 from imaginairy.samplers.base import get_sampler
 from imaginairy.schema import ImaginePrompt, ImagineResult
@@ -115,7 +115,7 @@ def imagine_image_files(
     def _record_step(img, description, step_count, prompt):
         steps_path = os.path.join(outdir, "steps", f"{base_count:08}_S{prompt.seed}")
         os.makedirs(steps_path, exist_ok=True)
-        filename = f"{base_count:08}_S{prompt.seed}_step{step_count:04}.jpg"
+        filename = f"{base_count:08}_S{prompt.seed}_step{step_count:04}_{prompt_normalized(description)[:40]}.jpg"
         destination = os.path.join(steps_path, filename)
         draw = ImageDraw.Draw(img)
         draw.text((10, 10), str(description))
@@ -142,6 +142,7 @@ def imagine_image_files(
             result.save_upscaled(bigfilepath)
             logger.info(f"    Upscaled 🖼  saved to: {bigfilepath}")
         base_count += 1
+        del result
 
 
 def imagine(
@@ -173,8 +174,10 @@ def imagine(
     )
     with torch.no_grad(), precision_scope(get_device()), fix_torch_nn_layer_norm():
         for prompt in prompts:
-            with LatentLoggingContext(
-                prompt=prompt, model=model, img_callback=img_callback
+            with ImageLoggingContext(
+                prompt=prompt,
+                model=model,
+                img_callback=img_callback,
             ):
                 logger.info(f"Generating {prompt.prompt_description()}")
                 seed_everything(prompt.seed)
@@ -182,11 +185,17 @@ def imagine(
                 uc = None
                 if prompt.prompt_strength != 1.0:
                     uc = model.get_learned_conditioning(1 * [""])
-                total_weight = sum(wp.weight for wp in prompt.prompts)
-                c = sum(
-                    model.get_learned_conditioning(wp.text) * (wp.weight / total_weight)
-                    for wp in prompt.prompts
-                )
+                    log_conditioning(uc, "neutral conditioning")
+                if prompt.conditioning is not None:
+                    c = prompt.conditioning
+                else:
+                    total_weight = sum(wp.weight for wp in prompt.prompts)
+                    c = sum(
+                        model.get_learned_conditioning(wp.text)
+                        * (wp.weight / total_weight)
+                        for wp in prompt.prompts
+                    )
+                log_conditioning(c, "positive conditioning")
 
                 shape = [
                     latent_channels,

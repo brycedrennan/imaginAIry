@@ -281,7 +281,7 @@ class DDIMSampler:
             noise_pred = noise_pred_uncond + unconditional_guidance_scale * (
                 noise_pred - noise_pred_uncond
             )
-
+        log_latent(noise_pred, "noise prediction")
         alphas = self.model.alphas_cumprod if use_original_steps else self.ddim_alphas
         alphas_prev = (
             self.model.alphas_cumprod_prev

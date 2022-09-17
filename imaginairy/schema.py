@@ -55,7 +55,9 @@ class LazyLoadingImage:
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_filepath}"
             )
         elif self._lazy_url:
-            self._img = Image.open(requests.get(self._lazy_url, stream=True, timeout=60).raw)
+            self._img = Image.open(
+                requests.get(self._lazy_url, stream=True, timeout=60).raw
+            )
             logger.info(
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_url}"
             )
@@ -89,6 +91,7 @@ class ImaginePrompt:
         upscale=False,
         fix_faces=False,
         sampler_type="PLMS",
+        conditioning=None,
     ):
         prompt = prompt if prompt is not None else "a scenic landscape"
         if isinstance(prompt, str):
@@ -108,6 +111,7 @@ class ImaginePrompt:
         self.upscale = upscale
         self.fix_faces = fix_faces
         self.sampler_type = sampler_type
+        self.conditioning = conditioning
 
     @property
     def prompt_text(self):
