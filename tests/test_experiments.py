@@ -56,7 +56,7 @@ def experiment_step_repeats():
     sampler.make_schedule(1000)
 
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/beach_at_sainte_adresse.jpg")
-    init_image, w, h = pillow_img_to_torch_image(
+    init_image, _, h = pillow_img_to_torch_image(
         img,
         max_height=512,
         max_width=512,
@@ -64,7 +64,7 @@ def experiment_step_repeats():
     init_image = init_image.to(get_device())
     init_latent = model.get_first_stage_encoding(model.encode_first_stage(init_image))
     log_latent(init_latent, "init_latent")
-    noise = torch.randn_like(init_latent)
+
     base_count = 1
     neutral_embedding = embedder.encode([""])
     outdir = f"{TESTS_FOLDER}/test_output"

@@ -14,7 +14,7 @@ import math
 import numpy as np
 import torch
 import torch.nn as nn
-from einops import repeat
+from einops import repeat as e_repeat
 
 from imaginairy.utils import instantiate_from_config
 
@@ -207,7 +207,7 @@ def timestep_embedding(timesteps, dim, max_period=10000, repeat_only=False):
                 [embedding, torch.zeros_like(embedding[:, :1])], dim=-1
             )
     else:
-        embedding = repeat(timesteps, "b -> b d", d=dim)
+        embedding = e_repeat(timesteps, "b -> b d", d=dim)
     return embedding
 
 
@@ -269,22 +269,13 @@ def conv_nd(dims, *args, **kwargs):
     raise ValueError(f"unsupported dimensions: {dims}")
 
 
-def linear(*args, **kwargs):
-    """
-    Create a linear module.
-    """
-    return nn.Linear(*args, **kwargs)
-
-
 def avg_pool_nd(dims, *args, **kwargs):
-    """
-    Create a 1D, 2D, or 3D average pooling module.
-    """
+    """Create a 1D, 2D, or 3D average pooling module."""
     if dims == 1:
         return nn.AvgPool1d(*args, **kwargs)
-    elif dims == 2:
+    if dims == 2:
         return nn.AvgPool2d(*args, **kwargs)
-    elif dims == 3:
+    if dims == 3:
         return nn.AvgPool3d(*args, **kwargs)
     raise ValueError(f"unsupported dimensions: {dims}")
 

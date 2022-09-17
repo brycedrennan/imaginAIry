@@ -263,7 +263,7 @@ def imagine(
                     upscaled_img = None
                     is_nsfw_img = None
                     if IMAGINAIRY_SAFETY_MODE != SafetyMode.DISABLED:
-                        is_nsfw_img = is_nsfw(img, x_sample, half_mode=half_mode)
+                        is_nsfw_img = is_nsfw(img, x_sample)
                         if is_nsfw_img and IMAGINAIRY_SAFETY_MODE == SafetyMode.FILTER:
                             logger.info("    ⚠️  Filtering NSFW image")
                             img = img.filter(ImageFilter.GaussianBlur(radius=40))

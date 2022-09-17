@@ -72,7 +72,7 @@ def enhance_faces(img, fidelity=0):
                 restored_face = tensor2img(output, rgb2bgr=True, min_max=(-1, 1))
             del output
             torch.cuda.empty_cache()
-        except Exception as error:
+        except Exception as error:  # noqa
             logger.error(f"\tFailed inference for CodeFormer: {error}")
             restored_face = tensor2img(cropped_face_t, rgb2bgr=True, min_max=(-1, 1))
 
