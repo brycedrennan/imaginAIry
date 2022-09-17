@@ -4,6 +4,7 @@ import logging
 import os.path
 import random
 from datetime import datetime, timezone
+from functools import lru_cache
 
 import numpy
 import requests
@@ -48,6 +49,8 @@ class LazyLoadingImage:
         if key == "_img":
             #  http://nedbatchelder.com/blog/201010/surprising_getattr_recursion.html
             raise AttributeError()
+        if self._img:
+            return getattr(self._img, key)
 
         if self._lazy_filepath:
             self._img = Image.open(self._lazy_filepath)
@@ -79,19 +82,19 @@ class WeightedPrompt:
 
 class ImaginePrompt:
     def __init__(
-        self,
-        prompt=None,
-        prompt_strength=7.5,
-        init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
-        init_image_strength=0.3,
-        seed=None,
-        steps=50,
-        height=512,
-        width=512,
-        upscale=False,
-        fix_faces=False,
-        sampler_type="PLMS",
-        conditioning=None,
+            self,
+            prompt=None,
+            prompt_strength=7.5,
+            init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
+            init_image_strength=0.3,
+            seed=None,
+            steps=50,
+            height=512,
+            width=512,
+            upscale=False,
+            fix_faces=False,
+            sampler_type="PLMS",
+            conditioning=None,
     ):
         prompt = prompt if prompt is not None else "a scenic landscape"
         if isinstance(prompt, str):
@@ -193,3 +196,8 @@ class ImagineResult:
 
     def save_upscaled(self, save_path):
         self.upscaled_img.save(save_path, exif=self._exif())
+
+
+@lru_cache(maxsize=2)
+def _get_briefly_cached_url(url):
+    return requests.get(url, timeout=60)
