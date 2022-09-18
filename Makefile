@@ -76,10 +76,25 @@ vendor_openai_clip:
 	git --git-dir ./downloads/CLIP/.git rev-parse HEAD | tee ./imaginairy/vendored/clip/clip-commit-hash.txt
 	echo "vendored from git@github.com:openai/CLIP.git" | tee ./imaginairy/vendored/clip/readme.txt
 
-revendorize:
+revendorize: vendorize_kdiffusion
 	make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip COMMIT=d50d76daa670286dd6cacf3bcd80b5e4823fc8e1
+
+	make af
+
+vendorize_clipseg:
+	make download_repo REPO=git@github.com:timojl/clipseg.git PKG=clipseg COMMIT=664ee94393491cdd7ad422f67eb1ce670d3d00e6
+	rm -rf ./imaginairy/vendored/clipseg
+	mkdir -p ./imaginairy/vendored/clipseg
+	cp -R ./downloads/clipseg/models/* ./imaginairy/vendored/clipseg/
+	sed -i '' -e 's#import clip#from imaginairy.vendored import clip#g' ./imaginairy/vendored/clipseg/clipseg.py
+	rm ./imaginairy/vendored/clipseg/vitseg.py
+	mv ./imaginairy/vendored/clipseg/clipseg.py ./imaginairy/vendored/clipseg/__init__.py
+	wget https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth -P ./imaginairy/vendored/clipseg
+
+
+vendorize_kdiffusion:
 	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=1a0703dfb7d24d8806267c3e7ccc4caf67fd1331
-	#sed -i '' -e 's/^import\sclip/from\simaginairy.vendored\simport\sclip/g' imaginairy/vendored/k_diffusion/evaluation.py
+	#sed -i '' -e 's/import\sclip/from\simaginairy.vendored\simport\sclip/g' imaginairy/vendored/k_diffusion/evaluation.py
 	rm imaginairy/vendored/k_diffusion/evaluation.py
 	touch imaginairy/vendored/k_diffusion/evaluation.py
 	rm imaginairy/vendored/k_diffusion/config.py
@@ -88,8 +103,6 @@ revendorize:
 	sed -i '' -e 's#return (x - denoised) / utils.append_dims(sigma, x.ndim)#return (x - denoised) / sigma#g' imaginairy/vendored/k_diffusion/sampling.py
 	sed -i '' -e 's#x = x + torch.randn_like(x) \* sigma_up#x = x + torch.randn_like(x, device="cpu").to(x.device) \* sigma_up#g' imaginairy/vendored/k_diffusion/sampling.py
 	make af
-
-
 
 vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
 	mkdir -p ./downloads
@@ -100,6 +113,11 @@ vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:ope
 	git --git-dir ./downloads/$(PKG)/.git rev-parse HEAD | tee ./imaginairy/vendored/$(PKG)/clip-commit-hash.txt
 	touch ./imaginairy/vendored/$(PKG)/version.py
 	echo "vendored from $(REPO)" | tee ./imaginairy/vendored/$(PKG)/readme.txt
+
+download_repo:
+	mkdir -p ./downloads
+	-cd ./downloads && git clone $(REPO) $(PKG)
+	cd ./downloads/$(PKG) && git pull
 
 vendorize_whole_repo:
 	mkdir -p ./downloads
