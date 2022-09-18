@@ -8,28 +8,6 @@ from imaginairy.vendored.k_diffusion import sampling as k_sampling
 from imaginairy.vendored.k_diffusion.external import CompVisDenoiser
 
 
-class CFGMaskedDenoiser(nn.Module):
-    def __init__(self, model):
-        super().__init__()
-        self.inner_model = model
-
-    def forward(self, x, sigma, uncond, cond, cond_scale, mask, x0, xi):
-        x_in = x
-        x_in = torch.cat([x_in] * 2)
-        sigma_in = torch.cat([sigma] * 2)
-        cond_in = torch.cat([uncond, cond])
-        uncond, cond = self.inner_model(x_in, sigma_in, cond=cond_in).chunk(2)
-        denoised = uncond + (cond - uncond) * cond_scale
-
-        if mask is not None:
-            assert x0 is not None
-            img_orig = x0
-            mask_inv = 1.0 - mask
-            denoised = (img_orig * mask_inv) + (mask * denoised)
-
-        return denoised
-
-
 class KDiffusionSampler:
     def __init__(self, model, sampler_name):
         self.model = model

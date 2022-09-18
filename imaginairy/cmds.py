@@ -123,6 +123,26 @@ def configure_logging(level="INFO"):
     is_flag=True,
     help="Any images rendered will be tileable.  Unfortunately cannot be controlled at the per-image level yet",
 )
+@click.option(
+    "--mask-image",
+    help="A mask to use for inpainting. White gets painted, Black is left alone.",
+)
+@click.option(
+    "--mask-prompt",
+    help="Describe what you want masked and the AI will mask it for you",
+)
+@click.option(
+    "--mask-mode",
+    default="replace",
+    type=click.Choice(["keep", "replace"]),
+    help="Should we replace the masked area or keep it?",
+)
+@click.option(
+    "--mask-expansion",
+    default="8",
+    type=int,
+    help="How much to grow (or shrink) the mask area",
+)
 def imagine_cmd(
     prompt_texts,
     prompt_strength,
@@ -141,6 +161,10 @@ def imagine_cmd(
     log_level,
     show_work,
     tile,
+    mask_image,
+    mask_prompt,
+    mask_mode,
+    mask_expansion,
 ):
     """Render an image"""
     suppress_annoying_logs_and_warnings()
@@ -161,7 +185,6 @@ def imagine_cmd(
     load_model(tile_mode=tile)
     for _ in range(repeats):
         for prompt_text in prompt_texts:
-
             prompt = ImaginePrompt(
                 prompt_text,
                 prompt_strength=prompt_strength,
@@ -172,6 +195,10 @@ def imagine_cmd(
                 steps=steps,
                 height=height,
                 width=width,
+                mask_image=mask_image,
+                mask_prompt=mask_prompt,
+                mask_expansion=mask_expansion,
+                mask_mode=mask_mode,
                 upscale=upscale,
                 fix_faces=fix_faces,
             )

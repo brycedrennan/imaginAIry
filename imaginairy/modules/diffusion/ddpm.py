@@ -16,7 +16,11 @@ from einops import rearrange
 from torchvision.utils import make_grid
 from tqdm import tqdm
 
-from imaginairy.modules.diffusion.util import make_beta_schedule, noise_like
+from imaginairy.modules.diffusion.util import (
+    extract_into_tensor,
+    make_beta_schedule,
+    noise_like,
+)
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.utils import instantiate_from_config, log_params
 
@@ -851,6 +855,18 @@ class LatentDiffusion(DDPM):
             )
 
         return model_mean + nonzero_mask * (0.5 * model_log_variance).exp() * noise
+
+    def q_sample(self, x_start, t, noise=None):
+        noise = (
+            noise
+            if noise is not None
+            else torch.randn_like(x_start, device="cpu").to(x_start.device)
+        )
+        return (
+            extract_into_tensor(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start
+            + extract_into_tensor(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape)
+            * noise
+        )
 
 
 class DiffusionWrapper(pl.LightningModule):

@@ -335,10 +335,11 @@ class DDIMSampler:
         img_callback=None,
         score_corrector=None,
         temperature=1.0,
+        mask=None,
+        orig_latent=None,
     ):
 
-        timesteps = self.ddim_timesteps
-        timesteps = timesteps[:t_start]
+        timesteps = self.ddim_timesteps[:t_start]
 
         time_range = np.flip(timesteps)
         total_steps = timesteps.shape[0]
@@ -352,6 +353,15 @@ class DDIMSampler:
             ts = torch.full(
                 (x_latent.shape[0],), step, device=x_latent.device, dtype=torch.long
             )
+
+            if mask is not None:
+                assert orig_latent is not None
+                xdec_orig = self.model.q_sample(orig_latent, ts)
+                log_latent(xdec_orig, "xdec_orig")
+                log_latent(xdec_orig * mask, "masked_xdec_orig")
+                x_dec = xdec_orig * mask + (1.0 - mask) * x_dec
+                log_latent(x_dec, "x_dec")
+
             x_dec, pred_x0 = self.p_sample_ddim(
                 x_dec,
                 cond,

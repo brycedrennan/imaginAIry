@@ -1,4 +1,4 @@
-import os
+import os.path
 
 # tells pytorch to allow MPS usage (for Mac M1 compatibility)
 os.putenv("PYTORCH_ENABLE_MPS_FALLBACK", "1")
@@ -10,3 +10,5 @@ from .schema import (  # noqa
     LazyLoadingImage,
     WeightedPrompt,
 )
+
+PKG_ROOT = os.path.dirname(__file__)

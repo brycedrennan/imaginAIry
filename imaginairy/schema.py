@@ -81,12 +81,20 @@ class WeightedPrompt:
 
 
 class ImaginePrompt:
+    class MaskMode:
+        KEEP = "keep"
+        REPLACE = "replace"
+
     def __init__(
         self,
         prompt=None,
         prompt_strength=7.5,
         init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
         init_image_strength=0.3,
+        mask_prompt=None,
+        mask_image=None,
+        mask_mode=MaskMode.REPLACE,
+        mask_expansion=8,
         seed=None,
         steps=50,
         height=512,
@@ -105,6 +113,10 @@ class ImaginePrompt:
         self.prompt_strength = prompt_strength
         if isinstance(init_image, str):
             init_image = LazyLoadingImage(filepath=init_image)
+
+        if mask_image is not None and mask_prompt is not None:
+            raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
+
         self.init_image = init_image
         self.init_image_strength = init_image_strength
         self.seed = random.randint(1, 1_000_000_000) if seed is None else seed
@@ -115,6 +127,10 @@ class ImaginePrompt:
         self.fix_faces = fix_faces
         self.sampler_type = sampler_type
         self.conditioning = conditioning
+        self.mask_prompt = mask_prompt
+        self.mask_image = mask_image
+        self.mask_mode = mask_mode
+        self.mask_expansion = mask_expansion
 
     @property
     def prompt_text(self):
