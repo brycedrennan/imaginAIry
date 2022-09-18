@@ -19,7 +19,13 @@ setup(
     entry_points={
         "console_scripts": ["imagine=imaginairy.cmds:imagine_cmd"],
     },
-    package_data={"imaginairy": ["configs/*.yaml", "vendored/clip/*.txt.gz", "vendored/clipseg/*.pth"]},
+    package_data={
+        "imaginairy": [
+            "configs/*.yaml",
+            "vendored/clip/*.txt.gz",
+            "vendored/clipseg/*.pth",
+        ]
+    },
     install_requires=[
         "click",
         "protobuf != 3.20.2, != 3.19.5",

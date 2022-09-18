@@ -42,20 +42,25 @@ def get_sampler(sampler_type, model):
 class CFGDenoiser(nn.Module):
     """
     Conditional forward guidance wrapper
-
-
     """
 
     def __init__(self, model):
         super().__init__()
         self.inner_model = model
 
-    def forward(self, x, sigma, uncond, cond, cond_scale):
+    def forward(self, x, sigma, uncond, cond, cond_scale, mask=None, orig_latent=None):
         x_in = torch.cat([x] * 2)
         sigma_in = torch.cat([sigma] * 2)
         cond_in = torch.cat([uncond, cond])
         uncond, cond = self.inner_model(x_in, sigma_in, cond=cond_in).chunk(2)
-        return uncond + (cond - uncond) * cond_scale
+        denoised = uncond + (cond - uncond) * cond_scale
+
+        if mask is not None:
+            assert orig_latent is not None
+            mask_inv = 1.0 - mask
+            denoised = (orig_latent * mask_inv) + (mask * denoised)
+
+        return denoised
 
 
 class DiffusionSampler:

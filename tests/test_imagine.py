@@ -89,3 +89,39 @@ def test_img_to_file():
     )
     out_folder = f"{TESTS_FOLDER}/test_output"
     imagine_image_files(prompt, outdir=out_folder)
+
+
+def test_inpainting():
+    prompt = ImaginePrompt(
+        "a basketball on a bench",
+        init_image=f"{TESTS_FOLDER}/data/bench2.png",
+        init_image_strength=0.4,
+        mask_image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2_mask.png"),
+        width=512,
+        height=512,
+        steps=5,
+        seed=1,
+        sampler_type="DDIM",
+    )
+    out_folder = f"{TESTS_FOLDER}/test_output"
+    imagine_image_files(prompt, outdir=out_folder)
+
+
+def test_cliptext_inpainting():
+    prompts = [
+        ImaginePrompt(
+            "elegant woman. oil painting",
+            prompt_strength=12,
+            init_image=f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg",
+            init_image_strength=0.3,
+            mask_prompt="face",
+            mask_mode=ImaginePrompt.MaskMode.KEEP,
+            mask_expansion=-3,
+            width=512,
+            height=512,
+            steps=5,
+            sampler_type="DDIM",
+        ),
+    ]
+    out_folder = f"{TESTS_FOLDER}/test_output"
+    imagine_image_files(prompts, outdir=out_folder)

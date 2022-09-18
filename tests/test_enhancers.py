@@ -1,9 +1,7 @@
 import hashlib
 
-import torch
 from PIL import Image
 from pytorch_lightning import seed_everything
-from torchvision import transforms
 
 from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
@@ -28,6 +26,10 @@ def img_hash(img):
 
 def test_clip_masking():
     img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg")
-    preds = get_img_mask(img, ['background'])
-    mask = transforms.ToPILImage()(torch.sigmoid(preds[0][0]))
-    mask.save(f"{TESTS_FOLDER}/test_output/earring_mask.png")
+    pred = get_img_mask(img, "head")
+    pred.save(f"{TESTS_FOLDER}/test_output/earring_mask.png")
+
+
+def test_clip_inpainting():
+    img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg")
+    pred = get_img_mask(img, "background")

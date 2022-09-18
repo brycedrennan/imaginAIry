@@ -9,11 +9,13 @@ from typing import List, Optional
 import numpy as np
 import requests
 import torch
-from PIL import Image
+from PIL import Image, ImageFilter
 from torch import Tensor
 from torch.nn import functional
 from torch.overrides import handle_torch_function, has_torch_function_variadic
 from transformers import cached_path
+
+from imaginairy.img_log import log_img
 
 logger = logging.getLogger(__name__)
 
@@ -102,23 +104,45 @@ def fix_torch_nn_layer_norm():
         functional.layer_norm = orig_function
 
 
-def img_path_to_torch_image(path, max_height=512, max_width=512):
+def expand_mask(mask_image, size):
+    if size < 0:
+        threshold = 0.9
+    else:
+        threshold = 0.1
+    mask_image = mask_image.convert("L")
+    mask_image = mask_image.filter(ImageFilter.GaussianBlur(size))
+    log_img(mask_image, "init mask blurred")
+    mask = np.array(mask_image)
+    mask = mask.astype(np.float32) / 255.0
+    mask = mask[None, None]
+
+    mask[mask < threshold] = 0
+    mask[mask >= threshold] = 1
+    return Image.fromarray(np.uint8(mask.squeeze() * 255))
+
+
+def img_path_to_torch_image(path):
     image = Image.open(path).convert("RGB")
     logger.info(f"Loaded input 🖼 of size {image.size} from {path}")
-    return pillow_img_to_torch_image(image, max_height=max_height, max_width=max_width)
+    return pillow_img_to_torch_image(image)
 
 
-def pillow_img_to_torch_image(image, max_height=512, max_width=512):
+def pillow_fit_image_within(image, max_height=512, max_width=512):
     image = image.convert("RGB")
     w, h = image.size
     resize_ratio = min(max_width / w, max_height / h)
     w, h = int(w * resize_ratio), int(h * resize_ratio)
-    w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 32
-    image = image.resize((w, h), resample=Image.Resampling.LANCZOS)
+    w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 64
+    image = image.resize((w, h), resample=Image.Resampling.NEAREST)
+    return image, w, h
+
+
+def pillow_img_to_torch_image(image):
+    image = image.convert("RGB")
     image = np.array(image).astype(np.float32) / 255.0
     image = image[None].transpose(0, 3, 1, 2)
     image = torch.from_numpy(image)
-    return 2.0 * image - 1.0, w, h
+    return 2.0 * image - 1.0
 
 
 def get_cache_dir():

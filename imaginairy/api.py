@@ -9,21 +9,29 @@ import torch
 import torch.nn
 from einops import rearrange
 from omegaconf import OmegaConf
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 from pytorch_lightning import seed_everything
 from torch import autocast
 from transformers import cached_path
 
+from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
-from imaginairy.img_log import ImageLoggingContext, log_conditioning, log_latent
+from imaginairy.img_log import (
+    ImageLoggingContext,
+    log_conditioning,
+    log_img,
+    log_latent,
+)
 from imaginairy.safety import is_nsfw
 from imaginairy.samplers.base import get_sampler
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
+    expand_mask,
     fix_torch_nn_layer_norm,
     get_device,
     instantiate_from_config,
+    pillow_fit_image_within,
     pillow_img_to_torch_image,
 )
 
@@ -202,22 +210,61 @@ def imagine(
                     prompt.height // downsampling_factor,
                     prompt.width // downsampling_factor,
                 ]
-
+                if prompt.init_image:
+                    sampler_type = "ddim"
+                else:
+                    sampler_type = prompt.sampler_type
                 start_code = None
-                sampler = get_sampler(prompt.sampler_type, model)
+                sampler = get_sampler(sampler_type, model)
+                mask, mask_image, mask_image_orig = None, None, None
                 if prompt.init_image:
                     generation_strength = 1 - prompt.init_image_strength
                     ddim_steps = int(prompt.steps / generation_strength)
                     sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
-
-                    init_image, w, h = pillow_img_to_torch_image(  # noqa
+                    init_image, _, h = pillow_fit_image_within(
                         prompt.init_image,
                         max_height=prompt.height,
                         max_width=prompt.width,
                     )
-                    init_image = init_image.to(get_device())
+                    init_image_t = pillow_img_to_torch_image(init_image)
+
+                    if prompt.mask_prompt:
+                        mask_image = get_img_mask(init_image, prompt.mask_prompt)
+                    elif prompt.mask_image:
+                        mask_image = prompt.mask_image
+
+                    if mask_image is not None:
+                        log_img(mask_image, "init mask")
+                        # mask_image = mask_image.filter(ImageFilter.GaussianBlur(8))
+                        mask_image = expand_mask(mask_image, prompt.mask_expansion)
+                        if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
+                            mask_image = ImageOps.invert(mask_image)
+                        log_img(mask_image, "init mask expanded")
+                        log_img(
+                            Image.composite(init_image, mask_image, mask_image),
+                            "mask overlay",
+                        )
+                        mask_image_orig = mask_image
+                        mask_image = mask_image.resize(
+                            (
+                                mask_image.width // downsampling_factor,
+                                mask_image.height // downsampling_factor,
+                            ),
+                            resample=Image.Resampling.NEAREST,
+                        )
+                        log_img(mask_image, "init mask 2")
+
+                        mask = np.array(mask_image)
+                        mask = mask.astype(np.float32) / 255.0
+                        mask = mask[None, None]
+                        mask[mask < 0.9] = 0
+                        mask[mask >= 0.9] = 1
+                        mask = torch.from_numpy(mask)
+                        mask = mask.to(get_device())
+
+                    init_image_t = init_image_t.to(get_device())
                     init_latent = model.get_first_stage_encoding(
-                        model.encode_first_stage(init_image)
+                        model.encode_first_stage(init_image_t)
                     )
 
                     log_latent(init_latent, "init_latent")
@@ -236,6 +283,8 @@ def imagine(
                         unconditional_guidance_scale=prompt.prompt_strength,
                         unconditional_conditioning=uc,
                         img_callback=_img_callback,
+                        mask=mask,
+                        orig_latent=init_latent,
                     )
                 else:
 
@@ -260,6 +309,14 @@ def imagine(
                     )
                     x_sample_8_orig = x_sample.astype(np.uint8)
                     img = Image.fromarray(x_sample_8_orig)
+                    if mask_image_orig and init_image:
+                        mask_image_orig = mask_image_orig.filter(
+                            ImageFilter.GaussianBlur(radius=3)
+                        )
+                        mask_image_orig = ImageOps.invert(mask_image_orig)
+                        img = Image.composite(img, init_image, mask_image_orig)
+                        log_img(img, "reconstituted image")
+
                     upscaled_img = None
                     is_nsfw_img = None
                     if IMAGINAIRY_SAFETY_MODE != SafetyMode.DISABLED:
@@ -269,7 +326,7 @@ def imagine(
                             img = img.filter(ImageFilter.GaussianBlur(radius=40))
 
                     if prompt.fix_faces:
-                        logger.info("    Fixing 😊 's in 🖼  using GFPGAN...")
+                        logger.info("    Fixing 😊 's in 🖼  using CodeFormer...")
                         img = enhance_faces(img, fidelity=0.2)
                     if prompt.upscale:
                         logger.info("    Upscaling 🖼  using real-ESRGAN...")

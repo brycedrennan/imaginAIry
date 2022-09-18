@@ -32,6 +32,12 @@ def log_latent(latents, description):
     _CURRENT_LOGGING_CONTEXT.log_latents(latents, description)
 
 
+def log_img(img, description):
+    if _CURRENT_LOGGING_CONTEXT is None:
+        return
+    _CURRENT_LOGGING_CONTEXT.log_img(img, description)
+
+
 class ImageLoggingContext:
     def __init__(self, prompt, model, img_callback=None, img_outdir=None):
         self.prompt = prompt
@@ -70,6 +76,15 @@ class ImageLoggingContext:
             latent = 255.0 * rearrange(latent.cpu().numpy(), "c h w -> h w c")
             img = Image.fromarray(latent.astype(np.uint8))
             self.img_callback(img, description, self.step_count, self.prompt)
+
+    def log_img(self, img, description):
+        if not self.img_callback:
+            return
+        self.step_count += 1
+        if isinstance(img, torch.Tensor):
+            img = ToPILImage()(img.squeeze().cpu().detach())
+        img = img.copy()
+        self.img_callback(img, description, self.step_count, self.prompt)
 
     # def img_callback(self, img, description, step_count, prompt):
     #     steps_path = os.path.join(self.img_outdir, "steps", f"{self.file_num:08}_S{prompt.seed}")

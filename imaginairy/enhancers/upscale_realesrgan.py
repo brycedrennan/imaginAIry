@@ -19,6 +19,8 @@ def realesrgan_upsampler():
     upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=0)
 
     device = get_device()
+    if "mps" in device:
+        device = "cpu"
 
     upsampler.device = torch.device(device)
     upsampler.model.to(device)
@@ -28,6 +30,7 @@ def realesrgan_upsampler():
 
 def upscale_image(img):
     img = img.convert("RGB")
+
     np_img = np.array(img, dtype=np.uint8)
     upsampler_output, img_mode = realesrgan_upsampler().enhance(np_img[:, :, ::-1])
     return Image.fromarray(upsampler_output[:, :, ::-1], mode=img_mode)

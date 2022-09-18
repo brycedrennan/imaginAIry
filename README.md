@@ -34,6 +34,40 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"  height="256"><br>
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
 
+### Automated Replacement (txt2mask) [by clipseg](https://github.com/timojl/clipseg)
+```bash
+>> imagine --init-image pearl_earring.jpg --mask-prompt face --mask-mode keep --init-image-strength .4 "a female doctor" "an elegant woman"
+```
+<img src="assets/mask_examples/pearl000.jpg" height="256">➡️ 
+<img src="assets/mask_examples/pearl002.jpg" height="256">
+<img src="assets/mask_examples/pearl004.jpg" height="256">
+<img src="assets/mask_examples/pearl001.jpg" height="256">
+<img src="assets/mask_examples/pearl003.jpg" height="256">
+```bash
+>> imagine --init-image fruit-bowl.jpg --mask-prompt fruit --mask-mode replace --init-image-strength .1 "a bowl of pears" "a bowl of gold" "a bowl of popcorn" "a bowl of spaghetti"
+```
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256">➡️ 
+<img src="assets/mask_examples/bowl004.jpg" height="256">
+<img src="assets/mask_examples/bowl001.jpg" height="256">
+<img src="assets/mask_examples/bowl002.jpg" height="256">
+<img src="assets/mask_examples/bowl003.jpg" height="256">
+
+
+### Face Enhancement [by CodeFormer](https://github.com/sczhou/CodeFormer)
+
+```bash
+>> imagine "a couple smiling" --steps 40 --seed 1 --fix-faces
+```
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> ➡️ 
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
+
+
+### Upscaling [by RealESRGAN](https://github.com/xinntao/Real-ESRGAN)
+```bash
+>> imagine "colorful smoke" --steps 40 --upscale
+```
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" height="128"> ➡️ 
+<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" height="256"> 
 
 ### Tiled Images
 ```bash
@@ -50,24 +84,9 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 ```bash
 >> imagine "portrait of a smiling lady. oil painting" --init-image girl_with_a_pearl_earring.jpg
 ```
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/data/girl_with_a_pearl_earring.jpg" height="256"> =>
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/data/girl_with_a_pearl_earring.jpg" height="256"> ➡️ 
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000105_33084057_DDIM40_PS7.5_portrait_of_a_smiling_lady._oil_painting._.jpg" height="256"> 
 
-### Face Enhancement [by CodeFormer](https://github.com/sczhou/CodeFormer)
-
-```bash
->> imagine "a couple smiling" --steps 40 --seed 1 --fix-faces
-```
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> =>
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
-
-
-### Upscaling [by RealESRGAN](https://github.com/xinntao/Real-ESRGAN)
-```bash
->> imagine "colorful smoke" --steps 40 --upscale
-```
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" height="128"> =>
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" height="256"> 
 
 ## Features
  
