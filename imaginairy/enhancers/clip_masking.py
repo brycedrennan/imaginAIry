@@ -27,10 +27,11 @@ def clip_mask_model():
 
 
 def get_img_mask(img, mask_description):
-    return get_img_masks(img, [mask_description])[0]
+    descriptions = mask_description.split("|")
+    return get_img_masks(img, descriptions, combine=True)[0]
 
 
-def get_img_masks(img, mask_descriptions):
+def get_img_masks(img, mask_descriptions, combine=False):
     a, b = img.size
     orig_size = b, a
     log_img(img, "image for masking")
@@ -49,8 +50,17 @@ def get_img_masks(img, mask_descriptions):
             img.repeat(len(mask_descriptions), 1, 1, 1), mask_descriptions
         )[0]
     preds = transforms.Resize(orig_size)(preds)
+    preds = transforms.GaussianBlur(kernel_size=9)(preds)
 
     preds = [torch.sigmoid(p[0]) for p in preds]
+
+    if combine:
+        f_pred = preds[0]
+        for description, pred in zip(mask_descriptions, preds):
+            log_img(pred, f"mask search: {description}")
+            f_pred = torch.maximum(f_pred, pred)
+        preds = [f_pred]
+
     bw_preds = []
     for p in preds:
         log_img(p, f"clip mask for {mask_descriptions}")
@@ -58,7 +68,7 @@ def get_img_masks(img, mask_descriptions):
         _min = p.min()
         _max = p.max()
         _range = _max - _min
-        p = (p > (_min + (_range * 0.5))).float()
+        p = (p > (_min + (_range * 0.25))).float()
         bw_preds.append(transforms.ToPILImage()(p))
 
     return bw_preds

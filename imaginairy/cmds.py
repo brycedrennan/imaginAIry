@@ -139,7 +139,7 @@ def configure_logging(level="INFO"):
 )
 @click.option(
     "--mask-expansion",
-    default="8",
+    default="2",
     type=int,
     help="How much to grow (or shrink) the mask area",
 )

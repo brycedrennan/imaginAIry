@@ -237,9 +237,10 @@ def imagine(
                         log_img(mask_image, "init mask")
                         # mask_image = mask_image.filter(ImageFilter.GaussianBlur(8))
                         mask_image = expand_mask(mask_image, prompt.mask_expansion)
+                        log_img(mask_image, "init mask expanded")
                         if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
                             mask_image = ImageOps.invert(mask_image)
-                        log_img(mask_image, "init mask expanded")
+
                         log_img(
                             Image.composite(init_image, mask_image, mask_image),
                             "mask overlay",
@@ -310,9 +311,12 @@ def imagine(
                     x_sample_8_orig = x_sample.astype(np.uint8)
                     img = Image.fromarray(x_sample_8_orig)
                     if mask_image_orig and init_image:
+
+                        mask_image_orig = expand_mask(mask_image_orig, -3)
                         mask_image_orig = mask_image_orig.filter(
                             ImageFilter.GaussianBlur(radius=3)
                         )
+                        log_img(mask_image_orig, "reconstituting mask")
                         mask_image_orig = ImageOps.invert(mask_image_orig)
                         img = Image.composite(img, init_image, mask_image_orig)
                         log_img(img, "reconstituted image")
@@ -331,6 +335,9 @@ def imagine(
                     if prompt.upscale:
                         logger.info("    Upscaling 🖼  using real-ESRGAN...")
                         upscaled_img = upscale_image(img)
+                        if prompt.fix_faces:
+                            logger.info("    Fixing 😊 's in big 🖼  using CodeFormer...")
+                            upscaled_img = enhance_faces(upscaled_img, fidelity=0.8)
 
                     yield ImagineResult(
                         img=img,

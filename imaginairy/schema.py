@@ -94,7 +94,7 @@ class ImaginePrompt:
         mask_prompt=None,
         mask_image=None,
         mask_mode=MaskMode.REPLACE,
-        mask_expansion=8,
+        mask_expansion=2,
         seed=None,
         steps=50,
         height=512,

@@ -106,9 +106,9 @@ def fix_torch_nn_layer_norm():
 
 def expand_mask(mask_image, size):
     if size < 0:
-        threshold = 0.9
+        threshold = 0.95
     else:
-        threshold = 0.1
+        threshold = 0.05
     mask_image = mask_image.convert("L")
     mask_image = mask_image.filter(ImageFilter.GaussianBlur(size))
     log_img(mask_image, "init mask blurred")
