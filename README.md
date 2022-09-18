@@ -38,19 +38,19 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 ```bash
 >> imagine --init-image pearl_earring.jpg --mask-prompt face --mask-mode keep --init-image-strength .4 "a female doctor" "an elegant woman"
 ```
-<img src="assets/mask_examples/pearl000.jpg" height="256">➡️ 
-<img src="assets/mask_examples/pearl002.jpg" height="256">
-<img src="assets/mask_examples/pearl004.jpg" height="256">
-<img src="assets/mask_examples/pearl001.jpg" height="256">
-<img src="assets/mask_examples/pearl003.jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl000.jpg" height="256">➡️ 
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl002.jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl004.jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl001.jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl003.jpg" height="256">
 ```bash
 >> imagine --init-image fruit-bowl.jpg --mask-prompt fruit --mask-mode replace --init-image-strength .1 "a bowl of pears" "a bowl of gold" "a bowl of popcorn" "a bowl of spaghetti"
 ```
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256">➡️ 
-<img src="assets/mask_examples/bowl004.jpg" height="256">
-<img src="assets/mask_examples/bowl001.jpg" height="256">
-<img src="assets/mask_examples/bowl002.jpg" height="256">
-<img src="assets/mask_examples/bowl003.jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/bowl004.jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/bowl001.jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/bowl002.jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/bowl003.jpg" height="256">
 
 
 ### Face Enhancement [by CodeFormer](https://github.com/sczhou/CodeFormer)
