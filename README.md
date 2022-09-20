@@ -2,11 +2,11 @@
 
 AI imagined images. Pythonic generation of stable diffusion images.
 
-"just works" on Linux and OSX(M1) (and maybe windows?).
+"just works" on Linux and macOS(M1) (and maybe windows?).
 
 ## Examples
 ```bash
-# on osx, make sure rust is installed first
+# on macOS, make sure rust is installed first
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman"
 ```
@@ -149,7 +149,7 @@ imagine_image_files(prompts, outdir="./my-art")
 - ~10 gb space for models to download
 - A decent computer with either a CUDA supported graphics card or M1 processor.
 - Python installed. Preferably Python 3.10.
-- For OSX [rust must be installed](https://www.rust-lang.org/tools/install) 
+- For macOS [rust must be installed](https://www.rust-lang.org/tools/install) 
 to compile the `tokenizer` library.
 be installed via: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
     
