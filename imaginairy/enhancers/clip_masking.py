@@ -11,7 +11,7 @@ weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth
 
 @lru_cache()
 def clip_mask_model():
-    from imaginairy import PKG_ROOT
+    from imaginairy import PKG_ROOT  # noqa
 
     model = CLIPDensePredT(version="ViT-B/16", reduce_dim=64)
     model.eval()
@@ -26,16 +26,37 @@ def clip_mask_model():
     return model
 
 
-def get_img_mask(img, mask_description):
-    descriptions = mask_description.split("|")
-    return get_img_masks(img, descriptions, combine=True)[0]
+def get_img_mask(img, mask_description, negative_description=""):
+    pos_descriptions = mask_description.split("|")
+    pos_masks = get_img_masks(img, pos_descriptions)
+    pos_mask = pos_masks[0]
+    for pred in pos_masks:
+        pos_mask = torch.maximum(pos_mask, pred)
+
+    log_img(pos_mask, "pos mask")
+
+    if negative_description:
+        neg_descriptions = negative_description.split("|")
+        neg_masks = get_img_masks(img, neg_descriptions)
+        neg_mask = neg_masks[0]
+        for pred in neg_masks:
+            neg_mask = torch.maximum(neg_mask, pred)
+        neg_mask = (neg_mask * 3).clip(0, 1)
+        log_img(neg_mask, "neg_mask")
+        pos_mask = torch.minimum(pos_mask, 1 - neg_mask)
+    _min = pos_mask.min()
+    _max = pos_mask.max()
+    _range = _max - _min
+    pos_mask = (pos_mask > (_min + (_range * 0.35))).float()
+
+    return transforms.ToPILImage()(pos_mask)
 
 
-def get_img_masks(img, mask_descriptions, combine=False):
+def get_img_masks(img, mask_descriptions):
     a, b = img.size
     orig_size = b, a
     log_img(img, "image for masking")
-    # orig_shape = tuple(img.shape)[1:]
+
     transform = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -54,21 +75,11 @@ def get_img_masks(img, mask_descriptions, combine=False):
 
     preds = [torch.sigmoid(p[0]) for p in preds]
 
-    if combine:
-        f_pred = preds[0]
-        for description, pred in zip(mask_descriptions, preds):
-            log_img(pred, f"mask search: {description}")
-            f_pred = torch.maximum(f_pred, pred)
-        preds = [f_pred]
-
     bw_preds = []
-    for p in preds:
-        log_img(p, f"clip mask for {mask_descriptions}")
+    for p, desc in zip(preds, mask_descriptions):
+        log_img(p, f"clip mask: {desc}")
         # bw_preds.append(pred_transform(p))
-        _min = p.min()
-        _max = p.max()
-        _range = _max - _min
-        p = (p > (_min + (_range * 0.25))).float()
-        bw_preds.append(transforms.ToPILImage()(p))
+
+        bw_preds.append(p)
 
     return bw_preds

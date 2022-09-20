@@ -1,4 +1,4 @@
-import logging.config
+import logging
 import warnings
 
 from pytorch_lightning import _logger as pytorch_logger

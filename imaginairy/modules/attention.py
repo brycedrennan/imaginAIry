@@ -7,7 +7,7 @@ from einops import rearrange, repeat
 from torch import einsum, nn
 
 from imaginairy.modules.diffusion.util import checkpoint
-from imaginairy.utils import get_device, get_device_name
+from imaginairy.utils import get_device
 
 
 def uniq(arr):

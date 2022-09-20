@@ -26,6 +26,7 @@ init: require_pyenv  ## Setup a dev environment for local development.
 
 af: autoformat  ## Alias for `autoformat`
 autoformat:  ## Run the autoformatter.
+	@pycln . --all
 	@isort --atomic --profile black .
 	@black .
 
@@ -91,6 +92,14 @@ vendorize_clipseg:
 	mv ./imaginairy/vendored/clipseg/clipseg.py ./imaginairy/vendored/clipseg/__init__.py
 	wget https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth -P ./imaginairy/vendored/clipseg
 
+vendorize_blip:
+	make download_repo REPO=git@github.com:salesforce/BLIP.git PKG=blip COMMIT=48211a1594f1321b00f14c9f7a5b4813144b2fb9
+	rm -rf ./imaginairy/vendored/blip
+	mkdir -p ./imaginairy/vendored/blip
+	cp -R ./downloads/blip/models/* ./imaginairy/vendored/blip/
+	cp -R ./downloads/blip/configs ./imaginairy/vendored/blip/
+	sed -i '' -e 's#from models\.#from imaginairy.vendored.blip.#g' ./imaginairy/vendored/blip/blip.py
+	sed -i '' -e 's#print(#\# print(#g' ./imaginairy/vendored/blip/blip.py
 
 vendorize_kdiffusion:
 	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=1a0703dfb7d24d8806267c3e7ccc4caf67fd1331

@@ -2,10 +2,11 @@
 
 AI imagined images. Pythonic generation of stable diffusion images.
 
-"just works" on Linux and OSX(M1).
+"just works" on Linux and OSX(M1) (and maybe windows?).
 
 ## Examples
 ```bash
+# on osx, make sure rust is installed first
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman"
 ```
@@ -87,6 +88,11 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/data/girl_with_a_pearl_earring.jpg" height="256"> ➡️ 
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000105_33084057_DDIM40_PS7.5_portrait_of_a_smiling_lady._oil_painting._.jpg" height="256"> 
 
+### Generate image captions
+```bash
+>> aimg describe assets/mask_examples/bowl001.jpg
+a bowl full of gold bars sitting on a table
+```
 
 ## Features
  
@@ -99,8 +105,12 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
  - WeightedPrompts let you smash together separate prompts (cat-dog)
  - Tile Mode creates tileable images
  - Prompt metadata saved into image file metadata
+ - Edit images by describing the part you want edited (see example above)
+ - Have AI generate captions for images `aimg describe <filename-or-url>`
 
 ## How To
+
+For full command line instructions run `aimg --help`
 
 ```python
 from imaginairy import imagine, imagine_image_files, ImaginePrompt, WeightedPrompt, LazyLoadingImage
@@ -138,6 +148,11 @@ imagine_image_files(prompts, outdir="./my-art")
 ## Requirements
 - ~10 gb space for models to download
 - A decent computer with either a CUDA supported graphics card or M1 processor.
+- Python installed. Preferably Python 3.10.
+- For OSX [rust must be installed](https://www.rust-lang.org/tools/install) 
+to compile the `tokenizer` library.
+be installed via: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+    
 
 ## Running in Docker
 See example Dockerfile (works on machine where you can pass the gpu into the container)
@@ -161,6 +176,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## Not Supported
  - a web interface. this is a python library
+ - training
 
 ## Todo
  - performance optimizations
@@ -172,7 +188,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
  - ✅ deploy to pypi
  - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
  - Development Environment
-   - add tests
+   - ✅ add tests
    - set up ci (test/lint/format)
    - add docs
    - remove yaml config
@@ -192,8 +208,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    - ✅ face enhancers
      - ✅ gfpgan - https://github.com/TencentARC/GFPGAN
      - ✅ codeformer - https://github.com/sczhou/CodeFormer
-   - image describe feature - 
-     - https://replicate.com/methexis-inc/img2prompt
+   - ✅ image describe feature - 
+     - https://github.com/salesforce/BLIP
+     - https://github.com/rmokady/CLIP_prefix_caption
+     - https://github.com/pharmapsychotic/clip-interrogator (blip + clip)
      - https://github.com/KaiyangZhou/CoOp
    - outpainting
    - inpainting

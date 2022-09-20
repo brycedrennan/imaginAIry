@@ -3,9 +3,7 @@ import math
 import torch
 from scipy import integrate
 from torchdiffeq import odeint
-from tqdm.auto import tqdm, trange
-
-from . import utils
+from tqdm.auto import trange
 
 
 def append_zero(x):
