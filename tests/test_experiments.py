@@ -56,10 +56,8 @@ def experiment_step_repeats():
     sampler.make_schedule(1000)
 
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/beach_at_sainte_adresse.jpg")
-    init_image, _, h = pillow_img_to_torch_image(
+    init_image, _, _ = pillow_img_to_torch_image(
         img,
-        max_height=512,
-        max_width=512,
     )
     init_image = init_image.to(get_device())
     init_latent = model.get_first_stage_encoding(model.encode_first_stage(init_image))
@@ -119,3 +117,38 @@ def experiment_repeated_img_2_img():
         img = result.img
         os.makedirs(outdir, exist_ok=True)
         img.save(f"{outdir}/{step_num:04}.png")
+
+
+def experiment_superresolution():
+    """
+    Try to trick it into making a superresolution image
+
+    Did not work, resulting image was more blurry
+
+    # i put this into the api.py file hardcoded
+    row_a = torch.tensor([1, 0]).repeat(32)
+    row_b = torch.tensor([0, 1]).repeat(32)
+    grid = torch.stack([row_a, row_b]).repeat(32, 1)
+    mask = grid
+    mask = mask.to(get_device())
+    """
+
+    description = "a black and white photo of a dog's face"
+    # image was a quarter of existing image
+    img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/../outputs/dog02.jpg")
+
+    # todo: try with 1000 mask at image resultion (rencoding entire image+predicted image at every step)
+    # todo: use a gaussian pyramid and only include the "high-detail" level of the pyramid into the next step
+
+    prompt = ImaginePrompt(
+        description,
+        init_image=img,
+        init_image_strength=0.8,
+        width=512,
+        height=512,
+        steps=50,
+        seed=1,
+        sampler_type="DDIM",
+    )
+    out_folder = f"{TESTS_FOLDER}/test_output"
+    imagine_image_files(prompt, outdir=out_folder)

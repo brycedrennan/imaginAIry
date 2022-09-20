@@ -162,9 +162,27 @@ docker build . -t imaginairy
 docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -v $HOME/.cache/torch:/root/.cache/torch -v `pwd`/outputs:/outputs imaginairy /bin/bash
 ```
 
-## Improvements from CompVis
- - img2img actually does # of steps you specify
+## ChangeLog
+
+**1.5.0**
+ - img2img now supported with PLMS (instead of just DDIM)
+ - added image captioning feature `aimg describe dog.jpg` => `a brown dog sitting on grass`
+ - added new commandline tool `aimg` for additional image manipulation functionality
+
+**1.4.0**
+ - support multiple additive targets for masking with `|` symbol.  Example: "fruit|stem|fruit stem"
+
+**1.3.0**
+ - added prompt based image editing. Example: "fruit => gold coins"
+ - test coverage improved
+
+**1.2.0**
+ - allow urls as init-images
+
+** previous **
+ - img2img actually does # of steps you specify  
  - performance optimizations
+ - numerous other changes
 
 ## Models Used
  - CLIP - https://openai.com/blog/clip/
@@ -205,6 +223,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - ✅ realesrgan 
      - ldm
      - https://github.com/lowfuel/progrock-stable
+     - stable super-res?
+       - todo: try with 1-0-0-0 mask at full image resolution (rencoding entire image+predicted image at every step)
+       - todo: use a gaussian pyramid and only include the "high-detail" level of the pyramid into the next step
    - ✅ face enhancers
      - ✅ gfpgan - https://github.com/TencentARC/GFPGAN
      - ✅ codeformer - https://github.com/sczhou/CodeFormer
@@ -214,14 +235,15 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - https://github.com/pharmapsychotic/clip-interrogator (blip + clip)
      - https://github.com/KaiyangZhou/CoOp
    - outpainting
-   - inpainting
+   - ✅ inpainting
      - https://github.com/andreas128/RePaint
      - img2img but keeps img stable
      - https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/
      - https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1
      - https://github.com/pesser/stable-diffusion/commit/bbb52981460707963e2a62160890d7ecbce00e79
    - CPU support
-   - img2img for plms?
+   - ✅ img2img for plms
+   - img2img for kdiff functions
    - images as actual prompts instead of just init images
      - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
      - https://twitter.com/Buntworthy/status/1566744186153484288

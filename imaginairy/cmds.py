@@ -185,9 +185,6 @@ def imagine_cmd(
     logger.info(
         f"🤖🧠 imaginAIry received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
     )
-    if init_image and sampler_type != "ddim":
-        sampler_type = "ddim"
-        logger.info("   Sampler type switched to ddim for img2img")
 
     if init_image and init_image.startswith("http"):
         init_image = LazyLoadingImage(url=init_image)

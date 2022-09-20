@@ -45,7 +45,23 @@ def test_imagine(sampler_type, expected_md5):
     assert result.md5() == expected_md5
 
 
-def test_img_to_img():
+device_sampler_type_test_cases_img_2_img = {
+    "mps:0": {
+        ("plms", "54656a7f449cb73b99436e61470172b3"),
+        ("ddim", "87d04423f6d03ddfc065cabc62e3909c"),
+    },
+    "cuda": {
+        ("plms", "efba8b836b51d262dbf72284844869f8"),
+        ("ddim", "a62878000ad3b581a11dd3fb329dc7d2"),
+    },
+}
+sampler_type_test_cases_img_2_img = device_sampler_type_test_cases_img_2_img[
+    get_device()
+]
+
+
+@pytest.mark.parametrize("sampler_type,expected_md5", sampler_type_test_cases_img_2_img)
+def test_img_to_img(sampler_type, expected_md5):
     prompt = ImaginePrompt(
         "a photo of a beach",
         init_image=f"{TESTS_FOLDER}/data/beach_at_sainte_adresse.jpg",
@@ -54,10 +70,13 @@ def test_img_to_img():
         height=512,
         steps=5,
         seed=1,
-        sampler_type="DDIM",
+        sampler_type=sampler_type,
     )
-    out_folder = f"{TESTS_FOLDER}/test_output"
-    imagine_image_files(prompt, outdir=out_folder)
+    result = next(imagine(prompt))
+    result.img.save(
+        f"{TESTS_FOLDER}/test_output/sampler_type_{sampler_type.upper()}_img2img_beach.jpg"
+    )
+    assert result.md5() == expected_md5
 
 
 def test_img_to_img_from_url():

@@ -255,7 +255,8 @@ class LatentDiffusion(DDPM):
         self.cond_stage_key = cond_stage_key
         try:
             self.num_downs = len(first_stage_config.params.ddconfig.ch_mult) - 1
-        except:
+        except:  # noqa
+            logger.exception("Bad num downs?")
             self.num_downs = 0
         if not scale_by_std:
             self.scale_factor = scale_factor
@@ -639,7 +640,7 @@ class LatentDiffusion(DDPM):
             ks = self.split_input_params["ks"]  # eg. (128, 128)
             stride = self.split_input_params["stride"]  # eg. (64, 64)
 
-            h, w = x_noisy.shape[-2:]
+            h, w = x_noisy.shape[-2:]  # noqa
 
             fold, unfold, normalization, weighting = self.get_fold_unfold(
                 x_noisy, ks, stride
@@ -711,7 +712,7 @@ class LatentDiffusion(DDPM):
 
                 # tokenize crop coordinates for the bounding boxes of the respective patches
                 patch_limits_tknzd = [
-                    torch.LongTensor(self.bbox_tokenizer._crop_encoder(bbox))[
+                    torch.LongTensor(self.bbox_tokenizer._crop_encoder(bbox))[  # noqa
                         None
                     ].to(  # noqa
                         self.device

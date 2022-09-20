@@ -215,8 +215,9 @@ def imagine(
                     prompt.height // downsampling_factor,
                     prompt.width // downsampling_factor,
                 ]
-                if prompt.init_image:
-                    sampler_type = "ddim"
+                if prompt.init_image and prompt.sampler_type not in ("ddim", "plms"):
+                    sampler_type = "plms"
+                    logger.info("   Sampler type switched to plms for img2img")
                 else:
                     sampler_type = prompt.sampler_type
                 start_code = None
