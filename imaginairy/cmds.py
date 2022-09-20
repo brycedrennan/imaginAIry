@@ -2,7 +2,7 @@ import logging.config
 
 import click
 
-from imaginairy import LazyLoadingImage
+from imaginairy import LazyLoadingImage, generate_caption
 from imaginairy.api import imagine_image_files, load_model
 from imaginairy.samplers.base import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
@@ -143,7 +143,15 @@ def configure_logging(level="INFO"):
     type=int,
     help="How much to grow (or shrink) the mask area",
 )
+@click.option(
+    "--caption",
+    default=False,
+    is_flag=True,
+    help="Generate a text description of the generated image",
+)
+@click.pass_context
 def imagine_cmd(
+    ctx,
     prompt_texts,
     prompt_strength,
     init_image,
@@ -165,8 +173,11 @@ def imagine_cmd(
     mask_prompt,
     mask_mode,
     mask_expansion,
+    caption,
 ):
-    """Render an image"""
+    """Have the AI generate images. alias:imagine"""
+    if ctx.invoked_subcommand is not None:
+        return
     suppress_annoying_logs_and_warnings()
     configure_logging(log_level)
 
@@ -211,8 +222,31 @@ def imagine_cmd(
         record_step_images="images" in show_work,
         tile_mode=tile,
         output_file_extension="png",
+        print_caption=caption,
     )
 
+
+@click.group("aimg")
+def aimg():
+    pass
+
+
+@click.argument("image_filepaths", nargs=-1)
+@aimg.command()
+def describe(image_filepaths):
+    """Generate text descriptions of images"""
+    imgs = []
+    for p in image_filepaths:
+        if p.startswith("http"):
+            img = LazyLoadingImage(url=p)
+        else:
+            img = LazyLoadingImage(filepath=p)
+        imgs.append(img)
+    for img in imgs:
+        print(generate_caption(img.copy()))
+
+
+aimg.add_command(imagine_cmd, name="generate")
 
 if __name__ == "__main__":
     imagine_cmd()  # noqa

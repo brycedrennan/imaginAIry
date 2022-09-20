@@ -2,7 +2,7 @@ import hashlib
 import os
 import urllib
 import warnings
-from typing import Any, List, Union
+from typing import List, Union
 
 import torch
 from PIL import Image

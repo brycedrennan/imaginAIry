@@ -15,6 +15,7 @@ from torch import autocast
 from transformers import cached_path
 
 from imaginairy.enhancers.clip_masking import get_img_mask
+from imaginairy.enhancers.describe_image_blip import generate_caption
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
 from imaginairy.img_log import (
@@ -111,6 +112,7 @@ def imagine_image_files(
     record_step_images=False,
     output_file_extension="jpg",
     tile_mode=False,
+    print_caption=False,
 ):
     big_path = os.path.join(outdir, "upscaled")
     os.makedirs(outdir, exist_ok=True)
@@ -124,6 +126,7 @@ def imagine_image_files(
         steps_path = os.path.join(outdir, "steps", f"{base_count:08}_S{prompt.seed}")
         os.makedirs(steps_path, exist_ok=True)
         filename = f"{base_count:08}_S{prompt.seed}_step{step_count:04}_{prompt_normalized(description)[:40]}.jpg"
+
         destination = os.path.join(steps_path, filename)
         draw = ImageDraw.Draw(img)
         draw.text((10, 10), str(description))
@@ -137,6 +140,7 @@ def imagine_image_files(
         ddim_eta=ddim_eta,
         img_callback=_record_step if record_step_images else None,
         tile_mode=tile_mode,
+        add_caption=print_caption,
     ):
         prompt = result.prompt
         basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
@@ -162,6 +166,7 @@ def imagine(
     img_callback=None,
     tile_mode=False,
     half_mode=None,
+    add_caption=False,
 ):
     model = load_model(tile_mode=tile_mode)
 
@@ -226,6 +231,7 @@ def imagine(
                         max_height=prompt.height,
                         max_width=prompt.width,
                     )
+
                     init_image_t = pillow_img_to_torch_image(init_image)
 
                     if prompt.mask_prompt:
@@ -235,7 +241,6 @@ def imagine(
 
                     if mask_image is not None:
                         log_img(mask_image, "init mask")
-                        # mask_image = mask_image.filter(ImageFilter.GaussianBlur(8))
                         mask_image = expand_mask(mask_image, prompt.mask_expansion)
                         log_img(mask_image, "init mask expanded")
                         if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
@@ -323,6 +328,9 @@ def imagine(
 
                     upscaled_img = None
                     is_nsfw_img = None
+                    if add_caption:
+                        caption = generate_caption(img)
+                        logger.info(f"    Generated caption: {caption}")
                     if IMAGINAIRY_SAFETY_MODE != SafetyMode.DISABLED:
                         is_nsfw_img = is_nsfw(img, x_sample)
                         if is_nsfw_img and IMAGINAIRY_SAFETY_MODE == SafetyMode.FILTER:

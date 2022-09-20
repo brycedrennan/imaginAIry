@@ -7,7 +7,7 @@ setup(
     name="imaginAIry",
     author="Bryce Drennan",
     # author_email="b r y p y d o t io",
-    version="1.4.0",
+    version="1.5.0",
     description="AI imagined images. Pythonic generation of stable diffusion images.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -17,7 +17,10 @@ setup(
     },
     packages=find_packages(include=("imaginairy", "imaginairy.*")),
     entry_points={
-        "console_scripts": ["imagine=imaginairy.cmds:imagine_cmd"],
+        "console_scripts": [
+            "imagine=imaginairy.cmds:imagine_cmd",
+            "aimg=imaginairy.cmds:aimg",
+        ],
     },
     package_data={
         "imaginairy": [
@@ -29,6 +32,7 @@ setup(
     install_requires=[
         "click",
         "protobuf != 3.20.2, != 3.19.5",
+        "fairscale>=0.4.4",  # for vendored blip
         "ftfy",  # for vendored clip
         "torch>=1.2.0",
         "numpy",
@@ -38,6 +42,7 @@ setup(
         "pytorch-lightning==1.4.2",
         "omegaconf==2.1.1",
         "einops==0.3.0",
+        "timm>=0.4.12",  # for vendored blip
         "torchdiffeq",
         "transformers==4.19.2",
         "torchmetrics==0.6.0",

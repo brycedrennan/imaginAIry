@@ -1,7 +1,6 @@
 import math
 
 import torch
-from einops import rearrange, repeat
 from torch import nn
 from torch.nn import functional as F
 
