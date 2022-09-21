@@ -164,7 +164,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
-**1.5.2**
+**1.5.3**
  - fix: missing config file for describe feature
 
 **1.5.1**
