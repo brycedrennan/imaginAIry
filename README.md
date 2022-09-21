@@ -164,7 +164,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
-**1.5.0**
+**1.5.2**
+ - fix: missing config file for describe feature
+
+**1.5.1**
  - img2img now supported with PLMS (instead of just DDIM)
  - added image captioning feature `aimg describe dog.jpg` => `a brown dog sitting on grass`
  - added new commandline tool `aimg` for additional image manipulation functionality

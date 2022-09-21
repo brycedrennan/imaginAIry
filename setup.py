@@ -7,7 +7,7 @@ setup(
     name="imaginAIry",
     author="Bryce Drennan",
     # author_email="b r y p y d o t io",
-    version="1.5.1",
+    version="1.5.2",
     description="AI imagined images. Pythonic generation of stable diffusion images.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -27,6 +27,7 @@ setup(
             "configs/*.yaml",
             "vendored/clip/*.txt.gz",
             "vendored/clipseg/*.pth",
+            "vendored/configs/*.*",
         ]
     },
     install_requires=[
