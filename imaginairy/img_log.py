@@ -22,13 +22,7 @@ def log_conditioning(conditioning, description):
 def log_latent(latents, description):
     if _CURRENT_LOGGING_CONTEXT is None:
         return
-    if torch.isnan(latents).any() or torch.isinf(latents).any():
-        logger.error(
-            "Inf/NaN values showing in transformer."
-            + repr(latents)[:50]
-            + " "
-            + description[:50]
-        )
+
     _CURRENT_LOGGING_CONTEXT.log_latents(latents, description)
 
 
