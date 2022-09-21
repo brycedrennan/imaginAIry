@@ -273,6 +273,18 @@ class LatentDiffusion(DDPM):
             self.init_from_ckpt(ckpt_path, ignore_keys)
             self.restarted_from_ckpt = True
 
+        # store initial padding mode so we can switch to 'circular'
+        # when we want tiled images
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                m._initial_padding_mode = m.padding_mode
+
+    def tile_mode(self, enabled):
+        """For creating seamless tiles"""
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                m.padding_mode = "circular" if enabled else m._initial_padding_mode
+
     def make_cond_schedule(
         self,
     ):

@@ -117,7 +117,7 @@ from imaginairy import imagine, imagine_image_files, ImaginePrompt, WeightedProm
 
 url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Thomas_Cole_-_Architect%E2%80%99s_Dream_-_Google_Art_Project.jpg/540px-Thomas_Cole_-_Architect%E2%80%99s_Dream_-_Google_Art_Project.jpg"
 prompts = [
-    ImaginePrompt("a scenic landscape", seed=1),
+    ImaginePrompt("a scenic landscape", seed=1, upscale=True),
     ImaginePrompt("a bowl of fruit"),
     ImaginePrompt([
         WeightedPrompt("cat", weight=1),
@@ -133,7 +133,8 @@ prompts = [
         mask_prompt="fruit|stems",
         mask_mode="replace",
         mask_expansion=3
-    )
+    ),
+    ImaginePrompt("strawberries", tile_mode=True),
 ]
 for result in imagine(prompts):
     # do something
@@ -162,7 +163,11 @@ docker build . -t imaginairy
 docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -v $HOME/.cache/torch:/root/.cache/torch -v `pwd`/outputs:/outputs imaginairy /bin/bash
 ```
 
+## Running on Google Colab
+[Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
+
 ## ChangeLog
+ - tile mode can now be specified per-prompt
 
 **1.5.3**
  - fix: missing config file for describe feature

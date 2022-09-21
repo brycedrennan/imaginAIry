@@ -103,6 +103,7 @@ class ImaginePrompt:
         fix_faces=False,
         sampler_type="PLMS",
         conditioning=None,
+        tile_mode=False,
     ):
         prompt = prompt if prompt is not None else "a scenic landscape"
         if isinstance(prompt, str):
@@ -131,6 +132,7 @@ class ImaginePrompt:
         self.mask_image = mask_image
         self.mask_mode = mask_mode
         self.mask_expansion = mask_expansion
+        self.tile_mode = tile_mode
 
     @property
     def prompt_text(self):
