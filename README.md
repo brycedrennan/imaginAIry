@@ -167,7 +167,11 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
- - tile mode can now be specified per-prompt
+
+**1.6.0**
+ - fix: *maybe* address #13 with `expected scalar type BFloat16 but found Float`
+   - at minimum one can specify `--precision full` now and that will probably fix the issue  
+ - feature: tile mode can now be specified per-prompt
 
 **1.5.3**
  - fix: missing config file for describe feature
