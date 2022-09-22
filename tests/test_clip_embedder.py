@@ -17,4 +17,4 @@ def test_text_conditioning():
     if "mps" in get_device():
         assert hashed == "263e5ee7d2be087d816e094b80ffc546"
     elif "cuda" in get_device():
-        assert hashed == "3d7867d5b2ebf15102a9ca9476d63ebc"
+        assert hashed == "41818051d7c469fc57d0a940c9d24d82"

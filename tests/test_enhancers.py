@@ -20,7 +20,7 @@ def test_fix_faces():
     if "mps" in get_device():
         assert img_hash(img) == "a75991307eda675a26eeb7073f828e93"
     else:
-        assert img_hash(img) == "5aa847a1464de75b158658a35800b6bf"
+        assert img_hash(img) == "e56c1205bbc8f251be05773f2ba7fa24"
 
 
 def img_hash(img):

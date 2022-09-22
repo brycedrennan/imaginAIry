@@ -18,6 +18,7 @@ def test_is_nsfw():
 
 def _pil_to_latent(img):
     model = load_model()
+    model.tile_mode(False)
     img = pillow_img_to_torch_image(img)
     img = img.to(get_device())
     latent = model.get_first_stage_encoding(model.encode_first_stage(img))

@@ -121,7 +121,7 @@ def configure_logging(level="INFO"):
 @click.option(
     "--tile",
     is_flag=True,
-    help="Any images rendered will be tileable.  Unfortunately cannot be controlled at the per-image level yet",
+    help="Any images rendered will be tileable.",
 )
 @click.option(
     "--mask-image",
@@ -149,6 +149,12 @@ def configure_logging(level="INFO"):
     is_flag=True,
     help="Generate a text description of the generated image",
 )
+@click.option(
+    "--precision",
+    help="evaluate at this precision",
+    type=click.Choice(["full", "autocast"]),
+    default="autocast",
+)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -174,6 +180,7 @@ def imagine_cmd(
     mask_mode,
     mask_expansion,
     caption,
+    precision,
 ):
     """Have the AI generate images. alias:imagine"""
     if ctx.invoked_subcommand is not None:
@@ -190,7 +197,7 @@ def imagine_cmd(
         init_image = LazyLoadingImage(url=init_image)
 
     prompts = []
-    load_model(tile_mode=tile)
+    load_model()
     for _ in range(repeats):
         for prompt_text in prompt_texts:
             prompt = ImaginePrompt(
@@ -209,6 +216,7 @@ def imagine_cmd(
                 mask_mode=mask_mode,
                 upscale=upscale,
                 fix_faces=fix_faces,
+                tile_mode=tile,
             )
             prompts.append(prompt)
 
@@ -217,9 +225,9 @@ def imagine_cmd(
         outdir=outdir,
         ddim_eta=ddim_eta,
         record_step_images="images" in show_work,
-        tile_mode=tile,
         output_file_extension="png",
         print_caption=caption,
+        precision=precision,
     )
 
 

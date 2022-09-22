@@ -51,6 +51,12 @@ deploy:  ## Deploy the package to pypi.org
 	rm -rf dist
 	@echo "Deploy successful! ✨ 🍰 ✨"
 
+build-dev-image:
+	docker build -f tests/Dockerfile -t imaginairy-dev .
+
+run-dev: build-dev-image
+	docker run -it -v $$HOME/.cache/huggingface:/root/.cache/huggingface -v $$HOME/.cache/torch:/root/.cache/torch -v `pwd`/outputs:/outputs imaginairy-dev /bin/bash
+
 requirements:  ## Freeze the requirements.txt file
 	pip-compile setup.py requirements-dev.in --output-file=requirements-dev.txt --upgrade
 
