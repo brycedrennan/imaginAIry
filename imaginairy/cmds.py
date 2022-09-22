@@ -149,6 +149,12 @@ def configure_logging(level="INFO"):
     is_flag=True,
     help="Generate a text description of the generated image",
 )
+@click.option(
+    "--precision",
+    help="evaluate at this precision",
+    type=click.Choice(["full", "autocast"]),
+    default="autocast",
+)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -174,6 +180,7 @@ def imagine_cmd(
     mask_mode,
     mask_expansion,
     caption,
+    precision,
 ):
     """Have the AI generate images. alias:imagine"""
     if ctx.invoked_subcommand is not None:
@@ -220,6 +227,7 @@ def imagine_cmd(
         record_step_images="images" in show_work,
         output_file_extension="png",
         print_caption=caption,
+        precision=precision,
     )
 
 

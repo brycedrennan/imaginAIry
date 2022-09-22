@@ -29,6 +29,7 @@ from imaginairy.samplers.base import get_sampler
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     expand_mask,
+    fix_torch_group_norm,
     fix_torch_nn_layer_norm,
     get_device,
     instantiate_from_config,
@@ -156,13 +157,16 @@ def imagine(
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
     _img_callback = None
-
+    if get_device() == "cpu":
+        logger.info("Running in CPU mode. it's gonna be slooooooow.")
     precision_scope = (
         autocast
         if precision == "autocast" and get_device() in ("cuda", "cpu")
         else nullcontext
     )
-    with torch.no_grad(), precision_scope(get_device()), fix_torch_nn_layer_norm():
+    with torch.no_grad(), precision_scope(
+        get_device()
+    ), fix_torch_nn_layer_norm(), fix_torch_group_norm():
         for prompt in prompts:
             with ImageLoggingContext(
                 prompt=prompt,
