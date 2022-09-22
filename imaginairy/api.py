@@ -288,8 +288,9 @@ def imagine(
                 x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
 
                 for x_sample in x_samples:
+                    x_sample = x_sample.to(torch.float32)
                     x_sample = 255.0 * rearrange(
-                        x_sample.to(torch.float32).cpu().numpy(), "c h w -> h w c"
+                        x_sample.cpu().numpy(), "c h w -> h w c"
                     )
                     x_sample_8_orig = x_sample.astype(np.uint8)
                     img = Image.fromarray(x_sample_8_orig)

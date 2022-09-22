@@ -245,11 +245,12 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - ✅ gfpgan - https://github.com/TencentARC/GFPGAN
      - ✅ codeformer - https://github.com/sczhou/CodeFormer
    - ✅ image describe feature - 
-     - https://github.com/salesforce/BLIP
+     - ✅ https://github.com/salesforce/BLIP
      - https://github.com/rmokady/CLIP_prefix_caption
      - https://github.com/pharmapsychotic/clip-interrogator (blip + clip)
      - https://github.com/KaiyangZhou/CoOp
    - outpainting
+     - https://github.com/parlance-zz/g-diffuser-bot/search?q=noise&type=issues
    - ✅ inpainting
      - https://github.com/andreas128/RePaint
      - img2img but keeps img stable
@@ -259,6 +260,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    - CPU support
    - ✅ img2img for plms
    - img2img for kdiff functions
+   - image masking
+     - https://boolean-parser.readthedocs.io/en/latest/index.html
+     - https://github.com/facebookresearch/detectron2
    - images as actual prompts instead of just init images
      - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
      - https://twitter.com/Buntworthy/status/1566744186153484288
@@ -266,12 +270,16 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - https://github.com/LambdaLabsML/lambda-diffusers
      - https://www.reddit.com/r/MachineLearning/comments/x6k5bm/n_stable_diffusion_image_variations_released/
      - 
+   - animations
+     - https://github.com/francislabountyjr/stable-diffusion/blob/main/inferencing_notebook.ipynb
+     - https://www.youtube.com/watch?v=E7aAFEhdngI 
    - cross-attention control: 
      - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
    - guided generation 
      - https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI
      - https://colab.research.google.com/github/aicrumb/doohickey/blob/main/Doohickey_Diffusion.ipynb#scrollTo=PytCwKXCmPid
      - https://github.com/mlfoundations/open_clip
+     - https://github.com/openai/guided-diffusion
    - ✅ tiling
    - output show-work videos
    - image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md
@@ -279,6 +287,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - https://www.reddit.com/r/StableDiffusion/comments/xbwb5y/how_to_run_textual_inversion_locally_train_your/
      - https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h
      - https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/stable_diffusion_textual_inversion_library_navigator.ipynb
+     - https://github.com/Jack000/glid-3-xl-stable
    - fix saturation at high CFG https://www.reddit.com/r/StableDiffusion/comments/xalo78/fixing_excessive_contrastsaturation_resulting/
    - https://www.reddit.com/r/StableDiffusion/comments/xbrrgt/a_rundown_of_twenty_new_methodsoptions_added_to/
 
@@ -293,3 +302,4 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    - https://www.reddit.com/r/StableDiffusion/comments/xbeyw3/can_anyone_offer_a_little_guidance_on_the/
  - https://www.reddit.com/r/bigsleep/comments/xb5cat/wiskkeys_lists_of_texttoimage_systems_and_related/
  - https://huggingface.co/blog/annotated-diffusion
+ - https://huggingface.co/blog/assets/78_annotated-diffusion/unet_architecture.jpg
