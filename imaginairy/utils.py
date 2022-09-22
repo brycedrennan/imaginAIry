@@ -61,6 +61,18 @@ def get_obj_from_str(string, reload=False):
     return getattr(importlib.import_module(module, package=None), cls)
 
 
+@contextmanager
+def platform_appropriate_autocast(precision="autocast"):
+    """
+    allow calculations to run in mixed precision, which can be faster
+    """
+    precision_scope = nullcontext
+    if precision == "autocast" and get_device() in ("cuda", "cpu"):
+        precision_scope = autocast
+    with precision_scope(get_device()):
+        yield
+
+
 def _fixed_layer_norm(
     input: Tensor,  # noqa
     normalized_shape: List[int],
@@ -119,7 +131,7 @@ def fix_torch_group_norm():
     orig_group_norm = functional.group_norm
 
     def _group_norm_wrapper(
-        input: Tensor,
+        input: Tensor,  # noqa
         num_groups: int,
         weight: Optional[Tensor] = None,
         bias: Optional[Tensor] = None,

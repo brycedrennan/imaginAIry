@@ -6,3 +6,4 @@ pydocstyle
 pylama
 pylint
 pytest
+pytest-randomly

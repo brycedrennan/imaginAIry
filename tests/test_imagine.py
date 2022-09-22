@@ -8,7 +8,7 @@ from imaginairy.utils import get_device
 from . import TESTS_FOLDER
 
 device_sampler_type_test_cases = {
-    "mps:0": {
+    "mps:0": [
         ("plms", "b4b434ed45919f3505ac2be162791c71"),
         ("ddim", "b369032a025915c0a7ccced165a609b3"),
         ("k_lms", "b87325c189799d646ccd07b331564eb6"),
@@ -17,8 +17,8 @@ device_sampler_type_test_cases = {
         ("k_euler", "d126da5ca8b08099cde8b5037464e788"),
         ("k_euler_a", "cac5ca2e26c31a544b76a9442eb2ea37"),
         ("k_heun", "0382ef71d9967fefd15676410289ebab"),
-    },
-    "cuda": {
+    ],
+    "cuda": [
         ("plms", "62e78287e7848e48d45a1b207fb84102"),
         ("ddim", "164c2a008b100e5fa07d3db2018605bd"),
         ("k_lms", "450fea507ccfb44b677d30fae9f40a52"),
@@ -27,7 +27,8 @@ device_sampler_type_test_cases = {
         ("k_euler", "06df9c19d472bfa6530db98be4ea10e8"),
         ("k_euler_a", "79552628ff77914c8b6870703fe116b5"),
         ("k_heun", "8ced3578ae25d34da9f4e4b1a20bf416"),
-    },
+    ],
+    "cpu": [],
 }
 sampler_type_test_cases = device_sampler_type_test_cases[get_device()]
 
@@ -54,12 +55,14 @@ device_sampler_type_test_cases_img_2_img = {
         ("plms", "efba8b836b51d262dbf72284844869f8"),
         ("ddim", "a62878000ad3b581a11dd3fb329dc7d2"),
     },
+    "cpu": [],
 }
 sampler_type_test_cases_img_2_img = device_sampler_type_test_cases_img_2_img[
     get_device()
 ]
 
 
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 @pytest.mark.parametrize("sampler_type,expected_md5", sampler_type_test_cases_img_2_img)
 def test_img_to_img(sampler_type, expected_md5):
     prompt = ImaginePrompt(
@@ -79,6 +82,7 @@ def test_img_to_img(sampler_type, expected_md5):
     assert result.md5() == expected_md5
 
 
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_img_to_img_from_url():
     prompt = ImaginePrompt(
         "dogs lying on a hot pink couch",
@@ -96,6 +100,7 @@ def test_img_to_img_from_url():
     imagine_image_files(prompt, outdir=out_folder)
 
 
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_img_to_file():
     prompt = ImaginePrompt(
         "an old growth forest, diffuse light poking through the canopy. high-resolution, nature photography, nat geo photo",
@@ -110,6 +115,7 @@ def test_img_to_file():
     imagine_image_files(prompt, outdir=out_folder)
 
 
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_inpainting():
     prompt = ImaginePrompt(
         "a basketball on a bench",
@@ -126,6 +132,7 @@ def test_inpainting():
     imagine_image_files(prompt, outdir=out_folder)
 
 
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_cliptext_inpainting():
     prompts = [
         ImaginePrompt(

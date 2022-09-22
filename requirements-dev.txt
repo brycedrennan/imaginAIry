@@ -10,7 +10,7 @@ absl-py==1.2.0
     #   tensorboard
 addict==2.4.0
     # via basicsr
-aiohttp==3.8.1
+aiohttp==3.8.3
     # via fsspec
 aiosignal==1.2.0
     # via aiohttp
@@ -68,7 +68,7 @@ filelock==3.8.0
     #   transformers
 filterpy==1.4.5
     # via facexlib
-fonttools==4.37.2
+fonttools==4.37.3
     # via matplotlib
 frozenlist==1.3.1
     # via
@@ -86,7 +86,7 @@ gfpgan==1.3.8
     # via
     #   imaginAIry (setup.py)
     #   realesrgan
-google-auth==2.11.0
+google-auth==2.11.1
     # via
     #   google-auth-oauthlib
     #   tb-nightly
@@ -95,7 +95,7 @@ google-auth-oauthlib==0.4.6
     # via
     #   tb-nightly
     #   tensorboard
-grpcio==1.49.0
+grpcio==1.48.1
     # via
     #   tb-nightly
     #   tensorboard
@@ -212,6 +212,7 @@ pillow==9.2.0
     #   diffusers
     #   facexlib
     #   imageio
+    #   imaginAIry (setup.py)
     #   matplotlib
     #   realesrgan
     #   scikit-image
@@ -249,13 +250,17 @@ pyflakes==2.5.0
     # via pylama
 pylama==8.4.1
     # via -r requirements-dev.in
-pylint==2.15.2
+pylint==2.15.3
     # via -r requirements-dev.in
 pyparsing==3.0.9
     # via
     #   matplotlib
     #   packaging
 pytest==7.1.3
+    # via
+    #   -r requirements-dev.in
+    #   pytest-randomly
+pytest-randomly==3.12.0
     # via -r requirements-dev.in
 python-dateutil==2.8.2
     # via matplotlib
@@ -273,7 +278,7 @@ pyyaml==6.0
     #   pycln
     #   pytorch-lightning
     #   transformers
-realesrgan==0.2.8
+realesrgan==0.3.0
     # via imaginAIry (setup.py)
 regex==2022.9.13
     # via
@@ -311,7 +316,7 @@ six==1.16.0
     #   python-dateutil
 snowballstemmer==2.2.0
     # via pydocstyle
-tb-nightly==2.11.0a20220918
+tb-nightly==2.11.0a20220921
     # via
     #   basicsr
     #   gfpgan

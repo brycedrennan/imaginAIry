@@ -1,7 +1,6 @@
 import logging
 import os
 import re
-from contextlib import nullcontext
 from functools import lru_cache
 
 import numpy as np
@@ -11,7 +10,6 @@ from einops import rearrange
 from omegaconf import OmegaConf
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 from pytorch_lightning import seed_everything
-from torch import autocast
 from transformers import cached_path
 
 from imaginairy.enhancers.clip_masking import get_img_mask
@@ -35,6 +33,7 @@ from imaginairy.utils import (
     instantiate_from_config,
     pillow_fit_image_within,
     pillow_img_to_torch_image,
+    platform_appropriate_autocast,
 )
 
 LIB_PATH = os.path.dirname(__file__)
@@ -159,13 +158,9 @@ def imagine(
     _img_callback = None
     if get_device() == "cpu":
         logger.info("Running in CPU mode. it's gonna be slooooooow.")
-    precision_scope = (
-        autocast
-        if precision == "autocast" and get_device() in ("cuda", "cpu")
-        else nullcontext
-    )
-    with torch.no_grad(), precision_scope(
-        get_device()
+
+    with torch.no_grad(), platform_appropriate_autocast(
+        precision
     ), fix_torch_nn_layer_norm(), fix_torch_group_norm():
         for prompt in prompts:
             with ImageLoggingContext(
