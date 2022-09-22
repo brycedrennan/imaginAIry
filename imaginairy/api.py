@@ -280,7 +280,6 @@ def imagine(
                         unconditional_guidance_scale=prompt.prompt_strength,
                         unconditional_conditioning=uc,
                         eta=ddim_eta,
-                        initial_noise_tensor=start_code,
                         img_callback=_img_callback,
                     )
 

@@ -127,8 +127,8 @@ class DDIMSampler:
         x_T=None,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
-        # this has to come in the same format as the conditioning, # e.g. as encoded tokens, ...
         **kwargs,
+        # this has to come in the same format as the conditioning, # e.g. as encoded tokens, ...
     ):
         if isinstance(conditioning, dict):
             cbs = conditioning[list(conditioning.keys())[0]].shape[0]
@@ -376,7 +376,7 @@ class DDIMSampler:
             # x_dec = x_dec.detach() + (original_loss * 0.1) ** 2
             # cond_grad = -torch.autograd.grad(original_loss, x_dec)[0]
             # x_dec = x_dec.detach() + cond_grad * sigma_t ** 2
-            ## x_dec_alt = x_dec + (original_loss * 0.1) ** 2
+            # x_dec_alt = x_dec + (original_loss * 0.1) ** 2
 
             log_latent(x_dec, f"x_dec {i}")
             log_latent(pred_x0, f"pred_x0 {i}")

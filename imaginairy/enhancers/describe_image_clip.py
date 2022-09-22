@@ -30,7 +30,7 @@ def find_img_text_similarity(image: Image.Image, phrases: Sequence):
 
 
 def find_embed_text_similarity(embed_features, phrases):
-    model, preprocess = get_model()
+    model, _ = get_model()
     text = clip.tokenize(phrases).to(device)
 
     with torch.no_grad():

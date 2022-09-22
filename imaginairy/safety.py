@@ -15,7 +15,7 @@ def safety_models():
     return safety_feature_extractor, safety_checker
 
 
-def is_nsfw(img, x_sample):
+def is_nsfw(img):
     safety_feature_extractor, safety_checker = safety_models()
     safety_checker_input = safety_feature_extractor([img], return_tensors="pt")
     clip_input = safety_checker_input.pixel_values
