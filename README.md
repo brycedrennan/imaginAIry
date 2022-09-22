@@ -167,6 +167,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+**1.6.1**
+ - fix: make sure image tensors come to the CPU as float32 so there aren't compatability issues with non-bfloat16 cpus
 
 **1.6.0**
  - fix: *maybe* address #13 with `expected scalar type BFloat16 but found Float`
