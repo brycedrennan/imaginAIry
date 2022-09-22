@@ -23,9 +23,7 @@ class KDiffusionSampler:
         shape,
         unconditional_guidance_scale,
         unconditional_conditioning,
-        eta,
         initial_noise_tensor=None,
-        img_callback=None,
     ):
         size = (batch_size, *shape)
 

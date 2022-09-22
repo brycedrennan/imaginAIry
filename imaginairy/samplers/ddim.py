@@ -114,21 +114,15 @@ class DDIMSampler:
         shape,
         conditioning,
         callback=None,
-        normals_sequence=None,
-        img_callback=None,
-        quantize_x0=False,
         eta=0.0,
         mask=None,
         x0=None,
         temperature=1.0,
         noise_dropout=0.0,
-        score_corrector=None,
-        corrector_kwargs=None,
         x_T=None,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
         # this has to come in the same format as the conditioning, # e.g. as encoded tokens, ...
-        **kwargs,
     ):
         if isinstance(conditioning, dict):
             cbs = conditioning[list(conditioning.keys())[0]].shape[0]
@@ -148,14 +142,10 @@ class DDIMSampler:
             conditioning,
             shape=(batch_size, *shape),
             callback=callback,
-            img_callback=img_callback,
-            quantize_denoised=quantize_x0,
             mask=mask,
             x0=x0,
             noise_dropout=noise_dropout,
             temperature=temperature,
-            score_corrector=score_corrector,
-            corrector_kwargs=corrector_kwargs,
             x_T=x_T,
             unconditional_guidance_scale=unconditional_guidance_scale,
             unconditional_conditioning=unconditional_conditioning,
@@ -170,14 +160,10 @@ class DDIMSampler:
         x_T=None,
         callback=None,
         timesteps=None,
-        quantize_denoised=False,
         mask=None,
         x0=None,
-        img_callback=None,
         temperature=1.0,
         noise_dropout=0.0,
-        score_corrector=None,
-        corrector_kwargs=None,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
     ):
@@ -224,7 +210,6 @@ class DDIMSampler:
                 cond,
                 ts,
                 index=index,
-                quantize_denoised=quantize_denoised,
                 temperature=temperature,
                 noise_dropout=noise_dropout,
                 unconditional_guidance_scale=unconditional_guidance_scale,
@@ -245,12 +230,10 @@ class DDIMSampler:
         t,
         index,
         repeat_noise=False,
-        quantize_denoised=False,
         temperature=1.0,
         noise_dropout=0.0,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
-        loss_function=None,
     ):
         assert unconditional_guidance_scale >= 1
         x_in = torch.cat([x] * 2)
@@ -332,8 +315,6 @@ class DDIMSampler:
         t_start,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
-        img_callback=None,
-        score_corrector=None,
         temperature=1.0,
         mask=None,
         orig_latent=None,
@@ -376,7 +357,7 @@ class DDIMSampler:
             # x_dec = x_dec.detach() + (original_loss * 0.1) ** 2
             # cond_grad = -torch.autograd.grad(original_loss, x_dec)[0]
             # x_dec = x_dec.detach() + cond_grad * sigma_t ** 2
-            ## x_dec_alt = x_dec + (original_loss * 0.1) ** 2
+            # x_dec_alt = x_dec + (original_loss * 0.1) ** 2
 
             log_latent(x_dec, f"x_dec {i}")
             log_latent(pred_x0, f"pred_x0 {i}")

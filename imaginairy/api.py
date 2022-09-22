@@ -204,7 +204,7 @@ def imagine(
                     generation_strength = 1 - prompt.init_image_strength
                     ddim_steps = int(prompt.steps / generation_strength)
                     sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
-                    init_image, _, h = pillow_fit_image_within(
+                    init_image, _ = pillow_fit_image_within(
                         prompt.init_image,
                         max_height=prompt.height,
                         max_width=prompt.width,
@@ -280,7 +280,6 @@ def imagine(
                         unconditional_guidance_scale=prompt.prompt_strength,
                         unconditional_conditioning=uc,
                         eta=ddim_eta,
-                        initial_noise_tensor=start_code,
                         img_callback=_img_callback,
                     )
 

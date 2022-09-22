@@ -1,7 +1,11 @@
 import torch
 from torch import nn
 
+from imaginairy.samplers.ddim import DDIMSampler
+from imaginairy.samplers.kdiff import KDiffusionSampler
+from imaginairy.samplers.plms import PLMSSampler
 from imaginairy.utils import get_device
+
 
 SAMPLER_TYPE_OPTIONS = [
     "plms",
@@ -25,18 +29,16 @@ _k_sampler_type_lookup = {
 
 
 def get_sampler(sampler_type, model):
-    from imaginairy.samplers.ddim import DDIMSampler
-    from imaginairy.samplers.kdiff import KDiffusionSampler
-    from imaginairy.samplers.plms import PLMSSampler
 
     sampler_type = sampler_type.lower()
     if sampler_type == "plms":
         return PLMSSampler(model)
-    elif sampler_type == "ddim":
+    if sampler_type == "ddim":
         return DDIMSampler(model)
-    elif sampler_type.startswith("k_"):
+    if sampler_type.startswith("k_"):
         sampler_type = _k_sampler_type_lookup[sampler_type]
         return KDiffusionSampler(model, sampler_type)
+    raise ValueError("Invalid inputs")
 
 
 class CFGDenoiser(nn.Module):
@@ -84,9 +86,7 @@ class DiffusionSampler:
         shape,
         unconditional_guidance_scale,
         unconditional_conditioning,
-        eta,
         initial_noise_tensor=None,
-        img_callback=None,
     ):
         size = (batch_size, *shape)
 
