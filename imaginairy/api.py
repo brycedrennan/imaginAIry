@@ -289,7 +289,7 @@ def imagine(
 
                 for x_sample in x_samples:
                     x_sample = 255.0 * rearrange(
-                        x_sample.cpu().numpy(), "c h w -> h w c"
+                        x_sample.to(torch.float32).cpu().numpy(), "c h w -> h w c"
                     )
                     x_sample_8_orig = x_sample.astype(np.uint8)
                     img = Image.fromarray(x_sample_8_orig)

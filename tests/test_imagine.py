@@ -19,14 +19,14 @@ device_sampler_type_test_cases = {
         ("k_heun", "0382ef71d9967fefd15676410289ebab"),
     ],
     "cuda": [
-        ("plms", "62e78287e7848e48d45a1b207fb84102"),
-        ("ddim", "164c2a008b100e5fa07d3db2018605bd"),
-        ("k_lms", "450fea507ccfb44b677d30fae9f40a52"),
-        ("k_dpm_2", "901daad7a9e359404d8e3d3f4236c4ce"),
-        ("k_dpm_2_a", "855e80286dfdc89752f6bdd3fdeb1a62"),
-        ("k_euler", "06df9c19d472bfa6530db98be4ea10e8"),
-        ("k_euler_a", "79552628ff77914c8b6870703fe116b5"),
-        ("k_heun", "8ced3578ae25d34da9f4e4b1a20bf416"),
+        ("plms", "0c44d2c8222f519a6700ebae54450435"),
+        ("ddim", "4493ca85c2b24879525eac2b73e5a538"),
+        ("k_lms", "82b38a5638a572d5968422b02e625f66"),
+        ("k_dpm_2", "9df2fcd6256ff68c6cc4a6c603ae8f2e"),
+        ("k_dpm_2_a", "0c5491c1a73094540ed15785f4106bca"),
+        ("k_euler", "c82f628217fab06d8b5d5227827c1d92"),
+        ("k_euler_a", "74f748a8371c2fcec54ecc5dcf1dbb64"),
+        ("k_heun", "9ae586a7a8b10a0a0bf120405e4937e9"),
     ],
     "cpu": [],
 }
@@ -52,8 +52,8 @@ device_sampler_type_test_cases_img_2_img = {
         ("ddim", "87d04423f6d03ddfc065cabc62e3909c"),
     },
     "cuda": {
-        ("plms", "efba8b836b51d262dbf72284844869f8"),
-        ("ddim", "a62878000ad3b581a11dd3fb329dc7d2"),
+        ("plms", "c95f23a7039cf702e2e448f454e27c46"),
+        ("ddim", "ba054c630d9999ccbcc60c9fb687682d"),
     },
     "cpu": [],
 }

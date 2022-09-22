@@ -238,6 +238,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - stable super-res?
        - todo: try with 1-0-0-0 mask at full image resolution (rencoding entire image+predicted image at every step)
        - todo: use a gaussian pyramid and only include the "high-detail" level of the pyramid into the next step
+       - https://www.reddit.com/r/StableDiffusion/comments/xkjjf9/upscale_to_huge_sizes_and_add_detail_with_sd/
    - ✅ face enhancers
      - ✅ gfpgan - https://github.com/TencentARC/GFPGAN
      - ✅ codeformer - https://github.com/sczhou/CodeFormer
@@ -283,6 +284,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
  - https://github.com/huggingface/diffusers/tree/main/src/diffusers/pipelines/stable_diffusion
  - https://github.com/lstein/stable-diffusion
  - https://github.com/AUTOMATIC1111/stable-diffusion-webui
+ - https://github.com/blueturtleai/gimp-stable-diffusion
 
 ## Further Reading
  - Differences between samplers
