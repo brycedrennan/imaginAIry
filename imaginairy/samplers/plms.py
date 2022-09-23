@@ -20,13 +20,14 @@ logger = logging.getLogger(__name__)
 class PLMSSampler:
     """probabilistic least-mean-squares"""
 
-    def __init__(self, model, **kwargs):
+    def __init__(self, model):
         self.model = model
         self.ddpm_num_timesteps = model.num_timesteps
         self.device_available = get_device()
+        self.ddim_timesteps = None
 
     def register_buffer(self, name, attr):
-        if type(attr) == torch.Tensor:
+        if isinstance(attr, torch.Tensor):
             if attr.device != torch.device(self.device_available):
                 attr = attr.to(torch.float32).to(torch.device(self.device_available))
         setattr(self, name, attr)
@@ -43,7 +44,9 @@ class PLMSSampler:
         assert (
             alphas_cumprod.shape[0] == self.ddpm_num_timesteps
         ), "alphas have to be defined for each timestep"
-        to_torch = lambda x: x.clone().detach().to(torch.float32).to(self.model.device)
+
+        def to_torch(x):
+            return x.clone().detach().to(torch.float32).to(self.model.device)
 
         self.register_buffer("betas", to_torch(self.model.betas))
         self.register_buffer("alphas_cumprod", to_torch(alphas_cumprod))
@@ -431,7 +434,7 @@ class PLMSSampler:
             # x_dec = x_dec.detach() + (original_loss * 0.1) ** 2
             # cond_grad = -torch.autograd.grad(original_loss, x_dec)[0]
             # x_dec = x_dec.detach() + cond_grad * sigma_t ** 2
-            ## x_dec_alt = x_dec + (original_loss * 0.1) ** 2
+            # x_dec_alt = x_dec + (original_loss * 0.1) ** 2
 
             old_eps.append(e_t)
             if len(old_eps) >= 4:

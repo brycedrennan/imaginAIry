@@ -9,11 +9,11 @@ from tests import TESTS_FOLDER
 def test_is_nsfw():
     img = Image.open(f"{TESTS_FOLDER}/data/safety.jpg")
     latent = _pil_to_latent(img)
-    assert is_nsfw(img, latent)
+    assert is_nsfw(img)
 
     img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg")
     latent = _pil_to_latent(img)
-    assert not is_nsfw(img, latent)
+    assert not is_nsfw(img)
 
 
 def _pil_to_latent(img):

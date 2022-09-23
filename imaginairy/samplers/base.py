@@ -32,11 +32,12 @@ def get_sampler(sampler_type, model):
     sampler_type = sampler_type.lower()
     if sampler_type == "plms":
         return PLMSSampler(model)
-    elif sampler_type == "ddim":
+    if sampler_type == "ddim":
         return DDIMSampler(model)
-    elif sampler_type.startswith("k_"):
+    if sampler_type.startswith("k_"):
         sampler_type = _k_sampler_type_lookup[sampler_type]
         return KDiffusionSampler(model, sampler_type)
+    raise ValueError("invalid sampler_type")
 
 
 class CFGDenoiser(nn.Module):
