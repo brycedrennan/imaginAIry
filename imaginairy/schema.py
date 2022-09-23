@@ -114,6 +114,9 @@ class ImaginePrompt:
         self.prompt_strength = prompt_strength
         if isinstance(init_image, str):
             init_image = LazyLoadingImage(filepath=init_image)
+            
+        if isinstance(mask_image, str):
+            mask_image = LazyLoadingImage(filepath=mask_image)
 
         if mask_image is not None and mask_prompt is not None:
             raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
