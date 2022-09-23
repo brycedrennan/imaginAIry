@@ -310,7 +310,7 @@ def imagine(
                         caption = generate_caption(img)
                         logger.info(f"    Generated caption: {caption}")
                     if IMAGINAIRY_SAFETY_MODE != SafetyMode.DISABLED:
-                        is_nsfw_img = is_nsfw(img, x_sample)
+                        is_nsfw_img = is_nsfw(img)
                         if is_nsfw_img and IMAGINAIRY_SAFETY_MODE == SafetyMode.FILTER:
                             logger.info("    ⚠️  Filtering NSFW image")
                             img = img.filter(ImageFilter.GaussianBlur(radius=40))
