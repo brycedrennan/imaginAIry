@@ -15,6 +15,7 @@ from torch import autocast
 from imaginairy.utils import get_device, pillow_img_to_torch_image
 from imaginairy.vendored import k_diffusion as K
 
+
 def pil_img_to_latent(model, img, batch_size=1, half=True):
     # init_image = pil_img_to_torch(img, half=half).to(device)
     init_image = pillow_img_to_torch_image(img).to(get_device())

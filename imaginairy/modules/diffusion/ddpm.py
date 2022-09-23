@@ -11,8 +11,8 @@ from functools import partial
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from torch import nn
 from einops import rearrange
+from torch import nn
 from torchvision.utils import make_grid
 from tqdm import tqdm
 
@@ -348,16 +348,10 @@ class LatentDiffusion(DDPM):
             model = instantiate_from_config(config)
             self.cond_stage_model = model
 
-    def _get_denoise_row_from_list(
-        self, samples, desc=""
-    ):
+    def _get_denoise_row_from_list(self, samples, desc=""):
         denoise_row = []
         for zd in tqdm(samples, desc=desc):
-            denoise_row.append(
-                self.decode_first_stage(
-                    zd.to(self.device)
-                )
-            )
+            denoise_row.append(self.decode_first_stage(zd.to(self.device)))
         n_imgs_per_row = len(denoise_row)
         denoise_row = torch.stack(denoise_row)  # n_log_step, n_row, C, H, W
         denoise_grid = rearrange(denoise_row, "n b c h w -> b n c h w")

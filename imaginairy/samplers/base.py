@@ -3,7 +3,6 @@ from torch import nn
 
 from imaginairy.utils import get_device
 
-
 SAMPLER_TYPE_OPTIONS = [
     "plms",
     "ddim",
