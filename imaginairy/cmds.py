@@ -113,7 +113,8 @@ def configure_logging(level="INFO"):
     help="What level of logs to show.",
 )
 @click.option(
-    "--quiet", "-q",
+    "--quiet",
+    "-q",
     is_flag=True,
     help="Alias of `--log-level ERROR`",
 )
@@ -245,7 +246,7 @@ def imagine_cmd(
         output_file_extension="png",
         print_caption=caption,
         precision=precision,
-        mask_modify_original=mask_modify_original
+        mask_modify_original=mask_modify_original,
     )
 
 

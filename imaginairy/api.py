@@ -98,7 +98,7 @@ def imagine_image_files(
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
 
-    base_count = len(os.listdir(outdir))
+    base_count = len(os.listdir(generated_imgs_path))
     output_file_extension = output_file_extension.lower()
     if output_file_extension not in {"jpg", "png"}:
         raise ValueError("Must output a png or jpg")
@@ -210,8 +210,10 @@ def imagine(
                 mask, mask_image, mask_image_orig = None, None, None
                 if prompt.init_image:
                     generation_strength = 1 - prompt.init_image_strength
-                    ddim_steps = int(prompt.steps / generation_strength)
-                    sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
+                    t_enc = int(prompt.steps * generation_strength)
+                    sampler.make_schedule(
+                        ddim_num_steps=prompt.steps, ddim_eta=ddim_eta
+                    )
                     try:
                         init_image = pillow_fit_image_within(
                             prompt.init_image,
@@ -265,7 +267,7 @@ def imagine(
                     # encode (scaled latent)
                     z_enc = sampler.stochastic_encode(
                         init_latent,
-                        torch.tensor([prompt.steps]).to(get_device()),
+                        torch.tensor([t_enc - 1]).to(get_device()),
                     )
                     log_latent(z_enc, "z_enc")
 
@@ -273,7 +275,7 @@ def imagine(
                     samples = sampler.decode(
                         z_enc,
                         c,
-                        prompt.steps,
+                        t_enc,
                         unconditional_guidance_scale=prompt.prompt_strength,
                         unconditional_conditioning=uc,
                         img_callback=_img_callback,

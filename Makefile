@@ -26,7 +26,7 @@ init: require_pyenv  ## Setup a dev environment for local development.
 
 af: autoformat  ## Alias for `autoformat`
 autoformat:  ## Run the autoformatter.
-	@pycln . --all
+	@pycln . --all --quiet
 	@isort --atomic --profile black .
 	@black .
 
