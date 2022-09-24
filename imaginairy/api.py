@@ -124,8 +124,8 @@ def imagine_image_files(
     ):
         prompt = result.prompt
         basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
-        filepath = os.path.join(outdir, f"{basefilename}.jpg")
-
+        filepath = os.path.join(outdir, "generated", f"{basefilename}.jpg")
+        os.makedirs(filepath, exist_ok=True)
         result.save(filepath)
         logger.info(f"    🖼  saved to: {filepath}")
         if result.upscaled_img:
