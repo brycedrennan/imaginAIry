@@ -121,6 +121,7 @@ a bowl full of gold bars sitting on a table
  - Prompt metadata saved into image file metadata
  - Edit images by describing the part you want edited (see example above)
  - Have AI generate captions for images `aimg describe <filename-or-url>`
+ - Interactive prompt: just run `aimg`
 
 ## How To
 
@@ -180,7 +181,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
- 
+ - feature: interactive prompt added. access by running `aimg`
  - feature: Specify advanced text based masks using boolean logic and strength modifiers. Mask descriptions must be lowercase. Keywords uppercase.
    Valid symbols: `AND`, `OR`, `NOT`, `()`, and mask strength modifier `{+0.1}` where `+` can be any of `+ - * /`    
  - feature: apply mask edits to original files
@@ -285,7 +286,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    - CPU support
    - ✅ img2img for plms
    - img2img for kdiff functions
-   - image masking
+   - text based image masking
      - https://boolean-parser.readthedocs.io/en/latest/index.html
      - https://github.com/facebookresearch/detectron2
    - images as actual prompts instead of just init images

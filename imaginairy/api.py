@@ -91,7 +91,7 @@ def imagine_image_files(
     record_step_images=False,
     output_file_extension="jpg",
     print_caption=False,
-    create_modified_originals_for_masks=True,
+    mask_modify_original=True,
 ):
     big_path = os.path.join(outdir, "upscaled")
     masked_orig_path = os.path.join(outdir, "modified_originals")
@@ -120,7 +120,7 @@ def imagine_image_files(
         ddim_eta=ddim_eta,
         img_callback=_record_step if record_step_images else None,
         add_caption=print_caption,
-        create_modified_originals_for_masks=create_modified_originals_for_masks,
+        mask_modify_original=mask_modify_original,
     ):
         prompt = result.prompt
         basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
@@ -151,7 +151,7 @@ def imagine(
     img_callback=None,
     half_mode=None,
     add_caption=False,
-    create_modified_originals_for_masks=True,
+    mask_modify_original=True,
 ):
     model = load_model()
 
@@ -335,11 +335,7 @@ def imagine(
                             upscaled_img = enhance_faces(upscaled_img, fidelity=0.8)
 
                     # put the newly generated patch back into the original, full size image
-                    if (
-                        create_modified_originals_for_masks
-                        and mask_image_orig
-                        and prompt.init_image
-                    ):
+                    if mask_modify_original and mask_image_orig and prompt.init_image:
                         img_to_add_back_to_original = (
                             upscaled_img if upscaled_img else img
                         )
