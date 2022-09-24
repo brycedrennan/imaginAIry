@@ -1,6 +1,7 @@
 import logging.config
 
 import click
+from click_shell import shell
 
 from imaginairy import LazyLoadingImage, generate_caption
 from imaginairy.api import imagine_image_files, load_model
@@ -112,11 +113,16 @@ def configure_logging(level="INFO"):
     help="What level of logs to show.",
 )
 @click.option(
+    "--quiet, -q",
+    is_flag=True,
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    help="Alias of `--log-level ERROR`",
+)
+@click.option(
     "--show-work",
     default=["none"],
-    type=click.Choice(["none", "images", "video"]),
-    multiple=True,
-    help="Make a video showing the image being created",
+    is_flag=True,
+    help="Output a debug images to `steps` folder.",
 )
 @click.option(
     "--tile",
@@ -143,6 +149,12 @@ def configure_logging(level="INFO"):
     default="replace",
     type=click.Choice(["keep", "replace"]),
     help="Should we replace the masked area or keep it?",
+)
+@click.option(
+    "--mask-modify-original",
+    default=True,
+    is_flag=True,
+    help="After the inpainting is done",
 )
 @click.option(
     "--caption",
@@ -174,6 +186,7 @@ def imagine_cmd(
     sampler_type,
     ddim_eta,
     log_level,
+    quiet,
     show_work,
     tile,
     mask_image,
@@ -186,6 +199,8 @@ def imagine_cmd(
     if ctx.invoked_subcommand is not None:
         return
     suppress_annoying_logs_and_warnings()
+    if quiet:
+        log_level = "ERROR"
     configure_logging(log_level)
 
     total_image_count = len(prompt_texts) * repeats
@@ -233,7 +248,7 @@ def imagine_cmd(
     )
 
 
-@click.group("aimg")
+@shell(prompt="aimg > ", intro="Starting imaginAIry...")
 def aimg():
     pass
 
@@ -253,7 +268,7 @@ def describe(image_filepaths):
         print(generate_caption(img.copy()))
 
 
-aimg.add_command(imagine_cmd, name="generate")
+aimg.add_command(imagine_cmd, name="imagine")
 
 if __name__ == "__main__":
     imagine_cmd()  # noqa

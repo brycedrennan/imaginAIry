@@ -32,6 +32,7 @@ setup(
     },
     install_requires=[
         "click",
+        "click-shell",
         "protobuf != 3.20.2, != 3.19.5",
         "fairscale>=0.4.4",  # for vendored blip
         "ftfy",  # for vendored clip
