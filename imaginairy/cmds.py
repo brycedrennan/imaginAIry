@@ -129,19 +129,20 @@ def configure_logging(level="INFO"):
 )
 @click.option(
     "--mask-prompt",
-    help="Describe what you want masked and the AI will mask it for you",
+    help=(
+        "Describe what you want masked and the AI will mask it for you. "
+        "You can describe complex masks with AND, OR, NOT keywords and parentheses. "
+        "The strength of each mask can be modified with {*1.5} notation. \n\n"
+        "Examples:  \n"
+        "car AND (wheels{*1.1} OR trunk OR engine OR windows OR headlights) AND NOT (truck OR headlights){*10}\n"
+        "fruit|fruit stem"
+    ),
 )
 @click.option(
     "--mask-mode",
     default="replace",
     type=click.Choice(["keep", "replace"]),
     help="Should we replace the masked area or keep it?",
-)
-@click.option(
-    "--mask-expansion",
-    default="2",
-    type=int,
-    help="How much to grow (or shrink) the mask area",
 )
 @click.option(
     "--caption",
@@ -178,7 +179,6 @@ def imagine_cmd(
     mask_image,
     mask_prompt,
     mask_mode,
-    mask_expansion,
     caption,
     precision,
 ):
@@ -196,6 +196,9 @@ def imagine_cmd(
     if init_image and init_image.startswith("http"):
         init_image = LazyLoadingImage(url=init_image)
 
+    if mask_image and mask_image.startswith("http"):
+        mask_image = LazyLoadingImage(url=mask_image)
+
     prompts = []
     load_model()
     for _ in range(repeats):
@@ -212,7 +215,6 @@ def imagine_cmd(
                 width=width,
                 mask_image=mask_image,
                 mask_prompt=mask_prompt,
-                mask_expansion=mask_expansion,
                 mask_mode=mask_mode,
                 upscale=upscale,
                 fix_faces=fix_faces,

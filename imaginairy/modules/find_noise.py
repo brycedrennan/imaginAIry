@@ -9,26 +9,15 @@ needs https://github.com/crowsonkb/k-diffusion
 from contextlib import nullcontext
 
 import torch
-from einops import repeat
 from torch import autocast
 
-from imaginairy.utils import get_device, pillow_img_to_torch_image
+from imaginairy.img_utils import pillow_img_to_model_latent
+from imaginairy.utils import get_device
 from imaginairy.vendored import k_diffusion as K
 
 
-def pil_img_to_latent(model, img, batch_size=1, half=True):
-    # init_image = pil_img_to_torch(img, half=half).to(device)
-    init_image = pillow_img_to_torch_image(img).to(get_device())
-    init_image = repeat(init_image, "1 ... -> b ...", b=batch_size)
-    if half:
-        return model.get_first_stage_encoding(
-            model.encode_first_stage(init_image.half())
-        )
-    return model.get_first_stage_encoding(model.encode_first_stage(init_image))
-
-
 def find_noise_for_image(model, pil_img, prompt, steps=50, cond_scale=1.0, half=True):
-    img_latent = pil_img_to_latent(
+    img_latent = pillow_img_to_model_latent(
         model, pil_img, batch_size=1, device="cuda", half=half
     )
     return find_noise_for_latent(

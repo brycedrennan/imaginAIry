@@ -35,9 +35,18 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"  height="256"><br>
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
 
-### Automated Replacement (txt2mask) [by clipseg](https://github.com/timojl/clipseg)
+### Prompt Based Editing  [by clipseg](https://github.com/timojl/clipseg)
+Specify advanced text based masks using boolean logic and strength modifiers. Mask descriptions must be lowercase. Keywords uppercase.
+Valid symbols: `AND`, `OR`, `NOT`, `()`, and mask strength modifier `{*1.5}` where `+` can be any of `+ - * /`. Single-character boolean 
+operators also work.  When writing strength modifies know that pixel values are between 0 and 1.
+
 ```bash
->> imagine --init-image pearl_earring.jpg --mask-prompt face --mask-mode keep --init-image-strength .4 "a female doctor" "an elegant woman"
+>> imagine \
+    --init-image pearl_earring.jpg \ 
+    --mask-prompt "face{*1.9}" \
+    --mask-mode keep \
+    --init-image-strength .4 \
+    "a female doctor" "an elegant woman"
 ```
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl000.jpg" height="200">➡️ 
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl002.jpg" height="200">
@@ -45,7 +54,12 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl001.jpg" height="200">
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl003.jpg" height="200">
 ```bash
->> imagine --init-image fruit-bowl.jpg --mask-prompt fruit --mask-mode replace --init-image-strength .1 "a bowl of pears" "a bowl of gold" "a bowl of popcorn" "a bowl of spaghetti"
+>> imagine \
+    --init-image fruit-bowl.jpg \
+    --mask-prompt "fruit OR fruit stem{*1.5}" \
+    --mask-mode replace \
+    --init-image-strength .1 \
+    "a bowl of kittens" "a bowl of gold coins" "a bowl of popcorn" "a bowl of spaghetti"
 ```
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="200">➡️ 
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/bowl004.jpg" height="200">
@@ -130,9 +144,8 @@ prompts = [
     ImaginePrompt(
         "a bowl of strawberries", 
         init_image=LazyLoadingImage(filepath="mypath/to/bowl_of_fruit.jpg"),
-        mask_prompt="fruit|stems",
+        mask_prompt="fruit OR stem{*2}",  # amplify the stem mask x2
         mask_mode="replace",
-        mask_expansion=3
     ),
     ImaginePrompt("strawberries", tile_mode=True),
 ]
@@ -167,6 +180,13 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+ 
+ - feature: Specify advanced text based masks using boolean logic and strength modifiers. Mask descriptions must be lowercase. Keywords uppercase.
+   Valid symbols: `AND`, `OR`, `NOT`, `()`, and mask strength modifier `{+0.1}` where `+` can be any of `+ - * /`    
+ - feature: apply mask edits to original files
+ - feature: auto-rotate images if exif data specifies to do so
+ - fix: accept mask images in command line
+
 **1.6.2**
  - fix: another bfloat16 fix
 
@@ -214,6 +234,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
  - training
 
 ## Todo
+
+ - refactor how output versions are selected (upscaled, modified original, etc) 
  - performance optimizations
    - ✅ https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
    - ✅ https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#

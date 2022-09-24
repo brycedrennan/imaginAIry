@@ -6,9 +6,8 @@ import random
 from datetime import datetime, timezone
 from functools import lru_cache
 
-import numpy
 import requests
-from PIL import Image
+from PIL import Image, ImageOps
 from urllib3.exceptions import LocationParseError
 from urllib3.util import parse_url
 
@@ -64,6 +63,8 @@ class LazyLoadingImage:
             logger.info(
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_url}"
             )
+        # fix orientation
+        self._img = ImageOps.exif_transpose(self._img)
 
         return getattr(self._img, key)
 
@@ -94,7 +95,6 @@ class ImaginePrompt:
         mask_prompt=None,
         mask_image=None,
         mask_mode=MaskMode.REPLACE,
-        mask_expansion=2,
         seed=None,
         steps=50,
         height=512,
@@ -114,7 +114,7 @@ class ImaginePrompt:
         self.prompt_strength = prompt_strength
         if isinstance(init_image, str):
             init_image = LazyLoadingImage(filepath=init_image)
-            
+
         if isinstance(mask_image, str):
             mask_image = LazyLoadingImage(filepath=mask_image)
 
@@ -134,7 +134,6 @@ class ImaginePrompt:
         self.mask_prompt = mask_prompt
         self.mask_image = mask_image
         self.mask_mode = mask_mode
-        self.mask_expansion = mask_expansion
         self.tile_mode = tile_mode
 
     @property
@@ -178,21 +177,22 @@ class ExifCodes:
 
 
 class ImagineResult:
-    def __init__(self, img, prompt: ImaginePrompt, is_nsfw, upscaled_img=None):
+    def __init__(
+        self,
+        img,
+        prompt: ImaginePrompt,
+        is_nsfw,
+        upscaled_img=None,
+        modified_original_img=None,
+    ):
         self.img = img
         self.upscaled_img = upscaled_img
+        self.modified_original_img = modified_original_img
         self.prompt = prompt
         self.is_nsfw = is_nsfw
         self.created_at = datetime.utcnow().replace(tzinfo=timezone.utc)
         self.torch_backend = get_device()
         self.hardware_name = get_device_name(get_device())
-
-    def cv2_img(self):
-        open_cv_image = numpy.array(self.img)
-        # Convert RGB to BGR
-        open_cv_image = open_cv_image[:, :, ::-1].copy()
-        return open_cv_image
-        # return cv2.cvtColor(numpy.array(self.img), cv2.COLOR_RGB2BGR)
 
     def md5(self):
         return hashlib.md5(self.img.tobytes()).hexdigest()
@@ -217,6 +217,9 @@ class ImagineResult:
 
     def save_upscaled(self, save_path):
         self.upscaled_img.save(save_path, exif=self._exif())
+
+    def save_modified_orig(self, save_path):
+        self.modified_original_img.save(save_path, exif=self._exif())
 
 
 @lru_cache(maxsize=2)
