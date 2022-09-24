@@ -313,7 +313,7 @@ class DDIMSampler:
     def stochastic_encode(self, init_latent, t, noise=None):
         # fast, but does not allow for exact reconstruction
         # t serves as an index to gather the correct alphas
-
+        t = t.clamp(0, 1000)
         sqrt_alphas_cumprod = torch.sqrt(self.ddim_alphas)
         sqrt_one_minus_alphas_cumprod = self.ddim_sqrt_one_minus_alphas
 

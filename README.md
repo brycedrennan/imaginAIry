@@ -187,6 +187,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
  - feature: apply mask edits to original files
  - feature: auto-rotate images if exif data specifies to do so
  - fix: accept mask images in command line
+ - fix: img2img algorithm was wrong and wouldn't at values close to 0 or 1
 
 **1.6.2**
  - fix: another bfloat16 fix

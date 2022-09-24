@@ -48,12 +48,12 @@ def test_imagine(sampler_type, expected_md5):
 
 device_sampler_type_test_cases_img_2_img = {
     "mps:0": {
-        ("plms", "54656a7f449cb73b99436e61470172b3"),
-        ("ddim", "87d04423f6d03ddfc065cabc62e3909c"),
+        ("plms", "0d9c40c348cdac7bdc8d5a472f378f42"),
+        ("ddim", "12921ee5a8d276f1b477d196d304fef2"),
     },
     "cuda": {
-        ("plms", "c95f23a7039cf702e2e448f454e27c46"),
-        ("ddim", "ba054c630d9999ccbcc60c9fb687682d"),
+        ("plms", "28752d4e1d778abc3e9424f4f23d1aaf"),
+        ("ddim", "28752d4e1d778abc3e9424f4f23d1aaf"),
     },
     "cpu": [],
 }
