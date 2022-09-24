@@ -17,12 +17,13 @@ class AutoencoderKL(pl.LightningModule):
         lossconfig,
         embed_dim,
         ckpt_path=None,
-        ignore_keys=[],
+        ignore_keys=None,
         image_key="image",
         colorize_nlabels=None,
         monitor=None,
     ):
         super().__init__()
+        ignore_keys = [] if ignore_keys is None else ignore_keys
         self.image_key = image_key
         self.encoder = Encoder(**ddconfig)
         self.decoder = Decoder(**ddconfig)
@@ -32,20 +33,21 @@ class AutoencoderKL(pl.LightningModule):
         self.post_quant_conv = torch.nn.Conv2d(embed_dim, ddconfig["z_channels"], 1)
         self.embed_dim = embed_dim
         if colorize_nlabels is not None:
-            assert type(colorize_nlabels) == int
+            assert isinstance(colorize_nlabels, int)
             self.register_buffer("colorize", torch.randn(3, colorize_nlabels, 1, 1))
         if monitor is not None:
             self.monitor = monitor
         if ckpt_path is not None:
             self.init_from_ckpt(ckpt_path, ignore_keys=ignore_keys)
 
-    def init_from_ckpt(self, path, ignore_keys=list()):
+    def init_from_ckpt(self, path, ignore_keys=None):
+        ignore_keys = [] if ignore_keys is None else ignore_keys
         sd = torch.load(path, map_location="cpu")["state_dict"]
         keys = list(sd.keys())
         for k in keys:
             for ik in ignore_keys:
                 if k.startswith(ik):
-                    logger.info("Deleting key {} from state_dict.".format(k))
+                    logger.info(f"Deleting key {k} from state_dict.")
                     del sd[k]
         self.load_state_dict(sd, strict=False)
         logger.info(f"Restored from {path}")
@@ -61,7 +63,7 @@ class AutoencoderKL(pl.LightningModule):
         dec = self.decoder(z)
         return dec
 
-    def forward(self, input, sample_posterior=True):
+    def forward(self, input, sample_posterior=True):  # noqa
         posterior = self.encode(input)
         if sample_posterior:
             z = posterior.sample()

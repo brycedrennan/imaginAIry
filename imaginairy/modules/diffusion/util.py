@@ -13,8 +13,8 @@ import math
 
 import numpy as np
 import torch
-import torch.nn as nn
 from einops import repeat as e_repeat
+from torch import nn
 
 from imaginairy.utils import instantiate_from_config
 
@@ -57,7 +57,7 @@ def make_beta_schedule(
 
 
 def frange(start, stop, step):
-    """range but handles floats"""
+    """Range but handles floats"""
     x = start
     while True:
         if x >= stop:
@@ -148,11 +148,11 @@ def checkpoint(func, inputs, params, flag):
     if flag:
         args = tuple(inputs) + tuple(params)
         return CheckpointFunction.apply(func, len(inputs), *args)
-    else:
-        return func(*inputs)
+
+    return func(*inputs)
 
 
-class CheckpointFunction(torch.autograd.Function):
+class CheckpointFunction(torch.autograd.Function):  # noqa
     @staticmethod
     def forward(ctx, run_function, length, *args):
         ctx.run_function = run_function
@@ -252,7 +252,7 @@ class SiLU(nn.Module):
 
 
 class GroupNorm32(nn.GroupNorm):
-    def forward(self, x):
+    def forward(self, x):  # noqa
         return super().forward(x.float()).type(x.dtype)
 
 

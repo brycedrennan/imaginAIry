@@ -1,3 +1,4 @@
+# pylama:ignore=W0613
 import torch
 from torch import nn
 
@@ -25,9 +26,9 @@ _k_sampler_type_lookup = {
 
 
 def get_sampler(sampler_type, model):
-    from imaginairy.samplers.ddim import DDIMSampler
-    from imaginairy.samplers.kdiff import KDiffusionSampler
-    from imaginairy.samplers.plms import PLMSSampler
+    from imaginairy.samplers.ddim import DDIMSampler  # noqa
+    from imaginairy.samplers.kdiff import KDiffusionSampler  # noqa
+    from imaginairy.samplers.plms import PLMSSampler  # noqa
 
     sampler_type = sampler_type.lower()
     if sampler_type == "plms":

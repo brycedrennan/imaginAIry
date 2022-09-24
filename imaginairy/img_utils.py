@@ -16,7 +16,7 @@ def pillow_fit_image_within(image: PIL.Image.Image, max_height=512, max_width=51
     w, h = int(w * resize_ratio), int(h * resize_ratio)
     w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 64
     image = image.resize((w, h), resample=Image.Resampling.NEAREST)
-    return image, w, h
+    return image
 
 
 def pillow_img_to_torch_image(img: PIL.Image.Image):

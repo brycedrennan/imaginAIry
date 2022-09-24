@@ -54,7 +54,7 @@ class DDPM(pl.LightningModule):
         beta_schedule="linear",
         loss_type="l2",
         ckpt_path=None,
-        ignore_keys=[],
+        ignore_keys=None,
         load_only_unet=False,
         monitor="val/loss",
         first_stage_key="image",
@@ -77,6 +77,8 @@ class DDPM(pl.LightningModule):
         logvar_init=0.0,
     ):
         super().__init__()
+        ignore_keys = [] if ignore_keys is None else ignore_keys
+
         assert parameterization in [
             "eps",
             "x0",
@@ -236,7 +238,6 @@ class LatentDiffusion(DDPM):
         conditioning_key=None,
         scale_factor=1.0,
         scale_by_std=False,
-        *args,
         **kwargs,
     ):
         self.num_timesteps_cond = (
@@ -251,7 +252,7 @@ class LatentDiffusion(DDPM):
             conditioning_key = None
         ckpt_path = kwargs.pop("ckpt_path", None)
         ignore_keys = kwargs.pop("ignore_keys", [])
-        super().__init__(conditioning_key=conditioning_key, *args, **kwargs)
+        super().__init__(conditioning_key=conditioning_key, **kwargs)
         self.concat_mode = concat_mode
         self.cond_stage_trainable = cond_stage_trainable
         self.cond_stage_key = cond_stage_key
@@ -286,7 +287,9 @@ class LatentDiffusion(DDPM):
         """For creating seamless tiles"""
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                m.padding_mode = "circular" if enabled else m._initial_padding_mode
+                m.padding_mode = (
+                    "circular" if enabled else m._initial_padding_mode  # noqa
+                )
 
     def make_cond_schedule(
         self,
@@ -436,7 +439,7 @@ class LatentDiffusion(DDPM):
         :param x: img of size (bs, c, h, w)
         :return: n img crops of size (n, bs, c, kernel_size[0], kernel_size[1])
         """
-        bs, nc, h, w = x.shape
+        bs, nc, h, w = x.shape  # noqa
 
         # number of crops in image
         Ly = (h - kernel_size[0]) // stride[0] + 1
@@ -595,7 +598,7 @@ class LatentDiffusion(DDPM):
             stride = self.split_input_params["stride"]  # eg. (64, 64)
             df = self.split_input_params["vqf"]
             self.split_input_params["original_image_size"] = x.shape[-2:]
-            bs, nc, h, w = x.shape
+            bs, nc, h, w = x.shape  # noqa
             if ks[0] > h or ks[1] > w:
                 ks = (min(ks[0], h), min(ks[1], w))
                 logger.info("reducing Kernel")

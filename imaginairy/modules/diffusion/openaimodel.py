@@ -4,6 +4,7 @@ from abc import abstractmethod
 import numpy as np
 import torch as th
 import torch.nn.functional as F
+from omegaconf.listconfig import ListConfig
 from torch import nn
 
 from imaginairy.modules.attention import SpatialTransformer
@@ -488,7 +489,6 @@ class UNetModel(nn.Module):
             assert (
                 use_spatial_transformer
             ), "Fool!! You forgot to use the spatial transformer for your cross-attention conditioning..."
-            from omegaconf.listconfig import ListConfig
 
             if isinstance(context_dim, ListConfig):
                 context_dim = list(context_dim)
@@ -753,7 +753,7 @@ class UNetModel(nn.Module):
         self.middle_block.apply(convert_module_to_f32)
         self.output_blocks.apply(convert_module_to_f32)
 
-    def forward(self, x, timesteps=None, context=None, y=None, **kwargs):
+    def forward(self, x, timesteps=None, context=None, y=None, **kwargs):  # noqa
         """
         Apply the model to an input batch.
         :param x: an [N x C x ...] Tensor of inputs.

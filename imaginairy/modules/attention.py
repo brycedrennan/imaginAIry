@@ -85,7 +85,7 @@ class LinearAttention(nn.Module):
         self.to_out = nn.Conv2d(hidden_dim, dim, 1)
 
     def forward(self, x):
-        b, c, h, w = x.shape
+        b, c, h, w = x.shape  # noqa
         qkv = self.to_qkv(x)
         q, k, v = rearrange(
             qkv, "b (qkv heads c) h w -> qkv b heads c (h w)", heads=self.heads, qkv=3
@@ -126,7 +126,7 @@ class SpatialSelfAttention(nn.Module):
         v = self.v(h_)
 
         # compute attention
-        b, c, h, w = q.shape
+        b, c, h, w = q.shape  # noqa
         q = rearrange(q, "b c h w -> b (h w) c")
         k = rearrange(k, "b c h w -> b c (h w)")
         w_ = torch.einsum("bij,bjk->bik", q, k)
@@ -178,9 +178,9 @@ class CrossAttention(nn.Module):
 
         if mask is not None:
             mask = rearrange(mask, "b ... -> b (...)")
-            max_neg_value = -torch.finfo(sim.dtype).max
+            _max_neg_value = -torch.finfo(sim.dtype).max
             mask = repeat(mask, "b j -> (b h) () j", h=h)
-            sim.masked_fill_(~mask, max_neg_value)
+            sim.masked_fill_(~mask, _max_neg_value)
 
         # attention, what we cannot get enough of
         attn = sim.softmax(dim=-1)
@@ -189,7 +189,7 @@ class CrossAttention(nn.Module):
         out = rearrange(out, "(b h) n d -> b n (h d)", h=h)
         return self.to_out(out)
 
-    def forward_cuda(self, x, context=None, mask=None):
+    def forward_cuda(self, x, context=None, mask=None):  # noqa
         h = self.heads
 
         q_in = self.to_q(x)
@@ -258,7 +258,7 @@ class BasicTransformerBlock(nn.Module):
         dropout=0.0,
         context_dim=None,
         gated_ff=True,
-        checkpoint=True,
+        checkpoint=True,  # noqa
     ):
         super().__init__()
         self.attn1 = CrossAttention(
@@ -326,7 +326,7 @@ class SpatialTransformer(nn.Module):
 
     def forward(self, x, context=None):
         # note: if no context is given, cross-attention defaults to self-attention
-        b, c, h, w = x.shape
+        b, c, h, w = x.shape  # noqa
         x_in = x
         x = self.norm(x)
         x = self.proj_in(x)

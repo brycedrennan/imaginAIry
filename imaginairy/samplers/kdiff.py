@@ -1,3 +1,4 @@
+# pylama:ignore=W0613
 import torch
 
 from imaginairy.img_log import log_latent

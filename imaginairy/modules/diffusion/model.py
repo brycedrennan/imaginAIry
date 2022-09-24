@@ -1,3 +1,4 @@
+# pylama:ignore=W0613,W0612
 # pytorch_diffusion + derived encoder decoder
 import gc
 import logging
@@ -5,8 +6,8 @@ import math
 
 import numpy as np
 import torch
-import torch.nn as nn
 from einops import rearrange
+from torch import nn
 
 from imaginairy.modules.attention import LinearAttention
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def get_timestep_embedding(timesteps, embedding_dim):
     """
-    This matches the implementation in Denoising Diffusion Probabilistic Models:
+    Matches the implementation in Denoising Diffusion Probabilistic Models:
     From Fairseq.
     Build sinusoidal embeddings.
     This matches the implementation in tensor2tensor, but differs slightly
@@ -286,10 +287,10 @@ def make_attn(in_channels, attn_type="vanilla"):
     )
     if attn_type == "vanilla":
         return AttnBlock(in_channels)
-    elif attn_type == "none":
+    if attn_type == "none":
         return nn.Identity(in_channels)
-    else:
-        return LinAttnBlock(in_channels)
+
+    return LinAttnBlock(in_channels)
 
 
 class Encoder(nn.Module):
@@ -502,6 +503,7 @@ class Decoder(nn.Module):
         self.conv_out = torch.nn.Conv2d(
             block_in, out_ch, kernel_size=3, stride=1, padding=1
         )
+        self.last_z_shape = None
 
     def forward(self, z):
         # assert z.shape[1:] == self.z_shape[1:]
@@ -656,22 +658,22 @@ class Resize(nn.Module):
         self.mode = mode
         if self.with_conv:
             logger.info(
-                f"Note: {self.__class__.__name} uses learned downsampling and will ignore the fixed {mode} mode"
+                f"Note: {self.__class__.__name} uses learned downsampling and will ignore the fixed {mode} mode"  # noqa
             )
             raise NotImplementedError()
-            assert in_channels is not None
-            # no asymmetric padding in torch conv, must do it ourselves
-            self.conv = torch.nn.Conv2d(
-                in_channels, in_channels, kernel_size=4, stride=2, padding=1
-            )
+            # assert in_channels is not None
+            # # no asymmetric padding in torch conv, must do it ourselves
+            # self.conv = torch.nn.Conv2d(
+            #     in_channels, in_channels, kernel_size=4, stride=2, padding=1
+            # )
 
     def forward(self, x, scale_factor=1.0):
         if scale_factor == 1.0:
             return x
-        else:
-            x = torch.nn.functional.interpolate(
-                x, mode=self.mode, align_corners=False, scale_factor=scale_factor
-            )
+
+        x = torch.nn.functional.interpolate(
+            x, mode=self.mode, align_corners=False, scale_factor=scale_factor
+        )
         return x
 
 
