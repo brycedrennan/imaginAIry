@@ -17,16 +17,13 @@ from imaginairy.vendored import k_diffusion as K
 
 
 def find_noise_for_image(model, pil_img, prompt, steps=50, cond_scale=1.0, half=True):
-    img_latent = pillow_img_to_model_latent(
-        model, pil_img, batch_size=1, device="cuda", half=half
-    )
+    img_latent = pillow_img_to_model_latent(model, pil_img, batch_size=1, half=half)
     return find_noise_for_latent(
         model,
         img_latent,
         prompt,
         steps=steps,
         cond_scale=cond_scale,
-        half=half,
     )
 
 

@@ -68,7 +68,7 @@ def enhance_faces(img, fidelity=0):
 
         try:
             with torch.no_grad():
-                output = net(cropped_face_t, w=fidelity, adain=True)[0]
+                output = net(cropped_face_t, w=fidelity, adain=True)[0]  # noqa
                 restored_face = tensor2img(output, rgb2bgr=True, min_max=(-1, 1))
             del output
             torch.cuda.empty_cache()

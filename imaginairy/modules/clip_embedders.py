@@ -1,7 +1,7 @@
 import kornia
 import torch
-import torch.nn as nn
 from einops import repeat
+from torch import nn
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from imaginairy.utils import get_device
@@ -102,7 +102,9 @@ class FrozenClipImageEmbedder(nn.Module):
         antialias=False,
     ):
         super().__init__()
-        self.model, preprocess = clip.load(name=model_name, device=device, jit=jit)
+        self.model, preprocess = clip.load(  # noqa
+            name=model_name, device=device, jit=jit
+        )
 
         self.antialias = antialias
 

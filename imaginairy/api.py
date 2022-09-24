@@ -213,7 +213,7 @@ def imagine(
                     ddim_steps = int(prompt.steps / generation_strength)
                     sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
                     try:
-                        init_image, _, h = pillow_fit_image_within(
+                        init_image = pillow_fit_image_within(
                             prompt.init_image,
                             max_height=prompt.height,
                             max_width=prompt.width,
