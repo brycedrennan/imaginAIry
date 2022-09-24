@@ -1,11 +1,10 @@
 import logging
 import re
 
-import numpy as np
 import torch
-from einops import rearrange
-from PIL import Image
 from torchvision.transforms import ToPILImage
+
+from imaginairy.img_utils import model_latents_to_pillow_imgs
 
 _CURRENT_LOGGING_CONTEXT = None
 
@@ -64,11 +63,7 @@ class ImageLoggingContext:
             return
         self.step_count += 1
         description = f"{description} - {latents.shape}"
-        latents = self.model.decode_first_stage(latents)
-        latents = torch.clamp((latents + 1.0) / 2.0, min=0.0, max=1.0)
-        for latent in latents:
-            latent = 255.0 * rearrange(latent.cpu().numpy(), "c h w -> h w c")
-            img = Image.fromarray(latent.astype(np.uint8))
+        for img in model_latents_to_pillow_imgs(latents):
             self.img_callback(img, description, self.step_count, self.prompt)
 
     def log_img(self, img, description):

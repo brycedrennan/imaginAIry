@@ -6,9 +6,10 @@ from PIL import ImageDraw
 from imaginairy import ImaginePrompt, LazyLoadingImage, imagine, imagine_image_files
 from imaginairy.api import load_model
 from imaginairy.img_log import ImageLoggingContext, filesafe_text, log_latent
+from imaginairy.img_utils import pillow_img_to_torch_image
 from imaginairy.modules.clip_embedders import FrozenCLIPEmbedder
 from imaginairy.samplers.ddim import DDIMSampler
-from imaginairy.utils import get_device, pillow_img_to_torch_image
+from imaginairy.utils import get_device
 from tests import TESTS_FOLDER
 
 

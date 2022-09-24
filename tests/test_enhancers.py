@@ -4,6 +4,8 @@ import pytest
 from PIL import Image
 from pytorch_lightning import seed_everything
 
+from imaginairy import ImaginePrompt, imagine
+from imaginairy.enhancers.bool_masker import MASK_PROMPT
 from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
 from imaginairy.enhancers.describe_image_clip import find_img_text_similarity
@@ -28,9 +30,98 @@ def img_hash(img):
 
 
 def test_clip_masking():
-    img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg")
-    pred = get_img_mask(img, "head")
-    pred.save(f"{TESTS_FOLDER}/test_output/earring_mask.png")
+    img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring_large.jpg")
+    for mask_modifier in [
+        "*0.5",
+        "*1",
+        "*10",
+    ]:
+        pred = get_img_mask(img, f"(head OR face){{{mask_modifier}}}")
+        pred.save(f"{TESTS_FOLDER}/test_output/earring_mask_{mask_modifier}.png")
+
+    prompt = ImaginePrompt(
+        "professional photo of a woman",
+        init_image=img,
+        init_image_strength=0.95,
+        # lower steps for faster tests
+        # steps=40,
+        steps=4,
+        mask_prompt="(head OR face)*5",
+        mask_mode="replace",
+        upscale=True,
+        fix_faces=True,
+    )
+
+    result = next(imagine(prompt))
+    result.modified_original_img.save(
+        f"{TESTS_FOLDER}/test_output/earring_mask_photo.png"
+    )
+
+
+boolean_mask_test_cases = [
+    (
+        "fruit bowl",
+        "'fruit bowl'",
+    ),
+    (
+        "((((fruit bowl))))",
+        "'fruit bowl'",
+    ),
+    (
+        "fruit OR bowl",
+        "('fruit' OR 'bowl')",
+    ),
+    (
+        "fruit|bowl",
+        "('fruit' OR 'bowl')",
+    ),
+    (
+        "fruit | bowl",
+        "('fruit' OR 'bowl')",
+    ),
+    (
+        "fruit OR bowl OR pear",
+        "('fruit' OR 'bowl' OR 'pear')",
+    ),
+    (
+        "fruit AND bowl",
+        "('fruit' AND 'bowl')",
+    ),
+    (
+        "fruit & bowl",
+        "('fruit' AND 'bowl')",
+    ),
+    (
+        "fruit AND NOT green",
+        "('fruit' AND NOT 'green')",
+    ),
+    (
+        "fruit bowl{+0.5}",
+        "'fruit bowl'+0.5",
+    ),
+    (
+        "fruit bowl{+0.5} OR fruit",
+        "('fruit bowl'+0.5 OR 'fruit')",
+    ),
+    (
+        "NOT pizza",
+        "NOT 'pizza'",
+    ),
+    (
+        "car AND (wheels OR trunk OR engine OR windows) AND NOT (truck OR headlights{*10})",
+        "('car' AND ('wheels' OR 'trunk' OR 'engine' OR 'windows') AND NOT ('truck' OR 'headlights'*10))",
+    ),
+    (
+        "car AND (wheels OR trunk OR engine OR windows OR headlights) AND NOT (truck OR headlights){*10}",
+        "('car' AND ('wheels' OR 'trunk' OR 'engine' OR 'windows' OR 'headlights') AND NOT ('truck' OR 'headlights')*10)",
+    ),
+]
+
+
+@pytest.mark.parametrize("mask_text,expected", boolean_mask_test_cases)
+def test_clip_mask_parser(mask_text, expected):
+    parsed = MASK_PROMPT.parseString(mask_text)[0][0]
+    assert str(parsed) == expected
 
 
 def test_describe_picture():

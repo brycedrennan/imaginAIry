@@ -4,6 +4,7 @@ import re
 from functools import lru_cache
 
 import numpy as np
+import PIL
 import torch
 import torch.nn
 from einops import rearrange
@@ -22,17 +23,15 @@ from imaginairy.img_log import (
     log_img,
     log_latent,
 )
+from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
 from imaginairy.safety import is_nsfw
 from imaginairy.samplers.base import get_sampler
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
-    expand_mask,
     fix_torch_group_norm,
     fix_torch_nn_layer_norm,
     get_device,
     instantiate_from_config,
-    pillow_fit_image_within,
-    pillow_img_to_torch_image,
     platform_appropriate_autocast,
 )
 
@@ -92,8 +91,10 @@ def imagine_image_files(
     record_step_images=False,
     output_file_extension="jpg",
     print_caption=False,
+    create_modified_originals_for_masks=True,
 ):
     big_path = os.path.join(outdir, "upscaled")
+    masked_orig_path = os.path.join(outdir, "modified_originals")
     os.makedirs(outdir, exist_ok=True)
 
     base_count = len(os.listdir(outdir))
@@ -119,6 +120,7 @@ def imagine_image_files(
         ddim_eta=ddim_eta,
         img_callback=_record_step if record_step_images else None,
         add_caption=print_caption,
+        create_modified_originals_for_masks=create_modified_originals_for_masks,
     ):
         prompt = result.prompt
         basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
@@ -131,6 +133,11 @@ def imagine_image_files(
             bigfilepath = os.path.join(big_path, basefilename) + "_upscaled.jpg"
             result.save_upscaled(bigfilepath)
             logger.info(f"    Upscaled 🖼  saved to: {bigfilepath}")
+        if result.modified_original_img:
+            os.makedirs(masked_orig_path, exist_ok=True)
+            bigfilepath = os.path.join(masked_orig_path, basefilename) + "_modified.jpg"
+            result.save_modified_orig(bigfilepath)
+            logger.info(f"    Modified original 🖼  saved to: {bigfilepath}")
         base_count += 1
         del result
 
@@ -144,6 +151,7 @@ def imagine(
     img_callback=None,
     half_mode=None,
     add_caption=False,
+    create_modified_originals_for_masks=True,
 ):
     model = load_model()
 
@@ -197,30 +205,34 @@ def imagine(
                     logger.info("   Sampler type switched to plms for img2img")
                 else:
                     sampler_type = prompt.sampler_type
-                start_code = None
+
                 sampler = get_sampler(sampler_type, model)
                 mask, mask_image, mask_image_orig = None, None, None
                 if prompt.init_image:
                     generation_strength = 1 - prompt.init_image_strength
                     ddim_steps = int(prompt.steps / generation_strength)
                     sampler.make_schedule(ddim_num_steps=ddim_steps, ddim_eta=ddim_eta)
-                    init_image, _, h = pillow_fit_image_within(
-                        prompt.init_image,
-                        max_height=prompt.height,
-                        max_width=prompt.width,
-                    )
+                    try:
+                        init_image, _, h = pillow_fit_image_within(
+                            prompt.init_image,
+                            max_height=prompt.height,
+                            max_width=prompt.width,
+                        )
+                    except PIL.UnidentifiedImageError:
+                        logger.warning(f"   Could not load image: {prompt.init_image}")
+                        continue
 
                     init_image_t = pillow_img_to_torch_image(init_image)
 
                     if prompt.mask_prompt:
-                        mask_image = get_img_mask(init_image, prompt.mask_prompt)
+                        mask_image = get_img_mask(
+                            init_image, prompt.mask_prompt, threshold=0.1
+                        )
                     elif prompt.mask_image:
-                        mask_image = prompt.mask_image
+                        mask_image = prompt.mask_image.convert("L")
 
                     if mask_image is not None:
                         log_img(mask_image, "init mask")
-                        mask_image = expand_mask(mask_image, prompt.mask_expansion)
-                        log_img(mask_image, "init mask expanded")
                         if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
                             mask_image = ImageOps.invert(mask_image)
 
@@ -236,13 +248,11 @@ def imagine(
                             ),
                             resample=Image.Resampling.NEAREST,
                         )
-                        log_img(mask_image, "init mask 2")
+                        log_img(mask_image, "latent_mask")
 
                         mask = np.array(mask_image)
                         mask = mask.astype(np.float32) / 255.0
                         mask = mask[None, None]
-                        mask[mask < 0.9] = 0
-                        mask[mask >= 0.9] = 1
                         mask = torch.from_numpy(mask)
                         mask = mask.to(get_device())
 
@@ -294,8 +304,6 @@ def imagine(
                     x_sample_8_orig = x_sample.astype(np.uint8)
                     img = Image.fromarray(x_sample_8_orig)
                     if mask_image_orig and init_image:
-
-                        mask_image_orig = expand_mask(mask_image_orig, -3)
                         mask_image_orig = mask_image_orig.filter(
                             ImageFilter.GaussianBlur(radius=3)
                         )
@@ -305,12 +313,13 @@ def imagine(
                         log_img(img, "reconstituted image")
 
                     upscaled_img = None
+                    rebuilt_orig_img = None
                     is_nsfw_img = None
                     if add_caption:
                         caption = generate_caption(img)
                         logger.info(f"    Generated caption: {caption}")
                     if IMAGINAIRY_SAFETY_MODE != SafetyMode.DISABLED:
-                        is_nsfw_img = is_nsfw(img, x_sample)
+                        is_nsfw_img = is_nsfw(img)
                         if is_nsfw_img and IMAGINAIRY_SAFETY_MODE == SafetyMode.FILTER:
                             logger.info("    ⚠️  Filtering NSFW image")
                             img = img.filter(ImageFilter.GaussianBlur(radius=40))
@@ -325,11 +334,43 @@ def imagine(
                             logger.info("    Fixing 😊 's in big 🖼  using CodeFormer...")
                             upscaled_img = enhance_faces(upscaled_img, fidelity=0.8)
 
+                    # put the newly generated patch back into the original, full size image
+                    if (
+                        create_modified_originals_for_masks
+                        and mask_image_orig
+                        and prompt.init_image
+                    ):
+                        img_to_add_back_to_original = (
+                            upscaled_img if upscaled_img else img
+                        )
+                        img_to_add_back_to_original = (
+                            img_to_add_back_to_original.resize(
+                                prompt.init_image.size,
+                                resample=Image.Resampling.LANCZOS,
+                            )
+                        )
+
+                        mask_for_orig_size = mask_image_orig.resize(
+                            prompt.init_image.size, resample=Image.Resampling.LANCZOS
+                        )
+                        mask_for_orig_size = mask_for_orig_size.filter(
+                            ImageFilter.GaussianBlur(radius=5)
+                        )
+                        log_img(mask_for_orig_size, "mask for original image size")
+
+                        rebuilt_orig_img = Image.composite(
+                            img_to_add_back_to_original,
+                            prompt.init_image,
+                            mask_for_orig_size,
+                        )
+                        log_img(rebuilt_orig_img, "reconstituted original")
+
                     yield ImagineResult(
                         img=img,
                         prompt=prompt,
                         upscaled_img=upscaled_img,
                         is_nsfw=is_nsfw_img,
+                        modified_original_img=rebuilt_orig_img,
                     )
 
 
