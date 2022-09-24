@@ -113,14 +113,13 @@ def configure_logging(level="INFO"):
     help="What level of logs to show.",
 )
 @click.option(
-    "--quiet, -q",
+    "--quiet", "-q",
     is_flag=True,
-    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     help="Alias of `--log-level ERROR`",
 )
 @click.option(
     "--show-work",
-    default=["none"],
+    default=False,
     is_flag=True,
     help="Output a debug images to `steps` folder.",
 )
@@ -192,6 +191,7 @@ def imagine_cmd(
     mask_image,
     mask_prompt,
     mask_mode,
+    mask_modify_original,
     caption,
     precision,
 ):
@@ -241,10 +241,11 @@ def imagine_cmd(
         prompts,
         outdir=outdir,
         ddim_eta=ddim_eta,
-        record_step_images="images" in show_work,
+        record_step_images=show_work,
         output_file_extension="png",
         print_caption=caption,
         precision=precision,
+        mask_modify_original=mask_modify_original
     )
 
 
