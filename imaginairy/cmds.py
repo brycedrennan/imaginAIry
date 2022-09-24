@@ -116,7 +116,7 @@ def configure_logging(level="INFO"):
     "--quiet",
     "-q",
     is_flag=True,
-    help="Alias of `--log-level ERROR`",
+    help="Suppress logs. Alias of `--log-level ERROR`",
 )
 @click.option(
     "--show-work",
@@ -154,7 +154,7 @@ def configure_logging(level="INFO"):
     "--mask-modify-original",
     default=True,
     is_flag=True,
-    help="After the inpainting is done",
+    help="After the inpainting is done, apply the changes to a copy of the original image",
 )
 @click.option(
     "--caption",
