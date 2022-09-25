@@ -232,6 +232,7 @@ def imagine_cmd(
                 mask_image=mask_image,
                 mask_prompt=mask_prompt,
                 mask_mode=mask_mode,
+                mask_modify_original=mask_modify_original,
                 upscale=upscale,
                 fix_faces=fix_faces,
                 tile_mode=tile,
@@ -246,11 +247,10 @@ def imagine_cmd(
         output_file_extension="png",
         print_caption=caption,
         precision=precision,
-        mask_modify_original=mask_modify_original,
     )
 
 
-@shell(prompt="aimg > ", intro="Starting imaginAIry...")
+@shell(prompt="imaginAIry> ", intro="Starting imaginAIry...")
 def aimg():
     pass
 
