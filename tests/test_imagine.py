@@ -49,7 +49,7 @@ def test_imagine(sampler_type, expected_md5):
 device_sampler_type_test_cases_img_2_img = {
     "mps:0": {
         ("plms", "0d9c40c348cdac7bdc8d5a472f378f42"),
-        ("ddim", "12921ee5a8d276f1b477d196d304fef2"),
+        ("ddim", "0d9c40c348cdac7bdc8d5a472f378f42"),
     },
     "cuda": {
         ("plms", "28752d4e1d778abc3e9424f4f23d1aaf"),

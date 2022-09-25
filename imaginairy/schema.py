@@ -219,7 +219,7 @@ class ImagineResult:
         self.upscaled_img.save(save_path, exif=self._exif())
 
     def save_modified_orig(self, save_path):
-        self.modified_original_img.save(save_path, exif=self._exif())
+        self.modified_original_img.convert("RGB").save(save_path, exif=self._exif())
 
 
 @lru_cache(maxsize=2)
