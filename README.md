@@ -58,6 +58,7 @@ operators also work.  When writing strength modifies know that pixel values are 
     --init-image fruit-bowl.jpg \
     --mask-prompt "fruit OR fruit stem{*1.5}" \
     --mask-mode replace \
+    --mask-modify-original \
     --init-image-strength .1 \
     "a bowl of kittens" "a bowl of gold coins" "a bowl of popcorn" "a bowl of spaghetti"
 ```
@@ -147,6 +148,7 @@ prompts = [
         init_image=LazyLoadingImage(filepath="mypath/to/bowl_of_fruit.jpg"),
         mask_prompt="fruit OR stem{*2}",  # amplify the stem mask x2
         mask_mode="replace",
+        mask_modify_original=True,
     ),
     ImaginePrompt("strawberries", tile_mode=True),
 ]
@@ -181,10 +183,12 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+
+**2.0.0**
  - feature: interactive prompt added. access by running `aimg`
  - feature: Specify advanced text based masks using boolean logic and strength modifiers. Mask descriptions must be lowercase. Keywords uppercase.
-   Valid symbols: `AND`, `OR`, `NOT`, `()`, and mask strength modifier `{+0.1}` where `+` can be any of `+ - * /`    
- - feature: apply mask edits to original files
+   Valid symbols: `AND`, `OR`, `NOT`, `()`, and mask strength modifier `{+0.1}` where `+` can be any of `+ - * /`. Single character boolean operators also work (`|`, `&`, `!`)
+ - feature: apply mask edits to original files with `mask_modify_original` (on by default)
  - feature: auto-rotate images if exif data specifies to do so
  - fix: accept mask images in command line
  - fix: img2img algorithm was wrong and wouldn't at values close to 0 or 1
@@ -223,13 +227,6 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
  - performance optimizations
  - numerous other changes
 
-## Models Used
- - CLIP - https://openai.com/blog/clip/
- - LDM - Latent Diffusion
- - Stable Diffusion 
-   - https://github.com/CompVis/stable-diffusion
-   - https://huggingface.co/CompVis/stable-diffusion-v1-4
-   - https://laion.ai/blog/laion-5b/
 
 ## Not Supported
  - a web interface. this is a python library
@@ -248,16 +245,16 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
  - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
  - Development Environment
    - ✅ add tests
-   - set up ci (test/lint/format)
+   - ✅ set up ci (test/lint/format)
    - add docs
    - remove yaml config
    - delete more unused code
  - Interface improvements
    - ✅ init-image at command line
    - prompt expansion
+   - ✅ interactive cli
  - Image Generation Features
    - ✅ add k-diffusion sampling methods
-   - why is k-diffusion so slow compared to plms? 2 it/s vs 8 it/s
    - negative prompting
      - some syntax to allow it in a text string
    - upscaling
@@ -278,6 +275,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - https://github.com/KaiyangZhou/CoOp
    - outpainting
      - https://github.com/parlance-zz/g-diffuser-bot/search?q=noise&type=issues
+     - lama cleaner
    - ✅ inpainting
      - https://github.com/andreas128/RePaint
      - img2img but keeps img stable
@@ -287,8 +285,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    - CPU support
    - ✅ img2img for plms
    - img2img for kdiff functions
-   - text based image masking
-     - https://boolean-parser.readthedocs.io/en/latest/index.html
+   - ✅ text based image masking
      - https://github.com/facebookresearch/detectron2
    - images as actual prompts instead of just init images
      - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
@@ -296,7 +293,6 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
      - https://github.com/justinpinkney/stable-diffusion
      - https://github.com/LambdaLabsML/lambda-diffusers
      - https://www.reddit.com/r/MachineLearning/comments/x6k5bm/n_stable_diffusion_image_variations_released/
-     - 
    - animations
      - https://github.com/francislabountyjr/stable-diffusion/blob/main/inferencing_notebook.ipynb
      - https://www.youtube.com/watch?v=E7aAFEhdngI 

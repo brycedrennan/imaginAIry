@@ -95,6 +95,7 @@ class ImaginePrompt:
         mask_prompt=None,
         mask_image=None,
         mask_mode=MaskMode.REPLACE,
+        mask_modify_original=True,
         seed=None,
         steps=50,
         height=512,
@@ -134,7 +135,9 @@ class ImaginePrompt:
         self.mask_prompt = mask_prompt
         self.mask_image = mask_image
         self.mask_mode = mask_mode
+        self.mask_modify_original = mask_modify_original
         self.tile_mode = tile_mode
+
 
     @property
     def prompt_text(self):
@@ -184,11 +187,29 @@ class ImagineResult:
         is_nsfw,
         upscaled_img=None,
         modified_original_img=None,
+        mask_binary=None,
+        mask_grayscale=None,
     ):
+        self.prompt = prompt
+
+        self.images = {"generated": img}
+
+        if upscaled_img:
+            self.images["upscaled"] = upscaled_img
+
+        if modified_original_img:
+            self.images["modified_original"] = modified_original_img
+
+        if mask_binary:
+            self.images["mask_binary"] = mask_binary
+
+        if mask_grayscale:
+            self.images["mask_grayscale"] = mask_grayscale
+
+        # for backward compat
         self.img = img
         self.upscaled_img = upscaled_img
-        self.modified_original_img = modified_original_img
-        self.prompt = prompt
+
         self.is_nsfw = is_nsfw
         self.created_at = datetime.utcnow().replace(tzinfo=timezone.utc)
         self.torch_backend = get_device()
@@ -212,14 +233,14 @@ class ImagineResult:
         exif[ExifCodes.HostComputer] = f"{self.torch_backend}:{self.hardware_name}"
         return exif
 
-    def save(self, save_path):
-        self.img.save(save_path, exif=self._exif())
+    def save(self, save_path, image_type="generated"):
+        img = self.images.get(image_type, None)
+        if img is None:
+            raise ValueError(
+                f"Image of type {image_type} not stored. Options are: {self.images.keys()}"
+            )
 
-    def save_upscaled(self, save_path):
-        self.upscaled_img.save(save_path, exif=self._exif())
-
-    def save_modified_orig(self, save_path):
-        self.modified_original_img.convert("RGB").save(save_path, exif=self._exif())
+        img.convert("RGB").save(save_path, exif=self._exif())
 
 
 @lru_cache(maxsize=2)
