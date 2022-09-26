@@ -40,8 +40,15 @@ def test_clip_masking():
         "*1",
         "*10",
     ]:
-        pred = get_img_mask(img, f"(head OR face){{{mask_modifier}}}")
-        pred.save(f"{TESTS_FOLDER}/test_output/earring_mask_{mask_modifier}.png")
+        pred_bin, pred_grayscale = get_img_mask(
+            img, f"(head OR face){{{mask_modifier}}}", threshold=0.1
+        )
+        pred_grayscale.save(
+            f"{TESTS_FOLDER}/test_output/earring_mask_{mask_modifier}_g.png"
+        )
+        pred_bin.save(
+            f"{TESTS_FOLDER}/test_output/earring_mask_{mask_modifier}_bin.png"
+        )
 
     prompt = ImaginePrompt(
         "professional photo of a woman",
@@ -57,8 +64,9 @@ def test_clip_masking():
     )
 
     result = next(imagine(prompt))
-    result.modified_original_img.save(
-        f"{TESTS_FOLDER}/test_output/earring_mask_photo.png"
+    result.save(
+        f"{TESTS_FOLDER}/test_output/earring_mask_photo.png",
+        image_type="modified_original",
     )
 
 

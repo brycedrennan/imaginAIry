@@ -138,7 +138,6 @@ class ImaginePrompt:
         self.mask_modify_original = mask_modify_original
         self.tile_mode = tile_mode
 
-
     @property
     def prompt_text(self):
         if len(self.prompts) == 1:
@@ -186,7 +185,7 @@ class ImagineResult:
         prompt: ImaginePrompt,
         is_nsfw,
         upscaled_img=None,
-        modified_original_img=None,
+        modified_original=None,
         mask_binary=None,
         mask_grayscale=None,
     ):
@@ -197,8 +196,8 @@ class ImagineResult:
         if upscaled_img:
             self.images["upscaled"] = upscaled_img
 
-        if modified_original_img:
-            self.images["modified_original"] = modified_original_img
+        if modified_original:
+            self.images["modified_original"] = modified_original
 
         if mask_binary:
             self.images["mask_binary"] = mask_binary

@@ -185,11 +185,14 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 ## ChangeLog
 
 **2.0.0**
- - feature: interactive prompt added. access by running `aimg`
- - feature: Specify advanced text based masks using boolean logic and strength modifiers. Mask descriptions must be lowercase. Keywords uppercase.
+ - 🎉 fix: inpainted areas correlate with surrounding image, even at 100% generation strength.  Previously if the generation strength was high enough the generated image
+would be uncorrelated to the rest of the surrounding image.  It created terrible looking images.   
+ - 🎉 feature: interactive prompt added. access by running `aimg`
+ - 🎉 feature: Specify advanced text based masks using boolean logic and strength modifiers. Mask descriptions must be lowercase. Keywords uppercase.
    Valid symbols: `AND`, `OR`, `NOT`, `()`, and mask strength modifier `{+0.1}` where `+` can be any of `+ - * /`. Single character boolean operators also work (`|`, `&`, `!`)
- - feature: apply mask edits to original files with `mask_modify_original` (on by default)
+ - 🎉 feature: apply mask edits to original files with `mask_modify_original` (on by default)
  - feature: auto-rotate images if exif data specifies to do so
+ - fix: mask boundaries are more accurate
  - fix: accept mask images in command line
  - fix: img2img algorithm was wrong and wouldn't at values close to 0 or 1
 
@@ -234,7 +237,6 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## Todo
 
- - refactor how output versions are selected (upscaled, modified original, etc) 
  - performance optimizations
    - ✅ https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
    - ✅ https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#

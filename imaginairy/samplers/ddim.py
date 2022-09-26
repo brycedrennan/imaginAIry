@@ -359,8 +359,12 @@ class DDIMSampler:
                 assert orig_latent is not None
                 xdec_orig = self.model.q_sample(orig_latent, ts)
                 log_latent(xdec_orig, "xdec_orig")
-                log_latent(xdec_orig * mask, "masked_xdec_orig")
-                x_dec = xdec_orig * mask + (1.0 - mask) * x_dec
+                # this helps prevent the weird disjointed images that can happen with masking
+                hint_strength = 0.8
+                xdec_orig_with_hints = (
+                    xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
+                )
+                x_dec = xdec_orig_with_hints * mask + (1.0 - mask) * x_dec
                 log_latent(x_dec, "x_dec")
 
             x_dec, pred_x0 = self.p_sample_ddim(
