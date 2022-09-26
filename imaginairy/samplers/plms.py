@@ -388,6 +388,7 @@ class PLMSSampler:
         temperature=1.0,
         mask=None,
         orig_latent=None,
+        noise=None,
     ):
 
         timesteps = self.ddim_timesteps[:t_start]
@@ -398,7 +399,15 @@ class PLMSSampler:
         iterator = tqdm(time_range, desc="PLMS altering image", total=total_steps)
         x_dec = x_latent
         old_eps = []
+        log_latent(x_dec, "x_dec")
 
+        # not sure what the downside of using the same noise throughout the process would be...
+        # seems to work fine. maybe it runs faster?
+        noise = (
+            torch.randn_like(x_dec, device="cpu").to(x_dec.device)
+            if noise is None
+            else noise
+        )
         for i, step in enumerate(iterator):
             index = total_steps - i - 1
             ts = torch.full(
@@ -413,10 +422,14 @@ class PLMSSampler:
 
             if mask is not None:
                 assert orig_latent is not None
-                xdec_orig = self.model.q_sample(orig_latent, ts)
+                xdec_orig = self.model.q_sample(orig_latent, ts, noise)
                 log_latent(xdec_orig, "xdec_orig")
-                log_latent(xdec_orig * mask, "masked_xdec_orig")
-                x_dec = xdec_orig * mask + (1.0 - mask) * x_dec
+                # this helps prevent the weird disjointed images that can happen with masking
+                hint_strength = 0.8
+                xdec_orig_with_hints = (
+                    xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
+                )
+                x_dec = xdec_orig_with_hints * mask + (1.0 - mask) * x_dec
                 log_latent(x_dec, "x_dec")
 
             x_dec, pred_x0, e_t = self.p_sample_plms(
@@ -446,5 +459,6 @@ class PLMSSampler:
                 img_callback(pred_x0, "pred_x0")
 
             log_latent(x_dec, f"x_dec {i}")
+            log_latent(x_dec, f"e_t {i}")
             log_latent(pred_x0, f"pred_x0 {i}")
         return x_dec

@@ -122,13 +122,13 @@ def imagine_image_files(
         prompt = result.prompt
         basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
 
-        for image_type, img in result.images.items():
+        for image_type in result.images:
             subpath = os.path.join(outdir, image_type)
             os.makedirs(subpath, exist_ok=True)
             filepath = os.path.join(
                 subpath, f"{basefilename}_[{image_type}].{output_file_extension}"
             )
-            result.save(filepath)
+            result.save(filepath, image_type=image_type)
             logger.info(f"    🖼  [{image_type}] saved to: {filepath}")
         base_count += 1
         del result
@@ -198,7 +198,12 @@ def imagine(
                     sampler_type = prompt.sampler_type
 
                 sampler = get_sampler(sampler_type, model)
-                mask, mask_image, mask_image_orig = None, None, None
+                mask, mask_image, mask_image_orig, mask_grayscale = (
+                    None,
+                    None,
+                    None,
+                    None,
+                )
                 if prompt.init_image:
                     generation_strength = 1 - prompt.init_image_strength
                     t_enc = int(prompt.steps * generation_strength)
@@ -218,7 +223,7 @@ def imagine(
                     init_image_t = pillow_img_to_torch_image(init_image)
 
                     if prompt.mask_prompt:
-                        mask_image = get_img_mask(
+                        mask_image, mask_grayscale = get_img_mask(
                             init_image, prompt.mask_prompt, threshold=0.1
                         )
                     elif prompt.mask_image:
@@ -239,7 +244,7 @@ def imagine(
                                 mask_image.width // downsampling_factor,
                                 mask_image.height // downsampling_factor,
                             ),
-                            resample=Image.Resampling.NEAREST,
+                            resample=Image.Resampling.LANCZOS,
                         )
                         log_img(mask_image, "latent_mask")
 
@@ -256,9 +261,11 @@ def imagine(
 
                     log_latent(init_latent, "init_latent")
                     # encode (scaled latent)
+                    noise = torch.randn_like(init_latent, device="cpu").to(get_device())
                     z_enc = sampler.stochastic_encode(
                         init_latent,
                         torch.tensor([t_enc - 1]).to(get_device()),
+                        noise=noise,
                     )
                     log_latent(z_enc, "z_enc")
 
@@ -297,12 +304,12 @@ def imagine(
                     x_sample_8_orig = x_sample.astype(np.uint8)
                     img = Image.fromarray(x_sample_8_orig)
                     if mask_image_orig and init_image:
-                        mask_image_orig = mask_image_orig.filter(
+                        mask_final = mask_image_orig.filter(
                             ImageFilter.GaussianBlur(radius=3)
                         )
-                        log_img(mask_image_orig, "reconstituting mask")
-                        mask_image_orig = ImageOps.invert(mask_image_orig)
-                        img = Image.composite(img, init_image, mask_image_orig)
+                        log_img(mask_final, "reconstituting mask")
+                        mask_final = ImageOps.invert(mask_final)
+                        img = Image.composite(img, init_image, mask_final)
                         log_img(img, "reconstituted image")
 
                     upscaled_img = None
@@ -328,7 +335,11 @@ def imagine(
                             upscaled_img = enhance_faces(upscaled_img, fidelity=0.8)
 
                     # put the newly generated patch back into the original, full size image
-                    if prompt.mask_modify_original and mask_image_orig and prompt.init_image:
+                    if (
+                        prompt.mask_modify_original
+                        and mask_image_orig
+                        and prompt.init_image
+                    ):
                         img_to_add_back_to_original = (
                             upscaled_img if upscaled_img else img
                         )
@@ -348,8 +359,8 @@ def imagine(
                         log_img(mask_for_orig_size, "mask for original image size")
 
                         rebuilt_orig_img = Image.composite(
-                            img_to_add_back_to_original,
                             prompt.init_image,
+                            img_to_add_back_to_original,
                             mask_for_orig_size,
                         )
                         log_img(rebuilt_orig_img, "reconstituted original")
@@ -359,7 +370,9 @@ def imagine(
                         prompt=prompt,
                         upscaled_img=upscaled_img,
                         is_nsfw=is_nsfw_img,
-                        modified_original_img=rebuilt_orig_img,
+                        modified_original=rebuilt_orig_img,
+                        mask_binary=mask_image_orig,
+                        mask_grayscale=mask_grayscale,
                     )
 
 
