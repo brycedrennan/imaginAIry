@@ -15,7 +15,9 @@ from transformers import cached_path
 
 from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
-from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
+from imaginairy.enhancers.face_restoration_codeformer import FaceRestorationCodeformer
+codeformer = FaceRestorationCodeformer()
+
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
 from imaginairy.img_log import (
     ImageLoggingContext,
@@ -38,7 +40,6 @@ from imaginairy.utils import (
 LIB_PATH = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
 
-
 class SafetyMode:
     DISABLED = "disabled"
     CLASSIFY = "classify"
@@ -53,7 +54,7 @@ IMAGINAIRY_SAFETY_MODE = os.getenv("IMAGINAIRY_SAFETY_MODE", SafetyMode.FILTER)
 
 def load_model_from_config(config):
     url = "https://www.googleapis.com/storage/v1/b/aai-blog-files/o/sd-v1-4.ckpt?alt=media"
-    ckpt_path = cached_path(url)
+    ckpt_path = cached_path(os.getenv("STABLE_DIFFUSION_MODLE_PATH",url))
     logger.info(f"Loading model onto {get_device()} backend...")
     logger.debug(f"Loading model from {ckpt_path}")
     pl_sd = torch.load(ckpt_path, map_location="cpu")
@@ -326,13 +327,16 @@ def imagine(
 
                     if prompt.fix_faces:
                         logger.info("    Fixing 😊 's in 🖼  using CodeFormer...")
-                        img = enhance_faces(img, fidelity=0.2)
+                        #img = enhance_faces(img, fidelity=0.2)
+                        img =codeformer.enhance_faces(img,fidelity=0.2)
+
                     if prompt.upscale:
                         logger.info("    Upscaling 🖼  using real-ESRGAN...")
                         upscaled_img = upscale_image(img)
                         if prompt.fix_faces:
                             logger.info("    Fixing 😊 's in big 🖼  using CodeFormer...")
-                            upscaled_img = enhance_faces(upscaled_img, fidelity=0.8)
+                            #upscaled_img = enhance_faces(upscaled_img, fidelity=0.8)
+                            upscaled_img = codeformer.enhance_faces(upscaled_img, fidelity=0.8)
 
                     # put the newly generated patch back into the original, full size image
                     if (
