@@ -57,9 +57,9 @@ device_sampler_type_test_cases_img_2_img = {
         ("ddim", "1f0d72370fabcf2ff716e4068d5b2360"),
     },
 }
-sampler_type_test_cases_img_2_img = device_sampler_type_test_cases_img_2_img[
-    get_device()
-]
+sampler_type_test_cases_img_2_img = device_sampler_type_test_cases_img_2_img.get(
+    get_device(), []
+)
 
 
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
@@ -95,9 +95,9 @@ device_sampler_type_test_cases_img_2_img = {
         ("ddim", "d6784710dd78e4cb628aba28322b04cf"),
     },
 }
-sampler_type_test_cases_img_2_img = device_sampler_type_test_cases_img_2_img[
-    get_device()
-]
+sampler_type_test_cases_img_2_img = device_sampler_type_test_cases_img_2_img.get(
+    get_device(), []
+)
 
 
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
@@ -184,8 +184,11 @@ def test_img_to_img_fruit_2_gold_repeat():
         steps=20,
         seed=946188797,
         sampler_type="plms",
+        fix_faces=True,
+        upscale=True,
     )
     prompts = [
+        ImaginePrompt(**kwargs),
         ImaginePrompt(**kwargs),
         ImaginePrompt(**kwargs),
     ]
