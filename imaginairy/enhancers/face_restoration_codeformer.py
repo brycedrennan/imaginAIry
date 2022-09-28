@@ -31,11 +31,17 @@ def codeformer_model():
     return model
 
 
-def enhance_faces(img, fidelity=0):
-    net = codeformer_model()
+@lru_cache()
+def face_restore_helper():
+    """
+    Provide a singleton of FaceRestoreHelper
+
+    FaceRestoreHelper loads a model internally so we need to cache it
+    or we end up with a memory leak
+    """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     face_helper = FaceRestoreHelper(
-        1,
+        upscale_factor=1,
         face_size=512,
         crop_ratio=(1, 1),
         det_model="retinaface_resnet50",
@@ -43,7 +49,13 @@ def enhance_faces(img, fidelity=0):
         use_parse=True,
         device=device,
     )
-    face_helper.clean_all()
+    return face_helper
+
+
+def enhance_faces(img, fidelity=0):
+    net = codeformer_model()
+
+    face_helper = face_restore_helper()
 
     image = img.convert("RGB")
     np_img = np.array(image, dtype=np.uint8)
@@ -83,4 +95,5 @@ def enhance_faces(img, fidelity=0):
     # paste each restored face to the input image
     restored_img = face_helper.paste_faces_to_input_image()
     res = Image.fromarray(restored_img[:, :, ::-1])
+    face_helper.clean_all()
     return res
