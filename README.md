@@ -186,6 +186,11 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**2.0.3**
+ - fix memory leak in face enhancer
+ - fix blurry inpainting 
+ - fix for pillow compatibility
+
 **2.0.0**
  - 🎉 fix: inpainted areas correlate with surrounding image, even at 100% generation strength.  Previously if the generation strength was high enough the generated image
 would be uncorrelated to the rest of the surrounding image.  It created terrible looking images.   
