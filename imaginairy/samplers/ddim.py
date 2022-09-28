@@ -361,9 +361,12 @@ class DDIMSampler:
                 log_latent(xdec_orig, "xdec_orig")
                 # this helps prevent the weird disjointed images that can happen with masking
                 hint_strength = 0.8
-                xdec_orig_with_hints = (
-                    xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
-                )
+                if i < 2:
+                    xdec_orig_with_hints = (
+                        xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
+                    )
+                else:
+                    xdec_orig_with_hints = xdec_orig
                 x_dec = xdec_orig_with_hints * mask + (1.0 - mask) * x_dec
                 log_latent(x_dec, "x_dec")
 

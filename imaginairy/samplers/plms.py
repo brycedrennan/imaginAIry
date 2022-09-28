@@ -423,14 +423,17 @@ class PLMSSampler:
             if mask is not None:
                 assert orig_latent is not None
                 xdec_orig = self.model.q_sample(orig_latent, ts, noise)
-                log_latent(xdec_orig, "xdec_orig")
+                log_latent(xdec_orig, f"xdec_orig i={i} index-{index}")
                 # this helps prevent the weird disjointed images that can happen with masking
                 hint_strength = 0.8
-                xdec_orig_with_hints = (
-                    xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
-                )
+                if i < 2:
+                    xdec_orig_with_hints = (
+                        xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
+                    )
+                else:
+                    xdec_orig_with_hints = xdec_orig
                 x_dec = xdec_orig_with_hints * mask + (1.0 - mask) * x_dec
-                log_latent(x_dec, "x_dec")
+                log_latent(x_dec, f"x_dec {ts}")
 
             x_dec, pred_x0, e_t = self.p_sample_plms(
                 x_dec,

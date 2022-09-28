@@ -43,16 +43,18 @@ operators also work.  When writing strength modifies know that pixel values are 
 ```bash
 >> imagine \
     --init-image pearl_earring.jpg \ 
-    --mask-prompt "face{*1.9}" \
+    --mask-prompt "face AND NOT (bandana OR hair OR blue fabric){*6}" \
     --mask-mode keep \
-    --init-image-strength .4 \
-    "a female doctor" "an elegant woman"
+    --init-image-strength .2 \
+    --fix-faces \
+    "a modern female president" "a female robot" "a female doctor" "a female firefighter"
 ```
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl000.jpg" height="200">➡️ 
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl002.jpg" height="200">
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl004.jpg" height="200">
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl001.jpg" height="200">
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/mask_examples/pearl003.jpg" height="200">
+<img src="assets/mask_examples/pearl_pres.png" height="200">
+<img src="assets/mask_examples/pearl_robot.png" height="200">
+<img src="assets/mask_examples/pearl_doctor.png" height="200">
+<img src="assets/mask_examples/pearl_firefighter.png" height="200">
+
 ```bash
 >> imagine \
     --init-image fruit-bowl.jpg \

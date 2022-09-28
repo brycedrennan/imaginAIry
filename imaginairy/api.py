@@ -120,7 +120,10 @@ def imagine_image_files(
         add_caption=print_caption,
     ):
         prompt = result.prompt
-        basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}_{prompt_normalized(prompt.prompt_text)}"
+        img_str = ""
+        if prompt.init_image:
+            img_str = f"_img2img-{prompt.init_image_strength}"
+        basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
 
         for image_type in result.images:
             subpath = os.path.join(outdir, image_type)
@@ -261,6 +264,7 @@ def imagine(
 
                     log_latent(init_latent, "init_latent")
                     # encode (scaled latent)
+                    seed_everything(prompt.seed)
                     noise = torch.randn_like(init_latent, device="cpu").to(get_device())
                     z_enc = sampler.stochastic_encode(
                         init_latent,
