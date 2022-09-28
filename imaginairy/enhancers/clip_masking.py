@@ -5,7 +5,6 @@ import cv2
 import numpy as np
 import PIL.Image
 import torch
-from kornia.filters import median_blur
 from torchvision import transforms
 
 from imaginairy.img_log import log_img
@@ -19,12 +18,12 @@ weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth
 def clip_mask_model():
     from imaginairy import PKG_ROOT  # noqa
 
-    model = CLIPDensePredT(version="ViT-B/16", reduce_dim=64)
+    model = CLIPDensePredT(version="ViT-B/16", reduce_dim=64, complex_trans_conv=True)
     model.eval()
 
     model.load_state_dict(
         torch.load(
-            f"{PKG_ROOT}/vendored/clipseg/rd64-uni.pth",
+            f"{PKG_ROOT}/vendored/clipseg/rd64-uni-refined.pth",
             map_location=torch.device("cpu"),
         ),
         strict=False,
@@ -47,10 +46,6 @@ def get_img_mask(
     mask_cache = get_img_masks(img, descriptions)
     mask = parsed_mask.apply_masks(mask_cache)
     log_img(mask, "combined mask")
-
-    # try to blur the square shaped artifacts somewhat
-    mask = median_blur(mask.unsqueeze(dim=0).unsqueeze(dim=0), (11, 11)).squeeze()
-    log_img(mask, "median blurred")
 
     kernel = np.ones((3, 3), np.uint8)
     mask_g = mask.clone()

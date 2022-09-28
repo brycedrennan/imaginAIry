@@ -89,14 +89,19 @@ revendorize: vendorize_kdiffusion
 	make af
 
 vendorize_clipseg:
-	make download_repo REPO=git@github.com:timojl/clipseg.git PKG=clipseg COMMIT=664ee94393491cdd7ad422f67eb1ce670d3d00e6
+	make download_repo REPO=git@github.com:timojl/clipseg.git PKG=clipseg COMMIT=ea54753df1e444c4445bac6e023546b6a41951d8
 	rm -rf ./imaginairy/vendored/clipseg
 	mkdir -p ./imaginairy/vendored/clipseg
 	cp -R ./downloads/clipseg/models/* ./imaginairy/vendored/clipseg/
 	sed -i '' -e 's#import clip#from imaginairy.vendored import clip#g' ./imaginairy/vendored/clipseg/clipseg.py
 	rm ./imaginairy/vendored/clipseg/vitseg.py
 	mv ./imaginairy/vendored/clipseg/clipseg.py ./imaginairy/vendored/clipseg/__init__.py
-	wget https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth -P ./imaginairy/vendored/clipseg
+	# download weights
+	rm -rf ./downloads/clipseg-weights
+	mkdir -p ./downloads/clipseg-weights
+	wget https://owncloud.gwdg.de/index.php/s/ioHbRzFx6th32hn/download -O ./downloads/clipseg-weights/weights.tar
+	cd downloads/clipseg-weights && unzip -d weights -j weights.tar
+	cp ./downloads/clipseg-weights/weights/rd64-uni-refined.pth ./imaginairy/vendored/clipseg/
 
 vendorize_blip:
 	make download_repo REPO=git@github.com:salesforce/BLIP.git PKG=blip COMMIT=48211a1594f1321b00f14c9f7a5b4813144b2fb9
@@ -131,6 +136,7 @@ vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:ope
 
 download_repo:
 	mkdir -p ./downloads
+	rm -rf ./downloads/$(PKG)
 	-cd ./downloads && git clone $(REPO) $(PKG)
 	cd ./downloads/$(PKG) && git pull
 

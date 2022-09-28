@@ -26,7 +26,10 @@ def test_fix_faces():
         assert img_hash(img) == "a75991307eda675a26eeb7073f828e93"
     else:
         # probably different based on whether first run or not. looks the same either way
-        assert img_hash(img) in ["c840cf3bfe5a7760734f425a3f8941cf", "e56c1205bbc8f251be05773f2ba7fa24"]
+        assert img_hash(img) in [
+            "c840cf3bfe5a7760734f425a3f8941cf",
+            "e56c1205bbc8f251be05773f2ba7fa24",
+        ]
 
 
 def img_hash(img):

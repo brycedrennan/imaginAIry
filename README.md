@@ -185,6 +185,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+ - add improved masking update from clipseg
 
 **2.0.3**
  - fix memory leak in face enhancer
@@ -250,6 +251,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ https://www.reddit.com/r/StableDiffusion/comments/xalaws/test_update_for_less_memory_usage_and_higher/
    - https://github.com/neonsecret/stable-diffusion  https://github.com/CompVis/stable-diffusion/pull/177
    - https://github.com/huggingface/diffusers/pull/532/files
+   - https://github.com/HazyResearch/flash-attention
  - ✅ deploy to pypi
  - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
  - Development Environment
@@ -291,6 +293,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/
      - https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1
      - https://github.com/pesser/stable-diffusion/commit/bbb52981460707963e2a62160890d7ecbce00e79
+     - https://github.com/SHI-Labs/FcF-Inpainting https://praeclarumjj3.github.io/fcf-inpainting/
    - CPU support
    - ✅ img2img for plms
    - img2img for kdiff functions
@@ -304,7 +307,8 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - https://www.reddit.com/r/MachineLearning/comments/x6k5bm/n_stable_diffusion_image_variations_released/
    - animations
      - https://github.com/francislabountyjr/stable-diffusion/blob/main/inferencing_notebook.ipynb
-     - https://www.youtube.com/watch?v=E7aAFEhdngI 
+     - https://www.youtube.com/watch?v=E7aAFEhdngI
+     - https://github.com/pytti-tools/frame-interpolation
    - cross-attention control: 
      - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
    - guided generation 
