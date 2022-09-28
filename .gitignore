@@ -17,3 +17,4 @@ dist
 tests/test_output
 gfpgan/**
 .python-version
+._.DS_Store

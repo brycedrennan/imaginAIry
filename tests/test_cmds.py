@@ -11,6 +11,14 @@ def test_imagine_cmd():
     runner = CliRunner()
     result = runner.invoke(
         imagine_cmd,
-        ["gold coins", "--steps", "5", "--outdir", f"{TESTS_FOLDER}/test_output"],
+        [
+            "gold coins",
+            "--steps",
+            "25",
+            "--outdir",
+            f"{TESTS_FOLDER}/test_output",
+            "--seed",
+            "703425280",
+        ],
     )
     assert result.exit_code == 0

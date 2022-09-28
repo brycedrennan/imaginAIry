@@ -35,13 +35,16 @@ def img_hash(img):
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_clip_masking():
     img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring_large.jpg")
+
     for mask_modifier in [
         "*0.5",
         "*1",
-        "*10",
+        "*6",
     ]:
         pred_bin, pred_grayscale = get_img_mask(
-            img, f"(head OR face){{{mask_modifier}}}", threshold=0.1
+            img,
+            f"face AND NOT (bandana OR hair OR blue fabric){{{mask_modifier}}}",
+            threshold=0.5,
         )
         pred_grayscale.save(
             f"{TESTS_FOLDER}/test_output/earring_mask_{mask_modifier}_g.png"
@@ -51,15 +54,14 @@ def test_clip_masking():
         )
 
     prompt = ImaginePrompt(
-        "professional photo of a woman",
+        "a female firefighter in front of a burning building",
         init_image=img,
         init_image_strength=0.95,
         # lower steps for faster tests
-        # steps=40,
-        steps=4,
-        mask_prompt="(head OR face)*5",
+        steps=40,
+        mask_prompt="(head OR face){*5}",
         mask_mode="replace",
-        upscale=True,
+        upscale=False,
         fix_faces=True,
     )
 

@@ -1,3 +1,3 @@
 import os.path
 
-TESTS_FOLDER = os.path.dirname(__file__)
+TESTS_FOLDER = os.path.abspath(os.path.dirname(__file__))

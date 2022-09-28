@@ -244,7 +244,7 @@ def imagine_cmd(
         outdir=outdir,
         ddim_eta=ddim_eta,
         record_step_images=show_work,
-        output_file_extension="png",
+        output_file_extension="jpg",
         print_caption=caption,
         precision=precision,
     )
