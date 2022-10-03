@@ -330,13 +330,10 @@ def imagine(
 
                     if prompt.fix_faces:
                         logger.info("    Fixing 😊 's in 🖼  using CodeFormer...")
-                        img = enhance_faces(img, fidelity=0.2)
+                        img = enhance_faces(img, fidelity=prompt.fix_faces_fidelity)
                     if prompt.upscale:
                         logger.info("    Upscaling 🖼  using real-ESRGAN...")
                         upscaled_img = upscale_image(img)
-                        if prompt.fix_faces:
-                            logger.info("    Fixing 😊 's in big 🖼  using CodeFormer...")
-                            upscaled_img = enhance_faces(upscaled_img, fidelity=0.8)
 
                     # put the newly generated patch back into the original, full size image
                     if (
