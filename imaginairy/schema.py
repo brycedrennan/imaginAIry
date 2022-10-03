@@ -102,6 +102,7 @@ class ImaginePrompt:
         width=512,
         upscale=False,
         fix_faces=False,
+        fix_faces_fidelity=0.5,
         sampler_type="PLMS",
         conditioning=None,
         tile_mode=False,
@@ -130,6 +131,7 @@ class ImaginePrompt:
         self.width = width
         self.upscale = upscale
         self.fix_faces = fix_faces
+        self.fix_faces_fidelity = fix_faces_fidelity
         self.sampler_type = sampler_type
         self.conditioning = conditioning
         self.mask_prompt = mask_prompt

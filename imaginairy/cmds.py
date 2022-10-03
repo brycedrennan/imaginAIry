@@ -100,6 +100,11 @@ def configure_logging(level="INFO"):
 @click.option("--upscale", is_flag=True)
 @click.option("--fix-faces", is_flag=True)
 @click.option(
+    "--fix-faces-fidelity",
+    default=None,
+    help="How faithful to the original should face enhancement be. 1 = best fidelity, 0 = best looking face",
+)
+@click.option(
     "--sampler-type",
     default="plms",
     type=click.Choice(SAMPLER_TYPE_OPTIONS),
@@ -183,6 +188,7 @@ def imagine_cmd(
     seed,
     upscale,
     fix_faces,
+    fix_faces_fidelity,
     sampler_type,
     ddim_eta,
     log_level,
@@ -214,7 +220,8 @@ def imagine_cmd(
 
     if mask_image and mask_image.startswith("http"):
         mask_image = LazyLoadingImage(url=mask_image)
-
+    if fix_faces_fidelity is not None:
+        fix_faces_fidelity = float(fix_faces_fidelity)
     prompts = []
     load_model()
     for _ in range(repeats):
@@ -235,6 +242,7 @@ def imagine_cmd(
                 mask_modify_original=mask_modify_original,
                 upscale=upscale,
                 fix_faces=fix_faces,
+                fix_faces_fidelity=fix_faces_fidelity,
                 tile_mode=tile,
             )
             prompts.append(prompt)
