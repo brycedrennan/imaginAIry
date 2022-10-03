@@ -186,6 +186,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**2.2.0**
+ - feature: face enhancement fidelity is now configurable
+
 **2.1.0**
  - [improved masking accuracy from clipseg](https://github.com/timojl/clipseg/issues/8#issuecomment-1259150865)
 
