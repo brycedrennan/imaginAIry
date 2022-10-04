@@ -1,5 +1,4 @@
 import math
-from inspect import isfunction
 
 import torch
 import torch.nn.functional as F
@@ -8,27 +7,6 @@ from torch import einsum, nn
 
 from imaginairy.modules.diffusion.util import checkpoint
 from imaginairy.utils import get_device
-
-
-def uniq(arr):
-    return {el: True for el in arr}.keys()
-
-
-def default(val, d):
-    if val is not None:
-        return val
-    return d() if isfunction(d) else d
-
-
-def max_neg_value(t):
-    return -torch.finfo(t.dtype).max
-
-
-def init_(tensor):
-    dim = tensor.shape[-1]
-    std = 1 / math.sqrt(dim)
-    tensor.uniform_(-std, std)
-    return tensor
 
 
 # feedforward
@@ -193,7 +171,7 @@ class CrossAttention(nn.Module):
         h = self.heads
 
         q_in = self.to_q(x)
-        context = default(context, x)
+        context = context if context is not None else x
         k_in = self.to_k(context)
         v_in = self.to_v(context)
         del context, x
@@ -227,7 +205,7 @@ class CrossAttention(nn.Module):
             max_res = math.floor(math.sqrt(math.sqrt(mem_free_total / 2.5)) / 8) * 64
             raise RuntimeError(
                 f"Not enough memory, use lower resolution (max approx. {max_res}x{max_res}). "
-                f"Need: {mem_required/64/gb:0.1f}GB free, Have:{mem_free_total/gb:0.1f}GB free"
+                f"Need: {mem_required / 64 / gb:0.1f}GB free, Have:{mem_free_total / gb:0.1f}GB free"
             )
 
         slice_size = q.shape[1] // steps if (q.shape[1] % steps) == 0 else q.shape[1]
