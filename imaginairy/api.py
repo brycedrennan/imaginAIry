@@ -266,18 +266,24 @@ def imagine(
                     # encode (scaled latent)
                     seed_everything(prompt.seed)
                     noise = torch.randn_like(init_latent, device="cpu").to(get_device())
-                    z_enc = sampler.stochastic_encode(
-                        init_latent,
-                        torch.tensor([t_enc - 1]).to(get_device()),
-                        noise=noise,
-                    )
+                    if generation_strength >= 1:
+                        # prompt strength gets converted to time encodings,
+                        # which means you can't get to true 0 without this hack
+                        # (or setting steps=1000)
+                        z_enc = noise
+                    else:
+                        z_enc = sampler.stochastic_encode(
+                            init_latent,
+                            torch.tensor([t_enc - 1]).to(get_device()),
+                            noise=noise,
+                        )
                     log_latent(z_enc, "z_enc")
 
                     # decode it
                     samples = sampler.decode(
-                        z_enc,
-                        c,
-                        t_enc,
+                        x_latent=z_enc,
+                        cond=c,
+                        t_start=t_enc,
                         unconditional_guidance_scale=prompt.prompt_strength,
                         unconditional_conditioning=uc,
                         img_callback=_img_callback,
