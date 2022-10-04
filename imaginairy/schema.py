@@ -11,7 +11,7 @@ from PIL import Image, ImageOps
 from urllib3.exceptions import LocationParseError
 from urllib3.util import parse_url
 
-from imaginairy.utils import get_device, get_device_name
+from imaginairy.utils import get_device, get_hardware_description
 
 logger = logging.getLogger(__name__)
 
@@ -219,7 +219,7 @@ class ImagineResult:
         self.is_nsfw = is_nsfw
         self.created_at = datetime.utcnow().replace(tzinfo=timezone.utc)
         self.torch_backend = get_device()
-        self.hardware_name = get_device_name(get_device())
+        self.hardware_name = get_hardware_description(get_device())
 
     def md5(self):
         return hashlib.md5(self.img.tobytes()).hexdigest()
