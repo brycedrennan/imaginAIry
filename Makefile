@@ -46,7 +46,7 @@ deploy:  ## Deploy the package to pypi.org
 	python setup.py bdist_wheel
 	#python setup.py sdist
 	@echo 'pypi.org Username: '
-	@read username && twine upload dist/* -u $$username;
+	@read username && twine upload --verbose dist/* -u $$username;
 	rm -rf build
 	rm -rf dist
 	@echo "Deploy successful! ✨ 🍰 ✨"

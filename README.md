@@ -245,23 +245,24 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
 
 
 ## Not Supported
- - a web interface. this is a python library
+ - a GUI. this is a python library
  - training
 
 ## Todo
 
- - performance optimizations
+ - Performance Optimizations
    - ✅ https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
    - ✅ https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#
    - ✅ https://www.reddit.com/r/StableDiffusion/comments/xalaws/test_update_for_less_memory_usage_and_higher/
-   - https://github.com/neonsecret/stable-diffusion  https://github.com/CompVis/stable-diffusion/pull/177
+   - https://github.com/neonsecret/stable-diffusion  
+   - https://github.com/CompVis/stable-diffusion/pull/177
    - https://github.com/huggingface/diffusers/pull/532/files
    - https://github.com/HazyResearch/flash-attention
- - ✅ deploy to pypi
- - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
+   - xformers improvments https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/
  - Development Environment
    - ✅ add tests
    - ✅ set up ci (test/lint/format)
+   - setup parallel testing
    - add docs
    - remove yaml config
    - delete more unused code
@@ -271,12 +272,41 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ interactive cli
  - Image Generation Features
    - ✅ add k-diffusion sampling methods
+   - ✅ tiling
+   - generation videos/gifs
+   - Compositional Visual Generation
+     - https://github.com/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch
+     - https://colab.research.google.com/github/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch/blob/main/notebooks/demo.ipynb#scrollTo=wt_j3uXZGFAS
    - negative prompting
      - some syntax to allow it in a text string
-   - upscaling
+   - images as actual prompts instead of just init images
+     - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
+     - https://twitter.com/Buntworthy/status/1566744186153484288
+     - https://github.com/justinpinkney/stable-diffusion
+     - https://github.com/LambdaLabsML/lambda-diffusers
+     - https://www.reddit.com/r/MachineLearning/comments/x6k5bm/n_stable_diffusion_image_variations_released/
+ - Image Editing
+   - outpainting
+     - https://github.com/parlance-zz/g-diffuser-bot/search?q=noise&type=issues
+     - lama cleaner
+   - ✅ inpainting
+     - https://github.com/Jack000/glid-3-xl-stable 
+     - https://github.com/andreas128/RePaint
+     - img2img but keeps img stable
+     - https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/
+     - https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1
+     - https://github.com/pesser/stable-diffusion/commit/bbb52981460707963e2a62160890d7ecbce00e79
+     - https://github.com/SHI-Labs/FcF-Inpainting https://praeclarumjj3.github.io/fcf-inpainting/
+   - ✅ text based image masking
+     - ✅ ClipSeg - https://github.com/timojl/clipseg
+     - https://github.com/facebookresearch/detectron2
+ - Image Enhancement
+   - Photo Restoration - https://github.com/microsoft/Bringing-Old-Photos-Back-to-Life
+   - Upscaling
      - ✅ realesrgan 
      - ldm
      - https://github.com/lowfuel/progrock-stable
+     - gobig
      - stable super-res?
        - todo: try with 1-0-0-0 mask at full image resolution (rencoding entire image+predicted image at every step)
        - todo: use a gaussian pyramid and only include the "high-detail" level of the pyramid into the next step
@@ -289,27 +319,13 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - https://github.com/rmokady/CLIP_prefix_caption
      - https://github.com/pharmapsychotic/clip-interrogator (blip + clip)
      - https://github.com/KaiyangZhou/CoOp
-   - outpainting
-     - https://github.com/parlance-zz/g-diffuser-bot/search?q=noise&type=issues
-     - lama cleaner
-   - ✅ inpainting
-     - https://github.com/andreas128/RePaint
-     - img2img but keeps img stable
-     - https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/
-     - https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1
-     - https://github.com/pesser/stable-diffusion/commit/bbb52981460707963e2a62160890d7ecbce00e79
-     - https://github.com/SHI-Labs/FcF-Inpainting https://praeclarumjj3.github.io/fcf-inpainting/
    - CPU support
    - ✅ img2img for plms
    - img2img for kdiff functions
-   - ✅ text based image masking
-     - https://github.com/facebookresearch/detectron2
-   - images as actual prompts instead of just init images
-     - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
-     - https://twitter.com/Buntworthy/status/1566744186153484288
-     - https://github.com/justinpinkney/stable-diffusion
-     - https://github.com/LambdaLabsML/lambda-diffusers
-     - https://www.reddit.com/r/MachineLearning/comments/x6k5bm/n_stable_diffusion_image_variations_released/
+ - Other
+   - Enhancement pipelines
+   - text-to-3d https://dreamfusionpaper.github.io/
+   - make a video https://github.com/lucidrains/make-a-video-pytorch
    - animations
      - https://github.com/francislabountyjr/stable-diffusion/blob/main/inferencing_notebook.ipynb
      - https://www.youtube.com/watch?v=E7aAFEhdngI
@@ -321,8 +337,6 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - https://colab.research.google.com/github/aicrumb/doohickey/blob/main/Doohickey_Diffusion.ipynb#scrollTo=PytCwKXCmPid
      - https://github.com/mlfoundations/open_clip
      - https://github.com/openai/guided-diffusion
-   - ✅ tiling
-   - output show-work videos
    - image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md
    - textual inversion 
      - https://www.reddit.com/r/StableDiffusion/comments/xbwb5y/how_to_run_textual_inversion_locally_train_your/
@@ -331,12 +345,18 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - https://github.com/Jack000/glid-3-xl-stable
    - fix saturation at high CFG https://www.reddit.com/r/StableDiffusion/comments/xalo78/fixing_excessive_contrastsaturation_resulting/
    - https://www.reddit.com/r/StableDiffusion/comments/xbrrgt/a_rundown_of_twenty_new_methodsoptions_added_to/
+   - ✅ deploy to pypi
+   - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
 
 ## Noteable Stable Diffusion Implementations
- - https://github.com/huggingface/diffusers/tree/main/src/diffusers/pipelines/stable_diffusion
- - https://github.com/lstein/stable-diffusion
+ - https://github.com/ahrm/UnstableFusion
  - https://github.com/AUTOMATIC1111/stable-diffusion-webui
  - https://github.com/blueturtleai/gimp-stable-diffusion
+ - https://github.com/hafriedlander/stable-diffusion-grpcserver
+ - https://github.com/huggingface/diffusers/tree/main/src/diffusers/pipelines/stable_diffusion
+ - https://github.com/lkwq007/stablediffusion-infinity
+ - https://github.com/lstein/stable-diffusion
+ - https://github.com/parlance-zz/g-diffuser-lib
 
 ## Further Reading
  - Differences between samplers
