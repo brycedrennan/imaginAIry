@@ -186,6 +186,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**2.2.1**
+ - fix: init image is fully ignored if init-image-strength = 0
+
 **2.2.0**
  - feature: face enhancement fidelity is now configurable
 
