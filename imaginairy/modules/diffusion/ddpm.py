@@ -22,7 +22,7 @@ from imaginairy.modules.diffusion.util import (
     noise_like,
 )
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
-from imaginairy.utils import instantiate_from_config, log_params
+from imaginairy.utils import instantiate_from_config
 
 logger = logging.getLogger(__name__)
 __conditioning_keys__ = {"concat": "c_concat", "crossattn": "c_crossattn", "adm": "y"}
@@ -95,7 +95,6 @@ class DDPM(pl.LightningModule):
         self.channels = channels
         self.use_positional_encodings = use_positional_encodings
         self.model = DiffusionWrapper(unet_config, conditioning_key)
-        log_params(self.model)
 
         self.use_scheduler = scheduler_config is not None
         if self.use_scheduler:

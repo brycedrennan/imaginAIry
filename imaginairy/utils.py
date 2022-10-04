@@ -4,7 +4,7 @@ import os.path
 import platform
 from contextlib import contextmanager, nullcontext
 from functools import lru_cache
-from typing import List, Optional
+from typing import Any, List, Optional, Union
 
 import requests
 import torch
@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 @lru_cache()
-def get_device():
+def get_device() -> str:
+    """Return the best torch backend available"""
     if torch.cuda.is_available():
         return "cuda"
 
@@ -28,33 +29,40 @@ def get_device():
 
 
 @lru_cache()
-def get_device_name(device_type):
+def get_hardware_description(device_type: str) -> str:
+    """Description of the hardware being used"""
+    desc = platform.platform()
     if device_type == "cuda":
-        return torch.cuda.get_device_name(0)
-    return platform.processor()
+        desc += "-" + torch.cuda.get_device_name(0)
+
+    return desc
 
 
-def log_params(model):
-    total_params = sum(p.numel() for p in model.parameters())
-    logger.debug(f"{model.__class__.__name__} has {total_params * 1.e-6:.2f} M params.")
+def get_obj_from_str(import_path: str, reload=False) -> Any:
+    """
+    Gets a python object from a string reference if it's location
+
+    Example: "functools.lru_cache"
+    """
+    module_path, obj_name = import_path.rsplit(".", 1)
+    if reload:
+        module_imp = importlib.import_module(module_path)
+        importlib.reload(module_imp)
+    module = importlib.import_module(module_path, package=None)
+    return getattr(module, obj_name)
 
 
-def instantiate_from_config(config):
+def instantiate_from_config(config: Union[dict, str]) -> Any:
+    """Instantiate an object from a config dict"""
     if "target" not in config:
         if config == "__is_first_stage__":
             return None
         if config == "__is_unconditional__":
             return None
         raise KeyError("Expected key `target` to instantiate.")
-    return get_obj_from_str(config["target"])(**config.get("params", {}))
-
-
-def get_obj_from_str(string, reload=False):
-    module, cls = string.rsplit(".", 1)
-    if reload:
-        module_imp = importlib.import_module(module)
-        importlib.reload(module_imp)
-    return getattr(importlib.import_module(module, package=None), cls)
+    params = config.get("params", {})
+    _cls = get_obj_from_str(config["target"])
+    return _cls(**params)
 
 
 @contextmanager
