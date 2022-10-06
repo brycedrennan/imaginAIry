@@ -1,5 +1,4 @@
 # pylama:ignore=W0613
-"""SAMPLING ONLY."""
 import logging
 
 import numpy as np
@@ -13,41 +12,19 @@ from imaginairy.modules.diffusion.util import (
     make_ddim_timesteps,
     noise_like,
 )
+from imaginairy.samplers.base import get_noise_prediction
 from imaginairy.utils import get_device
 
 logger = logging.getLogger(__name__)
 
 
-class DDIMSampler:
-    """
-    Denoising Diffusion Implicit Models
-
-    https://arxiv.org/abs/2010.02502
-    """
-
-    def __init__(self, model):
-        self.model = model
-
-    def make_schedule(self, ddim_num_steps, ddim_discretize="uniform", ddim_eta=0.0):
-        buffers = self._make_schedule(
-            model_num_timesteps=self.model.num_timesteps,
-            model_alphas_cumprod=self.model.alphas_cumprod,
-            model_betas=self.model.betas,
-            model_alphas_cumprod_prev=self.model.alphas_cumprod_prev,
-            ddim_num_steps=ddim_num_steps,
-            ddim_discretize=ddim_discretize,
-            ddim_eta=ddim_eta,
-            device=self.model.device,
-        )
-        for k, v in buffers.items():
-            setattr(self, k, v)
-
-    @staticmethod
-    def _make_schedule(
+class DDIMSchedule:
+    def __init__(
+        self,
         model_num_timesteps,
         model_alphas_cumprod,
-        model_betas,
         model_alphas_cumprod_prev,
+        model_betas,
         ddim_num_steps,
         ddim_discretize="uniform",
         ddim_eta=0.0,
@@ -71,41 +48,37 @@ class DDIMSampler:
             ddim_timesteps=ddim_timesteps,
             eta=ddim_eta,
         )
-
-        buffers = {
-            "ddim_timesteps": ddim_timesteps,
-            "betas": to_torch(model_betas),
-            "alphas_cumprod": to_torch(alphas_cumprod),
-            "alphas_cumprod_prev": to_torch(model_alphas_cumprod_prev),
-            # calculations for diffusion q(x_t | x_{t-1}) and others
-            "sqrt_alphas_cumprod": to_torch(np.sqrt(alphas_cumprod.cpu())),
-            "sqrt_one_minus_alphas_cumprod": to_torch(
-                np.sqrt(1.0 - alphas_cumprod.cpu())
-            ),
-            "log_one_minus_alphas_cumprod": to_torch(
-                np.log(1.0 - alphas_cumprod.cpu())
-            ),
-            "sqrt_recip_alphas_cumprod": to_torch(np.sqrt(1.0 / alphas_cumprod.cpu())),
-            "sqrt_recipm1_alphas_cumprod": to_torch(
-                np.sqrt(1.0 / alphas_cumprod.cpu() - 1)
-            ),
-            "ddim_sigmas": ddim_sigmas.to(torch.float32).to(device),
-            "ddim_alphas": ddim_alphas.to(torch.float32).to(device),
-            "ddim_alphas_prev": ddim_alphas_prev,
-            "ddim_sqrt_one_minus_alphas": np.sqrt(1.0 - ddim_alphas)
-            .to(torch.float32)
-            .to(device),
-        }
-
-        sigmas_for_original_sampling_steps = ddim_eta * torch.sqrt(
-            (1 - buffers["alphas_cumprod_prev"])
-            / (1 - buffers["alphas_cumprod"])
-            * (1 - buffers["alphas_cumprod"] / buffers["alphas_cumprod_prev"])
+        self.ddim_timesteps = ddim_timesteps
+        self.betas = to_torch(model_betas)
+        self.alphas_cumprod = to_torch(alphas_cumprod)
+        self.alphas_cumprod_prev = to_torch(model_alphas_cumprod_prev)
+        # calculations for diffusion q(x_t | x_{t-1}) and others
+        self.sqrt_alphas_cumprod = to_torch(np.sqrt(alphas_cumprod.cpu()))
+        self.sqrt_one_minus_alphas_cumprod = to_torch(
+            np.sqrt(1.0 - alphas_cumprod.cpu())
         )
-        buffers[
-            "ddim_sigmas_for_original_num_steps"
-        ] = sigmas_for_original_sampling_steps
-        return buffers
+        self.log_one_minus_alphas_cumprod = to_torch(np.log(1.0 - alphas_cumprod.cpu()))
+        self.sqrt_recip_alphas_cumprod = to_torch(np.sqrt(1.0 / alphas_cumprod.cpu()))
+        self.sqrt_recipm1_alphas_cumprod = to_torch(
+            np.sqrt(1.0 / alphas_cumprod.cpu() - 1)
+        )
+        self.ddim_sigmas = ddim_sigmas.to(torch.float32).to(device)
+        self.ddim_alphas = ddim_alphas.to(torch.float32).to(device)
+        self.ddim_alphas_prev = ddim_alphas_prev
+        self.ddim_sqrt_one_minus_alphas = (
+            np.sqrt(1.0 - ddim_alphas).to(torch.float32).to(device)
+        )
+
+
+class DDIMSampler:
+    """
+    Denoising Diffusion Implicit Models
+
+    https://arxiv.org/abs/2010.02502
+    """
+
+    def __init__(self, model):
+        self.model = model
 
     @torch.no_grad()
     def sample(
@@ -123,31 +96,30 @@ class DDIMSampler:
         x0=None,
         temperature=1.0,
         noise_dropout=0.0,
-        score_corrector=None,
-        corrector_kwargs=None,
         x_T=None,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
         **kwargs,
         # this has to come in the same format as the conditioning, # e.g. as encoded tokens, ...
     ):
-        if isinstance(conditioning, dict):
-            cbs = conditioning[list(conditioning.keys())[0]].shape[0]
-            if cbs != batch_size:
-                logger.warning(
-                    f"Warning: Got {cbs} conditionings but batch-size is {batch_size}"
-                )
-        else:
-            if conditioning.shape[0] != batch_size:
-                logger.warning(
-                    f"Warning: Got {conditioning.shape[0]} conditionings but batch-size is {batch_size}"
-                )
-
-        self.make_schedule(ddim_num_steps=num_steps, ddim_eta=eta)
+        if conditioning.shape[0] != batch_size:
+            logger.warning(
+                f"Warning: Got {conditioning.shape[0]} conditionings but batch-size is {batch_size}"
+            )
+        schedule = DDIMSchedule(
+            model_num_timesteps=self.model.num_timesteps,
+            model_alphas_cumprod=self.model.alphas_cumprod,
+            model_alphas_cumprod_prev=self.model.alphas_cumprod_prev,
+            model_betas=self.model.betas,
+            ddim_num_steps=num_steps,
+            ddim_discretize="uniform",
+            ddim_eta=0.0,
+        )
 
         samples = self.ddim_sampling(
             conditioning,
-            shape=(batch_size, *shape),
+            shape=shape,
+            schedule=schedule,
             callback=callback,
             img_callback=img_callback,
             quantize_denoised=quantize_x0,
@@ -155,8 +127,6 @@ class DDIMSampler:
             x0=x0,
             noise_dropout=noise_dropout,
             temperature=temperature,
-            score_corrector=score_corrector,
-            corrector_kwargs=corrector_kwargs,
             x_T=x_T,
             unconditional_guidance_scale=unconditional_guidance_scale,
             unconditional_conditioning=unconditional_conditioning,
@@ -168,6 +138,7 @@ class DDIMSampler:
         self,
         cond,
         shape,
+        schedule,
         x_T=None,
         callback=None,
         timesteps=None,
@@ -177,8 +148,6 @@ class DDIMSampler:
         img_callback=None,
         temperature=1.0,
         noise_dropout=0.0,
-        score_corrector=None,
-        corrector_kwargs=None,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
     ):
@@ -192,16 +161,16 @@ class DDIMSampler:
         log_latent(img, "initial noise")
 
         if timesteps is None:
-            timesteps = self.ddim_timesteps
+            timesteps = schedule.ddim_timesteps
         else:
             subset_end = (
                 int(
-                    min(timesteps / self.ddim_timesteps.shape[0], 1)
-                    * self.ddim_timesteps.shape[0]
+                    min(timesteps / schedule.ddim_timesteps.shape[0], 1)
+                    * schedule.ddim_timesteps.shape[0]
                 )
                 - 1
             )
-            timesteps = self.ddim_timesteps[:subset_end]
+            timesteps = schedule.ddim_timesteps[:subset_end]
 
         time_range = np.flip(timesteps)
         total_steps = timesteps.shape[0]
@@ -225,6 +194,7 @@ class DDIMSampler:
                 cond,
                 ts,
                 index=index,
+                schedule=schedule,
                 quantize_denoised=quantize_denoised,
                 temperature=temperature,
                 noise_dropout=noise_dropout,
@@ -245,6 +215,7 @@ class DDIMSampler:
         c,
         t,
         index,
+        schedule,
         repeat_noise=False,
         quantize_denoised=False,
         temperature=1.0,
@@ -254,26 +225,26 @@ class DDIMSampler:
         loss_function=None,
     ):
         assert unconditional_guidance_scale >= 1
-        x_in = torch.cat([x] * 2)
-        t_in = torch.cat([t] * 2)
-        c_in = torch.cat([unconditional_conditioning, c])
-        # with torch.no_grad():
-        noise_pred_uncond, noise_pred = self.model.apply_model(x_in, t_in, c_in).chunk(
-            2
-        )
-        noise_pred = noise_pred_uncond + unconditional_guidance_scale * (
-            noise_pred - noise_pred_uncond
+        noise_pred = get_noise_prediction(
+            denoise_func=self.model.apply_model,
+            noisy_latent=x,
+            time_encoding=t,
+            neutral_conditioning=unconditional_conditioning,
+            positive_conditioning=c,
+            signal_amplification=unconditional_guidance_scale,
         )
 
         b = x.shape[0]
         log_latent(noise_pred, "noise prediction")
 
         # select parameters corresponding to the currently considered timestep
-        a_t = torch.full((b, 1, 1, 1), self.ddim_alphas[index], device=x.device)
-        a_prev = torch.full((b, 1, 1, 1), self.ddim_alphas_prev[index], device=x.device)
-        sigma_t = torch.full((b, 1, 1, 1), self.ddim_sigmas[index], device=x.device)
+        a_t = torch.full((b, 1, 1, 1), schedule.ddim_alphas[index], device=x.device)
+        a_prev = torch.full(
+            (b, 1, 1, 1), schedule.ddim_alphas_prev[index], device=x.device
+        )
+        sigma_t = torch.full((b, 1, 1, 1), schedule.ddim_sigmas[index], device=x.device)
         sqrt_one_minus_at = torch.full(
-            (b, 1, 1, 1), self.ddim_sqrt_one_minus_alphas[index], device=x.device
+            (b, 1, 1, 1), schedule.ddim_sqrt_one_minus_alphas[index], device=x.device
         )
         return self._p_sample_ddim_formula(
             x,
@@ -310,12 +281,11 @@ class DDIMSampler:
         return x_prev, pred_x0
 
     @torch.no_grad()
-    def stochastic_encode(self, init_latent, t, noise=None):
-        # fast, but does not allow for exact reconstruction
+    def noise_an_image(self, init_latent, t, schedule, noise=None):
         # t serves as an index to gather the correct alphas
         t = t.clamp(0, 1000)
-        sqrt_alphas_cumprod = torch.sqrt(self.ddim_alphas)
-        sqrt_one_minus_alphas_cumprod = self.ddim_sqrt_one_minus_alphas
+        sqrt_alphas_cumprod = torch.sqrt(schedule.ddim_alphas)
+        sqrt_one_minus_alphas_cumprod = schedule.ddim_sqrt_one_minus_alphas
 
         if noise is None:
             noise = torch.randn_like(init_latent, device="cpu").to(get_device())
@@ -328,31 +298,34 @@ class DDIMSampler:
     @torch.no_grad()
     def decode(
         self,
-        x_latent,
+        initial_latent,
         cond,
         t_start,
+        schedule,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
         img_callback=None,
-        score_corrector=None,
         temperature=1.0,
         mask=None,
         orig_latent=None,
     ):
 
-        timesteps = self.ddim_timesteps[:t_start]
+        timesteps = schedule.ddim_timesteps[:t_start]
 
         time_range = np.flip(timesteps)
         total_steps = timesteps.shape[0]
         logger.debug(f"Running DDIM Sampling with {total_steps} timesteps")
 
         iterator = tqdm(time_range, desc="Decoding image", total=total_steps)
-        x_dec = x_latent
+        x_dec = initial_latent
 
         for i, step in enumerate(iterator):
             index = total_steps - i - 1
             ts = torch.full(
-                (x_latent.shape[0],), step, device=x_latent.device, dtype=torch.long
+                (initial_latent.shape[0],),
+                step,
+                device=initial_latent.device,
+                dtype=torch.long,
             )
 
             if mask is not None:
@@ -374,17 +347,12 @@ class DDIMSampler:
                 x_dec,
                 cond,
                 ts,
+                schedule=schedule,
                 index=index,
                 unconditional_guidance_scale=unconditional_guidance_scale,
                 unconditional_conditioning=unconditional_conditioning,
                 temperature=temperature,
             )
-            # original_loss = ((x_dec - x_latent).abs().mean()*70)
-            # sigma_t = torch.full((1, 1, 1, 1), self.ddim_sigmas[index], device=get_device())
-            # x_dec = x_dec.detach() + (original_loss * 0.1) ** 2
-            # cond_grad = -torch.autograd.grad(original_loss, x_dec)[0]
-            # x_dec = x_dec.detach() + cond_grad * sigma_t ** 2
-            # x_dec_alt = x_dec + (original_loss * 0.1) ** 2
 
             log_latent(x_dec, f"x_dec {i}")
             log_latent(pred_x0, f"pred_x0 {i}")

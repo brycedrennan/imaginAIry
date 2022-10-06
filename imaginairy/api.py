@@ -26,6 +26,7 @@ from imaginairy.img_log import (
 from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
 from imaginairy.safety import is_nsfw
 from imaginairy.samplers.base import get_sampler
+from imaginairy.samplers.plms import PLMSSchedule
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     fix_torch_group_norm,
@@ -208,6 +209,7 @@ def imagine(
                 log_conditioning(c, "positive conditioning")
 
                 shape = [
+                    1,
                     latent_channels,
                     prompt.height // downsampling_factor,
                     prompt.width // downsampling_factor,
@@ -228,9 +230,6 @@ def imagine(
                 if prompt.init_image:
                     generation_strength = 1 - prompt.init_image_strength
                     t_enc = int(prompt.steps * generation_strength)
-                    sampler.make_schedule(
-                        ddim_num_steps=prompt.steps, ddim_eta=ddim_eta
-                    )
                     try:
                         init_image = pillow_fit_image_within(
                             prompt.init_image,
@@ -284,24 +283,35 @@ def imagine(
                     # encode (scaled latent)
                     seed_everything(prompt.seed)
                     noise = torch.randn_like(init_latent, device="cpu").to(get_device())
+                    schedule = PLMSSchedule(
+                        ddpm_num_timesteps=model.num_timesteps,
+                        ddim_num_steps=prompt.steps,
+                        alphas_cumprod=model.alphas_cumprod,
+                        alphas_cumprod_prev=model.alphas_cumprod_prev,
+                        betas=model.betas,
+                        ddim_discretize="uniform",
+                        ddim_eta=0.0,
+                    )
                     if generation_strength >= 1:
                         # prompt strength gets converted to time encodings,
                         # which means you can't get to true 0 without this hack
                         # (or setting steps=1000)
                         z_enc = noise
                     else:
-                        z_enc = sampler.stochastic_encode(
+                        z_enc = sampler.noise_an_image(
                             init_latent,
                             torch.tensor([t_enc - 1]).to(get_device()),
+                            schedule=schedule,
                             noise=noise,
                         )
                     log_latent(z_enc, "z_enc")
 
                     # decode it
                     samples = sampler.decode(
-                        x_latent=z_enc,
+                        initial_latent=z_enc,
                         cond=c,
                         t_start=t_enc,
+                        schedule=schedule,
                         unconditional_guidance_scale=prompt.prompt_strength,
                         unconditional_conditioning=uc,
                         img_callback=_img_callback,
