@@ -47,6 +47,11 @@ def pre_setup():
         yield
 
 
+@pytest.fixture(autouse=True)
+def reset_get_device():
+    get_device.cache_clear()
+
+
 @pytest.fixture()
 def filename_base_for_outputs(request):
     filename_base = f"{TESTS_FOLDER}/test_output/{request.node.name}_{get_device()}_"

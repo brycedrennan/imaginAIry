@@ -12,7 +12,6 @@ from imaginairy.utils import (
     get_hardware_description,
     get_obj_from_str,
     instantiate_from_config,
-    platform_appropriate_autocast,
 )
 
 
@@ -79,6 +78,7 @@ def test_instantiate_from_config():
         instantiate_from_config(config)
 
 
-def test_platform_appropriate_autocast():
-    with platform_appropriate_autocast("autocast"):
-        pass
+#
+# def test_platform_appropriate_autocast():
+#     with platform_appropriate_autocast("autocast"):
+#         pass

@@ -2,7 +2,7 @@
 import torch
 from torch import nn
 
-from imaginairy.utils import get_device
+from imaginairy.img_log import log_latent
 
 SAMPLER_TYPE_OPTIONS = [
     "plms",
@@ -51,11 +51,19 @@ class CFGDenoiser(nn.Module):
         self.inner_model = model
 
     def forward(self, x, sigma, uncond, cond, cond_scale, mask=None, orig_latent=None):
-        x_in = torch.cat([x] * 2)
-        sigma_in = torch.cat([sigma] * 2)
-        cond_in = torch.cat([uncond, cond])
-        uncond, cond = self.inner_model(x_in, sigma_in, cond=cond_in).chunk(2)
-        denoised = uncond + (cond - uncond) * cond_scale
+        def _wrapper(noisy_latent_in, time_encoding_in, conditioning_in):
+            return self.inner_model(
+                noisy_latent_in, time_encoding_in, cond=conditioning_in
+            )
+
+        denoised = get_noise_prediction(
+            denoise_func=_wrapper,
+            noisy_latent=x,
+            time_encoding=sigma,
+            neutral_conditioning=uncond,
+            positive_conditioning=cond,
+            signal_amplification=cond_scale,
+        )
 
         if mask is not None:
             assert orig_latent is not None
@@ -65,51 +73,37 @@ class CFGDenoiser(nn.Module):
         return denoised
 
 
-class DiffusionSampler:
-    """
-    wip
+def ensure_4_dim(t: torch.Tensor):
+    if len(t.shape) == 3:
+        t = t.unsqueeze(dim=0)
+    return t
 
-    hope to enforce an api upon samplers
-    """
 
-    def __init__(self, noise_prediction_model, sampler_func, device=get_device()):
-        self.noise_prediction_model = noise_prediction_model
-        self.cfg_noise_prediction_model = CFGDenoiser(noise_prediction_model)
-        self.sampler_func = sampler_func
-        self.device = device
+def get_noise_prediction(
+    denoise_func,
+    noisy_latent,
+    time_encoding,
+    neutral_conditioning,
+    positive_conditioning,
+    signal_amplification=7.5,
+):
+    noisy_latent = ensure_4_dim(noisy_latent)
 
-    def zzsample(
-        self,
-        num_steps,
-        text_conditioning,
-        batch_size,
-        shape,
-        unconditional_guidance_scale,
-        unconditional_conditioning,
-        eta,
-        initial_noise_tensor=None,
-        img_callback=None,
-    ):
-        size = (batch_size, *shape)
+    noisy_latent_in = torch.cat([noisy_latent] * 2)
+    time_encoding_in = torch.cat([time_encoding] * 2)
+    conditioning_in = torch.cat([neutral_conditioning, positive_conditioning])
 
-        initial_noise_tensor = (
-            torch.randn(size, device="cpu").to(get_device())
-            if initial_noise_tensor is None
-            else initial_noise_tensor
-        )
-        sigmas = self.noise_prediction_model.get_sigmas(num_steps)
-        x = initial_noise_tensor * sigmas[0]
+    pred_noise_neutral, pred_noise_positive = denoise_func(
+        noisy_latent_in, time_encoding_in, conditioning_in
+    ).chunk(2)
 
-        samples = self.sampler_func(
-            self.cfg_noise_prediction_model,
-            x,
-            sigmas,
-            extra_args={
-                "cond": text_conditioning,
-                "uncond": unconditional_conditioning,
-                "cond_scale": unconditional_guidance_scale,
-            },
-            disable=False,
-        )
+    amplified_noise_pred = signal_amplification * (
+        pred_noise_positive - pred_noise_neutral
+    )
+    pred_noise = pred_noise_neutral + amplified_noise_pred
 
-        return samples, None
+    log_latent(pred_noise_neutral, "neutral noise prediction")
+    log_latent(pred_noise_positive, "positive noise prediction")
+    log_latent(pred_noise, "noise prediction")
+
+    return pred_noise

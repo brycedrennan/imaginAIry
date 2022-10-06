@@ -8,11 +8,15 @@ from imaginairy.vendored.k_diffusion import sampling as k_sampling
 from imaginairy.vendored.k_diffusion.external import CompVisDenoiser
 
 
+class StandardCompVisDenoiser(CompVisDenoiser):
+    def apply_model(self, *args, **kwargs):
+        return self.inner_model.apply_model(*args, **kwargs)
+
+
 class KDiffusionSampler:
     def __init__(self, model, sampler_name):
         self.model = model
-        self.cv_denoiser = CompVisDenoiser(model)
-        # self.cfg_denoiser = CompVisDenoiser(self.cv_denoiser)
+        self.cv_denoiser = StandardCompVisDenoiser(model)
         self.sampler_name = sampler_name
         self.sampler_func = getattr(k_sampling, f"sample_{sampler_name}")
 
@@ -28,10 +32,8 @@ class KDiffusionSampler:
         initial_noise_tensor=None,
         img_callback=None,
     ):
-        size = (batch_size, *shape)
-
         initial_noise_tensor = (
-            torch.randn(size, device="cpu").to(get_device())
+            torch.randn(shape, device="cpu").to(get_device())
             if initial_noise_tensor is None
             else initial_noise_tensor
         )

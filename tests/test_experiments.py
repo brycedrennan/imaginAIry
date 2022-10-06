@@ -54,7 +54,6 @@ def experiment_step_repeats():
     embedder.to(get_device())
 
     sampler = DDIMSampler(model)
-    sampler.make_schedule(1000)
 
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/beach_at_sainte_adresse.jpg")
     init_image, _, _ = pillow_img_to_torch_image(
@@ -89,7 +88,9 @@ def experiment_step_repeats():
         # noise_pred = model.apply_model(init_latent, t, neutral_embedding)
         # log_latent(noise_pred, "noise prediction")
         for _ in range(100):
-            x_prev, pred_x0 = sampler.p_sample_ddim(x_prev, neutral_embedding, t, index)
+            x_prev, pred_x0 = sampler.p_sample_ddim(  # noqa
+                x_prev, neutral_embedding, t, index
+            )
             log_latent(pred_x0, "pred_x0")
             x_prev = pred_x0
 
