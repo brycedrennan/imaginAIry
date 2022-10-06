@@ -4,7 +4,7 @@ import click
 from click_shell import shell
 
 from imaginairy import LazyLoadingImage, generate_caption
-from imaginairy.api import imagine_image_files, load_model
+from imaginairy.api import imagine_image_files
 from imaginairy.samplers.base import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
 from imaginairy.suppress_logs import suppress_annoying_logs_and_warnings
@@ -173,6 +173,12 @@ def configure_logging(level="INFO"):
     type=click.Choice(["full", "autocast"]),
     default="autocast",
 )
+@click.option(
+    "--model-weights-path",
+    help="path to model weights file. by default we use stable diffusion 1.4",
+    type=click.Path(exists=True),
+    default=None,
+)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -201,6 +207,7 @@ def imagine_cmd(
     mask_modify_original,
     caption,
     precision,
+    model_weights_path,
 ):
     """Have the AI generate images. alias:imagine"""
     if ctx.invoked_subcommand is not None:
@@ -223,7 +230,6 @@ def imagine_cmd(
     if fix_faces_fidelity is not None:
         fix_faces_fidelity = float(fix_faces_fidelity)
     prompts = []
-    load_model()
     for _ in range(repeats):
         for prompt_text in prompt_texts:
             prompt = ImaginePrompt(
@@ -255,6 +261,7 @@ def imagine_cmd(
         output_file_extension="jpg",
         print_caption=caption,
         precision=precision,
+        model_weights_path=model_weights_path,
     )
 
 
