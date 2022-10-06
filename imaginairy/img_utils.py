@@ -12,10 +12,17 @@ from imaginairy.utils import get_device
 def pillow_fit_image_within(image: PIL.Image.Image, max_height=512, max_width=512):
     image = image.convert("RGB")
     w, h = image.size
+    resize_ratio = 1
     if w > max_width or h > max_height:
         resize_ratio = min(max_width / w, max_height / h)
+    elif w < max_width and h < max_height:
+        # it's smaller than our target image, enlarge
+        resize_ratio = max(max_width / w, max_height / h)
+
+    if resize_ratio != 1:
         w, h = int(w * resize_ratio), int(h * resize_ratio)
-        w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 64
+    w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 64
+    if (w, h) != image.size:
         image = image.resize((w, h), resample=Image.Resampling.LANCZOS)
     return image
 
