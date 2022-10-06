@@ -185,6 +185,12 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**2.3.0**
+ - feature: model weights file can be specified via `--model-weights-path` argument at the command line
+ - fix: set face fidelity default back to old value
+ - fix: handle small images without throwing exception. credit to @NiclasEriksen
+ - docs: add setuptools-rust as dependency for macos 
+
 **2.2.1**
  - fix: init image is fully ignored if init-image-strength = 0
 
