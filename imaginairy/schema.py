@@ -102,7 +102,7 @@ class ImaginePrompt:
         width=512,
         upscale=False,
         fix_faces=False,
-        fix_faces_fidelity=0.5,
+        fix_faces_fidelity=0.2,
         sampler_type="PLMS",
         conditioning=None,
         tile_mode=False,
