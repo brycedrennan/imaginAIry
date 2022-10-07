@@ -86,6 +86,8 @@ class ImaginePrompt:
         KEEP = "keep"
         REPLACE = "replace"
 
+    DEFAULT_FACE_FIDELITY = 0.2
+
     def __init__(
         self,
         prompt=None,
@@ -102,12 +104,15 @@ class ImaginePrompt:
         width=512,
         upscale=False,
         fix_faces=False,
-        fix_faces_fidelity=0.2,
+        fix_faces_fidelity=DEFAULT_FACE_FIDELITY,
         sampler_type="PLMS",
         conditioning=None,
         tile_mode=False,
     ):
-        prompt = prompt if prompt is not None else "a scenic landscape"
+        prompt = prompt if prompt is not None else ""
+        fix_faces_fidelity = (
+            fix_faces_fidelity if fix_faces_fidelity else self.DEFAULT_FACE_FIDELITY
+        )
         if isinstance(prompt, str):
             self.prompts = [WeightedPrompt(prompt, 1)]
         else:
