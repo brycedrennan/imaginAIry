@@ -185,6 +185,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**2.3.1**
+ - fix: face fidelity default was broken
+
 **2.3.0**
  - feature: model weights file can be specified via `--model-weights-path` argument at the command line
  - fix: set face fidelity default back to old value
@@ -246,7 +249,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
 **1.2.0**
  - allow urls as init-images
 
-** previous **
+**previous**
  - img2img actually does # of steps you specify  
  - performance optimizations
  - numerous other changes
