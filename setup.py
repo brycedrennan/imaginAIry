@@ -25,9 +25,11 @@ setup(
     package_data={
         "imaginairy": [
             "configs/*.yaml",
+            "enhancers/wordlists/*.txt",
             "vendored/clip/*.txt.gz",
             "vendored/clipseg/*.pth",
             "vendored/blip/configs/*.*",
+            "vendored/noodle_soup_prompts/*.*",
         ]
     },
     install_requires=[

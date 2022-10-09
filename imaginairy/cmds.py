@@ -183,7 +183,7 @@ def configure_logging(level="INFO"):
 )
 @click.option(
     "--prompt-library-path",
-    help="path to model weights file. by default we use stable diffusion 1.4",
+    help="path to folder containing phaselists in txt files. use txt filename in prompt: {_filename_}",
     type=click.Path(exists=True),
     default=None,
     multiple=True,
