@@ -7,7 +7,7 @@ setup(
     name="imaginAIry",
     author="Bryce Drennan",
     # author_email="b r y p y d o t io",
-    version="2.4.0",
+    version="2.4.1",
     description="AI imagined images. Pythonic generation of stable diffusion images.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -25,11 +25,12 @@ setup(
     package_data={
         "imaginairy": [
             "configs/*.yaml",
-            "enhancers/wordlists/*.txt",
+            "enhancers/phraselists/*.txt",
             "vendored/clip/*.txt.gz",
             "vendored/clipseg/*.pth",
             "vendored/blip/configs/*.*",
             "vendored/noodle_soup_prompts/*.*",
+            "vendored/noodle_soup_prompts/LICENSE",
         ]
     },
     install_requires=[
