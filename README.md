@@ -123,10 +123,9 @@ You can use `{}` to randomly pull values from lists.  A list of values separated
 
    `imagine "a {lime|blue|silver|aqua} colored dog" -r 2 --seed 0` will generate both "a red dog" and "a black dog"
 
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000184_0_plms40_PS7.5_a_silver_colored_dog_[generated].jpg" height="256">
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000186_0_plms40_PS7.5_a_aqua_colored_dog_[generated].jpg" height="256"> 
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000210_0_plms40_PS7.5_a_lime_colored_dog_[generated].jpg" height="256"> 
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000211_0_plms40_PS7.5_a_blue_colored_dog_[generated].jpg" height="256"> 
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000184_0_plms40_PS7.5_a_silver_colored_dog_[generated].jpg" height="200"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000186_0_plms40_PS7.5_a_aqua_colored_dog_[generated].jpg" height="200">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000210_0_plms40_PS7.5_a_lime_colored_dog_[generated].jpg" height="200">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000211_0_plms40_PS7.5_a_blue_colored_dog_[generated].jpg" height="200">
 
    `imagine "a {_color_} dog" -r 4 --seed 0` will generate four, different colored dogs. The colors will eb pulled from an included 
    phraselist of colors.
@@ -362,10 +361,13 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - ✅ codeformer - https://github.com/sczhou/CodeFormer
    - ✅ image describe feature - 
      - ✅ https://github.com/salesforce/BLIP
-     - https://github.com/rmokady/CLIP_prefix_caption
-     - https://github.com/pharmapsychotic/clip-interrogator (blip + clip)
+     - 🚫 CLIP brute-force prompt reconstruction
+       - The accuracy of this approach is too low for me to include it in imaginAIry
+       - https://github.com/rmokady/CLIP_prefix_caption
+       - https://github.com/pharmapsychotic/clip-interrogator (blip + clip)
      - https://github.com/KaiyangZhou/CoOp
-   - CPU support
+   - 🚫 CPU support.  While the code does actually work on some CPUs, the generation takes so long that I don't think it's
+    worth the effort to support this feature
    - ✅ img2img for plms
    - img2img for kdiff functions
  - Other
