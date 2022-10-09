@@ -9,7 +9,7 @@ from imaginairy import PKG_ROOT
 
 DEFAULT_PROMPT_LIBRARY_PATHS = [
     os.path.join(PKG_ROOT, "vendored", "noodle_soup_prompts"),
-    os.path.join(PKG_ROOT, "enhancers", "wordlists"),
+    os.path.join(PKG_ROOT, "enhancers", "phraselists"),
 ]
 formatter = Formatter()
 PROMPT_EXPANSION_PATTERN = re.compile(r"[|a-z0-9_ -]+")
@@ -70,7 +70,7 @@ def get_phrases(category_name, prompt_library_paths=None):
 
 def expand_prompts(prompt_text, n=1, prompt_library_paths=None):
     """
-    Replaces {vars} with random samples of corresponding wordlists
+    Replaces {vars} with random samples of corresponding phraselists
 
     Example:
         p = "a happy {animal}"

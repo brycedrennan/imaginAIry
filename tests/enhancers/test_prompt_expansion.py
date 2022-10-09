@@ -40,5 +40,5 @@ def test_prompt_expander_from_wordlist():
     assert prompts == expected
 
 
-def test_get_wordlist_names():
+def test_get_phraselist_names():
     print(", ".join(category_list()))
