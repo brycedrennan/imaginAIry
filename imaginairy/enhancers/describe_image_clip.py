@@ -10,9 +10,12 @@ from imaginairy.vendored import clip
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
+# device = "cpu"
+
+
 @lru_cache()
 def get_model():
-    model_name = "ViT-L/14"
+    model_name = "ViT-B/32"
     model, preprocess = clip.load(model_name, device=device)
     return model, preprocess
 
@@ -36,8 +39,8 @@ def find_embed_text_similarity(embed_features, phrases):
     with torch.no_grad():
         text_features = model.encode_text(text)
 
-    probs = cosine_distance(embed_features, text_features)
-    probs = [float(p) for p in probs.squeeze()]
+    probs = cosine_distance(text_features, embed_features)
+    probs = [float(p) for p in probs.squeeze(dim=0)]
     phrase_probs = list(zip(phrases, probs))
     phrase_probs.sort(key=lambda r: r[1], reverse=True)
 

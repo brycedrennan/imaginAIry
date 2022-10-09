@@ -33,7 +33,8 @@ def blip_model():
     return model
 
 
-def generate_caption(image):
+def generate_caption(image, min_length=30):
+    """Given an image, return a caption"""
     gpu_image = (
         transforms.Compose(
             [
@@ -54,6 +55,6 @@ def generate_caption(image):
 
     with torch.no_grad():
         caption = blip_model().generate(
-            gpu_image, sample=False, num_beams=3, max_length=20, min_length=5
+            gpu_image, sample=False, num_beams=3, max_length=80, min_length=min_length
         )
     return caption[0]
