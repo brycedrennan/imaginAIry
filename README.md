@@ -121,13 +121,13 @@ You can use `{}` to randomly pull values from lists.  A list of values separated
 
    Examples:
 
-   `imagine "a {lime|blue|silver|aqua} colored dog" -r 2 --seed 0` will generate both "a red dog" and "a black dog"
+   `imagine "a {lime|blue|silver|aqua} colored dog" -r 4 --seed 0` (note that it generates a dog of each color without repetition)
 
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000184_0_plms40_PS7.5_a_silver_colored_dog_[generated].jpg" height="200"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000186_0_plms40_PS7.5_a_aqua_colored_dog_[generated].jpg" height="200">
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000210_0_plms40_PS7.5_a_lime_colored_dog_[generated].jpg" height="200">
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000211_0_plms40_PS7.5_a_blue_colored_dog_[generated].jpg" height="200">
 
-   `imagine "a {_color_} dog" -r 4 --seed 0` will generate four, different colored dogs. The colors will eb pulled from an included 
+   `imagine "a {_color_} dog" -r 4 --seed 0` will generate four, different colored dogs. The colors will be pulled from an included 
    phraselist of colors.
     
    `imagine "a {_spaceship_|_fruit_|hot air balloon}. low-poly" -r 4 --seed 0` will generate images of spaceships or fruits or a hot air balloon
