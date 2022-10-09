@@ -105,7 +105,37 @@ operators also work.  When writing strength modifies know that pixel values are 
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/data/girl_with_a_pearl_earring.jpg" height="256"> ➡️ 
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000105_33084057_DDIM40_PS7.5_portrait_of_a_smiling_lady._oil_painting._.jpg" height="256"> 
 
-### Generate image captions
+### Prompt Expansion
+You can use `{}` to randomly pull values from lists.  A list of values separated by `|` 
+ and enclosed in `{ }` will be randomly drawn from in a non-repeating fashion. Values that are surrounded by `_ _` will 
+ pull from a phrase list of the same name.   Folders containing .txt phraselist files may be specified via
+`--prompt_library_path`. The option may be specified multiple times.  Built-in categories:
+    
+      3d-term, adj-architecture, adj-beauty, adj-detailed, adj-emotion, adj-general, adj-horror, animal, art-movement, 
+      art-site, artist, artist-botanical, artist-surreal, aspect-ratio, bird, body-of-water, body-pose, camera-brand,
+      camera-model, color, cosmic-galaxy, cosmic-nebula, cosmic-star, cosmic-term, dinosaur, eyecolor, f-stop, 
+      fantasy-creature, fantasy-setting, fish, flower, focal-length, food, fruit, games, gen-modifier, hair, hd,
+      iso-stop, landscape-type, national-park, nationality, neg-weight, noun-beauty, noun-fantasy, noun-general, 
+      noun-horror, occupation, photo-term, pop-culture, pop-location, punk-style, quantity, rpg-item, scenario-desc, 
+      skin-color, spaceship, style, tree-species, trippy, world-heritage-site
+
+   Examples:
+
+   `imagine "a {lime|blue|silver|aqua} colored dog" -r 2 --seed 0` will generate both "a red dog" and "a black dog"
+
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000184_0_plms40_PS7.5_a_silver_colored_dog_[generated].jpg" height="256">
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000186_0_plms40_PS7.5_a_aqua_colored_dog_[generated].jpg" height="256"> 
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000210_0_plms40_PS7.5_a_lime_colored_dog_[generated].jpg" height="256"> 
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000211_0_plms40_PS7.5_a_blue_colored_dog_[generated].jpg" height="256"> 
+
+   `imagine "a {_color_} dog" -r 4 --seed 0` will generate four, different colored dogs. The colors will eb pulled from an included 
+   phraselist of colors.
+    
+   `imagine "a {_spaceship_|_fruit_|hot air balloon}. low-poly" -r 4 --seed 0` will generate images of spaceships or fruits or a hot air balloon
+
+   Credit to [noodle-soup-prompts](https://github.com/WASasquatch/noodle-soup-prompts/) where most, but not all, of the wordlists originate.
+
+### Generate image captions (via [BLIP](https://github.com/salesforce/BLIP))
 ```bash
 >> aimg describe assets/mask_examples/bowl001.jpg
 a bowl full of gold bars sitting on a table
@@ -185,6 +215,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**2.4.0**
+- 🎉 feature: prompt expansion
+- feature: make (blip) photo captions more descriptive
+
 **2.3.1**
  - fix: face fidelity default was broken
 
@@ -258,6 +292,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
 ## Not Supported
  - a GUI. this is a python library
  - training
+ - exploratory features that don't work well
 
 ## Todo
 
@@ -279,7 +314,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - delete more unused code
  - Interface improvements
    - ✅ init-image at command line
-   - prompt expansion
+   - ✅ prompt expansion
    - ✅ interactive cli
  - Image Generation Features
    - ✅ add k-diffusion sampling methods

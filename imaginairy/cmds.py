@@ -1,10 +1,12 @@
 import logging.config
+import math
 
 import click
 from click_shell import shell
 
 from imaginairy import LazyLoadingImage, generate_caption
 from imaginairy.api import imagine_image_files
+from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.samplers.base import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
 from imaginairy.suppress_logs import suppress_annoying_logs_and_warnings
@@ -179,6 +181,13 @@ def configure_logging(level="INFO"):
     type=click.Path(exists=True),
     default=None,
 )
+@click.option(
+    "--prompt-library-path",
+    help="path to folder containing phaselists in txt files. use txt filename in prompt: {_filename_}",
+    type=click.Path(exists=True),
+    default=None,
+    multiple=True,
+)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -208,6 +217,7 @@ def imagine_cmd(
     caption,
     precision,
     model_weights_path,
+    prompt_library_path,
 ):
     """Have the AI generate images. alias:imagine"""
     if ctx.invoked_subcommand is not None:
@@ -230,10 +240,18 @@ def imagine_cmd(
     if fix_faces_fidelity is not None:
         fix_faces_fidelity = float(fix_faces_fidelity)
     prompts = []
+    prompt_expanding_iterators = {}
     for _ in range(repeats):
         for prompt_text in prompt_texts:
+            if prompt_text not in prompt_expanding_iterators:
+                prompt_expanding_iterators[prompt_text] = expand_prompts(
+                    n=math.inf,
+                    prompt_text=prompt_text,
+                    prompt_library_paths=prompt_library_path,
+                )
+            prompt_iterator = prompt_expanding_iterators[prompt_text]
             prompt = ImaginePrompt(
-                prompt_text,
+                next(prompt_iterator),
                 prompt_strength=prompt_strength,
                 init_image=init_image,
                 init_image_strength=init_image_strength,
