@@ -20,7 +20,7 @@ def prompt_library_filepaths(prompt_library_paths=None):
     """Return all available category/filepath pairs"""
     prompt_library_paths = [] if not prompt_library_paths else prompt_library_paths
     combined_prompt_library_filepaths = {}
-    for prompt_path in DEFAULT_PROMPT_LIBRARY_PATHS + prompt_library_paths:
+    for prompt_path in DEFAULT_PROMPT_LIBRARY_PATHS + list(prompt_library_paths):
         library_prompts = prompt_library_filepath(prompt_path)
         combined_prompt_library_filepaths.update(library_prompts)
 
