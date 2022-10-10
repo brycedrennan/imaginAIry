@@ -191,6 +191,7 @@ class ImagineResult:
         img,
         prompt: ImaginePrompt,
         is_nsfw,
+        safety_score,
         upscaled_img=None,
         modified_original=None,
         mask_binary=None,
@@ -217,6 +218,7 @@ class ImagineResult:
         self.upscaled_img = upscaled_img
 
         self.is_nsfw = is_nsfw
+        self.safety_score = safety_score
         self.created_at = datetime.utcnow().replace(tzinfo=timezone.utc)
         self.torch_backend = get_device()
         self.hardware_name = get_hardware_description(get_device())

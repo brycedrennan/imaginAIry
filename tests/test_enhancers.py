@@ -146,7 +146,10 @@ def test_clip_mask_parser(mask_text, expected):
 def test_describe_picture():
     img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg")
     caption = generate_caption(img)
-    assert caption == "a painting of a girl with a pearl ear"
+    assert (
+        caption
+        == "a painting of a girl with a pearl earring wearing a yellow dress and a pearl earring in her ear and a black background"
+    )
 
 
 def test_clip_text_comparison():
