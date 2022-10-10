@@ -213,6 +213,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+**3.0.0**
+- feature: improved safety filter
 
 **2.4.0**
 - 🎉 feature: prompt expansion
