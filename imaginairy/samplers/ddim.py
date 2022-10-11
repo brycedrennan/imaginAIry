@@ -23,8 +23,6 @@ class DDIMSchedule:
         self,
         model_num_timesteps,
         model_alphas_cumprod,
-        model_alphas_cumprod_prev,
-        model_betas,
         ddim_num_steps,
         ddim_discretize="uniform",
         ddim_eta=0.0,
@@ -49,18 +47,11 @@ class DDIMSchedule:
             eta=ddim_eta,
         )
         self.ddim_timesteps = ddim_timesteps
-        self.betas = to_torch(model_betas)
         self.alphas_cumprod = to_torch(alphas_cumprod)
-        self.alphas_cumprod_prev = to_torch(model_alphas_cumprod_prev)
         # calculations for diffusion q(x_t | x_{t-1}) and others
         self.sqrt_alphas_cumprod = to_torch(np.sqrt(alphas_cumprod.cpu()))
         self.sqrt_one_minus_alphas_cumprod = to_torch(
             np.sqrt(1.0 - alphas_cumprod.cpu())
-        )
-        self.log_one_minus_alphas_cumprod = to_torch(np.log(1.0 - alphas_cumprod.cpu()))
-        self.sqrt_recip_alphas_cumprod = to_torch(np.sqrt(1.0 / alphas_cumprod.cpu()))
-        self.sqrt_recipm1_alphas_cumprod = to_torch(
-            np.sqrt(1.0 / alphas_cumprod.cpu() - 1)
         )
         self.ddim_sigmas = ddim_sigmas.to(torch.float32).to(device)
         self.ddim_alphas = ddim_alphas.to(torch.float32).to(device)
@@ -109,8 +100,6 @@ class DDIMSampler:
         schedule = DDIMSchedule(
             model_num_timesteps=self.model.num_timesteps,
             model_alphas_cumprod=self.model.alphas_cumprod,
-            model_alphas_cumprod_prev=self.model.alphas_cumprod_prev,
-            model_betas=self.model.betas,
             ddim_num_steps=num_steps,
             ddim_discretize="uniform",
             ddim_eta=0.0,
