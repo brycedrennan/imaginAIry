@@ -76,7 +76,6 @@ logger = logging.getLogger(__name__)
     type=click.Choice(SAMPLER_TYPE_OPTIONS),
     help="What sampling strategy to use",
 )
-@click.option("--ddim-eta", default=0.0, type=float)
 @click.option(
     "--log-level",
     default="INFO",
@@ -169,7 +168,6 @@ def imagine_cmd(
     fix_faces,
     fix_faces_fidelity,
     sampler_type,
-    ddim_eta,
     log_level,
     quiet,
     show_work,
@@ -238,7 +236,6 @@ def imagine_cmd(
     imagine_image_files(
         prompts,
         outdir=outdir,
-        ddim_eta=ddim_eta,
         record_step_images=show_work,
         output_file_extension="jpg",
         print_caption=caption,

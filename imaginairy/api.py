@@ -100,7 +100,6 @@ def imagine_image_files(
     latent_channels=4,
     downsampling_factor=8,
     precision="autocast",
-    ddim_eta=0.0,
     record_step_images=False,
     output_file_extension="jpg",
     print_caption=False,
@@ -129,7 +128,6 @@ def imagine_image_files(
         latent_channels=latent_channels,
         downsampling_factor=downsampling_factor,
         precision=precision,
-        ddim_eta=ddim_eta,
         img_callback=_record_step if record_step_images else None,
         add_caption=print_caption,
         model_weights_path=model_weights_path,
@@ -157,7 +155,6 @@ def imagine(
     latent_channels=4,
     downsampling_factor=8,
     precision="autocast",
-    ddim_eta=0.0,
     img_callback=None,
     half_mode=None,
     add_caption=False,
@@ -322,7 +319,6 @@ def imagine(
                         shape=shape,
                         unconditional_guidance_scale=prompt.prompt_strength,
                         unconditional_conditioning=uc,
-                        eta=ddim_eta,
                         img_callback=_img_callback,
                     )
 
