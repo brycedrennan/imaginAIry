@@ -7,3 +7,4 @@ pylama
 pylint
 pytest
 pytest-randomly
+responses

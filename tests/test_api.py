@@ -103,8 +103,18 @@ sampler_type_test_cases_img_2_img = device_sampler_type_test_cases_img_2_img.get
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 @pytest.mark.parametrize("sampler_type,expected_md5", sampler_type_test_cases_img_2_img)
 def test_img_to_img_from_url_cats(
-    sampler_type, expected_md5, filename_base_for_outputs
+    sampler_type, expected_md5, filename_base_for_outputs, mocked_responses
 ):
+    with open(
+        os.path.join(TESTS_FOLDER, "data", "val2017-000000039769-cococats.jpg"), "rb"
+    ) as f:
+        img_data = f.read()
+    mocked_responses.get(
+        "http://images.cocodataset.org/val2017/000000039769.jpg",
+        body=img_data,
+        status=200,
+        content_type="image/jpeg",
+    )
     img = LazyLoadingImage(url="http://images.cocodataset.org/val2017/000000039769.jpg")
 
     prompt = ImaginePrompt(
@@ -134,7 +144,7 @@ def test_img_to_img_fruit_2_gold(
     filename_base_for_outputs, sampler_type, init_strength
 ):
     img = LazyLoadingImage(
-        url="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg"
+        filepath=os.path.join(TESTS_FOLDER, "data", "bowl_of_fruit.jpg")
     )
 
     prompt = ImaginePrompt(

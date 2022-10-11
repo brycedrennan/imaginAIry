@@ -3,6 +3,7 @@ import os
 import sys
 
 import pytest
+import responses
 from urllib3 import HTTPConnectionPool
 
 from imaginairy import api
@@ -39,6 +40,7 @@ def pre_setup():
         print(f"{method} {self.host}{url}")
         result = orig_urlopen(self, method, url, *args, **kwargs)
         print(f"{method} {self.host}{url} DONE")
+        # raise HTTPError("NO NETWORK CALLS")
         return result
 
     HTTPConnectionPool.urlopen = urlopen_tattle
@@ -56,3 +58,9 @@ def reset_get_device():
 def filename_base_for_outputs(request):
     filename_base = f"{TESTS_FOLDER}/test_output/{request.node.name}_{get_device()}_"
     return filename_base
+
+
+@pytest.fixture
+def mocked_responses():
+    with responses.RequestsMock() as rsps:
+        yield rsps

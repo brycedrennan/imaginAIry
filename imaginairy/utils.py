@@ -173,7 +173,7 @@ def get_cache_dir():
 def get_cached_url_path(url):
     try:
         return cached_path(url)
-    except OSError:
+    except (OSError, ValueError):
         pass
     filename = url.split("/")[-1]
     dest = get_cache_dir()
