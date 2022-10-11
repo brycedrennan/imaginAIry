@@ -280,14 +280,12 @@ def imagine(
                     # encode (scaled latent)
                     seed_everything(prompt.seed)
                     noise = torch.randn_like(init_latent, device="cpu").to(get_device())
+                    # todo: this isn't the right scheduler for everything...
                     schedule = PLMSSchedule(
                         ddpm_num_timesteps=model.num_timesteps,
                         ddim_num_steps=prompt.steps,
                         alphas_cumprod=model.alphas_cumprod,
-                        alphas_cumprod_prev=model.alphas_cumprod_prev,
-                        betas=model.betas,
                         ddim_discretize="uniform",
-                        ddim_eta=0.0,
                     )
                     if generation_strength >= 1:
                         # prompt strength gets converted to time encodings,
