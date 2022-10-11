@@ -61,7 +61,11 @@ jobs:
       id: cache-model-files
       uses: actions/cache@v3
       with:
-        path: ~/.cache
+        path: |
+          ~/.cache/huggingface
+          ~/.cache/clip
+          ~/.cache/imaginairy
+          ~/.cache/torch
         key: ${{ steps.date.outputs.curmonth }}
     - name: Test with pytest
       timeout-minutes: 10
