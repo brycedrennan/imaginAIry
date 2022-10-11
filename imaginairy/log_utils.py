@@ -98,6 +98,14 @@ def conditioning_to_img(conditioning):
     return ToPILImage()(conditioning)
 
 
+class IndentingFormatter(logging.Formatter):
+    def format(self, record):
+        s = super().format(record)
+        if _CURRENT_LOGGING_CONTEXT is not None:
+            s = f"    {s}"
+        return s
+
+
 def configure_logging(level="INFO"):
     fmt = "%(message)s"
     if level == "DEBUG":
@@ -107,7 +115,10 @@ def configure_logging(level="INFO"):
         "version": 1,
         "disable_existing_loggers": True,
         "formatters": {
-            "standard": {"format": fmt},
+            "standard": {
+                "format": fmt,
+                "class": "imaginairy.log_utils.IndentingFormatter",
+            },
         },
         "handlers": {
             "default": {
