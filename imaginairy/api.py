@@ -147,7 +147,7 @@ def imagine_image_files(
                 subpath, f"{basefilename}_[{image_type}].{output_file_extension}"
             )
             result.save(filepath, image_type=image_type)
-            logger.info(f"    🖼  [{image_type}] saved to: {filepath}")
+            logger.info(f"🖼  [{image_type}] saved to: {filepath}")
         base_count += 1
         del result
 
@@ -181,12 +181,12 @@ def imagine(
         precision
     ), fix_torch_nn_layer_norm(), fix_torch_group_norm():
         for prompt in prompts:
+            logger.info(f"Generating 🖼  : {prompt.prompt_description()}")
             with ImageLoggingContext(
                 prompt=prompt,
                 model=model,
                 img_callback=img_callback,
             ):
-                logger.info(f"Generating {prompt.prompt_description()}")
                 seed_everything(prompt.seed)
                 model.tile_mode(prompt.tile_mode)
 
@@ -234,7 +234,7 @@ def imagine(
                             max_width=prompt.width,
                         )
                     except PIL.UnidentifiedImageError:
-                        logger.warning(f"   Could not load image: {prompt.init_image}")
+                        logger.warning(f"Could not load image: {prompt.init_image}")
                         continue
 
                     init_image_t = pillow_img_to_torch_image(init_image)
@@ -352,7 +352,7 @@ def imagine(
 
                     if add_caption:
                         caption = generate_caption(img)
-                        logger.info(f"    Generated caption: {caption}")
+                        logger.info(f"Generated caption: {caption}")
 
                     safety_score = create_safety_score(
                         img,
@@ -360,10 +360,10 @@ def imagine(
                     )
                     if not safety_score.is_filtered:
                         if prompt.fix_faces:
-                            logger.info("    Fixing 😊 's in 🖼  using CodeFormer...")
+                            logger.info("Fixing 😊 's in 🖼  using CodeFormer...")
                             img = enhance_faces(img, fidelity=prompt.fix_faces_fidelity)
                         if prompt.upscale:
-                            logger.info("    Upscaling 🖼  using real-ESRGAN...")
+                            logger.info("Upscaling 🖼  using real-ESRGAN...")
                             upscaled_img = upscale_image(img)
 
                         # put the newly generated patch back into the original, full size image

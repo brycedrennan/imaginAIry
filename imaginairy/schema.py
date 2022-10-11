@@ -153,7 +153,7 @@ class ImaginePrompt:
 
     def prompt_description(self):
         return (
-            f'🖼  : "{self.prompt_text}" {self.width}x{self.height}px '
+            f'"{self.prompt_text}" {self.width}x{self.height}px '
             f"seed:{self.seed} prompt-strength:{self.prompt_strength} steps:{self.steps} sampler-type:{self.sampler_type}"
         )
 
