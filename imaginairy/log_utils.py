@@ -1,10 +1,13 @@
 import logging
+import logging.config
 import re
+import warnings
 
 import torch
+from pytorch_lightning import _logger as pytorch_logger
 from torchvision.transforms import ToPILImage
-
-from imaginairy.img_utils import model_latents_to_pillow_imgs
+from transformers.modeling_utils import logger as modeling_logger
+from transformers.utils.logging import _configure_library_root_logger
 
 _CURRENT_LOGGING_CONTEXT = None
 
@@ -56,6 +59,8 @@ class ImageLoggingContext:
         self.img_callback(img, description, self.step_count, self.prompt)
 
     def log_latents(self, latents, description):
+        from imaginairy.img_utils import model_latents_to_pillow_imgs  # noqa
+
         if not self.img_callback:
             return
         if latents.shape[1] != 4:
@@ -91,3 +96,73 @@ def filesafe_text(t):
 
 def conditioning_to_img(conditioning):
     return ToPILImage()(conditioning)
+
+
+def configure_logging(level="INFO"):
+    fmt = "%(message)s"
+    if level == "DEBUG":
+        fmt = "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
+
+    LOGGING_CONFIG = {
+        "version": 1,
+        "disable_existing_loggers": True,
+        "formatters": {
+            "standard": {"format": fmt},
+        },
+        "handlers": {
+            "default": {
+                "level": "INFO",
+                "formatter": "standard",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",  # Default is stderr
+            },
+        },
+        "loggers": {
+            "": {  # root logger
+                "handlers": ["default"],
+                "level": "WARNING",
+                "propagate": False,
+            },
+            "imaginairy": {"handlers": ["default"], "level": level, "propagate": False},
+            "transformers.modeling_utils": {
+                "handlers": ["default"],
+                "level": "ERROR",
+                "propagate": False,
+            },
+        },
+    }
+    suppress_annoying_logs_and_warnings()
+    logging.config.dictConfig(LOGGING_CONFIG)
+
+
+def disable_transformers_custom_logging():
+    _configure_library_root_logger()
+    _logger = modeling_logger.parent
+    _logger.handlers = []
+    _logger.propagate = True
+    _logger.setLevel(logging.NOTSET)
+
+
+def disable_pytorch_lighting_custom_logging():
+    pytorch_logger.setLevel(logging.NOTSET)
+
+
+def disable_common_warnings():
+    warnings.filterwarnings(
+        "ignore",
+        category=UserWarning,
+        message=r"The operator .*?is not currently supported.*",
+    )
+    warnings.filterwarnings(
+        "ignore", category=UserWarning, message=r"The parameter 'pretrained' is.*"
+    )
+    warnings.filterwarnings(
+        "ignore", category=UserWarning, message=r"Arguments other than a weight.*"
+    )
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+
+def suppress_annoying_logs_and_warnings():
+    disable_transformers_custom_logging()
+    disable_pytorch_lighting_custom_logging()
+    disable_common_warnings()

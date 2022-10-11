@@ -7,8 +7,8 @@ import PIL.Image
 import torch
 from torchvision import transforms
 
-from imaginairy.img_log import log_img
 from imaginairy.img_utils import pillow_fit_image_within
+from imaginairy.log_utils import log_img
 from imaginairy.vendored.clipseg import CLIPDensePredT
 
 weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth"
