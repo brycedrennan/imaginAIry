@@ -1,4 +1,4 @@
-import logging.config
+import logging
 import math
 
 import click
@@ -7,47 +7,11 @@ from click_shell import shell
 from imaginairy import LazyLoadingImage, generate_caption
 from imaginairy.api import imagine_image_files
 from imaginairy.enhancers.prompt_expansion import expand_prompts
+from imaginairy.log_utils import configure_logging
 from imaginairy.samplers.base import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
-from imaginairy.suppress_logs import suppress_annoying_logs_and_warnings
 
 logger = logging.getLogger(__name__)
-
-
-def configure_logging(level="INFO"):
-    fmt = "%(message)s"
-    if level == "DEBUG":
-        fmt = "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
-
-    LOGGING_CONFIG = {
-        "version": 1,
-        "disable_existing_loggers": True,
-        "formatters": {
-            "standard": {"format": fmt},
-        },
-        "handlers": {
-            "default": {
-                "level": "INFO",
-                "formatter": "standard",
-                "class": "logging.StreamHandler",
-                "stream": "ext://sys.stdout",  # Default is stderr
-            },
-        },
-        "loggers": {
-            "": {  # root logger
-                "handlers": ["default"],
-                "level": "WARNING",
-                "propagate": False,
-            },
-            "imaginairy": {"handlers": ["default"], "level": level, "propagate": False},
-            "transformers.modeling_utils": {
-                "handlers": ["default"],
-                "level": "ERROR",
-                "propagate": False,
-            },
-        },
-    }
-    logging.config.dictConfig(LOGGING_CONFIG)
 
 
 @click.command()
@@ -222,7 +186,7 @@ def imagine_cmd(
     """Have the AI generate images. alias:imagine"""
     if ctx.invoked_subcommand is not None:
         return
-    suppress_annoying_logs_and_warnings()
+
     if quiet:
         log_level = "ERROR"
     configure_logging(log_level)

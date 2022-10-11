@@ -42,6 +42,7 @@ def test_get_device(monkeypatch):
 
 
 def test_get_hardware_description(monkeypatch):
+    get_hardware_description.cache_clear()
     monkeypatch.setattr(platform, "platform", lambda: "macOS-12.5.1-arm64-arm-64bit-z")
     assert get_hardware_description("cpu") == "macOS-12.5.1-arm64-arm-64bit-z"
 
@@ -49,6 +50,7 @@ def test_get_hardware_description(monkeypatch):
     monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
     monkeypatch.setattr(torch.cuda, "get_device_name", lambda x: "rtx-3090")
     assert get_hardware_description("cuda") == "macOS-12.5.1-arm64-arm-64bit-z-rtx-3090"
+    get_hardware_description.cache_clear()
 
 
 def test_get_obj_from_str():

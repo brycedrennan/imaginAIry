@@ -1,7 +1,7 @@
 # pylama:ignore=W0613
 import torch
 
-from imaginairy.img_log import log_latent
+from imaginairy.log_utils import log_latent
 from imaginairy.samplers.base import CFGDenoiser
 from imaginairy.utils import get_device
 from imaginairy.vendored.k_diffusion import sampling as k_sampling

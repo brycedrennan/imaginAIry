@@ -17,13 +17,13 @@ from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
-from imaginairy.img_log import (
+from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
+from imaginairy.log_utils import (
     ImageLoggingContext,
     log_conditioning,
     log_img,
     log_latent,
 )
-from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
 from imaginairy.safety import SafetyMode, create_safety_score
 from imaginairy.samplers.base import get_sampler
 from imaginairy.samplers.plms import PLMSSchedule

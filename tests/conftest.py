@@ -6,7 +6,7 @@ import pytest
 from urllib3 import HTTPConnectionPool
 
 from imaginairy import api
-from imaginairy.suppress_logs import suppress_annoying_logs_and_warnings
+from imaginairy.log_utils import suppress_annoying_logs_and_warnings
 from imaginairy.utils import (
     fix_torch_group_norm,
     fix_torch_nn_layer_norm,

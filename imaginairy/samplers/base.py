@@ -2,7 +2,7 @@
 import torch
 from torch import nn
 
-from imaginairy.img_log import log_latent
+from imaginairy.log_utils import log_latent
 
 SAMPLER_TYPE_OPTIONS = [
     "plms",
