@@ -56,7 +56,7 @@ class CFGDenoiser(nn.Module):
                 noisy_latent_in, time_encoding_in, cond=conditioning_in
             )
 
-        denoised = get_noise_prediction(
+        noise_pred = get_noise_prediction(
             denoise_func=_wrapper,
             noisy_latent=x,
             time_encoding=sigma,
@@ -68,9 +68,9 @@ class CFGDenoiser(nn.Module):
         if mask is not None:
             assert orig_latent is not None
             mask_inv = 1.0 - mask
-            denoised = (orig_latent * mask_inv) + (mask * denoised)
+            noise_pred = (orig_latent * mask_inv) + (mask * noise_pred)
 
-        return denoised
+        return noise_pred
 
 
 def ensure_4_dim(t: torch.Tensor):
@@ -93,17 +93,17 @@ def get_noise_prediction(
     time_encoding_in = torch.cat([time_encoding] * 2)
     conditioning_in = torch.cat([neutral_conditioning, positive_conditioning])
 
-    pred_noise_neutral, pred_noise_positive = denoise_func(
+    noise_pred_neutral, noise_pred_positive = denoise_func(
         noisy_latent_in, time_encoding_in, conditioning_in
     ).chunk(2)
 
     amplified_noise_pred = signal_amplification * (
-        pred_noise_positive - pred_noise_neutral
+        noise_pred_positive - noise_pred_neutral
     )
-    pred_noise = pred_noise_neutral + amplified_noise_pred
+    noise_pred = noise_pred_neutral + amplified_noise_pred
 
-    log_latent(pred_noise_neutral, "neutral noise prediction")
-    log_latent(pred_noise_positive, "positive noise prediction")
-    log_latent(pred_noise, "noise prediction")
+    log_latent(noise_pred_neutral, "noise_pred_neutral")
+    log_latent(noise_pred_positive, "noise_pred_positive")
+    log_latent(noise_pred, "noise_pred")
 
-    return pred_noise
+    return noise_pred
