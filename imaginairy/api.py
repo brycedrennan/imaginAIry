@@ -186,20 +186,20 @@ def imagine(
                 seed_everything(prompt.seed)
                 model.tile_mode(prompt.tile_mode)
 
-                uc = None
+                neutral_conditioning = None
                 if prompt.prompt_strength != 1.0:
-                    uc = model.get_learned_conditioning(1 * [""])
-                    log_conditioning(uc, "neutral conditioning")
+                    neutral_conditioning = model.get_learned_conditioning(1 * [""])
+                    log_conditioning(neutral_conditioning, "neutral conditioning")
                 if prompt.conditioning is not None:
-                    c = prompt.conditioning
+                    positive_conditioning = prompt.conditioning
                 else:
                     total_weight = sum(wp.weight for wp in prompt.prompts)
-                    c = sum(
+                    positive_conditioning = sum(
                         model.get_learned_conditioning(wp.text)
                         * (wp.weight / total_weight)
                         for wp in prompt.prompts
                     )
-                log_conditioning(c, "positive conditioning")
+                log_conditioning(positive_conditioning, "positive conditioning")
 
                 shape = [
                     1,
@@ -209,7 +209,7 @@ def imagine(
                 ]
                 if prompt.init_image and prompt.sampler_type not in ("ddim", "plms"):
                     sampler_type = "plms"
-                    logger.info("   Sampler type switched to plms for img2img")
+                    logger.info("Sampler type switched to plms for img2img")
                 else:
                     sampler_type = prompt.sampler_type
 
@@ -287,36 +287,36 @@ def imagine(
                         # prompt strength gets converted to time encodings,
                         # which means you can't get to true 0 without this hack
                         # (or setting steps=1000)
-                        z_enc = noise
+                        init_latent_noised = noise
                     else:
-                        z_enc = sampler.noise_an_image(
+                        init_latent_noised = sampler.noise_an_image(
                             init_latent,
                             torch.tensor([t_enc - 1]).to(get_device()),
                             schedule=schedule,
                             noise=noise,
                         )
-                    log_latent(z_enc, "z_enc")
-
-                    # decode it
-                    samples = sampler.decode(
-                        initial_latent=z_enc,
-                        positive_conditioning=c,
-                        t_start=t_enc,
-                        schedule=schedule,
-                        guidance_scale=prompt.prompt_strength,
-                        neutral_conditioning=uc,
-                        mask=mask,
-                        orig_latent=init_latent,
-                    )
-                else:
+                    log_latent(init_latent_noised, "init_latent_noised")
 
                     samples = sampler.sample(
                         num_steps=prompt.steps,
-                        positive_conditioning=c,
+                        initial_latent=init_latent_noised,
+                        positive_conditioning=positive_conditioning,
+                        neutral_conditioning=neutral_conditioning,
+                        guidance_scale=prompt.prompt_strength,
+                        t_start=t_enc,
+                        mask=mask,
+                        orig_latent=init_latent,
+                        shape=shape,
+                        batch_size=1,
+                    )
+                else:
+                    samples = sampler.sample(
+                        num_steps=prompt.steps,
+                        neutral_conditioning=neutral_conditioning,
+                        positive_conditioning=positive_conditioning,
+                        guidance_scale=prompt.prompt_strength,
                         batch_size=1,
                         shape=shape,
-                        guidance_scale=prompt.prompt_strength,
-                        neutral_conditioning=uc,
                     )
 
                 x_samples = model.decode_first_stage(samples)
