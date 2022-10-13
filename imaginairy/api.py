@@ -295,6 +295,7 @@ def imagine(
                             schedule=schedule,
                             noise=noise,
                         )
+
                     log_latent(init_latent_noised, "init_latent_noised")
 
                     samples = sampler.sample(

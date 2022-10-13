@@ -137,6 +137,7 @@ def test_img_to_img_from_url_cats(
     assert result.md5() == expected_md5
 
 
+# @pytest.mark.parametrize("sampler_type", SAMPLER_TYPE_OPTIONS)
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 @pytest.mark.parametrize("sampler_type", ["ddim", "plms"])
 @pytest.mark.parametrize("init_strength", [0, 0.05, 0.2, 1])
@@ -152,7 +153,7 @@ def test_img_to_img_fruit_2_gold(
         prompt_strength=12,
         init_image=img,
         init_image_strength=init_strength,
-        mask_prompt="(fruit OR stem{*5} OR fruit stem)",
+        mask_prompt="(fruit{*2} OR stem{*5} OR fruit stem{*3})",
         mask_mode="replace",
         steps=80,
         seed=1,
