@@ -860,11 +860,9 @@ class LatentDiffusion(DDPM):
         return model_mean + nonzero_mask * (0.5 * model_log_variance).exp() * noise
 
     def q_sample(self, x_start, t, noise=None):
-        noise = (
-            noise
-            if noise is not None
-            else torch.randn_like(x_start, device="cpu").to(x_start.device)
-        )
+        if noise is None:
+            noise = torch.randn_like(x_start, device="cpu").to(x_start.device)
+
         return (
             extract_into_tensor(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start
             + extract_into_tensor(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape)

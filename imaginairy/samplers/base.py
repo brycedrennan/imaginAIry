@@ -115,6 +115,30 @@ def get_noise_prediction(
     return noise_pred
 
 
+def mask_blend(noisy_latent, orig_latent, mask, mask_noise, ts, model):
+    """
+    Apply a mask to the noisy_latent.
+
+    ts is a decreasing value between 1000 and 1
+    """
+    assert orig_latent is not None
+    noised_orig_latent = model.q_sample(orig_latent, ts, mask_noise)
+
+    # this helps prevent the weird disjointed images that can happen with masking
+    hint_strength = 0.8
+    # if we're in the first 10% of the steps then don't fully noise the parts
+    # of the image we're not changing so that the algorithm can learn from the context
+    if ts > 900:
+        xdec_orig_with_hints = (
+            noised_orig_latent * (1 - hint_strength) + orig_latent * hint_strength
+        )
+    else:
+        xdec_orig_with_hints = noised_orig_latent
+    noisy_latent = xdec_orig_with_hints * mask + (1.0 - mask) * noisy_latent
+    log_latent(noisy_latent, f"mask-blended noisy_latent {ts}")
+    return noisy_latent
+
+
 def to_torch(x):
     return x.clone().detach().to(torch.float32).to(get_device())
 

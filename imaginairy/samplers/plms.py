@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from imaginairy.log_utils import log_latent
 from imaginairy.modules.diffusion.util import extract_into_tensor, noise_like
-from imaginairy.samplers.base import NoiseSchedule, get_noise_prediction
+from imaginairy.samplers.base import NoiseSchedule, get_noise_prediction, mask_blend
 from imaginairy.utils import get_device
 
 logger = logging.getLogger(__name__)
@@ -86,19 +86,14 @@ class PLMSSampler:
             )
 
             if mask is not None:
-                assert orig_latent is not None
-                xdec_orig = self.model.q_sample(orig_latent, ts, mask_noise)
-                log_latent(xdec_orig, f"xdec_orig i={i} index-{index}")
-                # this helps prevent the weird disjointed images that can happen with masking
-                hint_strength = 0.8
-                if i < 2:
-                    xdec_orig_with_hints = (
-                        xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
-                    )
-                else:
-                    xdec_orig_with_hints = xdec_orig
-                noisy_latent = xdec_orig_with_hints * mask + (1.0 - mask) * noisy_latent
-                log_latent(noisy_latent, f"x_dec {ts}")
+                noisy_latent = mask_blend(
+                    noisy_latent=noisy_latent,
+                    orig_latent=orig_latent,
+                    mask=mask,
+                    mask_noise=mask_noise,
+                    ts=ts,
+                    model=self.model,
+                )
 
             noisy_latent, predicted_latent, noise_pred = self.p_sample_plms(
                 noisy_latent=noisy_latent,
