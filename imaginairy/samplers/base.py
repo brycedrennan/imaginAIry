@@ -74,7 +74,7 @@ class CFGDenoiser(nn.Module):
         if mask is not None:
             assert orig_latent is not None
             mask_inv = 1.0 - mask
-            noise_pred = (orig_latent * mask_inv) + (mask * noise_pred)
+            noise_pred = (orig_latent * mask) + (mask_inv * noise_pred)
 
         return noise_pred
 

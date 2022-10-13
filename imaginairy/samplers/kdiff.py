@@ -32,7 +32,7 @@ class KDiffusionSampler:
         mask=None,
         orig_latent=None,
         initial_latent=None,
-        img_callback=None,
+        t_start=None,
     ):
         if positive_conditioning.shape[0] != batch_size:
             raise ValueError(
@@ -62,6 +62,8 @@ class KDiffusionSampler:
                 "cond": positive_conditioning,
                 "uncond": neutral_conditioning,
                 "cond_scale": guidance_scale,
+                "mask": mask,
+                "orig_latent": orig_latent,
             },
             disable=False,
             callback=callback,
