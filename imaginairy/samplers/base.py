@@ -1,8 +1,14 @@
 # pylama:ignore=W0613
+import numpy as np
 import torch
 from torch import nn
 
 from imaginairy.log_utils import log_latent
+from imaginairy.modules.diffusion.util import (
+    make_ddim_sampling_parameters,
+    make_ddim_timesteps,
+)
+from imaginairy.utils import get_device
 
 SAMPLER_TYPE_OPTIONS = [
     "plms",
@@ -107,3 +113,47 @@ def get_noise_prediction(
     log_latent(noise_pred, "noise_pred")
 
     return noise_pred
+
+
+def to_torch(x):
+    return x.clone().detach().to(torch.float32).to(get_device())
+
+
+class NoiseSchedule:
+    def __init__(
+        self,
+        model_num_timesteps,
+        model_alphas_cumprod,
+        ddim_num_steps,
+        ddim_discretize="uniform",
+        ddim_eta=0.0,
+    ):
+        device = get_device()
+        if model_alphas_cumprod.shape[0] != model_num_timesteps:
+            raise ValueError("alphas have to be defined for each timestep")
+
+        self.alphas_cumprod = to_torch(model_alphas_cumprod)
+        # calculations for diffusion q(x_t | x_{t-1}) and others
+        self.sqrt_alphas_cumprod = to_torch(np.sqrt(model_alphas_cumprod.cpu()))
+        self.sqrt_one_minus_alphas_cumprod = to_torch(
+            np.sqrt(1.0 - model_alphas_cumprod.cpu())
+        )
+
+        self.ddim_timesteps = make_ddim_timesteps(
+            ddim_discr_method=ddim_discretize,
+            num_ddim_timesteps=ddim_num_steps,
+            num_ddpm_timesteps=model_num_timesteps,
+        )
+
+        # ddim sampling parameters
+        ddim_sigmas, ddim_alphas, ddim_alphas_prev = make_ddim_sampling_parameters(
+            alphacums=model_alphas_cumprod.cpu(),
+            ddim_timesteps=self.ddim_timesteps,
+            eta=ddim_eta,
+        )
+        self.ddim_sigmas = ddim_sigmas.to(torch.float32).to(device)
+        self.ddim_alphas = ddim_alphas.to(torch.float32).to(device)
+        self.ddim_alphas_prev = ddim_alphas_prev
+        self.ddim_sqrt_one_minus_alphas = (
+            np.sqrt(1.0 - ddim_alphas).to(torch.float32).to(device)
+        )
