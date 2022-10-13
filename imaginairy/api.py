@@ -25,8 +25,7 @@ from imaginairy.log_utils import (
     log_latent,
 )
 from imaginairy.safety import SafetyMode, create_safety_score
-from imaginairy.samplers.base import get_sampler
-from imaginairy.samplers.plms import PLMSSchedule
+from imaginairy.samplers.base import NoiseSchedule, get_sampler
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     fix_torch_group_norm,
@@ -277,8 +276,8 @@ def imagine(
                     # encode (scaled latent)
                     seed_everything(prompt.seed)
                     noise = torch.randn_like(init_latent, device="cpu").to(get_device())
-                    # todo: this isn't the right scheduler for everything...
-                    schedule = PLMSSchedule(
+
+                    schedule = NoiseSchedule(
                         model_num_timesteps=model.num_timesteps,
                         ddim_num_steps=prompt.steps,
                         model_alphas_cumprod=model.alphas_cumprod,
