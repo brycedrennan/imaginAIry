@@ -19,43 +19,49 @@ class KDiffusionSampler:
         self.cv_denoiser = StandardCompVisDenoiser(model)
         self.sampler_name = sampler_name
         self.sampler_func = getattr(k_sampling, f"sample_{sampler_name}")
+        self.device = get_device()
 
     def sample(
         self,
         num_steps,
-        conditioning,
-        batch_size,
         shape,
-        unconditional_guidance_scale,
-        unconditional_conditioning,
-        initial_noise_tensor=None,
+        neutral_conditioning,
+        positive_conditioning,
+        guidance_scale,
+        batch_size=1,
+        mask=None,
+        orig_latent=None,
+        initial_latent=None,
         img_callback=None,
     ):
-        initial_noise_tensor = (
-            torch.randn(shape, device="cpu").to(get_device())
-            if initial_noise_tensor is None
-            else initial_noise_tensor
-        )
-        log_latent(initial_noise_tensor, "initial_noise_tensor")
+        if positive_conditioning.shape[0] != batch_size:
+            raise ValueError(
+                f"Got {positive_conditioning.shape[0]} conditionings but batch-size is {batch_size}"
+            )
+
+        if initial_latent is None:
+            initial_latent = torch.randn(shape, device="cpu").to(self.device)
+
+        log_latent(initial_latent, "initial_latent")
 
         sigmas = self.cv_denoiser.get_sigmas(num_steps)
 
-        x = initial_noise_tensor * sigmas[0]
+        x = initial_latent * sigmas[0]
         log_latent(x, "initial_sigma_noised_tensor")
         model_wrap_cfg = CFGDenoiser(self.cv_denoiser)
 
         def callback(data):
-            log_latent(data["x"], "x")
-            log_latent(data["denoised"], "denoised")
+            log_latent(data["x"], "noisy_latent")
+            log_latent(data["denoised"], "noise_pred")
 
         samples = self.sampler_func(
-            model_wrap_cfg,
-            x,
-            sigmas,
+            model=model_wrap_cfg,
+            x=x,
+            sigmas=sigmas,
             extra_args={
-                "cond": conditioning,
-                "uncond": unconditional_conditioning,
-                "cond_scale": unconditional_guidance_scale,
+                "cond": positive_conditioning,
+                "uncond": neutral_conditioning,
+                "cond_scale": guidance_scale,
             },
             disable=False,
             callback=callback,

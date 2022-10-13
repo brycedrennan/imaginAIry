@@ -170,7 +170,7 @@ def imagine(
         # torch.set_default_tensor_type(torch.HalfTensor)
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
-    _img_callback = None
+
     if get_device() == "cpu":
         logger.info("Running in CPU mode. it's gonna be slooooooow.")
 
@@ -279,9 +279,9 @@ def imagine(
                     noise = torch.randn_like(init_latent, device="cpu").to(get_device())
                     # todo: this isn't the right scheduler for everything...
                     schedule = PLMSSchedule(
-                        ddpm_num_timesteps=model.num_timesteps,
+                        model_num_timesteps=model.num_timesteps,
                         ddim_num_steps=prompt.steps,
-                        alphas_cumprod=model.alphas_cumprod,
+                        model_alphas_cumprod=model.alphas_cumprod,
                         ddim_discretize="uniform",
                     )
                     if generation_strength >= 1:
@@ -301,12 +301,11 @@ def imagine(
                     # decode it
                     samples = sampler.decode(
                         initial_latent=z_enc,
-                        cond=c,
+                        positive_conditioning=c,
                         t_start=t_enc,
                         schedule=schedule,
-                        unconditional_guidance_scale=prompt.prompt_strength,
-                        unconditional_conditioning=uc,
-                        img_callback=_img_callback,
+                        guidance_scale=prompt.prompt_strength,
+                        neutral_conditioning=uc,
                         mask=mask,
                         orig_latent=init_latent,
                     )
@@ -314,12 +313,11 @@ def imagine(
 
                     samples = sampler.sample(
                         num_steps=prompt.steps,
-                        conditioning=c,
+                        positive_conditioning=c,
                         batch_size=1,
                         shape=shape,
-                        unconditional_guidance_scale=prompt.prompt_strength,
-                        unconditional_conditioning=uc,
-                        img_callback=_img_callback,
+                        guidance_scale=prompt.prompt_strength,
+                        neutral_conditioning=uc,
                     )
 
                 x_samples = model.decode_first_stage(samples)
