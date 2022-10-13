@@ -38,6 +38,7 @@ class DDIMSampler:
         temperature=1.0,
         noise_dropout=0.0,
         initial_latent=None,
+        t_start=None,
         quantize_x0=False,
     ):
         if positive_conditioning.shape[0] != batch_size:
@@ -57,7 +58,7 @@ class DDIMSampler:
 
         log_latent(initial_latent, "initial latent")
 
-        timesteps = schedule.ddim_timesteps
+        timesteps = schedule.ddim_timesteps[:t_start]
 
         time_range = np.flip(timesteps)
         total_steps = timesteps.shape[0]
@@ -69,8 +70,18 @@ class DDIMSampler:
 
             if mask is not None:
                 assert orig_latent is not None
-                img_orig = self.model.q_sample(orig_latent, ts)
-                noisy_latent = img_orig * mask + (1.0 - mask) * noisy_latent
+                xdec_orig = self.model.q_sample(orig_latent, ts)
+                log_latent(xdec_orig, "xdec_orig")
+                # this helps prevent the weird disjointed images that can happen with masking
+                hint_strength = 0.8
+                if i < 2:
+                    xdec_orig_with_hints = (
+                        xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
+                    )
+                else:
+                    xdec_orig_with_hints = xdec_orig
+                noisy_latent = xdec_orig_with_hints * mask + (1.0 - mask) * noisy_latent
+                log_latent(noisy_latent, "noisy_latent")
 
             noisy_latent, predicted_latent = self.p_sample_ddim(
                 noisy_latent=noisy_latent,
@@ -190,63 +201,3 @@ class DDIMSampler:
             + extract_into_tensor(sqrt_one_minus_alphas_cumprod, t, init_latent.shape)
             * noise
         )
-
-    @torch.no_grad()
-    def decode(
-        self,
-        initial_latent,
-        neutral_conditioning,
-        positive_conditioning,
-        guidance_scale,
-        t_start,
-        schedule,
-        temperature=1.0,
-        mask=None,
-        orig_latent=None,
-    ):
-
-        timesteps = schedule.ddim_timesteps[:t_start]
-
-        time_range = np.flip(timesteps)
-        total_steps = timesteps.shape[0]
-
-        noisy_latent = initial_latent
-
-        for i, step in enumerate(tqdm(time_range, total=total_steps)):
-            index = total_steps - i - 1
-            ts = torch.full(
-                (initial_latent.shape[0],),
-                step,
-                device=initial_latent.device,
-                dtype=torch.long,
-            )
-
-            if mask is not None:
-                assert orig_latent is not None
-                xdec_orig = self.model.q_sample(orig_latent, ts)
-                log_latent(xdec_orig, "xdec_orig")
-                # this helps prevent the weird disjointed images that can happen with masking
-                hint_strength = 0.8
-                if i < 2:
-                    xdec_orig_with_hints = (
-                        xdec_orig * (1 - hint_strength) + orig_latent * hint_strength
-                    )
-                else:
-                    xdec_orig_with_hints = xdec_orig
-                noisy_latent = xdec_orig_with_hints * mask + (1.0 - mask) * noisy_latent
-                log_latent(noisy_latent, "noisy_latent")
-
-            noisy_latent, predicted_latent = self.p_sample_ddim(
-                noisy_latent=noisy_latent,
-                positive_conditioning=positive_conditioning,
-                time_encoding=ts,
-                schedule=schedule,
-                index=index,
-                guidance_scale=guidance_scale,
-                neutral_conditioning=neutral_conditioning,
-                temperature=temperature,
-            )
-
-            log_latent(noisy_latent, f"noisy_latent {i}")
-            log_latent(predicted_latent, f"predicted_latent {i}")
-        return noisy_latent
