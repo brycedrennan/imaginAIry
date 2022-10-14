@@ -13,7 +13,7 @@ from . import TESTS_FOLDER
 device_sampler_type_test_cases = {
     "mps:0": [
         ("plms", "78539ae3a3097dc8232da6d630551ab3"),
-        ("ddim", "828fc143cd40586347b2f8403c288c9b"),
+        ("ddim", ("828fc143cd40586347b2f8403c288c9b", "4c7905d4a36f6f9c456b7e074b52707e")),
         ("k_lms", "53d25e59add39c8447537be30e4eff4b"),
         ("k_dpm_2", "5108bceb58a38d88a585f37b2ba1b072"),
         ("k_dpm_2_a", "20396daa6c920d1cfd6db90e73558c01"),
@@ -44,7 +44,7 @@ def test_imagine(sampler_type, expected_md5, filename_base_for_outputs):
     )
     result = next(imagine(prompt))
     result.img.save(f"{filename_base_for_outputs}.jpg")
-    assert result.md5() == expected_md5
+    assert result.md5() in expected_md5
 
 
 device_sampler_type_test_cases_img_2_img = {
@@ -87,8 +87,8 @@ def test_img2img_beach_to_sunset(sampler_type, expected_md5, filename_base_for_o
 
 device_sampler_type_test_cases_img_2_img = {
     "mps:0": {
-        ("plms", "e9bb714771f7984e61debabc4bb3cd22"),
-        ("ddim", "62bacc4ae391e6775a3723c88738ec61"),
+        ("plms", ("e9bb714771f7984e61debabc4bb3cd22", "af344c404de70da5db519869f8fcd0c1")),
+        ("ddim", ("62bacc4ae391e6775a3723c88738ec61", "5f0d2ee426e1bb6ccc1d57dfdd8c73bf")),
     },
     "cuda": {
         ("plms", "b8c7b52da977c1531a9a61c0a082404c"),
@@ -134,7 +134,7 @@ def test_img_to_img_from_url_cats(
     img.save(f"{filename_base_for_outputs}__orig.jpg")
     result.img.save(f"{filename_base_for_outputs}.jpg")
 
-    assert result.md5() == expected_md5
+    assert result.md5() in expected_md5
 
 
 # @pytest.mark.parametrize("sampler_type", SAMPLER_TYPE_OPTIONS)
