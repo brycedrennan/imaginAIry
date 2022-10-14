@@ -2,7 +2,7 @@ import math
 
 import torch
 import torch.nn.functional as F
-from einops import rearrange, repeat
+from einops import rearrange
 from torch import einsum, nn
 
 from imaginairy.modules.diffusion.util import checkpoint
@@ -140,6 +140,11 @@ class CrossAttention(nn.Module):
         )
 
     def forward(self, x, context=None, mask=None):
+        # from imaginairy.api import _global_mask_hack
+        #
+        # if mask is None and _global_mask_hack is not None:
+        #     mask = _global_mask_hack.to(torch.bool)
+
         if get_device() == "cuda":
             return self.forward_cuda(x, context=context, mask=mask)
 
@@ -154,11 +159,13 @@ class CrossAttention(nn.Module):
 
         sim = einsum("b i d, b j d -> b i j", q, k) * self.scale
 
-        if mask is not None:
-            mask = rearrange(mask, "b ... -> b (...)")
-            _max_neg_value = -torch.finfo(sim.dtype).max
-            mask = repeat(mask, "b j -> (b h) () j", h=h)
-            sim.masked_fill_(~mask, _max_neg_value)
+        # if mask is not None:
+        #     if sim.shape[2] == 320 and False:
+        #         mask = [mask] * 2
+        #         mask = rearrange(mask, "b ... -> b (...)")
+        #         _max_neg_value = -torch.finfo(sim.dtype).max
+        #         mask = repeat(mask, "b j -> (b h) () j", h=h)
+        #         sim.masked_fill_(~mask, _max_neg_value)
 
         # attention, what we cannot get enough of
         attn = sim.softmax(dim=-1)

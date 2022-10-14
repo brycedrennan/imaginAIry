@@ -1,14 +1,19 @@
 # pylama:ignore=W0613
+import logging
+
 import numpy as np
 import torch
 from torch import nn
 
-from imaginairy.log_utils import log_latent
+from imaginairy.log_utils import log_img, log_latent
 from imaginairy.modules.diffusion.util import (
+    extract_into_tensor,
     make_ddim_sampling_parameters,
     make_ddim_timesteps,
 )
 from imaginairy.utils import get_device
+
+logger = logging.getLogger(__name__)
 
 SAMPLER_TYPE_OPTIONS = [
     "plms",
@@ -55,11 +60,35 @@ class CFGDenoiser(nn.Module):
     def __init__(self, model):
         super().__init__()
         self.inner_model = model
+        self.device = get_device()
 
-    def forward(self, x, sigma, uncond, cond, cond_scale, mask=None, orig_latent=None):
+    def forward(
+        self,
+        x,
+        sigma,
+        uncond,
+        cond,
+        cond_scale,
+        mask=None,
+        mask_noise=None,
+        orig_latent=None,
+    ):
         def _wrapper(noisy_latent_in, time_encoding_in, conditioning_in):
             return self.inner_model(
                 noisy_latent_in, time_encoding_in, cond=conditioning_in
+            )
+
+        if mask is not None:
+            assert orig_latent is not None
+            t = self.inner_model.sigma_to_t(sigma, quantize=True)
+            big_sigma = max(sigma, 1)
+            x = mask_blend(
+                noisy_latent=x,
+                orig_latent=orig_latent * big_sigma,
+                mask=mask,
+                mask_noise=mask_noise * big_sigma,
+                ts=t,
+                model=self.inner_model.inner_model,
             )
 
         noise_pred = get_noise_prediction(
@@ -70,11 +99,6 @@ class CFGDenoiser(nn.Module):
             positive_conditioning=cond,
             signal_amplification=cond_scale,
         )
-
-        if mask is not None:
-            assert orig_latent is not None
-            mask_inv = 1.0 - mask
-            noise_pred = (orig_latent * mask) + (mask_inv * noise_pred)
 
         return noise_pred
 
@@ -122,19 +146,27 @@ def mask_blend(noisy_latent, orig_latent, mask, mask_noise, ts, model):
     ts is a decreasing value between 1000 and 1
     """
     assert orig_latent is not None
+    log_latent(orig_latent, "orig_latent")
     noised_orig_latent = model.q_sample(orig_latent, ts, mask_noise)
 
     # this helps prevent the weird disjointed images that can happen with masking
-    hint_strength = 0.8
+    hint_strength = 1
     # if we're in the first 10% of the steps then don't fully noise the parts
     # of the image we're not changing so that the algorithm can learn from the context
     if ts > 900:
-        xdec_orig_with_hints = (
+        hinted_orig_latent = (
             noised_orig_latent * (1 - hint_strength) + orig_latent * hint_strength
         )
+        log_latent(hinted_orig_latent, f"hinted_orig_latent {ts}")
     else:
-        xdec_orig_with_hints = noised_orig_latent
-    noisy_latent = xdec_orig_with_hints * mask + (1.0 - mask) * noisy_latent
+        hinted_orig_latent = noised_orig_latent
+    log_img(mask, f"mask {ts}")
+    # logger.info(mask.shape)
+    hinted_orig_latent_masked = hinted_orig_latent * mask
+    log_latent(hinted_orig_latent_masked, f"hinted_orig_latent_masked {ts}")
+    noisy_latent_masked = (1.0 - mask) * noisy_latent
+    log_latent(noisy_latent_masked, f"noisy_latent_masked {ts}")
+    noisy_latent = hinted_orig_latent_masked + noisy_latent_masked
     log_latent(noisy_latent, f"mask-blended noisy_latent {ts}")
     return noisy_latent
 
@@ -181,3 +213,20 @@ class NoiseSchedule:
         self.ddim_sqrt_one_minus_alphas = (
             np.sqrt(1.0 - ddim_alphas).to(torch.float32).to(device)
         )
+
+
+@torch.no_grad()
+def noise_an_image(init_latent, t, schedule, noise=None):
+    # fast, but does not allow for exact reconstruction
+    # t serves as an index to gather the correct alphas
+    t = t.clamp(0, 1000)
+    sqrt_alphas_cumprod = torch.sqrt(schedule.ddim_alphas)
+    sqrt_one_minus_alphas_cumprod = schedule.ddim_sqrt_one_minus_alphas
+
+    if noise is None:
+        noise = torch.randn_like(init_latent, device="cpu").to(get_device())
+    return (
+        extract_into_tensor(sqrt_alphas_cumprod, t, init_latent.shape) * init_latent
+        + extract_into_tensor(sqrt_one_minus_alphas_cumprod, t, init_latent.shape)
+        * noise
+    )

@@ -58,7 +58,7 @@ operators also work.  When writing strength modifies know that pixel values are 
 ```bash
 >> imagine \
     --init-image fruit-bowl.jpg \
-    --mask-prompt "fruit OR fruit stem{*1.5}" \
+    --mask-prompt "fruit OR fruit stem{*6}" \
     --mask-mode replace \
     --mask-modify-original \
     --init-image-strength .1 \
@@ -213,6 +213,12 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+
+**3.1.0**
+ - feature: img2img/inpainting supported on all samplers
+ - refactor: consolidates img2img/txt2img code. consolidates schedules. consolidates masking
+ - ci: minor logging improvements
+
 **3.0.1**
  - fix: k-samplers were broken
 
@@ -312,6 +318,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
  - Development Environment
    - ✅ add tests
    - ✅ set up ci (test/lint/format)
+   - ✅ unified pipeline (txt2img & img2img combined)
    - setup parallel testing
    - add docs
    - remove yaml config
@@ -329,7 +336,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - https://colab.research.google.com/github/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch/blob/main/notebooks/demo.ipynb#scrollTo=wt_j3uXZGFAS
    - negative prompting
      - some syntax to allow it in a text string
-   - images as actual prompts instead of just init images
+   - images as actual prompts instead of just init images. is this the same as textual inversion?
      - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
      - https://twitter.com/Buntworthy/status/1566744186153484288
      - https://github.com/justinpinkney/stable-diffusion
@@ -374,7 +381,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - 🚫 CPU support.  While the code does actually work on some CPUs, the generation takes so long that I don't think it's
     worth the effort to support this feature
    - ✅ img2img for plms
-   - img2img for kdiff functions
+   - ✅ img2img for kdiff functions
  - Other
    - Enhancement pipelines
    - text-to-3d https://dreamfusionpaper.github.io/
@@ -400,6 +407,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - https://www.reddit.com/r/StableDiffusion/comments/xbrrgt/a_rundown_of_twenty_new_methodsoptions_added_to/
    - ✅ deploy to pypi
    - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
+   - https://github.com/vicgalle/stable-diffusion-aesthetic-gradients
 
 ## Noteable Stable Diffusion Implementations
  - https://github.com/ahrm/UnstableFusion
@@ -410,10 +418,17 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
  - https://github.com/lkwq007/stablediffusion-infinity
  - https://github.com/lstein/stable-diffusion
  - https://github.com/parlance-zz/g-diffuser-lib
+ - https://github.com/hafriedlander/idea2art
+
+## Online Stable Diffusion Services
+ - https://stablecog.com/ 
 
 ## Further Reading
  - Differences between samplers
    - https://www.reddit.com/r/StableDiffusion/comments/xbeyw3/can_anyone_offer_a_little_guidance_on_the/
  - https://www.reddit.com/r/bigsleep/comments/xb5cat/wiskkeys_lists_of_texttoimage_systems_and_related/
  - https://huggingface.co/blog/annotated-diffusion
+ - https://github.com/jessevig/bertviz
+ - https://www.youtube.com/watch?v=5pIQFQZsNe8
+ - https://jalammar.github.io/illustrated-transformer/
  - https://huggingface.co/blog/assets/78_annotated-diffusion/unet_architecture.jpg

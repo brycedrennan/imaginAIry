@@ -43,16 +43,30 @@ class KDiffusionSampler:
             initial_latent = torch.randn(shape, device="cpu").to(self.device)
 
         log_latent(initial_latent, "initial_latent")
+        if t_start is not None:
+            t_start = num_steps - t_start + 1
 
-        sigmas = self.cv_denoiser.get_sigmas(num_steps)
+        sigmas = self.cv_denoiser.get_sigmas(num_steps)[t_start:]
+
+        # if our number of steps is zero, just return the initial latent
+        if sigmas.nelement() == 0:
+            if orig_latent is not None:
+                return orig_latent
+            return initial_latent
 
         x = initial_latent * sigmas[0]
         log_latent(x, "initial_sigma_noised_tensor")
         model_wrap_cfg = CFGDenoiser(self.cv_denoiser)
 
+        mask_noise = None
+        if mask is not None:
+            mask_noise = torch.randn_like(initial_latent, device="cpu").to(
+                initial_latent.device
+            )
+
         def callback(data):
             log_latent(data["x"], "noisy_latent")
-            log_latent(data["denoised"], "noise_pred")
+            log_latent(data["denoised"], "noise_pred c")
 
         samples = self.sampler_func(
             model=model_wrap_cfg,
@@ -63,6 +77,7 @@ class KDiffusionSampler:
                 "uncond": neutral_conditioning,
                 "cond_scale": guidance_scale,
                 "mask": mask,
+                "mask_noise": mask_noise,
                 "orig_latent": orig_latent,
             },
             disable=False,
