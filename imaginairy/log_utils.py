@@ -34,6 +34,12 @@ def log_img(img, description):
     _CURRENT_LOGGING_CONTEXT.log_img(img, description)
 
 
+def log_tensor(t, description=""):
+    if _CURRENT_LOGGING_CONTEXT is None:
+        return
+    _CURRENT_LOGGING_CONTEXT.log_img(t, description)
+
+
 class ImageLoggingContext:
     def __init__(self, prompt, model, img_callback=None, img_outdir=None):
         self.prompt = prompt
@@ -67,7 +73,11 @@ class ImageLoggingContext:
             # logger.info(f"Didn't save tensor of shape {samples.shape} for {description}")
             return
         self.step_count += 1
-        description = f"{description} - {latents.shape}"
+        try:
+            shape_str = ",".join(tuple(latents.shape))
+        except TypeError:
+            shape_str = str(latents.shape)
+        description = f"{description}-{shape_str}"
         for img in model_latents_to_pillow_imgs(latents):
             self.img_callback(img, description, self.step_count, self.prompt)
 
@@ -79,6 +89,16 @@ class ImageLoggingContext:
             img = ToPILImage()(img.squeeze().cpu().detach())
         img = img.copy()
         self.img_callback(img, description, self.step_count, self.prompt)
+
+    def log_tensor(self, t, description=""):
+        if not self.img_callback:
+            return
+
+        if len(t.shape) == 2:
+            self.log_img(t, description)
+
+    def log_indexed_graph_of_tensor(self):
+        pass
 
     # def img_callback(self, img, description, step_count, prompt):
     #     steps_path = os.path.join(self.img_outdir, "steps", f"{self.file_num:08}_S{prompt.seed}")

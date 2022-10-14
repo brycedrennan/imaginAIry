@@ -72,6 +72,7 @@ logger = logging.getLogger(__name__)
 )
 @click.option(
     "--sampler-type",
+    "--sampler",
     default="plms",
     type=click.Choice(SAMPLER_TYPE_OPTIONS),
     help="What sampling strategy to use",

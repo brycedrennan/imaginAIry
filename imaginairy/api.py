@@ -25,7 +25,7 @@ from imaginairy.log_utils import (
     log_latent,
 )
 from imaginairy.safety import SafetyMode, create_safety_score
-from imaginairy.samplers.base import NoiseSchedule, get_sampler
+from imaginairy.samplers.base import NoiseSchedule, get_sampler, noise_an_image
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     fix_torch_group_norm,
@@ -37,7 +37,6 @@ from imaginairy.utils import (
 
 LIB_PATH = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
-
 
 # leave undocumented. I'd ask that no one publicize this flag. Just want a
 # slight barrier to entry. Please don't use this is any way that's gonna cause
@@ -207,19 +206,10 @@ def imagine(
                     prompt.height // downsampling_factor,
                     prompt.width // downsampling_factor,
                 ]
-                if prompt.init_image and prompt.sampler_type not in ("ddim", "plms"):
-                    sampler_type = "plms"
-                    logger.info("Sampler type switched to plms for img2img")
-                else:
-                    sampler_type = prompt.sampler_type
 
-                sampler = get_sampler(sampler_type, model)
-                mask, mask_image, mask_image_orig, mask_grayscale = (
-                    None,
-                    None,
-                    None,
-                    None,
-                )
+                sampler = get_sampler(prompt.sampler_type, model)
+                mask = mask_image = mask_image_orig = mask_grayscale = None
+                t_enc = init_latent = init_latent_noised = None
                 if prompt.init_image:
                     generation_strength = 1 - prompt.init_image_strength
                     t_enc = int(prompt.steps * generation_strength)
@@ -271,6 +261,7 @@ def imagine(
                     init_latent = model.get_first_stage_encoding(
                         model.encode_first_stage(init_image_t)
                     )
+                    shape = init_latent.shape
 
                     log_latent(init_latent, "init_latent")
                     # encode (scaled latent)
@@ -289,36 +280,27 @@ def imagine(
                         # (or setting steps=1000)
                         init_latent_noised = noise
                     else:
-                        init_latent_noised = sampler.noise_an_image(
+
+                        init_latent_noised = noise_an_image(
                             init_latent,
                             torch.tensor([t_enc - 1]).to(get_device()),
                             schedule=schedule,
                             noise=noise,
                         )
+                        log_latent(init_latent_noised, "init_latent_noised")
 
-                    log_latent(init_latent_noised, "init_latent_noised")
-
-                    samples = sampler.sample(
-                        num_steps=prompt.steps,
-                        initial_latent=init_latent_noised,
-                        positive_conditioning=positive_conditioning,
-                        neutral_conditioning=neutral_conditioning,
-                        guidance_scale=prompt.prompt_strength,
-                        t_start=t_enc,
-                        mask=mask,
-                        orig_latent=init_latent,
-                        shape=shape,
-                        batch_size=1,
-                    )
-                else:
-                    samples = sampler.sample(
-                        num_steps=prompt.steps,
-                        neutral_conditioning=neutral_conditioning,
-                        positive_conditioning=positive_conditioning,
-                        guidance_scale=prompt.prompt_strength,
-                        batch_size=1,
-                        shape=shape,
-                    )
+                samples = sampler.sample(
+                    num_steps=prompt.steps,
+                    initial_latent=init_latent_noised,
+                    positive_conditioning=positive_conditioning,
+                    neutral_conditioning=neutral_conditioning,
+                    guidance_scale=prompt.prompt_strength,
+                    t_start=t_enc,
+                    mask=mask,
+                    orig_latent=init_latent,
+                    shape=shape,
+                    batch_size=1,
+                )
 
                 x_samples = model.decode_first_stage(samples)
                 x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
