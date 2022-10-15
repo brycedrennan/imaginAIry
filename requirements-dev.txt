@@ -202,6 +202,7 @@ packaging==21.3
     #   kornia
     #   matplotlib
     #   pytest
+    #   pytest-sugar
     #   pytorch-lightning
     #   scikit-image
     #   torchmetrics
@@ -264,7 +265,10 @@ pytest==7.1.3
     # via
     #   -r requirements-dev.in
     #   pytest-randomly
+    #   pytest-sugar
 pytest-randomly==3.12.0
+    # via -r requirements-dev.in
+pytest-sugar==0.9.5
     # via -r requirements-dev.in
 python-dateutil==2.8.2
     # via matplotlib
@@ -338,6 +342,8 @@ tensorboard-plugin-wit==1.8.1
     # via
     #   tb-nightly
     #   tensorboard
+termcolor==2.0.1
+    # via pytest-sugar
 tifffile==2022.10.10
     # via scikit-image
 timm==0.6.11

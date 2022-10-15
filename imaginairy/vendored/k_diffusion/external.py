@@ -54,7 +54,16 @@ class DiscreteSchedule(nn.Module):
     def __init__(self, sigmas, quantize):
         super().__init__()
         self.register_buffer("sigmas", sigmas)
+        self.register_buffer("log_sigmas", sigmas.log())
         self.quantize = quantize
+
+    @property
+    def sigma_min(self):
+        return self.sigmas[0]
+
+    @property
+    def sigma_max(self):
+        return self.sigmas[-1]
 
     def get_sigmas(self, n=None):
         if n is None:
@@ -65,14 +74,19 @@ class DiscreteSchedule(nn.Module):
 
     def sigma_to_t(self, sigma, quantize=None):
         quantize = self.quantize if quantize is None else quantize
-        dists = torch.abs(sigma - self.sigmas[:, None])
+        log_sigma = sigma.log()
+        dists = log_sigma - self.log_sigmas[:, None]
         if quantize:
-            return torch.argmin(dists, dim=0).view(sigma.shape)
-        low_idx, high_idx = torch.sort(
-            torch.topk(dists, dim=0, k=2, largest=False).indices, dim=0
-        )[0]
-        low, high = self.sigmas[low_idx], self.sigmas[high_idx]
-        w = (low - sigma) / (low - high)
+            return dists.abs().argmin(dim=0).view(sigma.shape)
+        low_idx = (
+            dists.ge(0)
+            .cumsum(dim=0)
+            .argmax(dim=0)
+            .clamp(max=self.log_sigmas.shape[0] - 2)
+        )
+        high_idx = low_idx + 1
+        low, high = self.log_sigmas[low_idx], self.log_sigmas[high_idx]
+        w = (low - log_sigma) / (low - high)
         w = w.clamp(0, 1)
         t = (1 - w) * low_idx + w * high_idx
         return t.view(sigma.shape)
@@ -80,7 +94,8 @@ class DiscreteSchedule(nn.Module):
     def t_to_sigma(self, t):
         t = t.float()
         low_idx, high_idx, w = t.floor().long(), t.ceil().long(), t.frac()
-        return (1 - w) * self.sigmas[low_idx] + w * self.sigmas[high_idx]
+        log_sigma = (1 - w) * self.log_sigmas[low_idx] + w * self.log_sigmas[high_idx]
+        return log_sigma.exp()
 
 
 class DiscreteEpsDDPMDenoiser(DiscreteSchedule):

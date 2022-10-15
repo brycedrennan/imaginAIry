@@ -76,9 +76,10 @@ class ConditionedModule(nn.Module):
 
 class UnconditionedModule(ConditionedModule):
     def __init__(self, module):
+        super().__init__()
         self.module = module
 
-    def forward(self, input, cond):
+    def forward(self, input, cond=None):
         return self.module(input)
 
 

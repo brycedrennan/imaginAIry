@@ -7,4 +7,5 @@ pylama
 pylint
 pytest
 pytest-randomly
+pytest-sugar
 responses

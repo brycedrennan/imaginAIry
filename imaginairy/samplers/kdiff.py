@@ -13,12 +13,55 @@ class StandardCompVisDenoiser(CompVisDenoiser):
         return self.inner_model.apply_model(*args, **kwargs)
 
 
+def sample_dpm_adaptive(
+    model, x, sigmas, extra_args=None, disable=False, callback=None
+):
+    sigma_min = sigmas[-2]
+    sigma_max = sigmas[0]
+    return k_sampling.sample_dpm_adaptive(
+        model=model,
+        x=x,
+        sigma_min=sigma_min,
+        sigma_max=sigma_max,
+        extra_args=extra_args,
+        disable=disable,
+        callback=callback,
+    )
+
+
+def sample_dpm_fast(model, x, sigmas, extra_args=None, disable=False, callback=None):
+    sigma_min = sigmas[-2]
+    sigma_max = sigmas[0]
+    return k_sampling.sample_dpm_fast(
+        model=model,
+        x=x,
+        sigma_min=sigma_min,
+        sigma_max=sigma_max,
+        n=len(sigmas),
+        extra_args=extra_args,
+        disable=disable,
+        callback=callback,
+    )
+
+
 class KDiffusionSampler:
+
+    sampler_lookup = {
+        "dpm_fast": sample_dpm_fast,
+        "dpm_adaptive": sample_dpm_adaptive,
+        "dpm_2": k_sampling.sample_dpm_2,
+        "dpm_2_ancestral": k_sampling.sample_dpm_2_ancestral,
+        "euler": k_sampling.sample_euler,
+        "euler_ancestral": k_sampling.sample_euler_ancestral,
+        "heun": k_sampling.sample_heun,
+        "lms": k_sampling.sample_lms,
+    }
+
     def __init__(self, model, sampler_name):
         self.model = model
         self.cv_denoiser = StandardCompVisDenoiser(model)
         self.sampler_name = sampler_name
-        self.sampler_func = getattr(k_sampling, f"sample_{sampler_name}")
+        self.sampler_func = self.sampler_lookup[sampler_name]
         self.device = get_device()
 
     def sample(
