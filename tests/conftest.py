@@ -1,10 +1,12 @@
 import logging
 import os
 import sys
+from functools import partialmethod
 from shutil import rmtree
 
 import pytest
 import responses
+from tqdm import tqdm
 from urllib3 import HTTPConnectionPool
 
 from imaginairy import api
@@ -55,7 +57,7 @@ def pre_setup():
         return result
 
     HTTPConnectionPool.urlopen = urlopen_tattle
-    # tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
+    tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
 
     # real_randn = torch.randn
     # def randn_tattle(*args, **kwargs):

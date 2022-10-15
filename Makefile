@@ -113,8 +113,12 @@ vendorize_blip:
 	sed -i '' -e 's#print(#\# print(#g' ./imaginairy/vendored/blip/blip.py
 
 vendorize_kdiffusion:
-	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=1a0703dfb7d24d8806267c3e7ccc4caf67fd1331
+	rm -rf ./imaginairy/vendored/k_diffusion
+	rm -rf ./downloads/k_diffusion
+    # version 0.0.9
+	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=f4e99857772fc3a126ba886aadf795a332774878
 	#sed -i '' -e 's/import\sclip/from\simaginairy.vendored\simport\sclip/g' imaginairy/vendored/k_diffusion/evaluation.py
+	mv ./downloads/k_diffusion/LICENSE ./imaginairy/vendored/k_diffusion/
 	rm imaginairy/vendored/k_diffusion/evaluation.py
 	touch imaginairy/vendored/k_diffusion/evaluation.py
 	rm imaginairy/vendored/k_diffusion/config.py
@@ -139,7 +143,7 @@ vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:ope
 	cd ./downloads/$(PKG) && git fetch && git checkout $(COMMIT)
 	rm -rf ./imaginairy/vendored/$(PKG)
 	cp -R ./downloads/$(PKG)/$(PKG) imaginairy/vendored/
-	git --git-dir ./downloads/$(PKG)/.git rev-parse HEAD | tee ./imaginairy/vendored/$(PKG)/clip-commit-hash.txt
+	git --git-dir ./downloads/$(PKG)/.git rev-parse HEAD | tee ./imaginairy/vendored/$(PKG)/source-commit-hash.txt
 	touch ./imaginairy/vendored/$(PKG)/version.py
 	echo "vendored from $(REPO)" | tee ./imaginairy/vendored/$(PKG)/readme.txt
 

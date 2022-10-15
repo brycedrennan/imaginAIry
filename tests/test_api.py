@@ -18,8 +18,14 @@ def test_imagine(sampler_type, filename_base_for_outputs):
         prompt_text, width=512, height=512, steps=20, seed=1, sampler_type=sampler_type
     )
     result = next(imagine(prompt))
+
+    threshold_lookup = {
+        "k_dpm_2_a": 26000
+    }
+    threshold = threshold_lookup.get(sampler_type, 10000)
+
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=2800)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=threshold)
 
 
 def test_img2img_beach_to_sunset(
@@ -80,7 +86,7 @@ def test_img_to_img_from_url_cats(
     img = pillow_fit_image_within(img)
     img.save(f"{filename_base_for_orig_outputs}__orig.jpg")
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=12000)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=14000)
 
 
 @pytest.mark.parametrize("init_strength", [0, 0.05, 0.2, 1])
@@ -108,9 +114,14 @@ def test_img_to_img_fruit_2_gold(
 
     result = next(imagine(prompt))
 
+    threshold_lookup = {
+        "k_dpm_2_a": 26000
+    }
+    threshold = threshold_lookup.get(sampler_type, 10000)
+
     pillow_fit_image_within(img).save(f"{filename_base_for_orig_outputs}__orig.jpg")
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=9000)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=threshold)
 
 
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")

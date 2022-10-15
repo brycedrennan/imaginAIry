@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 SAMPLER_TYPE_OPTIONS = [
     "plms",
     "ddim",
+    "k_dpm_fast",
+    "k_dpm_adaptive",
     "k_lms",
     "k_dpm_2",
     "k_dpm_2_a",
@@ -27,6 +29,8 @@ SAMPLER_TYPE_OPTIONS = [
 ]
 
 _k_sampler_type_lookup = {
+    "k_dpm_fast": "dpm_fast",
+    "k_dpm_adaptive": "dpm_adaptive",
     "k_dpm_2": "dpm_2",
     "k_dpm_2_a": "dpm_2_ancestral",
     "k_euler": "euler",
