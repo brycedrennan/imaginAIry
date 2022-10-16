@@ -172,6 +172,9 @@ def disable_transformers_custom_logging():
     _logger.handlers = []
     _logger.propagate = True
     _logger.setLevel(logging.NOTSET)
+    modeling_logger.handlers = []
+    modeling_logger.propagate = True
+    modeling_logger.setLevel(logging.ERROR)
 
 
 def disable_pytorch_lighting_custom_logging():

@@ -1,5 +1,3 @@
-import hashlib
-
 import pytest
 from PIL import Image
 from pytorch_lightning import seed_everything
@@ -12,28 +10,20 @@ from imaginairy.enhancers.describe_image_clip import find_img_text_similarity
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.utils import get_device
 from tests import TESTS_FOLDER
+from tests.utils import assert_image_similar_to_expectation
 
 
 @pytest.mark.skipif(
     get_device() == "cpu", reason="TypeError: Got unsupported ScalarType BFloat16"
 )
-def test_fix_faces():
-    img = Image.open(f"{TESTS_FOLDER}/data/distorted_face.png")
+def test_fix_faces(filename_base_for_orig_outputs, filename_base_for_outputs):
+    distorted_img = Image.open(f"{TESTS_FOLDER}/data/distorted_face.png")
     seed_everything(1)
-    img = enhance_faces(img)
-    img.save(f"{TESTS_FOLDER}/test_output/fixed_face.png")
-    if "mps" in get_device():
-        assert img_hash(img) == "a75991307eda675a26eeb7073f828e93"
-    else:
-        # probably different based on whether first run or not. looks the same either way
-        assert img_hash(img) in [
-            "c840cf3bfe5a7760734f425a3f8941cf",
-            "e56c1205bbc8f251be05773f2ba7fa24",
-        ]
+    img = enhance_faces(distorted_img)
 
-
-def img_hash(img):
-    return hashlib.md5(img.tobytes()).hexdigest()
+    distorted_img.save(f"{filename_base_for_orig_outputs}__orig.jpg")
+    img_path = f"{filename_base_for_outputs}.png"
+    assert_image_similar_to_expectation(img, img_path=img_path, threshold=2800)
 
 
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
@@ -58,13 +48,13 @@ def test_clip_masking():
         )
 
     prompt = ImaginePrompt(
-        "a female firefighter in front of a burning building",
+        "",
         init_image=img,
-        init_image_strength=0.95,
+        init_image_strength=0.5,
         # lower steps for faster tests
         steps=40,
         mask_prompt="(head OR face){*5}",
-        mask_mode="replace",
+        mask_mode="keep",
         upscale=False,
         fix_faces=True,
     )
@@ -72,7 +62,7 @@ def test_clip_masking():
     result = next(imagine(prompt))
     result.save(
         f"{TESTS_FOLDER}/test_output/earring_mask_photo.png",
-        image_type="modified_original",
+        image_type="generated",
     )
 
 
