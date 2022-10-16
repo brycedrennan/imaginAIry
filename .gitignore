@@ -18,3 +18,7 @@ tests/test_output
 gfpgan/**
 .python-version
 ._.DS_Store
+tests/vastai_cli.py
+/tests/test_output_local_cuda/
+/testing_support/
+.unison*

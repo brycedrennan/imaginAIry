@@ -71,4 +71,4 @@ jobs:
     - name: Test with pytest
       timeout-minutes: 10
       run: |
-        pytest
+        pytest --durations=50 -v

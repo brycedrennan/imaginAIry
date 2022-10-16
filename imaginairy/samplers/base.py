@@ -153,7 +153,7 @@ def mask_blend(noisy_latent, orig_latent, mask, mask_noise, ts, model):
     hint_strength = 1
     # if we're in the first 10% of the steps then don't fully noise the parts
     # of the image we're not changing so that the algorithm can learn from the context
-    if ts > 900:
+    if ts > 1000:
         hinted_orig_latent = (
             noised_orig_latent * (1 - hint_strength) + orig_latent * hint_strength
         )

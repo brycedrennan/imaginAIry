@@ -186,3 +186,27 @@ def get_cached_url_path(url):
     with open(dest_path, "wb") as f:
         f.write(r.content)
     return dest_path
+
+
+def randn_seeded(seed: int, size: List[int]) -> Tensor:
+    """Generate a random tensor with a given seed"""
+    g_cpu = torch.Generator()
+    g_cpu.manual_seed(seed)
+    noise = torch.randn(
+        size,
+        device="cpu",
+        generator=g_cpu,
+    )
+    return noise
+
+
+def check_torch_working():
+    """Check that torch is working"""
+    try:
+        torch.randn(1, device=get_device())
+    except RuntimeError as e:
+        if "CUDA" in str(e):
+            raise RuntimeError(
+                "CUDA is not working.  Make sure you have a GPU and CUDA installed."
+            ) from e
+        raise e

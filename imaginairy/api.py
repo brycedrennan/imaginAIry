@@ -33,6 +33,7 @@ from imaginairy.utils import (
     get_device,
     instantiate_from_config,
     platform_appropriate_autocast,
+    randn_seeded,
 )
 
 LIB_PATH = os.path.dirname(__file__)
@@ -65,7 +66,18 @@ def load_model_from_config(
     else:
         ckpt_path = model_weights_location
     logger.info(f"Loading model {ckpt_path} onto {get_device()} backend...")
-    pl_sd = torch.load(ckpt_path, map_location="cpu")
+    pl_sd = None
+    try:
+        pl_sd = torch.load(ckpt_path, map_location="cpu")
+    except RuntimeError as e:
+        if "PytorchStreamReader failed reading zip archive" in str(e):
+            if model_weights_location.startswith("http"):
+                logger.warning("Corrupt checkpoint. deleting and re-downloading...")
+                os.remove(ckpt_path)
+                ckpt_path = cached_path(model_weights_location)
+                pl_sd = torch.load(ckpt_path, map_location="cpu")
+        if pl_sd is None:
+            raise e
     if "global_step" in pl_sd:
         logger.debug(f"Global Step: {pl_sd['global_step']}")
     sd = pl_sd["state_dict"]
@@ -266,7 +278,8 @@ def imagine(
                     log_latent(init_latent, "init_latent")
                     # encode (scaled latent)
                     seed_everything(prompt.seed)
-                    noise = torch.randn_like(init_latent, device="cpu").to(get_device())
+                    noise = randn_seeded(seed=prompt.seed, size=init_latent.size())
+                    noise = noise.to(get_device())
 
                     schedule = NoiseSchedule(
                         model_num_timesteps=model.num_timesteps,
@@ -280,14 +293,14 @@ def imagine(
                         # (or setting steps=1000)
                         init_latent_noised = noise
                     else:
-
                         init_latent_noised = noise_an_image(
                             init_latent,
                             torch.tensor([t_enc - 1]).to(get_device()),
                             schedule=schedule,
                             noise=noise,
                         )
-                        log_latent(init_latent_noised, "init_latent_noised")
+
+                log_latent(init_latent_noised, "init_latent_noised")
 
                 samples = sampler.sample(
                     num_steps=prompt.steps,
