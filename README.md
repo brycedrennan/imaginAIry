@@ -214,6 +214,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+ - feature: update k-diffusion samplers. add k_dpm_adaptive and k_dpm_fast
+
 **3.1.0**
  - feature: img2img/inpainting supported on all samplers
  - refactor: consolidates img2img/txt2img code. consolidates schedules. consolidates masking
