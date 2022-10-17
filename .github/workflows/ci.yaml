@@ -67,7 +67,7 @@ jobs:
           ~/.cache/clip
           ~/.cache/imaginairy
           ~/.cache/torch
-        key: ${{ steps.date.outputs.curmonth }}
+        key: ${{ steps.date.outputs.curmonth }}-b
     - name: Test with pytest
       timeout-minutes: 10
       run: |
