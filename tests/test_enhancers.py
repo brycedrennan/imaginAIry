@@ -142,6 +142,7 @@ def test_describe_picture():
     )
 
 
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_clip_text_comparison():
     img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg")
     phrases = [
