@@ -36,9 +36,19 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
 
 ### Prompt Based Editing  [by clipseg](https://github.com/timojl/clipseg)
-Specify advanced text based masks using boolean logic and strength modifiers. Mask descriptions must be lowercase. Keywords uppercase.
-Valid symbols: `AND`, `OR`, `NOT`, `()`, and mask strength modifier `{*1.5}` where `+` can be any of `+ - * /`. Single-character boolean 
-operators also work.  When writing strength modifies know that pixel values are between 0 and 1.
+Specify advanced text based masks using boolean logic and strength modifiers. 
+Mask syntax:
+  - mask descriptions must be lowercase
+  - keywords (`AND`, `OR`, `NOT`) must be uppercase
+  - parentheses are supported 
+  - mask modifiers may be appended to any mask or group of masks.  Example: `(dog OR cat){+5}` means that we'll
+select any dog or cat and then expand the size of the mask area by 5 pixels.  Valid mask modifiers:
+    - `{+n}` - expand mask by n pixels
+    - `{-n}` - shrink mask by n pixels
+    - `{*n}` - multiply mask strength. will expand mask to areas that weakly matched the mask description
+    - `{/n}` - divide mask strength. will reduce mask to areas that most strongly matched the mask description. probably not useful
+
+When writing strength modifiers keep in mind that pixel values are between 0 and 1.
 
 ```bash
 >> imagine \
@@ -213,7 +223,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
-
+ - feature: dilation and erosion of masks
+ Previously the `+` and `-` characters in a mask (example: `face{+0.1}`) added to the grayscale value of any masked areas. This wasn't very useful. The new behavior is that the mask will expand or contract by the number of pixel specified. The technical terms for this are dilation and erosion.  This allows much greater control over the masked area.
  - feature: update k-diffusion samplers. add k_dpm_adaptive and k_dpm_fast
 
 **3.1.0**
@@ -359,6 +370,9 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ text based image masking
      - ✅ ClipSeg - https://github.com/timojl/clipseg
      - https://github.com/facebookresearch/detectron2
+   - Attention Control Methods
+     - https://github.com/bloc97/CrossAttentionControl
+     - https://github.com/ChenWu98/cycle-diffusion
  - Image Enhancement
    - Photo Restoration - https://github.com/microsoft/Bringing-Old-Photos-Back-to-Life
    - Upscaling
@@ -392,8 +406,6 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - https://github.com/francislabountyjr/stable-diffusion/blob/main/inferencing_notebook.ipynb
      - https://www.youtube.com/watch?v=E7aAFEhdngI
      - https://github.com/pytti-tools/frame-interpolation
-   - cross-attention control: 
-     - https://github.com/bloc97/CrossAttentionControl/blob/main/CrossAttention_Release_NoImages.ipynb
    - guided generation 
      - https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI
      - https://colab.research.google.com/github/aicrumb/doohickey/blob/main/Doohickey_Diffusion.ipynb#scrollTo=PytCwKXCmPid

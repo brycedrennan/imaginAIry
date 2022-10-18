@@ -27,25 +27,22 @@ def test_fix_faces(filename_base_for_orig_outputs, filename_base_for_outputs):
 
 
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
-def test_clip_masking():
+def test_clip_masking(filename_base_for_outputs):
     img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring_large.jpg")
 
-    for mask_modifier in [
-        "*0.5",
-        "*1",
-        "*6",
-    ]:
+    for mask_modifier in ["*0.5", "*6", "+1", "+11", "+101", "-25"]:
         pred_bin, pred_grayscale = get_img_mask(
             img,
             f"face AND NOT (bandana OR hair OR blue fabric){{{mask_modifier}}}",
             threshold=0.5,
         )
-        pred_grayscale.save(
-            f"{TESTS_FOLDER}/test_output/earring_mask_{mask_modifier}_g.png"
+        img_path = f"{filename_base_for_outputs}_mask{mask_modifier}_g.png"
+        assert_image_similar_to_expectation(
+            pred_grayscale, img_path=img_path, threshold=0
         )
-        pred_bin.save(
-            f"{TESTS_FOLDER}/test_output/earring_mask_{mask_modifier}_bin.png"
-        )
+
+        img_path = f"{filename_base_for_outputs}_mask{mask_modifier}_bin.png"
+        assert_image_similar_to_expectation(pred_bin, img_path=img_path, threshold=10)
 
     prompt = ImaginePrompt(
         "",
@@ -60,10 +57,8 @@ def test_clip_masking():
     )
 
     result = next(imagine(prompt))
-    result.save(
-        f"{TESTS_FOLDER}/test_output/earring_mask_photo.png",
-        image_type="generated",
-    )
+    img_path = f"{filename_base_for_outputs}.png"
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=10)
 
 
 boolean_mask_test_cases = [
