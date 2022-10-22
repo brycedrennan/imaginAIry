@@ -223,11 +223,11 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+**4.0.0**
+ - feature: stable diffusion 1.5 (slightly improved image quality)
  - feature: dilation and erosion of masks
  Previously the `+` and `-` characters in a mask (example: `face{+0.1}`) added to the grayscale value of any masked areas. This wasn't very useful. The new behavior is that the mask will expand or contract by the number of pixel specified. The technical terms for this are dilation and erosion.  This allows much greater control over the masked area.
  - feature: update k-diffusion samplers. add k_dpm_adaptive and k_dpm_fast
-
-**3.1.0**
  - feature: img2img/inpainting supported on all samplers
  - refactor: consolidates img2img/txt2img code. consolidates schedules. consolidates masking
  - ci: minor logging improvements
