@@ -48,9 +48,13 @@ if IMAGINAIRY_SAFETY_MODE in {"disabled", "classify"}:
 elif IMAGINAIRY_SAFETY_MODE == "filter":
     IMAGINAIRY_SAFETY_MODE = SafetyMode.STRICT
 
-DEFAULT_MODEL_WEIGHTS_LOCATION = (
-    "https://www.googleapis.com/storage/v1/b/aai-blog-files/o/sd-v1-4.ckpt?alt=media"
-)
+MODEL_LOCATIONS = {
+    "sd-1.4": "https://huggingface.co/bstddev/sd-v1-4/resolve/main/sd-v1-4.ckpt",
+    "sd-1.5": "https://huggingface.co/acheong08/SD-V1-5-cloned/resolve/main/v1-5-pruned-emaonly.ckpt",
+}
+
+DEFAULT_MODEL = "sd-1.5"
+DEFAULT_MODEL_WEIGHTS_LOCATION = MODEL_LOCATIONS[DEFAULT_MODEL]
 
 
 def load_model_from_config(
@@ -146,7 +150,10 @@ def imagine_image_files(
         img_str = ""
         if prompt.init_image:
             img_str = f"_img2img-{prompt.init_image_strength}"
-        basefilename = f"{base_count:06}_{prompt.seed}_{prompt.sampler_type}{prompt.steps}_PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
+        basefilename = (
+            f"{base_count:06}_{prompt.seed}_{prompt.sampler_type.replace('_', '')}{prompt.steps}_"
+            f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
+        )
 
         for image_type in result.images:
             subpath = os.path.join(outdir, image_type)

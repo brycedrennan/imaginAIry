@@ -38,7 +38,7 @@ def test_clip_masking(filename_base_for_outputs):
         )
         img_path = f"{filename_base_for_outputs}_mask{mask_modifier}_g.png"
         assert_image_similar_to_expectation(
-            pred_grayscale, img_path=img_path, threshold=0
+            pred_grayscale, img_path=img_path, threshold=100
         )
 
         img_path = f"{filename_base_for_outputs}_mask{mask_modifier}_bin.png"
@@ -54,6 +54,7 @@ def test_clip_masking(filename_base_for_outputs):
         mask_mode="keep",
         upscale=False,
         fix_faces=True,
+        seed=42,
     )
 
     result = next(imagine(prompt))
