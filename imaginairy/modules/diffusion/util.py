@@ -16,7 +16,6 @@ import torch
 from einops import repeat as e_repeat
 from torch import nn
 
-from imaginairy.log_utils import log_tensor
 from imaginairy.utils import instantiate_from_config
 
 logger = logging.getLogger(__name__)
@@ -208,7 +207,7 @@ def timestep_embedding(timesteps, dim, max_period=10000, repeat_only=False):
             )
     else:
         embedding = e_repeat(timesteps, "b -> b d", d=dim)
-    log_tensor(embedding, "timestep_embedding")
+
     return embedding
 
 

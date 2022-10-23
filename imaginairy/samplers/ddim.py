@@ -41,11 +41,6 @@ class DDIMSampler:
         t_start=None,
         quantize_x0=False,
     ):
-        if positive_conditioning.shape[0] != batch_size:
-            raise ValueError(
-                f"Got {positive_conditioning.shape[0]} conditionings but batch-size is {batch_size}"
-            )
-
         schedule = NoiseSchedule(
             model_num_timesteps=self.model.num_timesteps,
             model_alphas_cumprod=self.model.alphas_cumprod,

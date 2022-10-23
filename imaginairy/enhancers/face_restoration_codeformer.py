@@ -8,7 +8,7 @@ from facexlib.utils.face_restoration_helper import FaceRestoreHelper
 from PIL import Image
 from torchvision.transforms.functional import normalize
 
-from imaginairy.utils import get_cached_url_path
+from imaginairy.model_manager import get_cached_url_path
 from imaginairy.vendored.codeformer.codeformer_arch import CodeFormer
 
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ import numpy as np
 import PIL
 import torch
 import torch.nn
-from einops import rearrange
+from einops import rearrange, repeat
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 from pytorch_lightning import seed_everything
 
@@ -128,7 +128,9 @@ def imagine(
                 f"Generating 🖼  {i + 1}/{num_prompts}: {prompt.prompt_description()}"
             )
             model = get_diffusion_model(
-                weights_location=prompt.model, half_mode=half_mode
+                weights_location=prompt.model,
+                half_mode=half_mode,
+                for_inpainting=prompt.mask_image or prompt.mask_prompt,
             )
             with ImageLoggingContext(
                 prompt=prompt,
@@ -242,9 +244,60 @@ def imagine(
                             schedule=schedule,
                             noise=noise,
                         )
-
+                batch_size = 1
                 log_latent(init_latent_noised, "init_latent_noised")
+                batch = {
+                    "txt": batch_size * [prompt.prompt_text],
+                }
+                c_cat = []
+                if mask_image_orig:
+                    mask_t = pillow_img_to_torch_image(
+                        ImageOps.invert(mask_image_orig)
+                    ).to(get_device())
+                    inverted_mask = 1 - mask
+                    masked_image_t = init_image_t * (mask_t < 0.5)
+                    batch.update(
+                        {
+                            "image": repeat(
+                                init_image_t.to(device=get_device()),
+                                "1 ... -> n ...",
+                                n=batch_size,
+                            ),
+                            "txt": batch_size * [prompt.prompt_text],
+                            "mask": repeat(
+                                inverted_mask.to(device=get_device()),
+                                "1 ... -> n ...",
+                                n=batch_size,
+                            ),
+                            "masked_image": repeat(
+                                masked_image_t.to(device=get_device()),
+                                "1 ... -> n ...",
+                                n=batch_size,
+                            ),
+                        }
+                    )
 
+                    for concat_key in getattr(model, "concat_keys", []):
+                        cc = batch[concat_key].float()
+                        if concat_key != model.masked_image_key:
+                            bchw = [batch_size, 4, shape[2], shape[3]]
+                            cc = torch.nn.functional.interpolate(cc, size=bchw[-2:])
+                        else:
+                            cc = model.get_first_stage_encoding(
+                                model.encode_first_stage(cc)
+                            )
+                        c_cat.append(cc)
+                    if c_cat:
+                        c_cat = [torch.cat(c_cat, dim=1)]
+
+                positive_conditioning = {
+                    "c_concat": c_cat,
+                    "c_crossattn": [positive_conditioning],
+                }
+                neutral_conditioning = {
+                    "c_concat": c_cat,
+                    "c_crossattn": [neutral_conditioning],
+                }
                 samples = sampler.sample(
                     num_steps=prompt.steps,
                     initial_latent=init_latent_noised,

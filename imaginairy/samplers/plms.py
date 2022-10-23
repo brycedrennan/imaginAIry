@@ -45,10 +45,10 @@ class PLMSSampler:
         quantize_denoised=False,
         **kwargs,
     ):
-        if positive_conditioning.shape[0] != batch_size:
-            raise ValueError(
-                f"Got {positive_conditioning.shape[0]} conditionings but batch-size is {batch_size}"
-            )
+        # if positive_conditioning.shape[0] != batch_size:
+        #     raise ValueError(
+        #         f"Got {positive_conditioning.shape[0]} conditionings but batch-size is {batch_size}"
+        #     )
 
         schedule = NoiseSchedule(
             model_num_timesteps=self.model.num_timesteps,
