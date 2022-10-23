@@ -897,3 +897,58 @@ class DiffusionWrapper(pl.LightningModule):
             raise NotImplementedError()
 
         return out
+
+
+class LatentInpaintDiffusion(LatentDiffusion):
+    def __init__(  # noqa
+        self,
+        concat_keys=("mask", "masked_image"),
+        masked_image_key="masked_image",
+        finetune_keys=None,  # noqa
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.masked_image_key = masked_image_key
+        assert self.masked_image_key in concat_keys
+        self.concat_keys = concat_keys
+
+    @torch.no_grad()
+    def get_input(
+        self, batch, k, cond_key=None, bs=None, return_first_stage_outputs=False
+    ):
+        # note: restricted to non-trainable encoders currently
+        assert (
+            not self.cond_stage_trainable
+        ), "trainable cond stages not yet supported for inpainting"
+        z, c, x, xrec, xc = super().get_input(
+            batch,
+            self.first_stage_key,
+            return_first_stage_outputs=True,
+            force_c_encode=True,
+            return_original_cond=True,
+            bs=bs,
+        )
+
+        assert self.concat_keys is not None
+        c_cat = []
+        for ck in self.concat_keys:
+            cc = (
+                rearrange(batch[ck], "b h w c -> b c h w")
+                .to(memory_format=torch.contiguous_format)
+                .float()
+            )
+            if bs is not None:
+                cc = cc[:bs]
+                cc = cc.to(self.device)
+            bchw = z.shape
+            if ck != self.masked_image_key:
+                cc = torch.nn.functional.interpolate(cc, size=bchw[-2:])
+            else:
+                cc = self.get_first_stage_encoding(self.encode_first_stage(cc))
+            c_cat.append(cc)
+        c_cat = torch.cat(c_cat, dim=1)
+        all_conds = {"c_concat": [c_cat], "c_crossattn": [c]}
+        if return_first_stage_outputs:
+            return z, all_conds, x, xrec, xc
+        return z, all_conds

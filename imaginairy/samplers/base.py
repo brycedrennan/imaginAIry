@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from imaginairy.log_utils import log_img, log_latent
+from imaginairy.log_utils import log_latent
 from imaginairy.modules.diffusion.util import (
     extract_into_tensor,
     make_ddim_sampling_parameters,
@@ -125,7 +125,21 @@ def get_noise_prediction(
 
     noisy_latent_in = torch.cat([noisy_latent] * 2)
     time_encoding_in = torch.cat([time_encoding] * 2)
-    conditioning_in = torch.cat([neutral_conditioning, positive_conditioning])
+    if isinstance(positive_conditioning, dict):
+        assert isinstance(neutral_conditioning, dict)
+        conditioning_in = {}
+        for k in positive_conditioning:
+            if isinstance(positive_conditioning[k], list):
+                conditioning_in[k] = [
+                    torch.cat([neutral_conditioning[k][i], positive_conditioning[k][i]])
+                    for i in range(len(positive_conditioning[k]))
+                ]
+            else:
+                conditioning_in[k] = torch.cat(
+                    [neutral_conditioning[k], positive_conditioning[k]]
+                )
+    else:
+        conditioning_in = torch.cat([neutral_conditioning, positive_conditioning])
 
     noise_pred_neutral, noise_pred_positive = denoise_func(
         noisy_latent_in, time_encoding_in, conditioning_in
@@ -164,8 +178,7 @@ def mask_blend(noisy_latent, orig_latent, mask, mask_noise, ts, model):
         log_latent(hinted_orig_latent, f"hinted_orig_latent {ts}")
     else:
         hinted_orig_latent = noised_orig_latent
-    log_img(mask, f"mask {ts}")
-    # logger.info(mask.shape)
+
     hinted_orig_latent_masked = hinted_orig_latent * mask
     log_latent(hinted_orig_latent_masked, f"hinted_orig_latent_masked {ts}")
     noisy_latent_masked = (1.0 - mask) * noisy_latent

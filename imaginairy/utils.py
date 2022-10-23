@@ -1,17 +1,14 @@
 import importlib
 import logging
-import os.path
 import platform
 from contextlib import contextmanager, nullcontext
 from functools import lru_cache
 from typing import Any, List, Optional, Union
 
-import requests
 import torch
 from torch import Tensor, autocast
 from torch.nn import functional
 from torch.overrides import handle_torch_function, has_torch_function_variadic
-from transformers import cached_path
 
 logger = logging.getLogger(__name__)
 
@@ -155,37 +152,6 @@ def fix_torch_group_norm():
         yield
     finally:
         functional.group_norm = orig_group_norm
-
-
-def get_cache_dir():
-    xdg_cache_home = os.getenv("XDG_CACHE_HOME", None)
-    if xdg_cache_home is None:
-        user_home = os.getenv("HOME", None)
-        if user_home:
-            xdg_cache_home = os.path.join(user_home, ".cache")
-
-    if xdg_cache_home is not None:
-        return os.path.join(xdg_cache_home, "imaginairy", "weights")
-
-    return os.path.join(os.path.dirname(__file__), ".cached-downloads")
-
-
-def get_cached_url_path(url):
-    try:
-        return cached_path(url)
-    except (OSError, ValueError):
-        pass
-    filename = url.split("/")[-1]
-    dest = get_cache_dir()
-    os.makedirs(dest, exist_ok=True)
-    dest_path = os.path.join(dest, filename)
-    if os.path.exists(dest_path):
-        return dest_path
-    r = requests.get(url)  # noqa
-
-    with open(dest_path, "wb") as f:
-        f.write(r.content)
-    return dest_path
 
 
 def randn_seeded(seed: int, size: List[int]) -> Tensor:

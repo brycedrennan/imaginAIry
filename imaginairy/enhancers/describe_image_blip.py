@@ -6,7 +6,8 @@ import torch
 from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 
-from imaginairy.utils import get_cached_url_path, get_device
+from imaginairy.model_manager import get_cached_url_path
+from imaginairy.utils import get_device
 from imaginairy.vendored.blip.blip import BLIP_Decoder, load_checkpoint
 
 device = get_device()

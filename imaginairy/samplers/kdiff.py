@@ -77,10 +77,10 @@ class KDiffusionSampler:
         initial_latent=None,
         t_start=None,
     ):
-        if positive_conditioning.shape[0] != batch_size:
-            raise ValueError(
-                f"Got {positive_conditioning.shape[0]} conditionings but batch-size is {batch_size}"
-            )
+        # if positive_conditioning.shape[0] != batch_size:
+        #     raise ValueError(
+        #         f"Got {positive_conditioning.shape[0]} conditionings but batch-size is {batch_size}"
+        #     )
 
         if initial_latent is None:
             initial_latent = torch.randn(shape, device="cpu").to(self.device)

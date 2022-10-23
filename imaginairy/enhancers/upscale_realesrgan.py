@@ -6,7 +6,8 @@ from basicsr.archs.rrdbnet_arch import RRDBNet
 from PIL import Image
 from realesrgan import RealESRGANer
 
-from imaginairy.utils import get_cached_url_path, get_device
+from imaginairy.model_manager import get_cached_url_path
+from imaginairy.utils import get_device
 
 
 @lru_cache()
