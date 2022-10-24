@@ -141,8 +141,8 @@ logger = logging.getLogger(__name__)
 )
 @click.option(
     "--model-weights-path",
-    help="path to model weights file. by default we use stable diffusion 1.4",
-    type=click.Path(exists=True),
+    "--model",
+    help="Model to use. Should be one of SD-1.4, SD-1.5, or a path to custom weights. Defaults to SD-1.5",
     default=None,
 )
 @click.option(
@@ -231,6 +231,7 @@ def imagine_cmd(
                 fix_faces=fix_faces,
                 fix_faces_fidelity=fix_faces_fidelity,
                 tile_mode=tile,
+                model=model_weights_path,
             )
             prompts.append(prompt)
 
@@ -241,7 +242,6 @@ def imagine_cmd(
         output_file_extension="jpg",
         print_caption=caption,
         precision=precision,
-        model_weights_path=model_weights_path,
     )
 
 

@@ -43,9 +43,9 @@ def pillow_img_to_opencv_img(img: PIL.Image.Image):
 
 
 def model_latents_to_pillow_imgs(latents: torch.Tensor) -> Sequence[PIL.Image.Image]:
-    from imaginairy.api import load_model  # noqa
+    from imaginairy.model_manager import get_diffusion_model  # noqa
 
-    model = load_model()
+    model = get_diffusion_model()
     latents = model.decode_first_stage(latents)
     latents = torch.clamp((latents + 1.0) / 2.0, min=0.0, max=1.0)
     imgs = []

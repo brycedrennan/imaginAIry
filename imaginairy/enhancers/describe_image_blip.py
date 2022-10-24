@@ -18,7 +18,7 @@ BLIP_EVAL_SIZE = 384
 
 @lru_cache()
 def blip_model():
-    from imaginairy import PKG_ROOT  # noqa
+    from imaginairy.paths import PKG_ROOT  # noqa
 
     config_path = os.path.join(
         PKG_ROOT, "vendored", "blip", "configs", "med_config.json"
