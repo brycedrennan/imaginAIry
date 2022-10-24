@@ -1,17 +1,14 @@
 import logging
 import os
 import re
-from functools import lru_cache
 
 import numpy as np
 import PIL
 import torch
 import torch.nn
 from einops import rearrange
-from omegaconf import OmegaConf
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 from pytorch_lightning import seed_everything
-from transformers import cached_path
 
 from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
@@ -24,6 +21,7 @@ from imaginairy.log_utils import (
     log_img,
     log_latent,
 )
+from imaginairy.model_manager import get_diffusion_model
 from imaginairy.safety import SafetyMode, create_safety_score
 from imaginairy.samplers.base import NoiseSchedule, get_sampler, noise_an_image
 from imaginairy.schema import ImaginePrompt, ImagineResult
@@ -31,12 +29,10 @@ from imaginairy.utils import (
     fix_torch_group_norm,
     fix_torch_nn_layer_norm,
     get_device,
-    instantiate_from_config,
     platform_appropriate_autocast,
     randn_seeded,
 )
 
-LIB_PATH = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
 
 # leave undocumented. I'd ask that no one publicize this flag. Just want a
@@ -48,76 +44,14 @@ if IMAGINAIRY_SAFETY_MODE in {"disabled", "classify"}:
 elif IMAGINAIRY_SAFETY_MODE == "filter":
     IMAGINAIRY_SAFETY_MODE = SafetyMode.STRICT
 
-MODEL_LOCATIONS = {
-    "sd-1.4": "https://huggingface.co/bstddev/sd-v1-4/resolve/main/sd-v1-4.ckpt",
-    "sd-1.5": "https://huggingface.co/acheong08/SD-V1-5-cloned/resolve/main/v1-5-pruned-emaonly.ckpt",
-}
-
-DEFAULT_MODEL = "sd-1.5"
-DEFAULT_MODEL_WEIGHTS_LOCATION = MODEL_LOCATIONS[DEFAULT_MODEL]
-
-
-def load_model_from_config(
-    config, model_weights_location=DEFAULT_MODEL_WEIGHTS_LOCATION
-):
-    model_weights_location = (
-        model_weights_location
-        if model_weights_location
-        else DEFAULT_MODEL_WEIGHTS_LOCATION
-    )
-    if model_weights_location.startswith("http"):
-        ckpt_path = cached_path(model_weights_location)
-    else:
-        ckpt_path = model_weights_location
-    logger.info(f"Loading model {ckpt_path} onto {get_device()} backend...")
-    pl_sd = None
-    try:
-        pl_sd = torch.load(ckpt_path, map_location="cpu")
-    except RuntimeError as e:
-        if "PytorchStreamReader failed reading zip archive" in str(e):
-            if model_weights_location.startswith("http"):
-                logger.warning("Corrupt checkpoint. deleting and re-downloading...")
-                os.remove(ckpt_path)
-                ckpt_path = cached_path(model_weights_location)
-                pl_sd = torch.load(ckpt_path, map_location="cpu")
-        if pl_sd is None:
-            raise e
-    if "global_step" in pl_sd:
-        logger.debug(f"Global Step: {pl_sd['global_step']}")
-    sd = pl_sd["state_dict"]
-    model = instantiate_from_config(config.model)
-    m, u = model.load_state_dict(sd, strict=False)
-    if len(m) > 0:
-        logger.debug(f"missing keys: {m}")
-    if len(u) > 0:
-        logger.debug(f"unexpected keys: {u}")
-
-    model.to(get_device())
-    model.eval()
-    return model
-
-
-@lru_cache()
-def load_model(model_weights_location=None):
-    config = "configs/stable-diffusion-v1.yaml"
-    config = OmegaConf.load(f"{LIB_PATH}/{config}")
-    model = load_model_from_config(
-        config, model_weights_location=model_weights_location
-    )
-    model = model.to(get_device())
-    return model
-
 
 def imagine_image_files(
     prompts,
     outdir,
-    latent_channels=4,
-    downsampling_factor=8,
     precision="autocast",
     record_step_images=False,
     output_file_extension="jpg",
     print_caption=False,
-    model_weights_path=None,
 ):
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
@@ -139,12 +73,9 @@ def imagine_image_files(
 
     for result in imagine(
         prompts,
-        latent_channels=latent_channels,
-        downsampling_factor=downsampling_factor,
         precision=precision,
         img_callback=_record_step if record_step_images else None,
         add_caption=print_caption,
-        model_weights_path=model_weights_path,
     ):
         prompt = result.prompt
         img_str = ""
@@ -169,24 +100,22 @@ def imagine_image_files(
 
 def imagine(
     prompts,
-    latent_channels=4,
-    downsampling_factor=8,
     precision="autocast",
     img_callback=None,
     half_mode=None,
     add_caption=False,
-    model_weights_path=None,
 ):
-    model = load_model(model_weights_location=model_weights_path)
+    latent_channels = 4
+    downsampling_factor = 8
+    batch_size = 1
 
-    # only run half-mode on cuda. run it by default
-    half_mode = half_mode is None and get_device() == "cuda"
-    if half_mode:
-        model = model.half()
-        # needed when model is in half mode, remove if not using half mode
-        # torch.set_default_tensor_type(torch.HalfTensor)
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
+
+    try:
+        num_prompts = str(len(prompts))
+    except TypeError:
+        num_prompts = "?"
 
     if get_device() == "cpu":
         logger.info("Running in CPU mode. it's gonna be slooooooow.")
@@ -194,8 +123,13 @@ def imagine(
     with torch.no_grad(), platform_appropriate_autocast(
         precision
     ), fix_torch_nn_layer_norm(), fix_torch_group_norm():
-        for prompt in prompts:
-            logger.info(f"Generating 🖼  : {prompt.prompt_description()}")
+        for i, prompt in enumerate(prompts):
+            logger.info(
+                f"Generating 🖼  {i + 1}/{num_prompts}: {prompt.prompt_description()}"
+            )
+            model = get_diffusion_model(
+                weights_location=prompt.model, half_mode=half_mode
+            )
             with ImageLoggingContext(
                 prompt=prompt,
                 model=model,
@@ -206,7 +140,9 @@ def imagine(
 
                 neutral_conditioning = None
                 if prompt.prompt_strength != 1.0:
-                    neutral_conditioning = model.get_learned_conditioning(1 * [""])
+                    neutral_conditioning = model.get_learned_conditioning(
+                        batch_size * [""]
+                    )
                     log_conditioning(neutral_conditioning, "neutral conditioning")
                 if prompt.conditioning is not None:
                     positive_conditioning = prompt.conditioning
@@ -220,7 +156,7 @@ def imagine(
                 log_conditioning(positive_conditioning, "positive conditioning")
 
                 shape = [
-                    1,
+                    batch_size,
                     latent_channels,
                     prompt.height // downsampling_factor,
                     prompt.width // downsampling_factor,

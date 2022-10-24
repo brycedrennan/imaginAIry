@@ -16,7 +16,7 @@ weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth
 
 @lru_cache()
 def clip_mask_model():
-    from imaginairy import PKG_ROOT  # noqa
+    from imaginairy.paths import PKG_ROOT  # noqa
 
     model = CLIPDensePredT(version="ViT-B/16", reduce_dim=64, complex_trans_conv=True)
     model.eval()

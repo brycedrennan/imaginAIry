@@ -38,7 +38,7 @@ def test_clip_masking(filename_base_for_outputs):
         )
         img_path = f"{filename_base_for_outputs}_mask{mask_modifier}_g.png"
         assert_image_similar_to_expectation(
-            pred_grayscale, img_path=img_path, threshold=100
+            pred_grayscale, img_path=img_path, threshold=300
         )
 
         img_path = f"{filename_base_for_outputs}_mask{mask_modifier}_bin.png"
@@ -59,7 +59,7 @@ def test_clip_masking(filename_base_for_outputs):
 
     result = next(imagine(prompt))
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=10)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=300)
 
 
 boolean_mask_test_cases = [

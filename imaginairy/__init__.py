@@ -16,5 +16,3 @@ from .schema import (  # noqa
 # https://stackoverflow.com/questions/71738218/module-pil-has-not-attribute-resampling
 if not hasattr(PIL.Image, "Resampling"):  # Pillow<9.0
     PIL.Image.Resampling = PIL.Image
-
-PKG_ROOT = os.path.dirname(__file__)

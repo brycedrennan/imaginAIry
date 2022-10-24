@@ -223,6 +223,11 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+
+**4.1.0**
+ - feature: allow dynamic switching between models/weights `--model SD-1.5` or `--model SD-1.4` or `--model path/my-custom-weights.ckpt`)
+ - feature: log total progress when generating images (image X out of Y)
+
 **4.0.0**
  - feature: stable diffusion 1.5 (slightly improved image quality)
  - feature: dilation and erosion of masks

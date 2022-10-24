@@ -11,6 +11,7 @@ from PIL import Image, ImageOps
 from urllib3.exceptions import LocationParseError
 from urllib3.util import parse_url
 
+from imaginairy.model_manager import DEFAULT_MODEL
 from imaginairy.utils import get_device, get_hardware_description
 
 logger = logging.getLogger(__name__)
@@ -108,6 +109,7 @@ class ImaginePrompt:
         sampler_type="plms",
         conditioning=None,
         tile_mode=False,
+        model=DEFAULT_MODEL,
     ):
         prompt = prompt if prompt is not None else ""
         fix_faces_fidelity = (
@@ -127,6 +129,8 @@ class ImaginePrompt:
 
         if mask_image is not None and mask_prompt is not None:
             raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
+        if model is None:
+            model = DEFAULT_MODEL
 
         self.init_image = init_image
         self.init_image_strength = init_image_strength
@@ -144,6 +148,7 @@ class ImaginePrompt:
         self.mask_mode = mask_mode
         self.mask_modify_original = mask_modify_original
         self.tile_mode = tile_mode
+        self.model = model
 
     @property
     def prompt_text(self):

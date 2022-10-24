@@ -28,6 +28,31 @@ def test_imagine(sampler_type, filename_base_for_outputs):
     )
 
 
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
+def test_model_versions(filename_base_for_outputs):
+    """Test that we can switch between model versions"""
+    prompt_text = "a bowl of tropical fruit"
+    prompts = [
+        ImaginePrompt(
+            prompt_text, width=512, height=512, steps=20, seed=1, model="SD-1.5"
+        ),
+        ImaginePrompt(
+            prompt_text, width=512, height=512, steps=20, seed=1, model="SD-1.4"
+        ),
+    ]
+    threshold = 10000
+
+    for i, result in enumerate(imagine(prompts)):
+        img_path = f"{filename_base_for_outputs}_{i}_{result.prompt.model}.png"
+        result.img.save(img_path)
+
+    for i, result in enumerate(imagine(prompts)):
+        img_path = f"{filename_base_for_outputs}_{i}_{result.prompt.model}.png"
+        assert_image_similar_to_expectation(
+            result.img, img_path=img_path, threshold=threshold
+        )
+
+
 def test_img2img_beach_to_sunset(
     sampler_type, filename_base_for_outputs, filename_base_for_orig_outputs
 ):
@@ -116,7 +141,7 @@ def test_img_to_img_fruit_2_gold(
 
     threshold_lookup = {
         "k_dpm_2_a": 26000,
-        "k_dpm_adaptive": 11000,
+        "k_dpm_adaptive": 13000,
     }
     threshold = threshold_lookup.get(sampler_type, 10000)
 
