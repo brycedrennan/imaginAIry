@@ -224,6 +224,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**5.0.0**
+- feature: 🎉 inpainting support using new inpainting model from RunwayML. It works really well! (Unfortunately it requires a HuggingFace token).
+By default, inpainting model will automatically be used for any image-masking task 
+
 **4.1.0**
  - feature: allow dynamic switching between models/weights `--model SD-1.5` or `--model SD-1.4` or `--model path/my-custom-weights.ckpt`)
  - feature: log total progress when generating images (image X out of Y)
