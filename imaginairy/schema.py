@@ -201,6 +201,7 @@ class ImagineResult:
         modified_original=None,
         mask_binary=None,
         mask_grayscale=None,
+        timings=None,
     ):
         self.prompt = prompt
 
@@ -217,6 +218,8 @@ class ImagineResult:
 
         if mask_grayscale:
             self.images["mask_grayscale"] = mask_grayscale
+
+        self.timings = timings
 
         # for backward compat
         self.img = img
@@ -235,6 +238,11 @@ class ImagineResult:
         return {
             "prompt": self.prompt.as_dict(),
         }
+
+    def timings_str(self):
+        if not self.timings:
+            return ""
+        return " ".join(f"{k}:{v:.2f}s" for k, v in self.timings.items())
 
     def _exif(self):
         exif = Image.Exif()

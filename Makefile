@@ -116,7 +116,7 @@ vendorize_kdiffusion:
 	rm -rf ./imaginairy/vendored/k_diffusion
 	rm -rf ./downloads/k_diffusion
     # version 0.0.9
-	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=f4e99857772fc3a126ba886aadf795a332774878
+	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=60e5042ca0da89c14d1dd59d73883280f8fce991
 	#sed -i '' -e 's/import\sclip/from\simaginairy.vendored\simport\sclip/g' imaginairy/vendored/k_diffusion/evaluation.py
 	mv ./downloads/k_diffusion/LICENSE ./imaginairy/vendored/k_diffusion/
 	rm imaginairy/vendored/k_diffusion/evaluation.py
