@@ -224,6 +224,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- feature: added `DPM++ 2S a` and `DPM++ 2M` samplers.
+- fix: fix bug with `--show-work`
+
 **5.0.0**
 - feature: 🎉 inpainting support using new inpainting model from RunwayML. It works really well! (Unfortunately it requires a HuggingFace token).
 By default, inpainting model will automatically be used for any image-masking task 
@@ -447,6 +450,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
  - https://stablecog.com/ 
 
 ## Further Reading
+ - [Prompt Engineering Handbook](https://openart.ai/promptbook)
  - Differences between samplers
    - https://www.reddit.com/r/StableDiffusion/comments/xbeyw3/can_anyone_offer_a_little_guidance_on_the/
  - https://www.reddit.com/r/bigsleep/comments/xb5cat/wiskkeys_lists_of_texttoimage_systems_and_related/

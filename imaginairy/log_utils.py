@@ -1,6 +1,7 @@
 import logging
 import logging.config
 import re
+import time
 import warnings
 
 import torch
@@ -25,6 +26,9 @@ def log_latent(latents, description):
     if _CURRENT_LOGGING_CONTEXT is None:
         return
 
+    if latents is None:
+        return
+
     _CURRENT_LOGGING_CONTEXT.log_latents(latents, description)
 
 
@@ -40,6 +44,19 @@ def log_tensor(t, description=""):
     _CURRENT_LOGGING_CONTEXT.log_img(t, description)
 
 
+class TimingContext:
+    def __init__(self, logging_context, description):
+        self.logging_context = logging_context
+        self.description = description
+        self.start_time = None
+
+    def __enter__(self):
+        self.start_time = time.time()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.logging_context.timings[self.description] = time.time() - self.start_time
+
+
 class ImageLoggingContext:
     def __init__(self, prompt, model, img_callback=None, img_outdir=None):
         self.prompt = prompt
@@ -47,6 +64,8 @@ class ImageLoggingContext:
         self.step_count = 0
         self.img_callback = img_callback
         self.img_outdir = img_outdir
+        self.start_ts = time.perf_counter()
+        self.timings = {}
 
     def __enter__(self):
         global _CURRENT_LOGGING_CONTEXT  # noqa
@@ -56,6 +75,13 @@ class ImageLoggingContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         global _CURRENT_LOGGING_CONTEXT  # noqa
         _CURRENT_LOGGING_CONTEXT = None
+
+    def timing(self, description):
+        return TimingContext(self, description)
+
+    def get_timings(self):
+        self.timings["total"] = time.perf_counter() - self.start_ts
+        return self.timings
 
     def log_conditioning(self, conditioning, description):
         if not self.img_callback:

@@ -51,6 +51,8 @@ class KDiffusionSampler:
         "dpm_adaptive": sample_dpm_adaptive,
         "dpm_2": k_sampling.sample_dpm_2,
         "dpm_2_ancestral": k_sampling.sample_dpm_2_ancestral,
+        "dpmpp_2m": k_sampling.sample_dpmpp_2m,
+        "dpmpp_2s_ancestral": k_sampling.sample_dpmpp_2s_ancestral,
         "euler": k_sampling.sample_euler,
         "euler_ancestral": k_sampling.sample_euler_ancestral,
         "heun": k_sampling.sample_heun,

@@ -677,3 +677,79 @@ def sample_dpm_adaptive(
     if return_info:
         return x, info
     return x
+
+
+@torch.no_grad()
+def sample_dpmpp_2s_ancestral(
+    model, x, sigmas, extra_args=None, callback=None, disable=None, eta=1.0, s_noise=1.0
+):
+    """Ancestral sampling with DPM-Solver++(2S) second-order steps."""
+    extra_args = {} if extra_args is None else extra_args
+    s_in = x.new_ones([x.shape[0]])
+    sigma_fn = lambda t: t.neg().exp()
+    t_fn = lambda sigma: sigma.log().neg()
+
+    for i in trange(len(sigmas) - 1, disable=disable):
+        denoised = model(x, sigmas[i] * s_in, **extra_args)
+        sigma_down, sigma_up = get_ancestral_step(sigmas[i], sigmas[i + 1], eta=eta)
+        if callback is not None:
+            callback(
+                {
+                    "x": x,
+                    "i": i,
+                    "sigma": sigmas[i],
+                    "sigma_hat": sigmas[i],
+                    "denoised": denoised,
+                }
+            )
+        if sigma_down == 0:
+            # Euler method
+            d = to_d(x, sigmas[i], denoised)
+            dt = sigma_down - sigmas[i]
+            x = x + d * dt
+        else:
+            # DPM-Solver-2++(2S)
+            t, t_next = t_fn(sigmas[i]), t_fn(sigma_down)
+            r = 1 / 2
+            h = t_next - t
+            s = t + r * h
+            x_2 = (sigma_fn(s) / sigma_fn(t)) * x - (-h * r).expm1() * denoised
+            denoised_2 = model(x_2, sigma_fn(s) * s_in, **extra_args)
+            x = (sigma_fn(t_next) / sigma_fn(t)) * x - (-h).expm1() * denoised_2
+        # Noise addition
+        x = x + torch.randn_like(x) * s_noise * sigma_up
+    return x
+
+
+@torch.no_grad()
+def sample_dpmpp_2m(model, x, sigmas, extra_args=None, callback=None, disable=None):
+    """DPM-Solver++(2M)."""
+    extra_args = {} if extra_args is None else extra_args
+    s_in = x.new_ones([x.shape[0]])
+    sigma_fn = lambda t: t.neg().exp()
+    t_fn = lambda sigma: sigma.log().neg()
+    old_denoised = None
+
+    for i in trange(len(sigmas) - 1, disable=disable):
+        denoised = model(x, sigmas[i] * s_in, **extra_args)
+        if callback is not None:
+            callback(
+                {
+                    "x": x,
+                    "i": i,
+                    "sigma": sigmas[i],
+                    "sigma_hat": sigmas[i],
+                    "denoised": denoised,
+                }
+            )
+        t, t_next = t_fn(sigmas[i]), t_fn(sigmas[i + 1])
+        h = t_next - t
+        if old_denoised is None or sigmas[i + 1] == 0:
+            x = (sigma_fn(t_next) / sigma_fn(t)) * x - (-h).expm1() * denoised
+        else:
+            h_last = t - t_fn(sigmas[i - 1])
+            r = h_last / h
+            denoised_d = (1 + 1 / (2 * r)) * denoised - (1 / (2 * r)) * old_denoised
+            x = (sigma_fn(t_next) / sigma_fn(t)) * x - (-h).expm1() * denoised_d
+        old_denoised = denoised
+    return x

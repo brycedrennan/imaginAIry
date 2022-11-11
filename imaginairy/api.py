@@ -136,26 +136,26 @@ def imagine(
                 prompt=prompt,
                 model=model,
                 img_callback=img_callback,
-            ):
+            ) as lc:
                 seed_everything(prompt.seed)
                 model.tile_mode(prompt.tile_mode)
-
-                neutral_conditioning = None
-                if prompt.prompt_strength != 1.0:
-                    neutral_conditioning = model.get_learned_conditioning(
-                        batch_size * [""]
-                    )
-                    log_conditioning(neutral_conditioning, "neutral conditioning")
-                if prompt.conditioning is not None:
-                    positive_conditioning = prompt.conditioning
-                else:
-                    total_weight = sum(wp.weight for wp in prompt.prompts)
-                    positive_conditioning = sum(
-                        model.get_learned_conditioning(wp.text)
-                        * (wp.weight / total_weight)
-                        for wp in prompt.prompts
-                    )
-                log_conditioning(positive_conditioning, "positive conditioning")
+                with lc.timing("conditioning"):
+                    neutral_conditioning = None
+                    if prompt.prompt_strength != 1.0:
+                        neutral_conditioning = model.get_learned_conditioning(
+                            batch_size * [""]
+                        )
+                        log_conditioning(neutral_conditioning, "neutral conditioning")
+                    if prompt.conditioning is not None:
+                        positive_conditioning = prompt.conditioning
+                    else:
+                        total_weight = sum(wp.weight for wp in prompt.prompts)
+                        positive_conditioning = sum(
+                            model.get_learned_conditioning(wp.text)
+                            * (wp.weight / total_weight)
+                            for wp in prompt.prompts
+                        )
+                    log_conditioning(positive_conditioning, "positive conditioning")
 
                 shape = [
                     batch_size,
@@ -298,18 +298,19 @@ def imagine(
                     "c_concat": c_cat,
                     "c_crossattn": [neutral_conditioning],
                 }
-                samples = sampler.sample(
-                    num_steps=prompt.steps,
-                    initial_latent=init_latent_noised,
-                    positive_conditioning=positive_conditioning,
-                    neutral_conditioning=neutral_conditioning,
-                    guidance_scale=prompt.prompt_strength,
-                    t_start=t_enc,
-                    mask=mask,
-                    orig_latent=init_latent,
-                    shape=shape,
-                    batch_size=1,
-                )
+                with lc.timing("sampling"):
+                    samples = sampler.sample(
+                        num_steps=prompt.steps,
+                        initial_latent=init_latent_noised,
+                        positive_conditioning=positive_conditioning,
+                        neutral_conditioning=neutral_conditioning,
+                        guidance_scale=prompt.prompt_strength,
+                        t_start=t_enc,
+                        mask=mask,
+                        orig_latent=init_latent,
+                        shape=shape,
+                        batch_size=1,
+                    )
 
                 x_samples = model.decode_first_stage(samples)
                 x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
@@ -337,10 +338,11 @@ def imagine(
                         caption = generate_caption(img)
                         logger.info(f"Generated caption: {caption}")
 
-                    safety_score = create_safety_score(
-                        img,
-                        safety_mode=IMAGINAIRY_SAFETY_MODE,
-                    )
+                    with lc.timing("safety-filter"):
+                        safety_score = create_safety_score(
+                            img,
+                            safety_mode=IMAGINAIRY_SAFETY_MODE,
+                        )
                     if not safety_score.is_filtered:
                         if prompt.fix_faces:
                             logger.info("Fixing 😊 's in 🖼  using CodeFormer...")
@@ -381,7 +383,7 @@ def imagine(
                             )
                             log_img(rebuilt_orig_img, "reconstituted original")
 
-                    yield ImagineResult(
+                    result = ImagineResult(
                         img=img,
                         prompt=prompt,
                         upscaled_img=upscaled_img,
@@ -390,7 +392,10 @@ def imagine(
                         modified_original=rebuilt_orig_img,
                         mask_binary=mask_image_orig,
                         mask_grayscale=mask_grayscale,
+                        timings=lc.get_timings(),
                     )
+                    logger.info(f"Image Generated. Timings: {result.timings_str()}")
+                    yield result
 
 
 def prompt_normalized(prompt):
