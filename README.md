@@ -224,11 +224,14 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**6.0.0**
+- feature: new default sampler makes image generation mor than twice as fast
 - feature: added `DPM++ 2S a` and `DPM++ 2M` samplers.
 - feature: improve progress image logging
-- fix: fix bug with `--show-work`
+- fix: fix bug with `--show-work`. fixes #84
 - fix: add workaround for pytorch bug affecting MacOS users using the new `DPM++ 2S a` and `DPM++ 2M` samplers.
 - fix: add workaround for pytorch mps bug affecting `k_dpm_fast` sampler. fixes #75
+- fix: larger image sizes now work on MacOS. fixes #8
 
 **5.0.0**
 - feature: 🎉 inpainting support using new inpainting model from RunwayML. It works really well! (Unfortunately it requires a HuggingFace token).
