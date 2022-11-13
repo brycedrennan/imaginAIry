@@ -224,6 +224,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**5.0.1**
+- fix: support larger images on M1. Fixes #8
+- fix: support CPU generation by disabling autocast on CPU. Fixes #81
+
 **5.0.0**
 - feature: 🎉 inpainting support using new inpainting model from RunwayML. It works really well! By default, the 
 inpainting model will automatically be used for any image-masking task 
