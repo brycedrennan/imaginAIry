@@ -37,7 +37,7 @@ def get_sigmas_vp(n, beta_d=19.9, beta_min=0.1, eps_s=1e-3, device="cpu"):
 
 def to_d(x, sigma, denoised):
     """Converts a denoiser output to a Karras ODE derivative."""
-    return (x - denoised) / sigma
+    return ((x - denoised) / sigma.to("cpu")).to(x.device)
 
 
 def get_ancestral_step(sigma_from, sigma_to, eta=1.0):
@@ -394,7 +394,7 @@ class DPMSolver(nn.Module):
         return -sigma.log()
 
     def sigma(self, t):
-        return t.neg().exp()
+        return t.to("cpu").neg().exp().to(self.model.device)
 
     def eps(self, eps_cache, key, x, t, *args, **kwargs):
         if key in eps_cache:

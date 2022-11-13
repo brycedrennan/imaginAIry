@@ -127,7 +127,9 @@ vendorize_kdiffusion:
 	sed -i '' -e 's#return (x - denoised) / utils.append_dims(sigma, x.ndim)#return (x - denoised) / sigma#g' imaginairy/vendored/k_diffusion/sampling.py
 	sed -i '' -e 's#x = x + torch.randn_like(x) \* sigma_up#x = x + torch.randn_like(x, device="cpu").to(x.device) \* sigma_up#g' imaginairy/vendored/k_diffusion/sampling.py
  	# https://github.com/AUTOMATIC1111/stable-diffusion-webui/issues/4558#issuecomment-1310387114
-	sed -i '' -e 's#t_fn = lambda sigma: sigma.log().neg()#t_fn = lambda sigma: sigma.to('cpu').log().neg().to(x.device)#g' imaginairy/vendored/k_diffusion/sampling.py
+	sed -i '' -e 's#t_fn = lambda sigma: sigma.log().neg()#t_fn = lambda sigma: sigma.to("cpu").log().neg().to(x.device)#g' imaginairy/vendored/k_diffusion/sampling.py
+	sed -i '' -e 's#return (x - denoised) / sigma#return (x - denoised) / sigma#g' imaginairy/vendored/k_diffusion/sampling.py
+	sed -i '' -e 's#return t.neg().exp()#return t.to("cpu").neg().exp().to(self.model.device)#g' imaginairy/vendored/k_diffusion/sampling.py
 	make af
 
 vendorize_noodle_soup:
