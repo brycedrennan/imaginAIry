@@ -26,7 +26,7 @@ MODEL_SHORTCUTS = {
     ),
     "SD-1.5-inpaint": (
         "configs/stable-diffusion-v1-inpaint.yaml",
-        "https://huggingface.co/runwayml/stable-diffusion-inpainting/resolve/9f492cedac6a1a2993f0b6ba44bb71b96a8aa9e6/sd-v1-5-inpainting.ckpt",
+        "https://huggingface.co/julienacquaviva/inpainting/resolve/2155ff7fe38b55f4c0d99c2f1ab9b561f8311ca7/sd-v1-5-inpainting.ckpt",
     ),
 }
 DEFAULT_MODEL = "SD-1.5"
