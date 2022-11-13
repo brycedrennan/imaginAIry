@@ -68,7 +68,10 @@ def platform_appropriate_autocast(precision="autocast"):
     Allow calculations to run in mixed precision, which can be faster
     """
     precision_scope = nullcontext
-    if precision == "autocast" and get_device() in ("cuda", "cpu"):
+    # autocast not supported on CPU
+    # https://github.com/pytorch/pytorch/issues/55374
+    # https://github.com/invoke-ai/InvokeAI/pull/518
+    if precision == "autocast" and get_device() in ("cuda",):
         precision_scope = autocast
     with precision_scope(get_device()):
         yield
