@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 )
 @click.option(
     "--steps",
-    default=40,
+    default=15,
     type=int,
     show_default=True,
     help="How many diffusion steps to run. More steps, more detail, but with diminishing returns",
@@ -73,7 +73,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--sampler-type",
     "--sampler",
-    default="plms",
+    default="k_dpmpp_2m",
     type=click.Choice(SAMPLER_TYPE_OPTIONS),
     help="What sampling strategy to use",
 )
