@@ -1,7 +1,7 @@
 # pylama:ignore=W0613
 import torch
 
-from imaginairy.log_utils import log_latent
+from imaginairy.log_utils import increment_step, log_latent
 from imaginairy.samplers.base import CFGDenoiser
 from imaginairy.utils import get_device
 from imaginairy.vendored.k_diffusion import sampling as k_sampling
@@ -111,7 +111,8 @@ class KDiffusionSampler:
 
         def callback(data):
             log_latent(data["x"], "noisy_latent")
-            log_latent(data["denoised"], "noise_pred c")
+            log_latent(data["denoised"], "predicted_latent")
+            increment_step()
 
         samples = self.sampler_func(
             model=model_wrap_cfg,

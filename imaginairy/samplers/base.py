@@ -145,6 +145,8 @@ def get_noise_prediction(
     else:
         conditioning_in = torch.cat([neutral_conditioning, positive_conditioning])
 
+    # the k-diffusion samplers actually return the denoised predicted latents but things seem
+    # to work anyway
     noise_pred_neutral, noise_pred_positive = denoise_func(
         noisy_latent_in, time_encoding_in, conditioning_in
     ).chunk(2)
@@ -153,10 +155,6 @@ def get_noise_prediction(
         noise_pred_positive - noise_pred_neutral
     )
     noise_pred = noise_pred_neutral + amplified_noise_pred
-
-    log_latent(noise_pred_neutral, "noise_pred_neutral")
-    log_latent(noise_pred_positive, "noise_pred_positive")
-    log_latent(noise_pred, "noise_pred")
 
     return noise_pred
 

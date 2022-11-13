@@ -44,6 +44,12 @@ def log_tensor(t, description=""):
     _CURRENT_LOGGING_CONTEXT.log_img(t, description)
 
 
+def increment_step():
+    if _CURRENT_LOGGING_CONTEXT is None:
+        return
+    _CURRENT_LOGGING_CONTEXT.step_count += 1
+
+
 class TimingContext:
     def __init__(self, logging_context, description):
         self.logging_context = logging_context
@@ -62,6 +68,7 @@ class ImageLoggingContext:
         self.prompt = prompt
         self.model = model
         self.step_count = 0
+        self.image_count = 0
         self.img_callback = img_callback
         self.img_outdir = img_outdir
         self.start_ts = time.perf_counter()
@@ -88,7 +95,9 @@ class ImageLoggingContext:
             return
         img = conditioning_to_img(conditioning)
 
-        self.img_callback(img, description, self.step_count, self.prompt)
+        self.img_callback(
+            img, description, self.image_count, self.step_count, self.prompt
+        )
 
     def log_latents(self, latents, description):
         from imaginairy.img_utils import model_latents_to_pillow_imgs  # noqa
@@ -98,23 +107,28 @@ class ImageLoggingContext:
         if latents.shape[1] != 4:
             # logger.info(f"Didn't save tensor of shape {samples.shape} for {description}")
             return
-        self.step_count += 1
+
         try:
             shape_str = ",".join(tuple(latents.shape))
         except TypeError:
             shape_str = str(latents.shape)
         description = f"{description}-{shape_str}"
         for img in model_latents_to_pillow_imgs(latents):
-            self.img_callback(img, description, self.step_count, self.prompt)
+            self.image_count += 1
+            self.img_callback(
+                img, description, self.image_count, self.step_count, self.prompt
+            )
 
     def log_img(self, img, description):
         if not self.img_callback:
             return
-        self.step_count += 1
+        self.image_count += 1
         if isinstance(img, torch.Tensor):
             img = ToPILImage()(img.squeeze().cpu().detach())
         img = img.copy()
-        self.img_callback(img, description, self.step_count, self.prompt)
+        self.img_callback(
+            img, description, self.image_count, self.step_count, self.prompt
+        )
 
     def log_tensor(self, t, description=""):
         if not self.img_callback:

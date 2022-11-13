@@ -226,6 +226,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 - feature: added `DPM++ 2S a` and `DPM++ 2M` samplers.
 - fix: fix bug with `--show-work`
+- fix: add workaround for pytorch bug affecting MacOS users using the new `DPM++ 2S a` and `DPM++ 2M` samplers.
+- feature: improve progress image logging
 
 **5.0.0**
 - feature: 🎉 inpainting support using new inpainting model from RunwayML. It works really well! (Unfortunately it requires a HuggingFace token).

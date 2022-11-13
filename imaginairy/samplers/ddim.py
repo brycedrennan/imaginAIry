@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from imaginairy.log_utils import log_latent
+from imaginairy.log_utils import increment_step, log_latent
 from imaginairy.modules.diffusion.util import extract_into_tensor, noise_like
 from imaginairy.samplers.base import NoiseSchedule, get_noise_prediction, mask_blend
 from imaginairy.utils import get_device
@@ -94,6 +94,7 @@ class DDIMSampler:
 
             log_latent(noisy_latent, "noisy_latent")
             log_latent(predicted_latent, "predicted_latent")
+            increment_step()
 
         return noisy_latent
 
