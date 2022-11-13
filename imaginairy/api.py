@@ -61,10 +61,10 @@ def imagine_image_files(
     if output_file_extension not in {"jpg", "png"}:
         raise ValueError("Must output a png or jpg")
 
-    def _record_step(img, description, step_count, prompt):
+    def _record_step(img, description, image_count, step_count, prompt):
         steps_path = os.path.join(outdir, "steps", f"{base_count:08}_S{prompt.seed}")
         os.makedirs(steps_path, exist_ok=True)
-        filename = f"{base_count:08}_S{prompt.seed}_step{step_count:04}_{prompt_normalized(description)[:40]}.jpg"
+        filename = f"{base_count:08}_S{prompt.seed}_{image_count:04}_step{step_count:03}_{prompt_normalized(description)[:40]}.jpg"
 
         destination = os.path.join(steps_path, filename)
         draw = ImageDraw.Draw(img)

@@ -16,6 +16,7 @@ from torch import nn
 from torchvision.utils import make_grid
 from tqdm import tqdm
 
+from imaginairy.log_utils import log_latent
 from imaginairy.modules.diffusion.util import (
     extract_into_tensor,
     make_beta_schedule,
@@ -761,9 +762,9 @@ class LatentDiffusion(DDPM):
 
         else:
             x_recon = self.model(x_noisy, t, **cond)
-
         if isinstance(x_recon, tuple) and not return_ids:
             return x_recon[0]
+        log_latent(x_recon, "predicted noise")
 
         return x_recon
 

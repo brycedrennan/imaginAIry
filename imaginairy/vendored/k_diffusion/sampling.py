@@ -687,7 +687,7 @@ def sample_dpmpp_2s_ancestral(
     extra_args = {} if extra_args is None else extra_args
     s_in = x.new_ones([x.shape[0]])
     sigma_fn = lambda t: t.neg().exp()
-    t_fn = lambda sigma: sigma.log().neg()
+    t_fn = lambda sigma: sigma.to("cpu").log().neg().to(x.device)
 
     for i in trange(len(sigmas) - 1, disable=disable):
         denoised = model(x, sigmas[i] * s_in, **extra_args)
@@ -727,7 +727,8 @@ def sample_dpmpp_2m(model, x, sigmas, extra_args=None, callback=None, disable=No
     extra_args = {} if extra_args is None else extra_args
     s_in = x.new_ones([x.shape[0]])
     sigma_fn = lambda t: t.neg().exp()
-    t_fn = lambda sigma: sigma.log().neg()
+    t_fn = lambda sigma: sigma.to("cpu").log().neg().to(x.device)
+
     old_denoised = None
 
     for i in trange(len(sigmas) - 1, disable=disable):
