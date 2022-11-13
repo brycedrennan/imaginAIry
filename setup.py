@@ -45,6 +45,7 @@ setup(
         "diffusers",
         "imageio==2.9.0",
         "Pillow>=8.0.0",
+        "psutil",
         "pytorch-lightning==1.4.2",
         "omegaconf==2.1.1",
         "einops==0.3.0",
