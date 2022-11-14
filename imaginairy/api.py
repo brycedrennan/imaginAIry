@@ -74,7 +74,7 @@ def imagine_image_files(
     for result in imagine(
         prompts,
         precision=precision,
-        img_callback=_record_step if record_step_images else None,
+        debug_img_callback=_record_step if record_step_images else None,
         add_caption=print_caption,
     ):
         prompt = result.prompt
@@ -101,7 +101,10 @@ def imagine_image_files(
 def imagine(
     prompts,
     precision="autocast",
-    img_callback=None,
+    debug_img_callback=None,
+    progress_img_callback=None,
+    progress_img_interval_steps=3,
+    progress_img_interval_min_s=0.1,
     half_mode=None,
     add_caption=False,
 ):
@@ -135,7 +138,10 @@ def imagine(
             with ImageLoggingContext(
                 prompt=prompt,
                 model=model,
-                img_callback=img_callback,
+                debug_img_callback=debug_img_callback,
+                progress_img_callback=progress_img_callback,
+                progress_img_interval_steps=progress_img_interval_steps,
+                progress_img_interval_min_s=progress_img_interval_min_s,
             ) as lc:
                 seed_everything(prompt.seed)
                 model.tile_mode(prompt.tile_mode)

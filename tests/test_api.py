@@ -175,7 +175,7 @@ def test_img_to_img_fruit_2_gold_repeat():
         ImaginePrompt(**kwargs),
         ImaginePrompt(**kwargs),
     ]
-    for result in imagine(prompts, img_callback=None):
+    for result in imagine(prompts, debug_img_callback=None):
         result.img.save(
             f"{TESTS_FOLDER}/test_output/img2img_fruit_2_gold_plms_{get_device()}_run-{run_count:02}.jpg"
         )
