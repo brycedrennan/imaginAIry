@@ -352,10 +352,11 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ add tests
    - ✅ set up ci (test/lint/format)
    - ✅ unified pipeline (txt2img & img2img combined)
-   - setup parallel testing
+   - ✅ setup parallel testing
    - add docs
    - remove yaml config
    - delete more unused code
+   - faster latent logging https://discuss.huggingface.co/t/decoding-latents-to-rgb-without-upscaling/23204/9
  - Interface improvements
    - ✅ init-image at command line
    - ✅ prompt expansion
