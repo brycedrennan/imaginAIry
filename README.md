@@ -224,6 +224,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**5.1.0**
+- feature: add progress image callback
+
 **5.0.1**
 - fix: support larger images on M1. Fixes #8
 - fix: support CPU generation by disabling autocast on CPU. Fixes #81
