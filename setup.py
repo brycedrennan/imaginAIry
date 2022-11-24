@@ -48,6 +48,7 @@ setup(
         "psutil",
         "pytorch-lightning==1.4.2",
         "omegaconf==2.1.1",
+        "open-clip-torch",
         "einops==0.3.0",
         "timm>=0.4.12",  # for vendored blip
         "torchdiffeq",

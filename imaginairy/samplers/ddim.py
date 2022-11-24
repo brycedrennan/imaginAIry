@@ -123,6 +123,13 @@ class DDIMSampler:
             signal_amplification=guidance_scale,
         )
 
+        if self.model.parameterization == "v":
+            e_t = self.model.predict_eps_from_z_and_v(
+                noisy_latent, time_encoding, noise_pred
+            )
+        else:
+            e_t = noise_pred
+
         batch_size = noisy_latent.shape[0]
 
         # select parameters corresponding to the currently considered timestep
@@ -146,11 +153,15 @@ class DDIMSampler:
             schedule.ddim_sqrt_one_minus_alphas[index],
             device=noisy_latent.device,
         )
+
         noisy_latent, predicted_latent = self._p_sample_ddim_formula(
+            model=self.model,
             noisy_latent=noisy_latent,
             noise_pred=noise_pred,
+            e_t=e_t,
             sqrt_one_minus_at=sqrt_one_minus_at,
             a_t=a_t,
+            time_encoding=time_encoding,
             sigma_t=sigma_t,
             a_prev=a_prev,
             noise_dropout=noise_dropout,
@@ -161,19 +172,27 @@ class DDIMSampler:
 
     @staticmethod
     def _p_sample_ddim_formula(
+        model,
         noisy_latent,
         noise_pred,
+        e_t,
         sqrt_one_minus_at,
         a_t,
+        time_encoding,
         sigma_t,
         a_prev,
         noise_dropout,
         repeat_noise,
         temperature,
     ):
-        predicted_latent = (noisy_latent - sqrt_one_minus_at * noise_pred) / a_t.sqrt()
+        if model.parameterization != "v":
+            predicted_latent = (noisy_latent - sqrt_one_minus_at * e_t) / a_t.sqrt()
+        else:
+            predicted_latent = model.predict_start_from_z_and_v(
+                noisy_latent, time_encoding, noise_pred
+            )
         # direction pointing to x_t
-        dir_xt = (1.0 - a_prev - sigma_t**2).sqrt() * noise_pred
+        dir_xt = (1.0 - a_prev - sigma_t**2).sqrt() * e_t
         noise = (
             sigma_t
             * noise_like(noisy_latent.shape, noisy_latent.device, repeat_noise)

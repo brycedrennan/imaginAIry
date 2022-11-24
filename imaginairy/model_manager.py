@@ -28,8 +28,20 @@ MODEL_SHORTCUTS = {
         "configs/stable-diffusion-v1-inpaint.yaml",
         "https://huggingface.co/julienacquaviva/inpainting/resolve/2155ff7fe38b55f4c0d99c2f1ab9b561f8311ca7/sd-v1-5-inpainting.ckpt",
     ),
+    "SD-2.0": (
+        "configs/stable-diffusion-v2-inference.yaml",
+        "https://huggingface.co/stabilityai/stable-diffusion-2-base/resolve/main/512-base-ema.ckpt",
+    ),
+    "SD-2.0-inpaint": (
+        "configs/stable-diffusion-v2-inpainting-inference.yaml",
+        "https://huggingface.co/stabilityai/stable-diffusion-2-inpainting/resolve/main/512-inpainting-ema.ckpt",
+    ),
+    "SD-2.0-v": (
+        "configs/stable-diffusion-v2-inference-v.yaml",
+        "https://huggingface.co/stabilityai/stable-diffusion-2/resolve/main/768-v-ema.ckpt",
+    ),
 }
-DEFAULT_MODEL = "SD-1.5"
+DEFAULT_MODEL = "SD-2.0"
 
 LOADED_MODELS = {}
 MOST_RECENTLY_LOADED_MODEL = None

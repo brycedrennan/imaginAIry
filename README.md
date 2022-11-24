@@ -224,6 +224,13 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**6.0.0a**
+- feature: 🎉🎉🎉 Stable Diffusion 2.0
+  - Tested on MacOS and Linux
+  - All samplers working for new 512x512 model
+  - New inpainting model working
+  - 768x768 model working for DDIM sampler only
+
 **5.1.0**
 - feature: add progress image callback
 
