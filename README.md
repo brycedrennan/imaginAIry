@@ -4,6 +4,10 @@ AI imagined images. Pythonic generation of stable diffusion images.
 
 "just works" on Linux and macOS(M1) (and maybe windows?).
 
+**🎉 Try Stable Diffusion v2 with alpha version of imaginairy:**
+
+`pip install imaginairy==6.0.0a0 --upgrade`
+
 ## Examples
 ```bash
 # on macOS, make sure rust is installed first
