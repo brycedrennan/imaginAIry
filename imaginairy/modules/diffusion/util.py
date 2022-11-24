@@ -269,6 +269,13 @@ def conv_nd(dims, *args, **kwargs):
     raise ValueError(f"unsupported dimensions: {dims}")
 
 
+def linear(*args, **kwargs):
+    """
+    Create a linear module.
+    """
+    return nn.Linear(*args, **kwargs)
+
+
 def avg_pool_nd(dims, *args, **kwargs):
     """Create a 1D, 2D, or 3D average pooling module."""
     if dims == 1:
