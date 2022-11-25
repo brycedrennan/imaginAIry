@@ -1,3 +1,4 @@
+# pylama:ignore=W0613
 import logging
 from contextlib import contextmanager
 
@@ -19,7 +20,7 @@ class AutoencoderKL(pl.LightningModule):
         lossconfig,
         embed_dim,
         ckpt_path=None,
-        ignore_keys=[],
+        ignore_keys=None,
         image_key="image",
         colorize_nlabels=None,
         monitor=None,
@@ -37,7 +38,7 @@ class AutoencoderKL(pl.LightningModule):
         self.post_quant_conv = torch.nn.Conv2d(embed_dim, ddconfig["z_channels"], 1)
         self.embed_dim = embed_dim
         if colorize_nlabels is not None:
-            assert type(colorize_nlabels) == int
+            assert isinstance(colorize_nlabels, int)
             self.register_buffer("colorize", torch.randn(3, colorize_nlabels, 1, 1))
         if monitor is not None:
             self.monitor = monitor
@@ -52,13 +53,14 @@ class AutoencoderKL(pl.LightningModule):
         if ckpt_path is not None:
             self.init_from_ckpt(ckpt_path, ignore_keys=ignore_keys)
 
-    def init_from_ckpt(self, path, ignore_keys=list()):
+    def init_from_ckpt(self, path, ignore_keys=None):
         sd = torch.load(path, map_location="cpu")["state_dict"]
         keys = list(sd.keys())
+        ignore_keys = [] if ignore_keys is None else ignore_keys
         for k in keys:
             for ik in ignore_keys:
                 if k.startswith(ik):
-                    print("Deleting key {} from state_dict.".format(k))
+                    print(f"Deleting key {k} from state_dict.")
                     del sd[k]
         self.load_state_dict(sd, strict=False)
         print(f"Restored from {path}")
@@ -93,7 +95,7 @@ class AutoencoderKL(pl.LightningModule):
         dec = self.decoder(z)
         return dec
 
-    def forward(self, input, sample_posterior=True):
+    def forward(self, input, sample_posterior=True):  # noqa
         posterior = self.encode(input)
         if sample_posterior:
             z = posterior.sample()
@@ -161,6 +163,7 @@ class AutoencoderKL(pl.LightningModule):
                 log_dict_disc, prog_bar=False, logger=True, on_step=True, on_epoch=False
             )
             return discloss
+        return None
 
     def validation_step(self, batch, batch_idx):
         log_dict = self._validation_step(batch, batch_idx)
@@ -218,7 +221,7 @@ class AutoencoderKL(pl.LightningModule):
 
     @torch.no_grad()
     def log_images(self, batch, only_inputs=False, log_ema=False, **kwargs):
-        log = dict()
+        log = {}
         x = self.get_input(batch, self.image_key)
         x = x.to(self.device)
         if not only_inputs:

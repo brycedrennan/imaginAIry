@@ -1,6 +1,6 @@
 import open_clip
 import torch
-import torch.nn as nn
+from torch import nn
 from torch.utils.checkpoint import checkpoint
 from transformers import CLIPTextModel, CLIPTokenizer, T5EncoderModel, T5Tokenizer
 
@@ -10,16 +10,8 @@ from imaginairy.utils import get_device
 
 
 class AbstractEncoder(nn.Module):
-    def __init__(self):
-        super().__init__()
-
     def encode(self, *args, **kwargs):
         raise NotImplementedError
-
-
-class IdentityEncoder(AbstractEncoder):
-    def encode(self, x):
-        return x
 
 
 class ClassEmbedder(nn.Module):
@@ -51,9 +43,13 @@ class ClassEmbedder(nn.Module):
         return uc
 
 
-def disabled_train(self, mode=True):
-    """Overwrite model.train with this function to make sure train/eval mode
-    does not change anymore."""
+def disabled_train(self, mode=True):  # noqa
+    """
+    For disabling train/eval mode.
+
+    Overwrite `model.train` with this function to make sure train/eval mode
+    does not change anymore.
+    """
     return self
 
 

@@ -52,7 +52,7 @@ class DDPM(pl.LightningModule):
         beta_schedule="linear",
         loss_type="l2",
         ckpt_path=None,
-        ignore_keys=[],
+        ignore_keys=tuple(),
         load_only_unet=False,
         monitor="val/loss",
         use_ema=True,
@@ -123,7 +123,7 @@ class DDPM(pl.LightningModule):
             if reset_ema:
                 assert self.use_ema
                 print(
-                    f"Resetting ema to pure model weights. This is useful when restoring from an ema-only checkpoint."
+                    "Resetting ema to pure model weights. This is useful when restoring from an ema-only checkpoint."
                 )
                 self.model_ema = LitEma(self.model)
         if reset_num_ema_updates:
@@ -149,7 +149,7 @@ class DDPM(pl.LightningModule):
         if self.learn_logvar:
             self.logvar = nn.Parameter(self.logvar, requires_grad=True)
 
-        self.ucg_training = ucg_training or dict()
+        self.ucg_training = ucg_training or {}
         if self.ucg_training:
             self.ucg_prng = np.random.RandomState()
 
@@ -272,7 +272,7 @@ class DDPM(pl.LightningModule):
                     print(f"{context}: Restored training weights")
 
     @torch.no_grad()
-    def init_from_ckpt(self, path, ignore_keys=list(), only_model=False):
+    def init_from_ckpt(self, path, ignore_keys=tuple(), only_model=False):
         sd = torch.load(path, map_location="cpu")
         if "state_dict" in list(sd.keys()):
             sd = sd["state_dict"]
@@ -280,7 +280,7 @@ class DDPM(pl.LightningModule):
         for k in keys:
             for ik in ignore_keys:
                 if k.startswith(ik):
-                    print("Deleting key {} from state_dict.".format(k))
+                    print(f"Deleting key {k} from state_dict.")
                     del sd[k]
         if self.make_it_fit:
             n_params = len(
@@ -296,7 +296,7 @@ class DDPM(pl.LightningModule):
                 desc="Fitting old weights to new weights",
                 total=n_params,
             ):
-                if not name in sd:
+                if name not in sd:
                     continue
                 old_shape = sd[name].shape
                 new_shape = param.shape
@@ -592,7 +592,7 @@ class DDPM(pl.LightningModule):
 
     @torch.no_grad()
     def log_images(self, batch, N=8, n_row=2, sample=True, return_keys=None, **kwargs):
-        log = dict()
+        log = {}
         x = self.get_input(batch, self.first_stage_key)
         N = min(x.shape[0], N)
         n_row = min(x.shape[0], n_row)
@@ -600,7 +600,7 @@ class DDPM(pl.LightningModule):
         log["inputs"] = x
 
         # get diffusion row
-        diffusion_row = list()
+        diffusion_row = []
         x_start = x[:n_row]
 
         for t in range(self.num_timesteps):
@@ -626,8 +626,7 @@ class DDPM(pl.LightningModule):
         if return_keys:
             if np.intersect1d(list(log.keys()), return_keys).shape[0] == 0:
                 return log
-            else:
-                return {key: log[key] for key in return_keys}
+            return {key: log[key] for key in return_keys}
         return log
 
     def configure_optimizers(self):
@@ -1239,7 +1238,7 @@ class LatentDiffusion(DDPM):
         return model_mean, posterior_variance, posterior_log_variance
 
     @torch.no_grad()
-    def p_sample(
+    def p_sample(  # noqa
         self,
         x,
         c,

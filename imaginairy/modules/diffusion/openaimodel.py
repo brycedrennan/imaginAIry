@@ -4,6 +4,7 @@ from abc import abstractmethod
 import numpy as np
 import torch as th
 import torch.nn.functional as F
+from omegaconf.listconfig import ListConfig
 from torch import nn
 
 from imaginairy.modules.attention import SpatialTransformer
@@ -493,9 +494,8 @@ class UNetModel(nn.Module):
             assert (
                 use_spatial_transformer
             ), "Fool!! You forgot to use the spatial transformer for your cross-attention conditioning..."
-            from omegaconf.listconfig import ListConfig
 
-            if type(context_dim) == ListConfig:
+            if isinstance(context_dim, ListConfig):
                 context_dim = list(context_dim)
 
         if num_heads_upsample == -1:
@@ -842,5 +842,4 @@ class UNetModel(nn.Module):
         h = h.type(x.dtype)
         if self.predict_codebook_ids:
             return self.id_predictor(h)
-        else:
-            return self.out(h)
+        return self.out(h)

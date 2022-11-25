@@ -6,15 +6,15 @@ import torch.nn.functional as F
 from einops import rearrange
 from torch import einsum, nn
 
-from imaginairy.modules.diffusion.util import checkpoint
+from imaginairy.modules.diffusion.util import checkpoint as checkpoint_eval
 from imaginairy.utils import get_device
 
 try:
-    import xformers
-    import xformers.ops
+    import xformers  # noqa
+    import xformers.ops  # noqa
 
     XFORMERS_IS_AVAILBLE = True
-except:
+except ImportError:
     XFORMERS_IS_AVAILBLE = False
 
 
@@ -350,7 +350,7 @@ class BasicTransformerBlock(nn.Module):
         self.checkpoint = checkpoint
 
     def forward(self, x, context=None):
-        return checkpoint(
+        return checkpoint_eval(
             self._forward, (x, context), self.parameters(), self.checkpoint
         )
 
@@ -428,7 +428,7 @@ class SpatialTransformer(nn.Module):
         # note: if no context is given, cross-attention defaults to self-attention
         if not isinstance(context, list):
             context = [context]
-        b, c, h, w = x.shape
+        b, c, h, w = x.shape  # noqa
         x_in = x
         x = self.norm(x)
         if not self.use_linear:
