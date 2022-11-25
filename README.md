@@ -231,6 +231,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- feature: xformers support
+
 **6.1.0**
 - feature: use different default steps and image sizes depending on sampler and model selceted
 - fix: #110 use proper version in image metadata

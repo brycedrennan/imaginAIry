@@ -171,7 +171,8 @@ class CrossAttention(nn.Module):
         #     mask = _global_mask_hack.to(torch.bool)
 
         if get_device() == "cuda" or "mps" in get_device():
-            return self.forward_splitmem(x, context=context, mask=mask)
+            if not XFORMERS_IS_AVAILBLE:
+                return self.forward_splitmem(x, context=context, mask=mask)
 
         h = self.heads
 

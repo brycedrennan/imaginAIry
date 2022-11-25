@@ -1,6 +1,6 @@
 model:
   base_learning_rate: 1.0e-04
-  target: ldm.models.diffusion.ddpm.LatentUpscaleDiffusion
+  target: imaginairy.modules.diffusion.ddpm.LatentUpscaleDiffusion
   params:
     parameterization: "v"
     low_scale_key: "lr"
