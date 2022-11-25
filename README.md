@@ -1,4 +1,9 @@
 # ImaginAIry 🤖🧠
+[![Downloads](https://pepy.tech/badge/imaginairy)](https://pepy.tech/project/imaginairy)
+[![image](https://img.shields.io/pypi/v/imaginairy.svg)](https://pypi.org/project/imaginairy/)
+[![image](https://img.shields.io/badge/license-MIT-green)](https://github.com/brycedrennan/imaginAIry/blob/master/LICENSE/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![Python Checks](https://github.com/brycedrennan/imaginAIry/actions/workflows/ci.yaml/badge.svg)](https://github.com/brycedrennan/imaginAIry/actions/workflows/ci.yaml)
 
 AI imagined images. Pythonic generation of stable diffusion images.
 
