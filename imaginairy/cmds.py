@@ -24,62 +24,79 @@ logger = logging.getLogger(__name__)
 )
 @click.option(
     "--init-image",
-    help="Starting image. filepath or url",
+    metavar="PATH|URL",
+    help="Starting image.",
 )
 @click.option(
     "--init-image-strength",
     default=0.6,
     show_default=True,
-    help="Starting image.",
+    help="Starting image strength. Between 0 and 1.",
 )
-@click.option("--outdir", default="./outputs", help="where to write results to")
+@click.option(
+    "--outdir",
+    default="./outputs",
+    show_default=True,
+    type=click.Path(),
+    help="Where to write results to.",
+)
 @click.option(
     "-r",
     "--repeats",
     default=1,
+    show_default=True,
     type=int,
-    help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated",
+    help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated.",
 )
 @click.option(
     "-h",
     "--height",
     default=512,
+    show_default=True,
     type=int,
-    help="image height. should be multiple of 64",
+    help="Image height. Should be multiple of 64.",
 )
 @click.option(
-    "-w", "--width", default=512, type=int, help="image width. should be multiple of 64"
+    "-w",
+    "--width",
+    default=512,
+    show_default=True,
+    type=int,
+    help="Image width. Should be multiple of 64.",
 )
 @click.option(
     "--steps",
     default=15,
     type=int,
     show_default=True,
-    help="How many diffusion steps to run. More steps, more detail, but with diminishing returns",
+    help="How many diffusion steps to run. More steps, more detail, but with diminishing returns.",
 )
 @click.option(
     "--seed",
     default=None,
     type=int,
-    help="What seed to use for randomness. Allows reproducible image renders",
+    help="What seed to use for randomness. Allows reproducible image renders.",
 )
 @click.option("--upscale", is_flag=True)
 @click.option("--fix-faces", is_flag=True)
 @click.option(
     "--fix-faces-fidelity",
     default=None,
-    help="How faithful to the original should face enhancement be. 1 = best fidelity, 0 = best looking face",
+    type=float,
+    help="How faithful to the original should face enhancement be. 1 = best fidelity, 0 = best looking face.",
 )
 @click.option(
     "--sampler-type",
     "--sampler",
     default="k_dpmpp_2m",
+    show_default=True,
     type=click.Choice(SAMPLER_TYPE_OPTIONS),
-    help="What sampling strategy to use",
+    help="What sampling strategy to use.",
 )
 @click.option(
     "--log-level",
     default="INFO",
+    show_default=True,
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
     help="What level of logs to show.",
 )
@@ -87,7 +104,7 @@ logger = logging.getLogger(__name__)
     "--quiet",
     "-q",
     is_flag=True,
-    help="Suppress logs. Alias of `--log-level ERROR`",
+    help="Suppress logs. Alias of `--log-level ERROR`.",
 )
 @click.option(
     "--show-work",
@@ -102,6 +119,7 @@ logger = logging.getLogger(__name__)
 )
 @click.option(
     "--mask-image",
+    metavar="PATH|URL",
     help="A mask to use for inpainting. White gets painted, Black is left alone.",
 )
 @click.option(
@@ -118,6 +136,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--mask-mode",
     default="replace",
+    show_default=True,
     type=click.Choice(["keep", "replace"]),
     help="Should we replace the masked area or keep it?",
 )
@@ -125,29 +144,30 @@ logger = logging.getLogger(__name__)
     "--mask-modify-original",
     default=True,
     is_flag=True,
-    help="After the inpainting is done, apply the changes to a copy of the original image",
+    help="After the inpainting is done, apply the changes to a copy of the original image.",
 )
 @click.option(
     "--caption",
     default=False,
     is_flag=True,
-    help="Generate a text description of the generated image",
+    help="Generate a text description of the generated image.",
 )
 @click.option(
     "--precision",
-    help="evaluate at this precision",
+    help="Evaluate at this precision.",
     type=click.Choice(["full", "autocast"]),
     default="autocast",
+    show_default=True,
 )
 @click.option(
     "--model-weights-path",
     "--model",
-    help="Model to use. Should be one of SD-1.4, SD-1.5, or a path to custom weights. Defaults to SD-1.5",
+    help="Model to use. Should be one of SD-1.4, SD-1.5, or a path to custom weights. Defaults to SD-1.5.",
     default=None,
 )
 @click.option(
     "--prompt-library-path",
-    help="path to folder containing phaselists in txt files. use txt filename in prompt: {_filename_}",
+    help="Path to folder containing phrase lists in txt files. Use txt filename in prompt: {_filename_}.",
     type=click.Path(exists=True),
     default=None,
     multiple=True,
@@ -200,8 +220,7 @@ def imagine_cmd(
 
     if mask_image and mask_image.startswith("http"):
         mask_image = LazyLoadingImage(url=mask_image)
-    if fix_faces_fidelity is not None:
-        fix_faces_fidelity = float(fix_faces_fidelity)
+
     prompts = []
     prompt_expanding_iterators = {}
     for _ in range(repeats):
