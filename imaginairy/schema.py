@@ -11,7 +11,9 @@ from PIL import Image, ImageOps
 from urllib3.exceptions import LocationParseError
 from urllib3.util import parse_url
 
-from imaginairy.model_manager import DEFAULT_MODEL
+from imaginairy import config
+from imaginairy.model_manager import get_model_default_image_size
+from imaginairy.samplers import SAMPLER_LOOKUP
 from imaginairy.utils import get_device, get_hardware_description
 
 logger = logging.getLogger(__name__)
@@ -100,16 +102,16 @@ class ImaginePrompt:
         mask_mode=MaskMode.REPLACE,
         mask_modify_original=True,
         seed=None,
-        steps=50,
-        height=512,
-        width=512,
+        steps=None,
+        height=None,
+        width=None,
         upscale=False,
         fix_faces=False,
         fix_faces_fidelity=DEFAULT_FACE_FIDELITY,
-        sampler_type="plms",
+        sampler_type=config.DEFAULT_SAMPLER,
         conditioning=None,
         tile_mode=False,
-        model=DEFAULT_MODEL,
+        model=config.DEFAULT_MODEL,
     ):
         prompt = prompt if prompt is not None else ""
         fix_faces_fidelity = (
@@ -130,7 +132,7 @@ class ImaginePrompt:
         if mask_image is not None and mask_prompt is not None:
             raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
         if model is None:
-            model = DEFAULT_MODEL
+            model = config.DEFAULT_MODEL
 
         self.init_image = init_image
         self.init_image_strength = init_image_strength
@@ -141,7 +143,7 @@ class ImaginePrompt:
         self.upscale = upscale
         self.fix_faces = fix_faces
         self.fix_faces_fidelity = fix_faces_fidelity
-        self.sampler_type = sampler_type
+        self.sampler_type = sampler_type.lower()
         self.conditioning = conditioning
         self.mask_prompt = mask_prompt
         self.mask_image = mask_image
@@ -149,6 +151,12 @@ class ImaginePrompt:
         self.mask_modify_original = mask_modify_original
         self.tile_mode = tile_mode
         self.model = model
+
+        if self.height is None or self.width is None or self.steps is None:
+            SamplerCls = SAMPLER_LOOKUP[self.sampler_type]
+            self.steps = self.steps or SamplerCls.default_steps
+            self.width = self.width or get_model_default_image_size(self.model)
+            self.height = self.height or get_model_default_image_size(self.model)
 
     @property
     def prompt_text(self):
@@ -249,7 +257,10 @@ class ImagineResult:
         exif[ExifCodes.ImageDescription] = self.prompt.prompt_description()
         exif[ExifCodes.UserComment] = json.dumps(self.metadata_dict())
         # help future web scrapes not ingest AI generated art
-        exif[ExifCodes.Software] = "Imaginairy / Stable Diffusion v1.4"
+        sd_version = self.prompt.model
+        if len(sd_version) > 20:
+            sd_version = "custom weights"
+        exif[ExifCodes.Software] = "Imaginairy / Stable Diffusion {sd_version}"
         exif[ExifCodes.DateTime] = self.created_at.isoformat(sep=" ")[:19]
         exif[ExifCodes.HostComputer] = f"{self.torch_backend}:{self.hardware_name}"
         return exif

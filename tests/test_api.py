@@ -28,26 +28,40 @@ def test_imagine(sampler_type, filename_base_for_outputs):
     )
 
 
-@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
-def test_model_versions(filename_base_for_outputs):
+compare_prompts = [
+    "a photo of a bowl of fruit",
+    "a headshot photo of a happy couple smiling at the camera",
+    "a painting of a beautiful cloudy sunset at the beach",
+    "a photo of a dog",
+    "a photo of a handshake",
+    "a photo of an astronaut riding a horse on the moon. the earth visible in the background",
+]
+
+
+@pytest.mark.skipif(get_device() != "cuda", reason="Too slow to run on CPU or MPS")
+@pytest.mark.parametrize("model_version", ["SD-1.4", "SD-1.5", "SD-2.0", "SD-2.0-v"])
+def test_model_versions(filename_base_for_orig_outputs, model_version):
     """Test that we can switch between model versions"""
-    prompt_text = "a bowl of tropical fruit"
-    prompts = [
-        ImaginePrompt(
-            prompt_text, width=512, height=512, steps=20, seed=1, model="SD-1.5"
-        ),
-        ImaginePrompt(
-            prompt_text, width=512, height=512, steps=20, seed=1, model="SD-1.4"
-        ),
-    ]
+    prompts = []
+    for prompt_text in compare_prompts:
+        prompts.append(
+            ImaginePrompt(
+                prompt_text,
+                seed=1,
+                model=model_version,
+                sampler_type="ddim",
+                steps=30,
+            )
+        )
+
     threshold = 10000
 
     for i, result in enumerate(imagine(prompts)):
-        img_path = f"{filename_base_for_outputs}_{i}_{result.prompt.model}.png"
+        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model}.png"
         result.img.save(img_path)
 
     for i, result in enumerate(imagine(prompts)):
-        img_path = f"{filename_base_for_outputs}_{i}_{result.prompt.model}.png"
+        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model}.png"
         assert_image_similar_to_expectation(
             result.img, img_path=img_path, threshold=threshold
         )

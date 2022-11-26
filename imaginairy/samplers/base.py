@@ -1,9 +1,9 @@
 # pylama:ignore=W0613
 import logging
+from abc import ABC
 
 import numpy as np
 import torch
-from torch import nn
 
 from imaginairy.log_utils import log_latent
 from imaginairy.modules.diffusion.util import (
@@ -15,100 +15,31 @@ from imaginairy.utils import get_device
 
 logger = logging.getLogger(__name__)
 
-SAMPLER_TYPE_OPTIONS = [
-    "plms",
-    "ddim",
-    "k_dpm_fast",
-    "k_dpm_adaptive",
-    "k_lms",
-    "k_dpm_2",
-    "k_dpm_2_a",
-    "k_dpmpp_2m",
-    "k_dpmpp_2s_a",
-    "k_euler",
-    "k_euler_a",
-    "k_heun",
-]
 
-_k_sampler_type_lookup = {
-    "k_dpm_fast": "dpm_fast",
-    "k_dpm_adaptive": "dpm_adaptive",
-    "k_dpm_2": "dpm_2",
-    "k_dpm_2_a": "dpm_2_ancestral",
-    "k_dpmpp_2m": "dpmpp_2m",
-    "k_dpmpp_2s_a": "dpmpp_2s_ancestral",
-    "k_euler": "euler",
-    "k_euler_a": "euler_ancestral",
-    "k_heun": "heun",
-    "k_lms": "lms",
-}
+class SamplerName:
+    PLMS = "plms"
+    DDIM = "ddim"
+    K_DPM_FAST = "k_dpm_fast"
+    K_DPM_ADAPTIVE = "k_dpm_adaptive"
+    K_LMS = "k_lms"
+    K_DPM_2 = "k_dpm_2"
+    K_DPM_2_ANCESTRAL = "k_dpm_2_a"
+    K_DPMPP_2M = "k_dpmpp_2m"
+    K_DPMPP_2S_ANCESTRAL = "k_dpmpp_2s_a"
+    K_EULER = "k_euler"
+    K_EULER_ANCESTRAL = "k_euler_a"
+    K_HEUN = "k_heun"
 
 
-def get_sampler(sampler_type, model):
-    from imaginairy.samplers.ddim import DDIMSampler  # noqa
-    from imaginairy.samplers.kdiff import KDiffusionSampler  # noqa
-    from imaginairy.samplers.plms import PLMSSampler  # noqa
-
-    sampler_type = sampler_type.lower()
-    if sampler_type == "plms":
-        return PLMSSampler(model)
-    if sampler_type == "ddim":
-        return DDIMSampler(model)
-    if sampler_type.startswith("k_"):
-        sampler_type = _k_sampler_type_lookup[sampler_type]
-        return KDiffusionSampler(model, sampler_type)
-    raise ValueError("invalid sampler_type")
-
-
-class CFGDenoiser(nn.Module):
-    """
-    Conditional forward guidance wrapper
-    """
+class ImageSampler(ABC):
+    short_name: str
+    name: str
+    default_steps: int
+    default_size: int
 
     def __init__(self, model):
-        super().__init__()
-        self.inner_model = model
+        self.model = model
         self.device = get_device()
-
-    def forward(
-        self,
-        x,
-        sigma,
-        uncond,
-        cond,
-        cond_scale,
-        mask=None,
-        mask_noise=None,
-        orig_latent=None,
-    ):
-        def _wrapper(noisy_latent_in, time_encoding_in, conditioning_in):
-            return self.inner_model(
-                noisy_latent_in, time_encoding_in, cond=conditioning_in
-            )
-
-        if mask is not None:
-            assert orig_latent is not None
-            t = self.inner_model.sigma_to_t(sigma, quantize=True)
-            big_sigma = max(sigma, 1)
-            x = mask_blend(
-                noisy_latent=x,
-                orig_latent=orig_latent * big_sigma,
-                mask=mask,
-                mask_noise=mask_noise * big_sigma,
-                ts=t,
-                model=self.inner_model.inner_model,
-            )
-
-        noise_pred = get_noise_prediction(
-            denoise_func=_wrapper,
-            noisy_latent=x,
-            time_encoding=sigma,
-            neutral_conditioning=uncond,
-            positive_conditioning=cond,
-            signal_amplification=cond_scale,
-        )
-
-        return noise_pred
 
 
 def ensure_4_dim(t: torch.Tensor):

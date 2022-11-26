@@ -7,22 +7,28 @@ from tqdm import tqdm
 
 from imaginairy.log_utils import increment_step, log_latent
 from imaginairy.modules.diffusion.util import extract_into_tensor, noise_like
-from imaginairy.samplers.base import NoiseSchedule, get_noise_prediction, mask_blend
+from imaginairy.samplers.base import (
+    ImageSampler,
+    NoiseSchedule,
+    SamplerName,
+    get_noise_prediction,
+    mask_blend,
+)
 from imaginairy.utils import get_device
 
 logger = logging.getLogger(__name__)
 
 
-class DDIMSampler:
+class DDIMSampler(ImageSampler):
     """
     Denoising Diffusion Implicit Models
 
     https://arxiv.org/abs/2010.02502
     """
 
-    def __init__(self, model):
-        self.model = model
-        self.device = get_device()
+    short_name = SamplerName.DDIM
+    name = "Denoising Diffusion Implicit Models"
+    default_steps = 40
 
     @torch.no_grad()
     def sample(

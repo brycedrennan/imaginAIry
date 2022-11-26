@@ -55,11 +55,12 @@ def test_clip_masking(filename_base_for_outputs):
         upscale=False,
         fix_faces=True,
         seed=42,
+        sampler_type="plms",
     )
 
     result = next(imagine(prompt))
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=300)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=600)
 
 
 boolean_mask_test_cases = [

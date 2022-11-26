@@ -4,11 +4,11 @@ import math
 import click
 from click_shell import shell
 
-from imaginairy import LazyLoadingImage, generate_caption
+from imaginairy import LazyLoadingImage, config, generate_caption
 from imaginairy.api import imagine_image_files
 from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.log_utils import configure_logging
-from imaginairy.samplers.base import SAMPLER_TYPE_OPTIONS
+from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "-h",
     "--height",
-    default=512,
+    default=None,
     show_default=True,
     type=int,
     help="Image height. Should be multiple of 64.",
@@ -59,14 +59,14 @@ logger = logging.getLogger(__name__)
 @click.option(
     "-w",
     "--width",
-    default=512,
+    default=None,
     show_default=True,
     type=int,
     help="Image width. Should be multiple of 64.",
 )
 @click.option(
     "--steps",
-    default=15,
+    default=None,
     type=int,
     show_default=True,
     help="How many diffusion steps to run. More steps, more detail, but with diminishing returns.",
@@ -88,7 +88,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--sampler-type",
     "--sampler",
-    default="k_dpmpp_2m",
+    default=config.DEFAULT_SAMPLER,
     show_default=True,
     type=click.Choice(SAMPLER_TYPE_OPTIONS),
     help="What sampling strategy to use.",
@@ -163,7 +163,8 @@ logger = logging.getLogger(__name__)
     "--model-weights-path",
     "--model",
     help="Model to use. Should be one of SD-1.4, SD-1.5, or a path to custom weights. Defaults to SD-1.5.",
-    default=None,
+    show_default=True,
+    default=config.DEFAULT_MODEL,
 )
 @click.option(
     "--prompt-library-path",
