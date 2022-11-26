@@ -78,7 +78,7 @@
 # to_tensor_tfm = transforms.ToTensor()
 #
 #
-# # mismatch of tons of image encoding / decoding / loading functions i cant be asked to clean up right now
+# # mismatch of tons of image encoding / decoding / loading functions i can't be asked to clean up right now
 #
 # def pil_to_latent(input_im):
 #     # Single image -> single latent in a batch (so size 1, 4, 64, 64)
@@ -154,7 +154,7 @@
 #             text = text[idx + 1:]
 #             # find value for weight
 #             if " " in text:
-#                 idx = text.index(" ")  # first occurence
+#                 idx = text.index(" ")  # first occurrence
 #             else:  # no space, read to end
 #                 idx = len(text)
 #             if idx != 0:
@@ -303,7 +303,7 @@
 #                 linx = np.linspace(0, 5, h // 8, endpoint=False)
 #                 liny = np.linspace(0, 5, w // 8, endpoint=False)
 #                 x, y = np.meshgrid(liny, linx)
-#                 p = [np.expand_dims(perlin(x, y, seed=i), 0) for i in range(4)]  # reproducable seed
+#                 p = [np.expand_dims(perlin(x, y, seed=i), 0) for i in range(4)]  # reproducible seed
 #                 p = np.concatenate(p, 0)
 #                 p = torch.tensor(p).unsqueeze(0).cuda()
 #                 latents = latents + (p * args.perlin_multi).to(get_device()).half()

@@ -245,7 +245,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 **5.0.0**
 - feature: 🎉 inpainting support using new inpainting model from RunwayML. It works really well! By default, the 
 inpainting model will automatically be used for any image-masking task 
-- feature: 🎉 new default sampler makes image generation mor than twice as fast
+- feature: 🎉 new default sampler makes image generation more than twice as fast
 - feature: added `DPM++ 2S a` and `DPM++ 2M` samplers.
 - feature: improve progress image logging
 - fix: fix bug with `--show-work`. fixes #84
@@ -315,7 +315,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
  - fix: another bfloat16 fix
 
 **1.6.1**
- - fix: make sure image tensors come to the CPU as float32 so there aren't compatability issues with non-bfloat16 cpus
+ - fix: make sure image tensors come to the CPU as float32 so there aren't compatibility issues with non-bfloat16 cpus
 
 **1.6.0**
  - fix: *maybe* address #13 with `expected scalar type BFloat16 but found Float`
@@ -361,7 +361,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - https://github.com/CompVis/stable-diffusion/pull/177
    - https://github.com/huggingface/diffusers/pull/532/files
    - https://github.com/HazyResearch/flash-attention
-   - xformers improvments https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/
+   - xformers improvements https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/
  - Development Environment
    - ✅ add tests
    - ✅ set up ci (test/lint/format)
@@ -458,7 +458,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
    - https://github.com/vicgalle/stable-diffusion-aesthetic-gradients
 
-## Noteable Stable Diffusion Implementations
+## Notable Stable Diffusion Implementations
  - https://github.com/ahrm/UnstableFusion
  - https://github.com/AUTOMATIC1111/stable-diffusion-webui
  - https://github.com/blueturtleai/gimp-stable-diffusion
