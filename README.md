@@ -240,7 +240,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
   - Tested on macOS and Linux
   - All samplers working for new 512x512 model
   - New inpainting model working
-  - 768x768 model working for DDIM sampler only (`--model SD-2.0 --sampler DDIM`)
+  - 768x768 model working for all samplers except PLMS (`--model SD-2.0-v `)
 
 **5.1.0**
 - feature: add progress image callback

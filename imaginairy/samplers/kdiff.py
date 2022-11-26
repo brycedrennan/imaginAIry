@@ -13,10 +13,15 @@ from imaginairy.samplers.base import (
 )
 from imaginairy.utils import get_device
 from imaginairy.vendored.k_diffusion import sampling as k_sampling
-from imaginairy.vendored.k_diffusion.external import CompVisDenoiser
+from imaginairy.vendored.k_diffusion.external import CompVisDenoiser, CompVisVDenoiser
 
 
 class StandardCompVisDenoiser(CompVisDenoiser):
+    def apply_model(self, *args, **kwargs):
+        return self.inner_model.apply_model(*args, **kwargs)
+
+
+class StandardCompVisVDenoiser(CompVisVDenoiser):
     def apply_model(self, *args, **kwargs):
         return self.inner_model.apply_model(*args, **kwargs)
 
@@ -57,7 +62,12 @@ class KDiffusionSampler(ImageSampler, ABC):
 
     def __init__(self, model):
         super().__init__(model)
-        self.cv_denoiser = StandardCompVisDenoiser(model)
+        denoiseer_cls = (
+            StandardCompVisVDenoiser
+            if model.parameterization == "v"
+            else StandardCompVisDenoiser
+        )
+        self.cv_denoiser = denoiseer_cls(model)
 
     def sample(
         self,

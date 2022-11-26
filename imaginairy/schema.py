@@ -13,7 +13,7 @@ from urllib3.util import parse_url
 
 from imaginairy import config
 from imaginairy.model_manager import get_model_default_image_size
-from imaginairy.samplers import SAMPLER_LOOKUP
+from imaginairy.samplers import SAMPLER_LOOKUP, SamplerName
 from imaginairy.utils import get_device, get_hardware_description
 
 logger = logging.getLogger(__name__)
@@ -157,6 +157,9 @@ class ImaginePrompt:
             self.steps = self.steps or SamplerCls.default_steps
             self.width = self.width or get_model_default_image_size(self.model)
             self.height = self.height or get_model_default_image_size(self.model)
+
+        if self.model == "SD-2.0-v" and self.sampler_type == SamplerName.PLMS:
+            raise ValueError("PLMS sampler is not supported for SD-2.0-v model.")
 
     @property
     def prompt_text(self):

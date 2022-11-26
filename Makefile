@@ -116,7 +116,7 @@ vendorize_kdiffusion:
 	rm -rf ./imaginairy/vendored/k_diffusion
 	rm -rf ./downloads/k_diffusion
     # version 0.0.9
-	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=60e5042ca0da89c14d1dd59d73883280f8fce991
+	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=5b3af030dd83e0297272d861c19477735d0317ec
 	#sed -i '' -e 's/import\sclip/from\simaginairy.vendored\simport\sclip/g' imaginairy/vendored/k_diffusion/evaluation.py
 	mv ./downloads/k_diffusion/LICENSE ./imaginairy/vendored/k_diffusion/
 	rm imaginairy/vendored/k_diffusion/evaluation.py
@@ -128,8 +128,9 @@ vendorize_kdiffusion:
 	sed -i '' -e 's#x = x + torch.randn_like(x) \* sigma_up#x = x + torch.randn_like(x, device="cpu").to(x.device) \* sigma_up#g' imaginairy/vendored/k_diffusion/sampling.py
  	# https://github.com/AUTOMATIC1111/stable-diffusion-webui/issues/4558#issuecomment-1310387114
 	sed -i '' -e 's#t_fn = lambda sigma: sigma.log().neg()#t_fn = lambda sigma: sigma.to("cpu").log().neg().to(x.device)#g' imaginairy/vendored/k_diffusion/sampling.py
-	sed -i '' -e 's#return (x - denoised) / sigma#return (x - denoised) / sigma#g' imaginairy/vendored/k_diffusion/sampling.py
+	sed -i '' -e 's#return (x - denoised) / sigma#return ((x - denoised) / sigma.to("cpu")).to(x.device)#g' imaginairy/vendored/k_diffusion/sampling.py
 	sed -i '' -e 's#return t.neg().exp()#return t.to("cpu").neg().exp().to(self.model.device)#g' imaginairy/vendored/k_diffusion/sampling.py
+	sed -i '' -e 's#import torchsde##g' imaginairy/vendored/k_diffusion/sampling.py
 	make af
 
 vendorize_noodle_soup:
