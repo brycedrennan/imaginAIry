@@ -49,8 +49,6 @@ def test_model_versions(filename_base_for_orig_outputs, model_version):
                 prompt_text,
                 seed=1,
                 model=model_version,
-                sampler_type="ddim",
-                steps=30,
             )
         )
 
