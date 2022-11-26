@@ -198,7 +198,7 @@ class PLMSSampler:
             # 2nd order Pseudo Linear Multistep (Adams-Bashforth)
             e_t_prime = (3 * noise_pred - old_eps[-1]) / 2
         elif len(old_eps) == 2:
-            # 3nd order Pseudo Linear Multistep (Adams-Bashforth)
+            # 3rd order Pseudo Linear Multistep (Adams-Bashforth)
             e_t_prime = (23 * noise_pred - 16 * old_eps[-1] + 5 * old_eps[-2]) / 12
         elif len(old_eps) >= 3:
             # 4nd order Pseudo Linear Multistep (Adams-Bashforth)
