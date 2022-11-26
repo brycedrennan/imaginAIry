@@ -1,8 +1,16 @@
 # pylama:ignore=W0613
+from abc import ABC
+
 import torch
+from torch import nn
 
 from imaginairy.log_utils import increment_step, log_latent
-from imaginairy.samplers.base import CFGDenoiser
+from imaginairy.samplers.base import (
+    ImageSampler,
+    SamplerName,
+    get_noise_prediction,
+    mask_blend,
+)
 from imaginairy.utils import get_device
 from imaginairy.vendored.k_diffusion import sampling as k_sampling
 from imaginairy.vendored.k_diffusion.external import CompVisDenoiser
@@ -44,27 +52,12 @@ def sample_dpm_fast(model, x, sigmas, extra_args=None, disable=False, callback=N
     )
 
 
-class KDiffusionSampler:
+class KDiffusionSampler(ImageSampler, ABC):
+    sampler_func: callable
 
-    sampler_lookup = {
-        "dpm_fast": sample_dpm_fast,
-        "dpm_adaptive": sample_dpm_adaptive,
-        "dpm_2": k_sampling.sample_dpm_2,
-        "dpm_2_ancestral": k_sampling.sample_dpm_2_ancestral,
-        "dpmpp_2m": k_sampling.sample_dpmpp_2m,
-        "dpmpp_2s_ancestral": k_sampling.sample_dpmpp_2s_ancestral,
-        "euler": k_sampling.sample_euler,
-        "euler_ancestral": k_sampling.sample_euler_ancestral,
-        "heun": k_sampling.sample_heun,
-        "lms": k_sampling.sample_lms,
-    }
-
-    def __init__(self, model, sampler_name):
-        self.model = model
+    def __init__(self, model):
+        super().__init__(model)
         self.cv_denoiser = StandardCompVisDenoiser(model)
-        self.sampler_name = sampler_name
-        self.sampler_func = self.sampler_lookup[sampler_name]
-        self.device = get_device()
 
     def sample(
         self,
@@ -131,3 +124,124 @@ class KDiffusionSampler:
         )
 
         return samples
+
+
+class DPMFastSampler(KDiffusionSampler):
+    short_name = SamplerName.K_DPM_FAST
+    name = "Diffusion probabilistic models - fast"
+    default_steps = 15
+    sampler_func = staticmethod(sample_dpm_fast)
+
+
+class DPMAdaptiveSampler(KDiffusionSampler):
+    short_name = SamplerName.K_DPM_ADAPTIVE
+    name = "Diffusion probabilistic models - adaptive"
+    default_steps = 40
+    sampler_func = staticmethod(sample_dpm_adaptive)
+
+
+class DPM2Sampler(KDiffusionSampler):
+    short_name = SamplerName.K_DPM_2
+    name = "Diffusion probabilistic models - 2"
+    default_steps = 40
+    sampler_func = staticmethod(k_sampling.sample_dpm_2)
+
+
+class DPM2AncestralSampler(KDiffusionSampler):
+    short_name = SamplerName.K_DPM_2_ANCESTRAL
+    name = "Diffusion probabilistic models - 2 ancestral"
+    default_steps = 40
+    sampler_func = staticmethod(k_sampling.sample_dpm_2_ancestral)
+
+
+class DPMPP2MSampler(KDiffusionSampler):
+    short_name = SamplerName.K_DPMPP_2M
+    name = "Diffusion probabilistic models - 2m"
+    default_steps = 15
+    sampler_func = staticmethod(k_sampling.sample_dpmpp_2m)
+
+
+class DPMPP2SAncestralSampler(KDiffusionSampler):
+    short_name = SamplerName.K_DPMPP_2S_ANCESTRAL
+    name = "Ancestral sampling with DPM-Solver++(2S) second-order steps."
+    default_steps = 15
+    sampler_func = staticmethod(k_sampling.sample_dpmpp_2s_ancestral)
+
+
+class EulerSampler(KDiffusionSampler):
+    short_name = SamplerName.K_EULER
+    name = "Algorithm 2 (Euler steps) from Karras et al. (2022)"
+    default_steps = 40
+    sampler_func = staticmethod(k_sampling.sample_euler)
+
+
+class EulerAncestralSampler(KDiffusionSampler):
+    short_name = SamplerName.K_EULER_ANCESTRAL
+    name = "Euler ancestral"
+    default_steps = 40
+    sampler_func = staticmethod(k_sampling.sample_euler_ancestral)
+
+
+class HeunSampler(KDiffusionSampler):
+    short_name = SamplerName.K_HEUN
+    name = "Algorithm 2 (Heun steps) from Karras et al. (2022)."
+    default_steps = 40
+    sampler_func = staticmethod(k_sampling.sample_heun)
+
+
+class LMSSampler(KDiffusionSampler):
+    short_name = SamplerName.K_LMS
+    name = "LMS"
+    default_steps = 40
+    sampler_func = staticmethod(k_sampling.sample_lms)
+
+
+class CFGDenoiser(nn.Module):
+    """
+    Conditional forward guidance wrapper
+    """
+
+    def __init__(self, model):
+        super().__init__()
+        self.inner_model = model
+        self.device = get_device()
+
+    def forward(
+        self,
+        x,
+        sigma,
+        uncond,
+        cond,
+        cond_scale,
+        mask=None,
+        mask_noise=None,
+        orig_latent=None,
+    ):
+        def _wrapper(noisy_latent_in, time_encoding_in, conditioning_in):
+            return self.inner_model(
+                noisy_latent_in, time_encoding_in, cond=conditioning_in
+            )
+
+        if mask is not None:
+            assert orig_latent is not None
+            t = self.inner_model.sigma_to_t(sigma, quantize=True)
+            big_sigma = max(sigma, 1)
+            x = mask_blend(
+                noisy_latent=x,
+                orig_latent=orig_latent * big_sigma,
+                mask=mask,
+                mask_noise=mask_noise * big_sigma,
+                ts=t,
+                model=self.inner_model.inner_model,
+            )
+
+        noise_pred = get_noise_prediction(
+            denoise_func=_wrapper,
+            noisy_latent=x,
+            time_encoding=sigma,
+            neutral_conditioning=uncond,
+            positive_conditioning=cond,
+            signal_amplification=cond_scale,
+        )
+
+        return noise_pred

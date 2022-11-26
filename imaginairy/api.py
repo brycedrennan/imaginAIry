@@ -23,7 +23,8 @@ from imaginairy.log_utils import (
 )
 from imaginairy.model_manager import get_diffusion_model
 from imaginairy.safety import SafetyMode, create_safety_score
-from imaginairy.samplers.base import NoiseSchedule, get_sampler, noise_an_image
+from imaginairy.samplers import SAMPLER_LOOKUP
+from imaginairy.samplers.base import NoiseSchedule, noise_an_image
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     fix_torch_group_norm,
@@ -169,8 +170,8 @@ def imagine(
                     prompt.height // downsampling_factor,
                     prompt.width // downsampling_factor,
                 ]
-
-                sampler = get_sampler(prompt.sampler_type, model)
+                SamplerCls = SAMPLER_LOOKUP[prompt.sampler_type.lower()]
+                sampler = SamplerCls(model)
                 mask = mask_image = mask_image_orig = mask_grayscale = None
                 t_enc = init_latent = init_latent_noised = None
                 if prompt.init_image:

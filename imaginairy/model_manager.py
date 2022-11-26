@@ -10,38 +10,12 @@ from transformers import cached_path
 from transformers.utils.hub import TRANSFORMERS_CACHE, HfFolder
 from transformers.utils.hub import url_to_filename as tf_url_to_filename
 
+from imaginairy import config as iconfig
 from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
 
 logger = logging.getLogger(__name__)
 
-MODEL_SHORTCUTS = {
-    "SD-1.4": (
-        "configs/stable-diffusion-v1.yaml",
-        "https://huggingface.co/bstddev/sd-v1-4/resolve/77221977fa8de8ab8f36fac0374c120bd5b53287/sd-v1-4.ckpt",
-    ),
-    "SD-1.5": (
-        "configs/stable-diffusion-v1.yaml",
-        "https://huggingface.co/acheong08/SD-V1-5-cloned/resolve/fc392f6bd4345b80fc2256fa8aded8766b6c629e/v1-5-pruned-emaonly.ckpt",
-    ),
-    "SD-1.5-inpaint": (
-        "configs/stable-diffusion-v1-inpaint.yaml",
-        "https://huggingface.co/julienacquaviva/inpainting/resolve/2155ff7fe38b55f4c0d99c2f1ab9b561f8311ca7/sd-v1-5-inpainting.ckpt",
-    ),
-    "SD-2.0": (
-        "configs/stable-diffusion-v2-inference.yaml",
-        "https://huggingface.co/stabilityai/stable-diffusion-2-base/resolve/main/512-base-ema.ckpt",
-    ),
-    "SD-2.0-inpaint": (
-        "configs/stable-diffusion-v2-inpainting-inference.yaml",
-        "https://huggingface.co/stabilityai/stable-diffusion-2-inpainting/resolve/main/512-inpainting-ema.ckpt",
-    ),
-    "SD-2.0-v": (
-        "configs/stable-diffusion-v2-inference-v.yaml",
-        "https://huggingface.co/stabilityai/stable-diffusion-2/resolve/main/768-v-ema.ckpt",
-    ),
-}
-DEFAULT_MODEL = "SD-2.0"
 
 LOADED_MODELS = {}
 MOST_RECENTLY_LOADED_MODEL = None
@@ -126,7 +100,7 @@ def load_model_from_config(config, weights_location):
 
 
 def get_diffusion_model(
-    weights_location=DEFAULT_MODEL,
+    weights_location=iconfig.DEFAULT_MODEL,
     config_path="configs/stable-diffusion-v1.yaml",
     half_mode=None,
     for_inpainting=False,
@@ -146,13 +120,13 @@ def get_diffusion_model(
                 f"Failed to load inpainting model. Attempting to fall-back to standard model.   {str(e)}"
             )
             return _get_diffusion_model(
-                DEFAULT_MODEL, config_path, half_mode, for_inpainting=False
+                iconfig.DEFAULT_MODEL, config_path, half_mode, for_inpainting=False
             )
         raise e
 
 
 def _get_diffusion_model(
-    weights_location=DEFAULT_MODEL,
+    weights_location=iconfig.DEFAULT_MODEL,
     config_path="configs/stable-diffusion-v1.yaml",
     half_mode=None,
     for_inpainting=False,
@@ -164,11 +138,22 @@ def _get_diffusion_model(
     """
     global MOST_RECENTLY_LOADED_MODEL  # noqa
     if weights_location is None:
-        weights_location = DEFAULT_MODEL
-    if for_inpainting and f"{weights_location}-inpaint" in MODEL_SHORTCUTS:
-        config_path, weights_location = MODEL_SHORTCUTS[f"{weights_location}-inpaint"]
-    elif weights_location in MODEL_SHORTCUTS:
-        config_path, weights_location = MODEL_SHORTCUTS[weights_location]
+        weights_location = iconfig.DEFAULT_MODEL
+    if (
+        for_inpainting
+        and f"{weights_location}-inpaint" in iconfig.MODEL_CONFIG_SHORTCUTS
+    ):
+        model_config = iconfig.MODEL_CONFIG_SHORTCUTS[f"{weights_location}-inpaint"]
+        config_path, weights_location = (
+            model_config.config_path,
+            model_config.weights_url,
+        )
+    elif weights_location in iconfig.MODEL_CONFIG_SHORTCUTS:
+        model_config = iconfig.MODEL_CONFIG_SHORTCUTS[weights_location]
+        config_path, weights_location = (
+            model_config.config_path,
+            model_config.weights_url,
+        )
 
     key = (config_path, weights_location)
     if key not in LOADED_MODELS:
@@ -181,6 +166,13 @@ def _get_diffusion_model(
     model.num_timesteps_cond  # noqa
     MOST_RECENTLY_LOADED_MODEL = model
     return model
+
+
+def get_model_default_image_size(weights_location):
+    model_config = iconfig.MODEL_CONFIG_SHORTCUTS.get(weights_location, None)
+    if model_config:
+        return model_config.default_image_size
+    return 512
 
 
 def get_current_diffusion_model():

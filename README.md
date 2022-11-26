@@ -9,15 +9,13 @@ AI imagined images. Pythonic generation of stable diffusion images.
 
 "just works" on Linux and macOS(M1) (and maybe windows?).
 
-**🎉 Try Stable Diffusion v2 with alpha version of imaginairy:**
-
-`pip install imaginairy==6.0.0a0 --upgrade`
-
 ## Examples
 ```bash
 # on macOS, make sure rust is installed first
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman"
+# Stable Diffusion 2.0
+>> imagine --model SD-2.0 "a forest"
 ```
 
 <details closed>
@@ -215,7 +213,7 @@ imagine_image_files(prompts, outdir="./my-art")
 ## Requirements
 - ~10 gb space for models to download
 - A decent computer with either a CUDA supported graphics card or M1 processor.
-- Python installed. Preferably Python 3.10.
+- Python installed. Preferably Python 3.10.  (not conda)
 - For macOS [rust](https://www.rust-lang.org/tools/install) and setuptools-rust must be installed to compile the `tokenizer` library.
 They can be installed via: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh` and `pip install setuptools-rust`
     
@@ -233,12 +231,16 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
-**6.0.0a**
+**6.1.0**
+- feature: use different default steps and image sizes depending on sampler and model selceted
+- fix: #110 use proper version in image metadata
+- refactor: samplers all have their own class that inherits from ImageSampler
 - feature: 🎉🎉🎉 Stable Diffusion 2.0
-  - Tested on MacOS and Linux
+  - `--model SD-2.0` to use (it makes worse images than 1.5 though...) 
+  - Tested on macOS and Linux
   - All samplers working for new 512x512 model
   - New inpainting model working
-  - 768x768 model working for DDIM sampler only
+  - 768x768 model working for DDIM sampler only (`--model SD-2.0 --sampler DDIM`)
 
 **5.1.0**
 - feature: add progress image callback
@@ -254,9 +256,9 @@ inpainting model will automatically be used for any image-masking task
 - feature: added `DPM++ 2S a` and `DPM++ 2M` samplers.
 - feature: improve progress image logging
 - fix: fix bug with `--show-work`. fixes #84
-- fix: add workaround for pytorch bug affecting MacOS users using the new `DPM++ 2S a` and `DPM++ 2M` samplers.
+- fix: add workaround for pytorch bug affecting macOS users using the new `DPM++ 2S a` and `DPM++ 2M` samplers.
 - fix: add workaround for pytorch mps bug affecting `k_dpm_fast` sampler. fixes #75
-- fix: larger image sizes now work on MacOS. fixes #8
+- fix: larger image sizes now work on macOS. fixes #8
 
 **4.1.0**
  - feature: allow dynamic switching between models/weights `--model SD-1.5` or `--model SD-1.4` or `--model path/my-custom-weights.ckpt`)
