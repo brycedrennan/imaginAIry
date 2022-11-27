@@ -263,7 +263,7 @@ class ImagineResult:
         sd_version = self.prompt.model
         if len(sd_version) > 20:
             sd_version = "custom weights"
-        exif[ExifCodes.Software] = "Imaginairy / Stable Diffusion {sd_version}"
+        exif[ExifCodes.Software] = f"Imaginairy / Stable Diffusion {sd_version}"
         exif[ExifCodes.DateTime] = self.created_at.isoformat(sep=" ")[:19]
         exif[ExifCodes.HostComputer] = f"{self.torch_backend}:{self.hardware_name}"
         return exif
