@@ -230,6 +230,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+**6.1.2**
+- fix: add back in memory-efficient algorithms
 
 **6.1.1**
 - feature: xformers will be used if available (for faster generation)
