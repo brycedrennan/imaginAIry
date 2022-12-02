@@ -3,6 +3,15 @@ from dataclasses import dataclass
 DEFAULT_MODEL = "SD-1.5"
 DEFAULT_SAMPLER = "k_dpmpp_2m"
 
+DEFAULT_NEGATIVE_PROMPT = (
+    "Ugly, duplication, duplicates, mutilation, deformed, mutilated, mutation, twisted body, disfigured, bad anatomy, "
+    "out of frame, extra fingers, mutated hands, "
+    "poorly drawn hands, extra limbs, malformed limbs, missing arms, extra arms, missing legs, extra legs, mutated hands, "
+    "extra hands, fused fingers, missing fingers, extra fingers, long neck, small head, closed eyes, rolling eyes, "
+    "weird eyes, smudged face, blurred face, poorly drawn face, mutation, mutilation, cloned face, strange mouth, "
+    "grainy, blurred, blurry, writing, calligraphy, signature, text, watermark, bad art,"
+)
+
 
 @dataclass
 class ModelConfig:

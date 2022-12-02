@@ -147,20 +147,16 @@ def imagine(
                 seed_everything(prompt.seed)
                 model.tile_mode(prompt.tile_mode)
                 with lc.timing("conditioning"):
-                    neutral_conditioning = None
-                    if prompt.prompt_strength != 1.0:
-                        neutral_conditioning = model.get_learned_conditioning(
-                            batch_size * [""]
-                        )
-                        log_conditioning(neutral_conditioning, "neutral conditioning")
+                    # need to expand if doing batches
+                    neutral_conditioning = _prompts_to_embeddings(
+                        prompt.negative_prompt, model
+                    )
+                    log_conditioning(neutral_conditioning, "neutral conditioning")
                     if prompt.conditioning is not None:
                         positive_conditioning = prompt.conditioning
                     else:
-                        total_weight = sum(wp.weight for wp in prompt.prompts)
-                        positive_conditioning = sum(
-                            model.get_learned_conditioning(wp.text)
-                            * (wp.weight / total_weight)
-                            for wp in prompt.prompts
+                        positive_conditioning = _prompts_to_embeddings(
+                            prompt.prompts, model
                         )
                     log_conditioning(positive_conditioning, "positive conditioning")
 
@@ -403,6 +399,15 @@ def imagine(
                     )
                     logger.info(f"Image Generated. Timings: {result.timings_str()}")
                     yield result
+
+
+def _prompts_to_embeddings(prompts, model):
+    total_weight = sum(wp.weight for wp in prompts)
+    conditioning = sum(
+        model.get_learned_conditioning(wp.text) * (wp.weight / total_weight)
+        for wp in prompts
+    )
+    return conditioning
 
 
 def prompt_normalized(prompt):
