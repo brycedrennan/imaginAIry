@@ -94,6 +94,7 @@ class ImaginePrompt:
     def __init__(
         self,
         prompt=None,
+        negative_prompt=config.DEFAULT_NEGATIVE_PROMPT,
         prompt_strength=7.5,
         init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
         init_image_strength=0.3,
@@ -113,16 +114,11 @@ class ImaginePrompt:
         tile_mode=False,
         model=config.DEFAULT_MODEL,
     ):
-        prompt = prompt if prompt is not None else ""
-        fix_faces_fidelity = (
-            fix_faces_fidelity if fix_faces_fidelity else self.DEFAULT_FACE_FIDELITY
-        )
-        if isinstance(prompt, str):
-            self.prompts = [WeightedPrompt(prompt, 1)]
-        else:
-            self.prompts = prompt
-        self.prompts.sort(key=lambda p: p.weight, reverse=True)
+
+        self.prompts = self.process_prompt_input(prompt)
+        self.negative_prompt = self.process_prompt_input(negative_prompt)
         self.prompt_strength = prompt_strength
+
         if isinstance(init_image, str):
             init_image = LazyLoadingImage(filepath=init_image)
 
@@ -142,7 +138,9 @@ class ImaginePrompt:
         self.width = width
         self.upscale = upscale
         self.fix_faces = fix_faces
-        self.fix_faces_fidelity = fix_faces_fidelity
+        self.fix_faces_fidelity = (
+            fix_faces_fidelity if fix_faces_fidelity else self.DEFAULT_FACE_FIDELITY
+        )
         self.sampler_type = sampler_type.lower()
         self.conditioning = conditioning
         self.mask_prompt = mask_prompt
@@ -189,6 +187,15 @@ class ImaginePrompt:
             "fix_faces": self.fix_faces,
             "sampler_type": self.sampler_type,
         }
+
+    def process_prompt_input(self, prompt_input):
+        prompt_input = prompt_input if prompt_input is not None else ""
+
+        if isinstance(prompt_input, str):
+            prompt_input = [WeightedPrompt(prompt_input, 1)]
+
+        prompt_input.sort(key=lambda p: p.weight, reverse=True)
+        return prompt_input
 
 
 class ExifCodes:

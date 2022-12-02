@@ -17,6 +17,12 @@ logger = logging.getLogger(__name__)
 @click.command()
 @click.argument("prompt_texts", nargs=-1)
 @click.option(
+    "--negative-prompt",
+    default=config.DEFAULT_NEGATIVE_PROMPT,
+    show_default=True,
+    help="Negative prompt. Things to try and exclude from images. Same negative prompt will be used for all images.",
+)
+@click.option(
     "--prompt-strength",
     default=7.5,
     show_default=True,
@@ -177,6 +183,7 @@ logger = logging.getLogger(__name__)
 def imagine_cmd(
     ctx,
     prompt_texts,
+    negative_prompt,
     prompt_strength,
     init_image,
     init_image_strength,
@@ -235,6 +242,7 @@ def imagine_cmd(
             prompt_iterator = prompt_expanding_iterators[prompt_text]
             prompt = ImaginePrompt(
                 next(prompt_iterator),
+                negative_prompt=negative_prompt,
                 prompt_strength=prompt_strength,
                 init_image=init_image,
                 init_image_strength=init_image_strength,
