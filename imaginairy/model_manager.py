@@ -11,6 +11,7 @@ from transformers.utils.hub import TRANSFORMERS_CACHE, HfFolder
 from transformers.utils.hub import url_to_filename as tf_url_to_filename
 
 from imaginairy import config as iconfig
+from imaginairy.modules import attention
 from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
 
@@ -137,6 +138,7 @@ def _get_diffusion_model(
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
     global MOST_RECENTLY_LOADED_MODEL  # noqa
+    model_config = None
     if weights_location is None:
         weights_location = iconfig.DEFAULT_MODEL
     if (
@@ -154,6 +156,12 @@ def _get_diffusion_model(
             model_config.config_path,
             model_config.weights_url,
         )
+
+    # some models need the attention calculated in float32
+    if model_config is not None:
+        attention.ATTENTION_PRECISION_OVERRIDE = model_config.forced_attn_precision
+    else:
+        attention.ATTENTION_PRECISION_OVERRIDE = "default"
 
     key = (config_path, weights_location)
     if key not in LOADED_MODELS:

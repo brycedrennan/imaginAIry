@@ -18,6 +18,9 @@ except ImportError:
     XFORMERS_IS_AVAILBLE = False
 
 
+ATTENTION_PRECISION_OVERRIDE = "default"
+
+
 class GEGLU(nn.Module):
     def __init__(self, dim_in, dim_out):
         super().__init__()
@@ -178,13 +181,20 @@ class CrossAttention(nn.Module):
 
         q = self.to_q(x)
         context = context if context is not None else x
-        k = self.to_k(context)
+        k = self.to_k(context) * self.scale
         v = self.to_v(context)
 
         q, k, v = map(lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=h), (q, k, v))
 
-        sim = einsum("b i d, b j d -> b i j", q, k) * self.scale
+        # force cast to fp32 to avoid overflowing
+        if ATTENTION_PRECISION_OVERRIDE == "fp32":
+            with torch.autocast(enabled=False, device_type=get_device()):
+                q, k = q.float(), k.float()
+                sim = einsum("b i d, b j d -> b i j", q, k)
+        else:
+            sim = einsum("b i d, b j d -> b i j", q, k)
 
+        del q, k
         # if mask is not None:
         #     if sim.shape[2] == 320 and False:
         #         mask = [mask] * 2
@@ -237,7 +247,14 @@ class CrossAttention(nn.Module):
         slice_size = q.shape[1] // steps if (q.shape[1] % steps) == 0 else q.shape[1]
         for i in range(0, q.shape[1], slice_size):
             end = i + slice_size
-            s1 = einsum("b i d, b j d -> b i j", q[:, i:end], k)
+
+            # force cast to fp32 to avoid overflowing
+            if ATTENTION_PRECISION_OVERRIDE == "fp32":
+                with torch.autocast(enabled=False, device_type=get_device()):
+                    q, k = q.float(), k.float()
+                    s1 = einsum("b i d, b j d -> b i j", q[:, i:end], k)
+            else:
+                s1 = einsum("b i d, b j d -> b i j", q[:, i:end], k)
 
             s2 = s1.softmax(dim=-1, dtype=q.dtype)
             del s1
