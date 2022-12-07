@@ -39,7 +39,9 @@ compare_prompts = [
 
 
 @pytest.mark.skipif(get_device() != "cuda", reason="Too slow to run on CPU or MPS")
-@pytest.mark.parametrize("model_version", ["SD-1.4", "SD-1.5", "SD-2.0", "SD-2.0-v"])
+@pytest.mark.parametrize(
+    "model_version", ["SD-1.4", "SD-1.5", "SD-2.0", "SD-2.0-v", "SD-2.1", "SD-2.1-v"]
+)
 def test_model_versions(filename_base_for_orig_outputs, model_version):
     """Test that we can switch between model versions"""
     prompts = []

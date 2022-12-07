@@ -19,6 +19,7 @@ class ModelConfig:
     config_path: str
     weights_url: str
     default_image_size: int
+    forced_attn_precision: str = "default"
 
 
 MODEL_CONFIGS = [
@@ -53,17 +54,36 @@ MODEL_CONFIGS = [
         default_image_size=512,
     ),
     ModelConfig(
+        short_name="SD-2.1",
+        config_path="configs/stable-diffusion-v2-inference.yaml",
+        weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt",
+        default_image_size=512,
+    ),
+    ModelConfig(
+        short_name="SD-2.1-inpaint",
+        config_path="configs/stable-diffusion-v2-inpainting-inference.yaml",
+        weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-inpainting/resolve/main/512-inpainting-ema.ckpt",
+        default_image_size=512,
+    ),
+    ModelConfig(
+        short_name="SD-2.1-v",
+        config_path="configs/stable-diffusion-v2-inference-v.yaml",
+        weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt",
+        default_image_size=768,
+        forced_attn_precision="fp32",
+    ),
+    ModelConfig(
         short_name="SD-2.0-v",
         config_path="configs/stable-diffusion-v2-inference-v.yaml",
         weights_url="https://huggingface.co/stabilityai/stable-diffusion-2/resolve/main/768-v-ema.ckpt",
         default_image_size=768,
     ),
-    ModelConfig(
-        short_name="SD-2.0-upscale",
-        config_path="configs/stable-diffusion-v2-upscaling.yaml",
-        weights_url="https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler/resolve/main/x4-upscaler-ema.ckpt",
-        default_image_size=512,
-    ),
+    # ModelConfig(
+    #     short_name="SD-2.0-upscale",
+    #     config_path="configs/stable-diffusion-v2-upscaling.yaml",
+    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler/resolve/main/x4-upscaler-ema.ckpt",
+    #     default_image_size=512,
+    # ),
 ]
 
 MODEL_CONFIG_SHORTCUTS = {m.short_name: m for m in MODEL_CONFIGS}
