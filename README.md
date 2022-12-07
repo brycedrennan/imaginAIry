@@ -14,8 +14,8 @@ AI imagined images. Pythonic generation of stable diffusion images.
 # on macOS, make sure rust is installed first
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman"
-# Stable Diffusion 2.0
->> imagine --model SD-2.0 "a forest"
+# Stable Diffusion 2.1
+>> imagine --model SD-2.1 "a forest"
 ```
 
 <details closed>
