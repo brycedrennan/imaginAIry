@@ -11,6 +11,7 @@ from transformers.utils.hub import TRANSFORMERS_CACHE, HfFolder
 from transformers.utils.hub import url_to_filename as tf_url_to_filename
 
 from imaginairy import config as iconfig
+from imaginairy.config import MODEL_SHORT_NAMES
 from imaginairy.modules import attention
 from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
@@ -75,6 +76,12 @@ def load_model_from_config(config, weights_location):
     pl_sd = None
     try:
         pl_sd = torch.load(ckpt_path, map_location="cpu")
+    except FileNotFoundError as e:
+        if e.errno == 2:
+            logger.error(
+                f'Error: "{ckpt_path}" not a valid path to model weights.\nPreconfigured models you can use: {MODEL_SHORT_NAMES}.')
+            exit(1)
+        raise e
     except RuntimeError as e:
         if "PytorchStreamReader failed reading zip archive" in str(e):
             if weights_location.startswith("http"):
