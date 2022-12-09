@@ -6,6 +6,7 @@ from click_shell import shell
 
 from imaginairy import LazyLoadingImage, config, generate_caption
 from imaginairy.api import imagine_image_files
+from imaginairy.config import MODEL_SHORT_NAMES
 from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.log_utils import configure_logging
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
@@ -168,7 +169,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--model-weights-path",
     "--model",
-    help="Model to use. Should be one of SD-1.4, SD-1.5, or a path to custom weights. Defaults to SD-1.5.",
+    help=f"Model to use. Should be one of {', '.join(MODEL_SHORT_NAMES)}, or a path to custom weights.",
     show_default=True,
     default=config.DEFAULT_MODEL,
 )
