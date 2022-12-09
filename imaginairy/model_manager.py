@@ -2,6 +2,7 @@ import gc
 import glob
 import logging
 import os
+import sys
 
 import requests
 import torch
@@ -80,7 +81,7 @@ def load_model_from_config(config, weights_location):
         if e.errno == 2:
             logger.error(
                 f'Error: "{ckpt_path}" not a valid path to model weights.\nPreconfigured models you can use: {MODEL_SHORT_NAMES}.')
-            exit(1)
+            sys.exit(1)
         raise e
     except RuntimeError as e:
         if "PytorchStreamReader failed reading zip archive" in str(e):
