@@ -165,18 +165,28 @@ class ImaginePrompt:
             return self.prompts[0].text
         return "|".join(str(p) for p in self.prompts)
 
+    @property
+    def negative_prompt_text(self):
+        if len(self.negative_prompt) == 1:
+            return self.negative_prompt[0].text
+        return "|".join(str(p) for p in self.negative_prompt)
+
     def prompt_description(self):
         return (
             f'"{self.prompt_text}" {self.width}x{self.height}px '
+            f'negative-prompt:"{self.negative_prompt_text}" '
             f"seed:{self.seed} prompt-strength:{self.prompt_strength} steps:{self.steps} sampler-type:{self.sampler_type}"
         )
 
     def as_dict(self):
         prompts = [(p.weight, p.text) for p in self.prompts]
+        negative_prompts = [(p.weight, p.text) for p in self.negative_prompt]
         return {
-            "software": "imaginairy",
+            "software": "imaginAIry",
+            "model": self.model,
             "prompts": prompts,
             "prompt_strength": self.prompt_strength,
+            "negative_prompt": negative_prompts,
             "init_image": str(self.init_image),
             "init_image_strength": self.init_image_strength,
             "seed": self.seed,
