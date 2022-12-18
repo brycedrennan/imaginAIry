@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 1.0e-04
+  base_learning_rate: 1.0e-4
   target: imaginairy.modules.diffusion.ddpm.LatentDiffusion
   params:
     linear_start: 0.00085
@@ -11,10 +11,11 @@ model:
     cond_stage_key: "txt"
     image_size: 64
     channels: 4
-    cond_stage_trainable: false   # Note: different from the one we trained before
+    cond_stage_trainable: false
     conditioning_key: crossattn
     monitor: val/loss_simple_ema
     scale_factor: 0.18215
+    use_ema: False # we set this to false because this is an inference only config
 
     scheduler_config: # 10000 warm-up steps
       target: imaginairy.lr_scheduler.LambdaLinearScheduler
@@ -28,6 +29,7 @@ model:
     unet_config:
       target: imaginairy.modules.diffusion.openaimodel.UNetModel
       params:
+        use_checkpoint: True
         image_size: 32 # unused
         in_channels: 4
         out_channels: 4
@@ -39,7 +41,6 @@ model:
         use_spatial_transformer: True
         transformer_depth: 1
         context_dim: 768
-        use_checkpoint: True
         legacy: False
 
     first_stage_config:
