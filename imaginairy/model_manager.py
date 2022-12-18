@@ -80,7 +80,8 @@ def load_model_from_config(config, weights_location):
     except FileNotFoundError as e:
         if e.errno == 2:
             logger.error(
-                f'Error: "{ckpt_path}" not a valid path to model weights.\nPreconfigured models you can use: {MODEL_SHORT_NAMES}.')
+                f'Error: "{ckpt_path}" not a valid path to model weights.\nPreconfigured models you can use: {MODEL_SHORT_NAMES}.'
+            )
             sys.exit(1)
         raise e
     except RuntimeError as e:

@@ -298,3 +298,9 @@ aimg.add_command(imagine_cmd, name="imagine")
 
 if __name__ == "__main__":
     imagine_cmd()  # noqa
+    # from cProfile import Profile
+    # from pyprof2calltree import convert, visualize
+    # profiler = Profile()
+    # profiler.runctx("imagine_cmd.main(standalone_mode=False)", locals(), globals())
+    # convert(profiler.getstats(), 'imagine.kgrind')
+    # visualize(profiler.getstats())
