@@ -212,7 +212,7 @@ imagine_image_files(prompts, outdir="./my-art")
 
 ## Requirements
 - ~10 gb space for models to download
-- A decent computer with either a CUDA supported graphics card or M1 processor.
+- A decent computer with either a CUDA supported graphics card (and CUDA installed) or an M1 processor.
 - Python installed. Preferably Python 3.10.  (not conda)
 - For macOS [rust](https://www.rust-lang.org/tools/install) and setuptools-rust must be installed to compile the `tokenizer` library.
 They can be installed via: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh` and `pip install setuptools-rust`
@@ -230,6 +230,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+**7.1.1**
+- fix: memory/speed regression introduced in 6.1.0
+- fix: model switching now clears memory better, thus avoiding out of memory errors
+
 **7.1.0**
 - feature: 🎉 Stable Diffusion 2.1.  Generated people are no longer (completely) distorted. 
 Use with `--model SD-2.1` or `--model SD-2.0-v` 
