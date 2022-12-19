@@ -63,8 +63,14 @@ class MemoryAwareModel:
         return getattr(self._model, key)
 
     def unload_model(self):
-        del self._model
-        self._model = None
+        if self._model is not None:
+            del self._model.cond_stage_model
+            del self._model.first_stage_model
+            del self._model.model
+            del self._model
+            self._model = None
+        if get_device() == "cuda":
+            torch.cuda.empty_cache()
         gc.collect()
 
 

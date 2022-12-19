@@ -21,4 +21,5 @@ def test_text_conditioning():
         "263e5ee7d2be087d816e094b80ffc546",  # mps
         "41818051d7c469fc57d0a940c9d24d82",
         "b5f29fb26bceb60dcde19ec7ec5a0711",
+        "88245bdb2a83b49092407fc5b4c473ab",  # ubuntu, torch 1.12.1 cu116
     }
