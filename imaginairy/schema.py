@@ -111,13 +111,20 @@ class ImaginePrompt:
         fix_faces_fidelity=DEFAULT_FACE_FIDELITY,
         sampler_type=config.DEFAULT_SAMPLER,
         conditioning=None,
-        tile_mode=False,
+        tile_mode="",
         model=config.DEFAULT_MODEL,
     ):
 
         self.prompts = self.process_prompt_input(prompt)
         self.negative_prompt = self.process_prompt_input(negative_prompt)
         self.prompt_strength = prompt_strength
+        if tile_mode is True:
+            tile_mode = "xy"
+        elif tile_mode is False:
+            tile_mode = ""
+        else:
+            tile_mode = tile_mode.lower()
+            assert tile_mode in ("", "x", "y", "xy")
 
         if isinstance(init_image, str):
             init_image = LazyLoadingImage(filepath=init_image)

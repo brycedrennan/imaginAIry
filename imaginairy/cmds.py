@@ -122,7 +122,17 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--tile",
     is_flag=True,
-    help="Any images rendered will be tileable.",
+    help="Any images rendered will be tileable in both X and Y directions.",
+)
+@click.option(
+    "--tile-x",
+    is_flag=True,
+    help="Any images rendered will be tileable in the X direction.",
+)
+@click.option(
+    "--tile-y",
+    is_flag=True,
+    help="Any images rendered will be tileable in the Y direction.",
 )
 @click.option(
     "--mask-image",
@@ -202,6 +212,8 @@ def imagine_cmd(
     quiet,
     show_work,
     tile,
+    tile_x,
+    tile_y,
     mask_image,
     mask_prompt,
     mask_mode,
@@ -241,6 +253,15 @@ def imagine_cmd(
                     prompt_library_paths=prompt_library_path,
                 )
             prompt_iterator = prompt_expanding_iterators[prompt_text]
+            if tile:
+                _tile_mode = "xy"
+            elif tile_x:
+                _tile_mode = "x"
+            elif tile_y:
+                _tile_mode = "y"
+            else:
+                _tile_mode = ""
+
             prompt = ImaginePrompt(
                 next(prompt_iterator),
                 negative_prompt=negative_prompt,
@@ -259,7 +280,7 @@ def imagine_cmd(
                 upscale=upscale,
                 fix_faces=fix_faces,
                 fix_faces_fidelity=fix_faces_fidelity,
-                tile_mode=tile,
+                tile_mode=_tile_mode,
                 model=model_weights_path,
             )
             prompts.append(prompt)

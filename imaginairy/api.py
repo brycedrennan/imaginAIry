@@ -145,6 +145,7 @@ def imagine(
                 progress_img_interval_min_s=progress_img_interval_min_s,
             ) as lc:
                 seed_everything(prompt.seed)
+
                 model.tile_mode(prompt.tile_mode)
                 with lc.timing("conditioning"):
                     # need to expand if doing batches
