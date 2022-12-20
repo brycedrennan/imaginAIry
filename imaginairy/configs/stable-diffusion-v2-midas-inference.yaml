@@ -1,6 +1,6 @@
 model:
   base_learning_rate: 5.0e-07
-  target: ldm.models.diffusion.ddpm.LatentDepth2ImageDiffusion
+  target: imaginairy.modules.diffusion.ddpm.LatentDepth2ImageDiffusion
   params:
     linear_start: 0.00085
     linear_end: 0.0120
@@ -19,12 +19,12 @@ model:
     use_ema: False
 
     depth_stage_config:
-      target: ldm.modules.midas.api.MiDaSInference
+      target: imaginairy.modules.midas.api.MiDaSInference
       params:
         model_type: "dpt_hybrid"
 
     unet_config:
-      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      target: imaginairy.modules.diffusion.openaimodel.UNetModel
       params:
         use_checkpoint: True
         image_size: 32 # unused
@@ -42,7 +42,7 @@ model:
         legacy: False
 
     first_stage_config:
-      target: ldm.models.autoencoder.AutoencoderKL
+      target: imaginairy.modules.autoencoder.AutoencoderKL
       params:
         embed_dim: 4
         monitor: val/rec_loss
@@ -66,7 +66,7 @@ model:
           target: torch.nn.Identity
 
     cond_stage_config:
-      target: ldm.modules.encoders.modules.FrozenOpenCLIPEmbedder
+      target: imaginairy.modules.encoders.FrozenOpenCLIPEmbedder
       params:
         freeze: True
         layer: "penultimate"

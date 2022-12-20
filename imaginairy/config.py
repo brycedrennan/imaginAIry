@@ -22,6 +22,8 @@ class ModelConfig:
     forced_attn_precision: str = "default"
 
 
+midas_url = "https://github.com/intel-isl/DPT/releases/download/1_0/dpt_hybrid-midas-501f0c75.pt"
+
 MODEL_CONFIGS = [
     ModelConfig(
         short_name="SD-1.4",
@@ -77,6 +79,12 @@ MODEL_CONFIGS = [
         config_path="configs/stable-diffusion-v2-inference-v.yaml",
         weights_url="https://huggingface.co/stabilityai/stable-diffusion-2/resolve/main/768-v-ema.ckpt",
         default_image_size=768,
+    ),
+    ModelConfig(
+        short_name="SD-2.0-depth",
+        config_path="configs/stable-diffusion-v2-midas-inference.yaml",
+        weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-depth/resolve/main/512-depth-ema.ckpt",
+        default_image_size=512,
     ),
     # ModelConfig(
     #     short_name="SD-2.0-upscale",
