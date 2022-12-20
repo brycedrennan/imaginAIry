@@ -236,6 +236,7 @@ class ImagineResult:
         modified_original=None,
         mask_binary=None,
         mask_grayscale=None,
+        depth_image=None,
         timings=None,
     ):
         self.prompt = prompt
@@ -253,6 +254,9 @@ class ImagineResult:
 
         if mask_grayscale:
             self.images["mask_grayscale"] = mask_grayscale
+
+        if depth_image is not None:
+            self.images["depth_image"] = depth_image
 
         self.timings = timings
 

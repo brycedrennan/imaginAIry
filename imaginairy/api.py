@@ -22,6 +22,7 @@ from imaginairy.log_utils import (
     log_latent,
 )
 from imaginairy.model_manager import get_diffusion_model
+from imaginairy.modules.midas.utils import AddMiDaS
 from imaginairy.safety import SafetyMode, create_safety_score
 from imaginairy.samplers import SAMPLER_LOOKUP
 from imaginairy.samplers.base import NoiseSchedule, noise_an_image
@@ -136,6 +137,7 @@ def imagine(
                 half_mode=half_mode,
                 for_inpainting=prompt.mask_image or prompt.mask_prompt,
             )
+            has_depth_channel = hasattr(model, "depth_stage_key")
             with ImageLoggingContext(
                 prompt=prompt,
                 model=model,
@@ -254,7 +256,45 @@ def imagine(
                     "txt": batch_size * [prompt.prompt_text],
                 }
                 c_cat = []
-                if mask_image_orig:
+                depth_image_display = None
+                if has_depth_channel and prompt.init_image:
+                    midas_model = AddMiDaS()
+                    _init_image_d = np.array(prompt.init_image.convert("RGB"))
+                    _init_image_d = (
+                        torch.from_numpy(_init_image_d).to(dtype=torch.float32) / 127.5
+                        - 1.0
+                    )
+                    depth_image = midas_model(_init_image_d)
+                    depth_image = torch.from_numpy(depth_image[None, ...])
+                    batch[model.depth_stage_key] = depth_image.to(device=get_device())
+                    _init_image_d = rearrange(_init_image_d, "h w c -> 1 c h w")
+                    batch["jpg"] = _init_image_d
+                    for ck in model.concat_keys:
+                        cc = batch[ck]
+                        cc = model.depth_model(cc)
+                        depth_min, depth_max = torch.amin(
+                            cc, dim=[1, 2, 3], keepdim=True
+                        ), torch.amax(cc, dim=[1, 2, 3], keepdim=True)
+                        display_depth = (cc - depth_min) / (depth_max - depth_min)
+                        depth_image_display = Image.fromarray(
+                            (display_depth[0, 0, ...].cpu().numpy() * 255.0).astype(
+                                np.uint8
+                            )
+                        )
+                        cc = torch.nn.functional.interpolate(
+                            cc,
+                            size=shape[2:],
+                            mode="bicubic",
+                            align_corners=False,
+                        )
+                        depth_min, depth_max = torch.amin(
+                            cc, dim=[1, 2, 3], keepdim=True
+                        ), torch.amax(cc, dim=[1, 2, 3], keepdim=True)
+                        cc = 2.0 * (cc - depth_min) / (depth_max - depth_min) - 1.0
+                        c_cat.append(cc)
+                    c_cat = [torch.cat(c_cat, dim=1)]
+
+                if mask_image_orig and not has_depth_channel:
                     mask_t = pillow_img_to_torch_image(
                         ImageOps.invert(mask_image_orig)
                     ).to(get_device())
@@ -396,6 +436,7 @@ def imagine(
                         modified_original=rebuilt_orig_img,
                         mask_binary=mask_image_orig,
                         mask_grayscale=mask_grayscale,
+                        depth_image=depth_image_display,
                         timings=lc.get_timings(),
                     )
                     logger.info(f"Image Generated. Timings: {result.timings_str()}")
