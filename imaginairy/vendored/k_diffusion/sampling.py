@@ -64,7 +64,7 @@ def get_ancestral_step(sigma_from, sigma_to, eta=1.0):
 
 
 def default_noise_sampler(x):
-    return lambda sigma, sigma_next: torch.randn_like(x)
+    return lambda sigma, sigma_next: torch.randn_like(x, device="cpu").to(x.device)
 
 
 class BatchedBrownianTree:
@@ -147,7 +147,7 @@ def sample_euler(
             if s_tmin <= sigmas[i] <= s_tmax
             else 0.0
         )
-        eps = torch.randn_like(x) * s_noise
+        eps = torch.randn_like(x, device="cpu").to(x.device) * s_noise
         sigma_hat = sigmas[i] * (gamma + 1)
         if gamma > 0:
             x = x + eps * (sigma_hat**2 - sigmas[i] ** 2) ** 0.5
@@ -229,7 +229,7 @@ def sample_heun(
             if s_tmin <= sigmas[i] <= s_tmax
             else 0.0
         )
-        eps = torch.randn_like(x) * s_noise
+        eps = torch.randn_like(x, device="cpu").to(x.device) * s_noise
         sigma_hat = sigmas[i] * (gamma + 1)
         if gamma > 0:
             x = x + eps * (sigma_hat**2 - sigmas[i] ** 2) ** 0.5
@@ -281,7 +281,7 @@ def sample_dpm_2(
             if s_tmin <= sigmas[i] <= s_tmax
             else 0.0
         )
-        eps = torch.randn_like(x) * s_noise
+        eps = torch.randn_like(x, device="cpu").to(x.device) * s_noise
         sigma_hat = sigmas[i] * (gamma + 1)
         if gamma > 0:
             x = x + eps * (sigma_hat**2 - sigmas[i] ** 2) ** 0.5
