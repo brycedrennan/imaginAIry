@@ -125,7 +125,7 @@ def test_img_to_img_from_url_cats(
     img = pillow_fit_image_within(img)
     img.save(f"{filename_base_for_orig_outputs}__orig.jpg")
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=14000)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=17000)
 
 
 @pytest.mark.parametrize("init_strength", [0, 0.05, 0.2, 1])
@@ -155,6 +155,7 @@ def test_img_to_img_fruit_2_gold(
 
     threshold_lookup = {
         "k_dpm_2_a": 26000,
+        "k_euler_a": 18000,
         "k_dpm_adaptive": 13000,
     }
     threshold = threshold_lookup.get(sampler_type, 11000)
