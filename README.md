@@ -121,11 +121,15 @@ imagine --tile-x -w 1024 -h 512 "360 degree equirectangular panorama photograph 
 <img src="assets/desert_360.jpg" height="128">
 
 ### Image-to-Image
+Use depth maps for amazing "translations" of existing images.
+
 ```bash
->> imagine "portrait of a smiling lady. oil painting" --init-image girl_with_a_pearl_earring.jpg
+>> imagine --model SD-2.0-depth --init-image girl_with_a_pearl_earring_large.jpg --init-image-strength 0.05  "professional headshot photo of a woman with a pearl earring" -r 4 -w 1024 -h 1024 --steps 50
 ```
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/data/girl_with_a_pearl_earring.jpg" height="256"> ➡️ 
-<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000105_33084057_DDIM40_PS7.5_portrait_of_a_smiling_lady._oil_painting._.jpg" height="256"> 
+<img src="assets/pearl_depth_1.jpg" height="512">
+<img src="assets/pearl_depth_2.jpg" height="512"> 
+<img src="assets/pearl_depth_3.jpg" height="512">
 
 ### Prompt Expansion
 You can use `{}` to randomly pull values from lists.  A list of values separated by `|` 
@@ -237,6 +241,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 ## ChangeLog
 **7.3.0**
 - feature: 🎉 depth-based image-to-image generations (and inpainting) 
+- fix: k_euler_a produces more consistent images per seed (randomization respects the seed again)
 
 **7.2.0**
 - feature: 🎉 tile in a single dimension ("x" or "y").  This enables, with a bit of luck, generation of 360 VR images.
