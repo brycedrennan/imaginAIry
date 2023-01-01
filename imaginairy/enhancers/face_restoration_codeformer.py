@@ -56,6 +56,7 @@ def enhance_faces(img, fidelity=0):
     net = codeformer_model()
 
     face_helper = face_restore_helper()
+    face_helper.clean_all()
 
     image = img.convert("RGB")
     np_img = np.array(image, dtype=np.uint8)

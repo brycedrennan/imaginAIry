@@ -24,5 +24,5 @@ tests/vastai_cli.py
 .unison*
 *.kgrind
 *.pyprof
-/imaginairy/enhancers/.polyscope.ini
-/imaginairy/enhancers/imgui.ini
+**/.polyscope.ini
+**/imgui.ini

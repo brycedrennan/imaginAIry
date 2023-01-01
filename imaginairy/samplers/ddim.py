@@ -47,6 +47,13 @@ class DDIMSampler(ImageSampler):
         t_start=None,
         quantize_x0=False,
     ):
+        # print("Sampling with DDIM")
+        # print("num_steps", num_steps)
+        # print("shape", shape)
+        # print("neutral_conditioning", neutral_conditioning)
+        # print("positive_conditioning", positive_conditioning)
+        # print("guidance_scale", guidance_scale)
+        # print("batch_size", batch_size)
         schedule = NoiseSchedule(
             model_num_timesteps=self.model.num_timesteps,
             model_alphas_cumprod=self.model.alphas_cumprod,

@@ -12,6 +12,8 @@ DEFAULT_NEGATIVE_PROMPT = (
     "grainy, blurred, blurry, writing, calligraphy, signature, text, watermark, bad art,"
 )
 
+SPLITMEM_ENABLED = False
+
 
 @dataclass
 class ModelConfig:
@@ -19,6 +21,7 @@ class ModelConfig:
     config_path: str
     weights_url: str
     default_image_size: int
+    weights_url_full: str = None
     forced_attn_precision: str = "default"
 
 
@@ -34,7 +37,8 @@ MODEL_CONFIGS = [
     ModelConfig(
         short_name="SD-1.5",
         config_path="configs/stable-diffusion-v1.yaml",
-        weights_url="https://huggingface.co/acheong08/SD-V1-5-cloned/resolve/fc392f6bd4345b80fc2256fa8aded8766b6c629e/v1-5-pruned-emaonly.ckpt",
+        weights_url="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/889b629140e71758e1e0006e355c331a5744b4bf/v1-5-pruned-emaonly.ckpt",
+        weights_url_full="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/889b629140e71758e1e0006e355c331a5744b4bf/v1-5-pruned.ckpt",
         default_image_size=512,
     ),
     ModelConfig(

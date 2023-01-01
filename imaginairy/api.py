@@ -134,6 +134,7 @@ def imagine(
             )
             model = get_diffusion_model(
                 weights_location=prompt.model,
+                config_path=prompt.model_config_path,
                 half_mode=half_mode,
                 for_inpainting=prompt.mask_image or prompt.mask_prompt,
             )
@@ -182,6 +183,7 @@ def imagine(
                             max_height=prompt.height,
                             max_width=prompt.width,
                         )
+
                     except PIL.UnidentifiedImageError:
                         logger.warning(f"Could not load image: {prompt.init_image}")
                         continue
@@ -194,9 +196,16 @@ def imagine(
                         )
                     elif prompt.mask_image:
                         mask_image = prompt.mask_image.convert("L")
+                        mask_image = pillow_fit_image_within(
+                            mask_image,
+                            max_height=prompt.height,
+                            max_width=prompt.width,
+                            convert="L",
+                        )
 
                     if mask_image is not None:
                         log_img(mask_image, "init mask")
+
                         if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
                             mask_image = ImageOps.invert(mask_image)
 
@@ -355,6 +364,8 @@ def imagine(
                         shape=shape,
                         batch_size=1,
                     )
+                # from torch.nn.functional import interpolate
+                # samples = interpolate(samples, scale_factor=2, mode='nearest')
 
                 x_samples = model.decode_first_stage(samples)
                 x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
