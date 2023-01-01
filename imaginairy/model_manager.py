@@ -1,12 +1,15 @@
 import gc
+import inspect
 import logging
 import os
 import sys
 import urllib.parse
+from functools import wraps
 
 import requests
 import torch
-from huggingface_hub import hf_hub_download, try_to_load_from_cache
+from huggingface_hub import hf_hub_download as _hf_hub_download
+from huggingface_hub import try_to_load_from_cache
 from omegaconf import OmegaConf
 from transformers.utils.hub import HfFolder
 
@@ -30,11 +33,12 @@ class HuggingFaceAuthorizationError(RuntimeError):
 class MemoryAwareModel:
     """Wraps a model to allow dynamic loading/unloading as needed."""
 
-    def __init__(self, config_path, weights_path, half_mode=None):
+    def __init__(self, config_path, weights_path, half_mode=None, for_training=False):
         self._config_path = config_path
         self._weights_path = weights_path
         self._half_mode = half_mode
         self._model = None
+        self._for_training = for_training
 
         LOADED_MODELS[(self._config_path, self._weights_path)] = self
 
@@ -47,9 +51,13 @@ class MemoryAwareModel:
             # unload all models in LOADED_MODELS
             for model in LOADED_MODELS.values():
                 model.unload_model()
+            model_config = OmegaConf.load(f"{PKG_ROOT}/{self._config_path}")
+            if self._for_training:
+                model_config.use_ema = True
+                # model_config.use_scheduler = True
 
             model = load_model_from_config(
-                config=OmegaConf.load(f"{PKG_ROOT}/{self._config_path}"),
+                config=model_config,
                 weights_location=self._weights_path,
             )
 
@@ -75,7 +83,7 @@ class MemoryAwareModel:
 
 def load_model_from_config(config, weights_location):
     if weights_location.startswith("http"):
-        ckpt_path = get_cached_url_path(weights_location)
+        ckpt_path = get_cached_url_path(weights_location, category="weights")
     else:
         ckpt_path = weights_location
     logger.info(f"Loading model {ckpt_path} onto {get_device()} backend...")
@@ -94,7 +102,7 @@ def load_model_from_config(config, weights_location):
             if weights_location.startswith("http"):
                 logger.warning("Corrupt checkpoint. deleting and re-downloading...")
                 os.remove(ckpt_path)
-                ckpt_path = get_cached_url_path(weights_location)
+                ckpt_path = get_cached_url_path(weights_location, category="weights")
                 pl_sd = torch.load(ckpt_path, map_location="cpu")
         if pl_sd is None:
             raise e
@@ -119,6 +127,7 @@ def get_diffusion_model(
     config_path="configs/stable-diffusion-v1.yaml",
     half_mode=None,
     for_inpainting=False,
+    for_training=False,
 ):
     """
     Load a diffusion model.
@@ -127,7 +136,11 @@ def get_diffusion_model(
     """
     try:
         return _get_diffusion_model(
-            weights_location, config_path, half_mode, for_inpainting
+            weights_location,
+            config_path,
+            half_mode,
+            for_inpainting,
+            for_training=for_training,
         )
     except HuggingFaceAuthorizationError as e:
         if for_inpainting:
@@ -135,7 +148,11 @@ def get_diffusion_model(
                 f"Failed to load inpainting model. Attempting to fall-back to standard model.   {str(e)}"
             )
             return _get_diffusion_model(
-                iconfig.DEFAULT_MODEL, config_path, half_mode, for_inpainting=False
+                iconfig.DEFAULT_MODEL,
+                config_path,
+                half_mode,
+                for_inpainting=False,
+                for_training=for_training,
             )
         raise e
 
@@ -145,6 +162,7 @@ def _get_diffusion_model(
     config_path="configs/stable-diffusion-v1.yaml",
     half_mode=None,
     for_inpainting=False,
+    for_training=False,
 ):
     """
     Load a diffusion model.
@@ -152,25 +170,12 @@ def _get_diffusion_model(
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
     global MOST_RECENTLY_LOADED_MODEL  # noqa
-    model_config = None
-    if weights_location is None:
-        weights_location = iconfig.DEFAULT_MODEL
-    if (
-        for_inpainting
-        and f"{weights_location}-inpaint" in iconfig.MODEL_CONFIG_SHORTCUTS
-    ):
-        model_config = iconfig.MODEL_CONFIG_SHORTCUTS[f"{weights_location}-inpaint"]
-        config_path, weights_location = (
-            model_config.config_path,
-            model_config.weights_url,
-        )
-    elif weights_location in iconfig.MODEL_CONFIG_SHORTCUTS:
-        model_config = iconfig.MODEL_CONFIG_SHORTCUTS[weights_location]
-        config_path, weights_location = (
-            model_config.config_path,
-            model_config.weights_url,
-        )
-
+    model_config, weights_location, config_path = resolve_model_paths(
+        weights_path=weights_location,
+        config_path=config_path,
+        for_inpainting=for_inpainting,
+        for_training=for_training,
+    )
     # some models need the attention calculated in float32
     if model_config is not None:
         attention.ATTENTION_PRECISION_OVERRIDE = model_config.forced_attn_precision
@@ -180,7 +185,10 @@ def _get_diffusion_model(
     key = (config_path, weights_location)
     if key not in LOADED_MODELS:
         MemoryAwareModel(
-            config_path=config_path, weights_path=weights_location, half_mode=half_mode
+            config_path=config_path,
+            weights_path=weights_location,
+            half_mode=half_mode,
+            for_training=for_training,
         )
 
     model = LOADED_MODELS[key]
@@ -188,6 +196,41 @@ def _get_diffusion_model(
     model.num_timesteps_cond  # noqa
     MOST_RECENTLY_LOADED_MODEL = model
     return model
+
+
+def resolve_model_paths(
+    weights_path=iconfig.DEFAULT_MODEL,
+    config_path=None,
+    for_inpainting=False,
+    for_training=False,
+):
+    """Resolve weight and config path if they happen to be shortcuts."""
+    model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(weights_path, None)
+    model_metadata_c = iconfig.MODEL_CONFIG_SHORTCUTS.get(config_path, None)
+    if for_inpainting:
+        model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(
+            f"{weights_path}-inpaint", model_metadata_w
+        )
+        model_metadata_c = iconfig.MODEL_CONFIG_SHORTCUTS.get(
+            f"{config_path}-inpaint", model_metadata_c
+        )
+
+    if model_metadata_w:
+        if config_path is None:
+            config_path = model_metadata_w.config_path
+        if for_training:
+            weights_path = model_metadata_w.weights_url_full
+            if weights_path is None:
+                raise ValueError(
+                    "No full training weights configured for this model. Edit the code or subimt a github issue."
+                )
+        else:
+            weights_path = model_metadata_w.weights_url
+
+    if model_metadata_c:
+        config_path = model_metadata_c.config_path
+    model_metadata = model_metadata_w or model_metadata_c
+    return model_metadata, weights_path, config_path
 
 
 def get_model_default_image_size(weights_location):
@@ -209,12 +252,12 @@ def get_cache_dir():
             xdg_cache_home = os.path.join(user_home, ".cache")
 
     if xdg_cache_home is not None:
-        return os.path.join(xdg_cache_home, "imaginairy", "weights")
+        return os.path.join(xdg_cache_home, "imaginairy")
 
-    return os.path.join(os.path.dirname(__file__), ".cached-downloads")
+    return os.path.join(os.path.dirname(__file__), ".cached-aimg")
 
 
-def get_cached_url_path(url):
+def get_cached_url_path(url, category=None):
     """
     Gets the contents of a url, but caches the response indefinitely.
 
@@ -231,6 +274,8 @@ def get_cached_url_path(url):
         pass
     filename = url.split("/")[-1]
     dest = get_cache_dir()
+    if category:
+        dest = os.path.join(dest, category)
     os.makedirs(dest, exist_ok=True)
     dest_path = os.path.join(dest, filename)
     if os.path.exists(dest_path):
@@ -258,6 +303,20 @@ def check_huggingface_url_authorized(url):
             "See https://huggingface.co/docs/huggingface_hub/quick-start#login for more information"
         )
     return None
+
+
+@wraps(_hf_hub_download)
+def hf_hub_download(*args, **kwargs):
+    """
+    backwards compatible wrapper for huggingface's hf_hub_download.
+
+    they changed ther argument name from `use_auth_token` to `token`
+    """
+    arg_names = inspect.getfullargspec(_hf_hub_download)
+    if "use_auth_token" in arg_names.args and "token" in kwargs:
+        kwargs["use_auth_token"] = kwargs.pop("token")
+
+    return _hf_hub_download(*args, **kwargs)
 
 
 def huggingface_cached_path(url):

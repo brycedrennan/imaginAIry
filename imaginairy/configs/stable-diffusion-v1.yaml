@@ -7,7 +7,7 @@ model:
     num_timesteps_cond: 1
     log_every_t: 200
     timesteps: 1000
-    first_stage_key: "jpg"
+    first_stage_key: "image"
     cond_stage_key: "txt"
     image_size: 64
     channels: 4
@@ -20,7 +20,7 @@ model:
     scheduler_config: # 10000 warm-up steps
       target: imaginairy.lr_scheduler.LambdaLinearScheduler
       params:
-        warm_up_steps: [ 10000 ]
+        warm_up_steps: [ 1 ] # NOTE for resuming. use 10000 if starting from scratch
         cycle_lengths: [ 10000000000000 ] # incredibly large number to prevent corner cases
         f_start: [ 1.e-6 ]
         f_max: [ 1. ]
