@@ -12,6 +12,8 @@ DEFAULT_NEGATIVE_PROMPT = (
     "grainy, blurred, blurry, writing, calligraphy, signature, text, watermark, bad art,"
 )
 
+SPLITMEM_ENABLED = False
+
 
 @dataclass
 class ModelConfig:

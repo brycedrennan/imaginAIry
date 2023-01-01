@@ -14,12 +14,17 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 from einops import rearrange, repeat
+from omegaconf import ListConfig
+from PIL import Image, ImageDraw, ImageFont
 from torch import nn
 from torch.nn import functional as F
 from torch.nn.modules.utils import _pair
+from torch.optim.lr_scheduler import LambdaLR
 from torchvision.utils import make_grid
 from tqdm import tqdm
 
+from imaginairy.modules.attention import CrossAttention
+from imaginairy.modules.autoencoder import AutoencoderKL, IdentityFirstStage
 from imaginairy.modules.diffusion.util import (
     extract_into_tensor,
     make_beta_schedule,
@@ -27,10 +32,37 @@ from imaginairy.modules.diffusion.util import (
 )
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.modules.ema import LitEma
+from imaginairy.samplers import DDIMSampler
 from imaginairy.utils import instantiate_from_config
 
 logger = logging.getLogger(__name__)
 __conditioning_keys__ = {"concat": "c_concat", "crossattn": "c_crossattn", "adm": "y"}
+
+
+def log_txt_as_img(wh, xc, size=10):
+    # wh a tuple of (width, height)
+    # xc a list of captions to plot
+    b = len(xc)
+    txts = list()
+    for bi in range(b):
+        txt = Image.new("RGB", wh, color="white")
+        draw = ImageDraw.Draw(txt)
+        font = ImageFont.truetype("data/DejaVuSans.ttf", size=size)
+        nc = int(40 * (wh[0] / 256))
+        lines = "\n".join(
+            xc[bi][start : start + nc] for start in range(0, len(xc[bi]), nc)
+        )
+
+        try:
+            draw.text((0, 0), lines, fill="black", font=font)
+        except UnicodeEncodeError:
+            print("Cant encode string for logging. Skipping.")
+
+        txt = np.array(txt).transpose(2, 0, 1) / 127.5 - 1.0
+        txts.append(txt)
+    txts = np.stack(txts)
+    txts = torch.tensor(txts)
+    return txts
 
 
 def disabled_train(self):
@@ -678,6 +710,7 @@ class LatentDiffusion(DDPM):
         conditioning_key=None,
         scale_factor=1.0,
         scale_by_std=False,
+        unet_trainable=True,
         **kwargs,
     ):
         self.num_timesteps_cond = (
@@ -695,6 +728,7 @@ class LatentDiffusion(DDPM):
         super().__init__(conditioning_key=conditioning_key, **kwargs)
         self.concat_mode = concat_mode
         self.cond_stage_trainable = cond_stage_trainable
+        self.unet_trainable = unet_trainable
         self.cond_stage_key = cond_stage_key
         try:
             self.num_downs = len(first_stage_config.params.ddconfig.ch_mult) - 1
@@ -726,6 +760,7 @@ class LatentDiffusion(DDPM):
                 m._conv_forward = _TileModeConv2DConvForward.__get__(  # noqa
                     m, nn.Conv2d
                 )
+        self.tile_mode(tile_mode=False)
 
     def tile_mode(self, tile_mode):
         """For creating seamless tiles."""
@@ -1005,7 +1040,7 @@ class LatentDiffusion(DDPM):
             if cond_key is None:
                 cond_key = self.cond_stage_key
             if cond_key != self.first_stage_key:
-                if cond_key in ["caption", "coordinates_bbox"]:
+                if cond_key in ["caption", "coordinates_bbox", "txt"]:
                     xc = batch[cond_key]
                 elif cond_key == "class_label":
                     xc = batch
@@ -1099,6 +1134,24 @@ class LatentDiffusion(DDPM):
             return decoded
 
         return self.first_stage_model.encode(x)
+
+    def shared_step(self, batch, **kwargs):
+        x, c = self.get_input(batch, self.first_stage_key)
+        loss = self(x, c)
+        return loss
+
+    def forward(self, x, c, *args, **kwargs):
+        t = torch.randint(
+            0, self.num_timesteps, (x.shape[0],), device=self.device
+        ).long()
+        if self.model.conditioning_key is not None:
+            assert c is not None
+            if self.cond_stage_trainable:
+                c = self.get_learned_conditioning(c)
+            if self.shorten_cond_schedule:  # TODO: drop this option
+                tc = self.cond_ids[t].to(self.device)
+                c = self.q_sample(x_start=c, t=tc, noise=torch.randn_like(c.float()))
+        return self.p_losses(x, c, t, *args, **kwargs)
 
     def apply_model(self, x_noisy, t, cond, return_ids=False):
 
@@ -1244,6 +1297,41 @@ class LatentDiffusion(DDPM):
 
         return x_recon
 
+    def p_losses(self, x_start, cond, t, noise=None):
+        noise = noise if noise is not None else torch.randn_like(x_start)
+        x_noisy = self.q_sample(x_start=x_start, t=t, noise=noise)
+        model_output = self.apply_model(x_noisy, t, cond)
+
+        loss_dict = {}
+        prefix = "train" if self.training else "val"
+
+        if self.parameterization == "x0":
+            target = x_start
+        elif self.parameterization == "eps":
+            target = noise
+        else:
+            raise NotImplementedError()
+
+        loss_simple = self.get_loss(model_output, target, mean=False).mean([1, 2, 3])
+        loss_dict.update({f"{prefix}/loss_simple": loss_simple.mean()})
+
+        logvar_t = self.logvar[t].to(self.device)
+        loss = loss_simple / torch.exp(logvar_t) + logvar_t
+        # loss = loss_simple / torch.exp(self.logvar) + self.logvar
+        if self.learn_logvar:
+            loss_dict.update({f"{prefix}/loss_gamma": loss.mean()})
+            loss_dict.update({"logvar": self.logvar.data.mean()})
+
+        loss = self.l_simple_weight * loss.mean()
+
+        loss_vlb = self.get_loss(model_output, target, mean=False).mean(dim=(1, 2, 3))
+        loss_vlb = (self.lvlb_weights[t] * loss_vlb).mean()
+        loss_dict.update({f"{prefix}/loss_vlb": loss_vlb})
+        loss += self.original_elbo_weight * loss_vlb
+        loss_dict.update({f"{prefix}/loss": loss})
+
+        return loss, loss_dict
+
     def p_mean_variance(
         self,
         x,
@@ -1345,6 +1433,287 @@ class LatentDiffusion(DDPM):
             + extract_into_tensor(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape)
             * noise
         )
+
+    @torch.no_grad()
+    def sample_log(self, cond, batch_size, ddim, ddim_steps, **kwargs):
+        sampler = DDIMSampler(self)
+        shape = (batch_size, self.channels, self.image_size, self.image_size)
+        uncond = kwargs.get("unconditional_conditioning")
+        if uncond is None:
+            uncond = self.get_unconditional_conditioning(batch_size, "")
+
+        positive_conditioning = {
+            "c_concat": [],
+            "c_crossattn": [cond],
+        }
+        neutral_conditioning = {
+            "c_concat": [],
+            "c_crossattn": [uncond],
+        }
+        samples = sampler.sample(
+            num_steps=ddim_steps,
+            positive_conditioning=positive_conditioning,
+            neutral_conditioning=neutral_conditioning,
+            guidance_scale=kwargs.get("unconditional_guidance_scale", 1.0),
+            shape=shape,
+            batch_size=1,
+        )
+
+        return samples, []
+
+    @torch.no_grad()
+    def get_unconditional_conditioning(self, batch_size, null_label=None):
+        if null_label is not None:
+            xc = null_label
+            if isinstance(xc, ListConfig):
+                xc = list(xc)
+            if isinstance(xc, dict) or isinstance(xc, list):
+                c = self.get_learned_conditioning(xc)
+            else:
+                if hasattr(xc, "to"):
+                    xc = xc.to(self.device)
+                c = self.get_learned_conditioning(xc)
+        else:
+            # todo: get null label from cond_stage_model
+            raise NotImplementedError()
+        c = repeat(c, "1 ... -> b ...", b=batch_size).to(self.device)
+        return c
+
+    @torch.no_grad()
+    def log_images(
+        self,
+        batch,
+        N=8,
+        n_row=4,
+        sample=True,
+        ddim_steps=50,
+        ddim_eta=1.0,
+        return_keys=None,
+        quantize_denoised=True,
+        inpaint=True,
+        plot_denoise_rows=False,
+        plot_progressive_rows=True,
+        plot_diffusion_rows=True,
+        unconditional_guidance_scale=1.0,
+        unconditional_guidance_label=None,
+        use_ema_scope=True,
+        **kwargs,
+    ):
+        ema_scope = self.ema_scope if use_ema_scope else nullcontext
+        use_ddim = ddim_steps is not None
+
+        log = dict()
+        z, c, x, xrec, xc = self.get_input(
+            batch,
+            self.first_stage_key,
+            return_first_stage_outputs=True,
+            force_c_encode=True,
+            return_original_cond=True,
+            bs=N,
+        )
+        N = min(x.shape[0], N)
+        n_row = min(x.shape[0], n_row)
+        log["inputs"] = x
+        log["reconstruction"] = xrec
+        if self.model.conditioning_key is not None:
+            if hasattr(self.cond_stage_model, "decode"):
+                xc = self.cond_stage_model.decode(c)
+                log["conditioning"] = xc
+            elif self.cond_stage_key in ["caption", "txt"]:
+                xc = log_txt_as_img(
+                    (x.shape[2], x.shape[3]),
+                    batch[self.cond_stage_key],
+                    size=x.shape[2] // 25,
+                )
+                log["conditioning"] = xc
+            elif self.cond_stage_key == "class_label":
+                # xc = log_txt_as_img(
+                #     (x.shape[2], x.shape[3]),
+                #     batch["human_label"],
+                #     size=x.shape[2] // 25,
+                # )
+                log["conditioning"] = xc
+            elif isimage(xc):
+                log["conditioning"] = xc
+            if ismap(xc):
+                log["original_conditioning"] = self.to_rgb(xc)
+
+        if plot_diffusion_rows:
+            # get diffusion row
+            diffusion_row = list()
+            z_start = z[:n_row]
+            for t in range(self.num_timesteps):
+                if t % self.log_every_t == 0 or t == self.num_timesteps - 1:
+                    t = repeat(torch.tensor([t]), "1 -> b", b=n_row)
+                    t = t.to(self.device).long()
+                    noise = torch.randn_like(z_start)
+                    z_noisy = self.q_sample(x_start=z_start, t=t, noise=noise)
+                    diffusion_row.append(self.decode_first_stage(z_noisy))
+
+            diffusion_row = torch.stack(diffusion_row)  # n_log_step, n_row, C, H, W
+            diffusion_grid = rearrange(diffusion_row, "n b c h w -> b n c h w")
+            diffusion_grid = rearrange(diffusion_grid, "b n c h w -> (b n) c h w")
+            diffusion_grid = make_grid(diffusion_grid, nrow=diffusion_row.shape[0])
+            log["diffusion_row"] = diffusion_grid
+
+        if sample:
+            # get denoise row
+            with ema_scope("Sampling"):
+                samples, z_denoise_row = self.sample_log(
+                    cond=c,
+                    batch_size=N,
+                    ddim=use_ddim,
+                    ddim_steps=ddim_steps,
+                    eta=ddim_eta,
+                )
+                # samples, z_denoise_row = self.sample(cond=c, batch_size=N, return_intermediates=True)
+            x_samples = self.decode_first_stage(samples)
+            log["samples"] = x_samples
+            if plot_denoise_rows:
+                denoise_grid = self._get_denoise_row_from_list(z_denoise_row)
+                log["denoise_row"] = denoise_grid
+
+            if (
+                quantize_denoised
+                and not isinstance(self.first_stage_model, AutoencoderKL)
+                and not isinstance(self.first_stage_model, IdentityFirstStage)
+            ):
+                # also display when quantizing x0 while sampling
+                with ema_scope("Plotting Quantized Denoised"):
+                    samples, z_denoise_row = self.sample_log(
+                        cond=c,
+                        batch_size=N,
+                        ddim=use_ddim,
+                        ddim_steps=ddim_steps,
+                        eta=ddim_eta,
+                        quantize_denoised=True,
+                    )
+                    # samples, z_denoise_row = self.sample(cond=c, batch_size=N, return_intermediates=True,
+                    #                                      quantize_denoised=True)
+                x_samples = self.decode_first_stage(samples.to(self.device))
+                log["samples_x0_quantized"] = x_samples
+
+        if unconditional_guidance_scale > 1.0:
+            uc = self.get_unconditional_conditioning(N, unconditional_guidance_label)
+            # uc = torch.zeros_like(c)
+            with ema_scope("Sampling with classifier-free guidance"):
+                samples_cfg, _ = self.sample_log(
+                    cond=c,
+                    batch_size=N,
+                    ddim=use_ddim,
+                    ddim_steps=ddim_steps,
+                    eta=ddim_eta,
+                    unconditional_guidance_scale=unconditional_guidance_scale,
+                    unconditional_conditioning=uc,
+                )
+                x_samples_cfg = self.decode_first_stage(samples_cfg)
+                log[
+                    f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"
+                ] = x_samples_cfg
+
+        if inpaint:
+            # make a simple center square
+            b, h, w = z.shape[0], z.shape[2], z.shape[3]
+            mask = torch.ones(N, h, w).to(self.device)
+            # zeros will be filled in
+            mask[:, h // 4 : 3 * h // 4, w // 4 : 3 * w // 4] = 0.0
+            mask = mask[:, None, ...]
+            with ema_scope("Plotting Inpaint"):
+                samples, _ = self.sample_log(
+                    cond=c,
+                    batch_size=N,
+                    ddim=use_ddim,
+                    eta=ddim_eta,
+                    ddim_steps=ddim_steps,
+                    x0=z[:N],
+                    mask=mask,
+                )
+            x_samples = self.decode_first_stage(samples.to(self.device))
+            log["samples_inpainting"] = x_samples
+            log["mask"] = mask
+
+            # outpaint
+            mask = 1.0 - mask
+            with ema_scope("Plotting Outpaint"):
+                samples, _ = self.sample_log(
+                    cond=c,
+                    batch_size=N,
+                    ddim=use_ddim,
+                    eta=ddim_eta,
+                    ddim_steps=ddim_steps,
+                    x0=z[:N],
+                    mask=mask,
+                )
+            x_samples = self.decode_first_stage(samples.to(self.device))
+            log["samples_outpainting"] = x_samples
+
+        if plot_progressive_rows:
+            with ema_scope("Plotting Progressives"):
+                img, progressives = self.progressive_denoising(
+                    c,
+                    shape=(self.channels, self.image_size, self.image_size),
+                    batch_size=N,
+                )
+            prog_row = self._get_denoise_row_from_list(
+                progressives, desc="Progressive Generation"
+            )
+            log["progressive_row"] = prog_row
+
+        if return_keys:
+            if np.intersect1d(list(log.keys()), return_keys).shape[0] == 0:
+                return log
+            else:
+                return {key: log[key] for key in return_keys}
+        return log
+
+    def configure_optimizers(self):
+        lr = self.learning_rate
+        params = []
+        if self.unet_trainable == "attn":
+            logger.info("Training only unet attention layers")
+            for n, m in self.model.named_modules():
+                if isinstance(m, CrossAttention) and n.endswith("attn2"):
+                    params.extend(m.parameters())
+        elif self.unet_trainable is True or self.unet_trainable == "all":
+            logger.info("Training the full unet")
+            params = list(self.model.parameters())
+        else:
+            raise ValueError(
+                f"Unrecognised setting for unet_trainable: {self.unet_trainable}"
+            )
+
+        if self.cond_stage_trainable:
+            logger.info(
+                f"{self.__class__.__name__}: Also optimizing conditioner params!"
+            )
+            params = params + list(self.cond_stage_model.parameters())
+        if self.learn_logvar:
+            logger.info("Diffusion model optimizing logvar")
+            params.append(self.logvar)
+        opt = torch.optim.AdamW(params, lr=lr)
+        if self.use_scheduler:
+            assert "target" in self.scheduler_config
+            scheduler = instantiate_from_config(self.scheduler_config)
+
+            logger.info("Setting up LambdaLR scheduler...")
+            scheduler = [
+                {
+                    "scheduler": LambdaLR(opt, lr_lambda=scheduler.schedule),
+                    "interval": "step",
+                    "frequency": 1,
+                }
+            ]
+            return [opt], scheduler
+        return opt
+
+    @torch.no_grad()
+    def to_rgb(self, x):
+        x = x.float()
+        if not hasattr(self, "colorize"):
+            self.colorize = torch.randn(3, x.shape[1], 1, 1).to(x)
+        x = nn.functional.conv2d(x, weight=self.colorize)
+        x = 2.0 * (x - x.min()) / (x.max() - x.min()) - 1.0
+        return x
 
 
 class DiffusionWrapper(pl.LightningModule):

@@ -12,7 +12,7 @@ class BaseModel(torch.nn.Module):  # noqa
         Args:
             path (str): file path
         """
-        ckpt_path = get_cached_url_path(config.midas_url)
+        ckpt_path = get_cached_url_path(config.midas_url, category="weights")
         parameters = torch.load(ckpt_path, map_location=torch.device("cpu"))
 
         if "optimizer" in parameters:

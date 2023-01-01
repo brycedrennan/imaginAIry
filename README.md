@@ -403,7 +403,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - https://github.com/CompVis/stable-diffusion/pull/177
    - https://github.com/huggingface/diffusers/pull/532/files
    - https://github.com/HazyResearch/flash-attention
-   - xformers improvements https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/
+   - ✅ xformers improvements https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/
  - Development Environment
    - ✅ add tests
    - ✅ set up ci (test/lint/format)
@@ -424,9 +424,10 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - Compositional Visual Generation
      - https://github.com/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch
      - https://colab.research.google.com/github/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch/blob/main/notebooks/demo.ipynb#scrollTo=wt_j3uXZGFAS
-   - negative prompting
+   - ✅ negative prompting
      - some syntax to allow it in a text string
-   - images as actual prompts instead of just init images. is this the same as textual inversion?
+   - 🚫 images as actual prompts instead of just init images. 
+     - not directly possible due to model architecture.
      - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
      - https://twitter.com/Buntworthy/status/1566744186153484288
      - https://github.com/justinpinkney/stable-diffusion
@@ -439,7 +440,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ inpainting
      - https://github.com/Jack000/glid-3-xl-stable 
      - https://github.com/andreas128/RePaint
-     - img2img but keeps img stable
+     - ✅ img2img but keeps img stable
      - https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/
      - https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1
      - https://github.com/pesser/stable-diffusion/commit/bbb52981460707963e2a62160890d7ecbce00e79
@@ -478,6 +479,11 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
  - Other
    - Enhancement pipelines
    - text-to-3d https://dreamfusionpaper.github.io/
+     - https://shihmengli.github.io/3D-Photo-Inpainting/
+     - https://github.com/thygate/stable-diffusion-webui-depthmap-script/discussions/50
+     - Depth estimation
+       - what is SOTA for monocular depth estimation?
+       - https://github.com/compphoto/BoostingMonocularDepth
    - make a video https://github.com/lucidrains/make-a-video-pytorch
    - animations
      - https://github.com/francislabountyjr/stable-diffusion/blob/main/inferencing_notebook.ipynb

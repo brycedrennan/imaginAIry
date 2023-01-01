@@ -75,7 +75,7 @@ class MemoryAwareModel:
 
 def load_model_from_config(config, weights_location):
     if weights_location.startswith("http"):
-        ckpt_path = get_cached_url_path(weights_location)
+        ckpt_path = get_cached_url_path(weights_location, category="weights")
     else:
         ckpt_path = weights_location
     logger.info(f"Loading model {ckpt_path} onto {get_device()} backend...")
@@ -94,7 +94,7 @@ def load_model_from_config(config, weights_location):
             if weights_location.startswith("http"):
                 logger.warning("Corrupt checkpoint. deleting and re-downloading...")
                 os.remove(ckpt_path)
-                ckpt_path = get_cached_url_path(weights_location)
+                ckpt_path = get_cached_url_path(weights_location, category="weights")
                 pl_sd = torch.load(ckpt_path, map_location="cpu")
         if pl_sd is None:
             raise e
@@ -209,12 +209,12 @@ def get_cache_dir():
             xdg_cache_home = os.path.join(user_home, ".cache")
 
     if xdg_cache_home is not None:
-        return os.path.join(xdg_cache_home, "imaginairy", "weights")
+        return os.path.join(xdg_cache_home, "imaginairy")
 
-    return os.path.join(os.path.dirname(__file__), ".cached-downloads")
+    return os.path.join(os.path.dirname(__file__), ".cached-aimg")
 
 
-def get_cached_url_path(url):
+def get_cached_url_path(url, category=None):
     """
     Gets the contents of a url, but caches the response indefinitely.
 
@@ -231,6 +231,8 @@ def get_cached_url_path(url):
         pass
     filename = url.split("/")[-1]
     dest = get_cache_dir()
+    if category:
+        dest = os.path.join(dest, category)
     os.makedirs(dest, exist_ok=True)
     dest_path = os.path.join(dest, filename)
     if os.path.exists(dest_path):

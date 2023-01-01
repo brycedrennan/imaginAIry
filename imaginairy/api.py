@@ -355,6 +355,8 @@ def imagine(
                         shape=shape,
                         batch_size=1,
                     )
+                # from torch.nn.functional import interpolate
+                # samples = interpolate(samples, scale_factor=2, mode='nearest')
 
                 x_samples = model.decode_first_stage(samples)
                 x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
