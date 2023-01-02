@@ -117,7 +117,7 @@ class ModifiedResNet(nn.Module):
     A ResNet class that is similar to torchvision's but contains the following changes:
     - There are now 3 "stem" convolutions as opposed to 1, with an average pool instead of a max pool.
     - Performs anti-aliasing strided convolutions, where an avgpool is prepended to convolutions with stride > 1
-    - The final pooling layer is a QKV attention instead of an average pool
+    - The final pooling layer is a QKV attention instead of an average pool.
     """
 
     def __init__(self, layers, output_dim, heads, input_resolution=224, width=64):
@@ -447,7 +447,7 @@ class CLIP(nn.Module):
 
 
 def convert_weights(model: nn.Module):
-    """Convert applicable model parameters to fp16"""
+    """Convert applicable model parameters to fp16."""
 
     def _convert_weights_to_fp16(l):
         if isinstance(l, (nn.Conv1d, nn.Conv2d, nn.Linear)):
@@ -495,11 +495,11 @@ def build_model(state_dict: dict):
     else:
         counts: list = [
             len(
-                set(
+                {
                     k.split(".")[2]
                     for k in state_dict
                     if k.startswith(f"visual.layer{b}")
-                )
+                }
             )
             for b in [1, 2, 3, 4]
         ]
@@ -521,9 +521,7 @@ def build_model(state_dict: dict):
     transformer_width = state_dict["ln_final.weight"].shape[0]
     transformer_heads = transformer_width // 64
     transformer_layers = len(
-        set(
-            k.split(".")[2] for k in state_dict if k.startswith("transformer.resblocks")
-        )
+        {k.split(".")[2] for k in state_dict if k.startswith("transformer.resblocks")}
     )
 
     model = CLIP(

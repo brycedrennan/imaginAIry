@@ -14,7 +14,7 @@ from imaginairy.vendored.clipseg import CLIPDensePredT
 weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth"
 
 
-@lru_cache()
+@lru_cache
 def clip_mask_model():
     from imaginairy.paths import PKG_ROOT  # noqa
 

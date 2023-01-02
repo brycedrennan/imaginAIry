@@ -109,7 +109,7 @@ def _transform(n_px):
 
 
 def available_models() -> List[str]:
-    """Returns the names of available CLIP models"""
+    """Returns the names of available CLIP models."""
     return list(_MODELS.keys())
 
 
@@ -119,7 +119,7 @@ def load(
     jit: bool = False,
     download_root: str = None,
 ):
-    """Load a CLIP model
+    """Load a CLIP model.
 
     Parameters
     ----------
@@ -246,7 +246,7 @@ def tokenize(
     texts: Union[str, List[str]], context_length: int = 77, truncate: bool = False
 ) -> Union[torch.IntTensor, torch.LongTensor]:
     """
-    Returns the tokenized representation of given input string(s)
+    Returns the tokenized representation of given input string(s).
 
     Parameters
     ----------

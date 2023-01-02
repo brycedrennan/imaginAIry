@@ -14,7 +14,7 @@ from imaginairy.vendored.codeformer.codeformer_arch import CodeFormer
 logger = logging.getLogger(__name__)
 
 
-@lru_cache()
+@lru_cache
 def codeformer_model():
     model = CodeFormer(
         dim_embd=512,
@@ -31,10 +31,10 @@ def codeformer_model():
     return model
 
 
-@lru_cache()
+@lru_cache
 def face_restore_helper():
     """
-    Provide a singleton of FaceRestoreHelper
+    Provide a singleton of FaceRestoreHelper.
 
     FaceRestoreHelper loads a model internally so we need to cache it
     or we end up with a memory leak

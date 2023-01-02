@@ -7,14 +7,14 @@ import ftfy
 import regex as re
 
 
-@lru_cache()
+@lru_cache
 def default_bpe():
     return os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "bpe_simple_vocab_16e6.txt.gz"
     )
 
 
-@lru_cache()
+@lru_cache
 def bytes_to_unicode():
     """
     Returns list of utf-8 byte and a corresponding list of unicode strings.
@@ -65,7 +65,7 @@ def whitespace_clean(text):
     return text
 
 
-class SimpleTokenizer(object):
+class SimpleTokenizer:
     def __init__(self, bpe_path: str = default_bpe()):
         self.byte_encoder = bytes_to_unicode()
         self.byte_decoder = {v: k for k, v in self.byte_encoder.items()}

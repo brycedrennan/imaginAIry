@@ -3,7 +3,7 @@ wild mixture of
 https://github.com/lucidrains/denoising-diffusion-pytorch/blob/7706bdfc6f527f58d33f84b7b522e61e6e3164b3/denoising_diffusion_pytorch/denoising_diffusion_pytorch.py
 https://github.com/openai/improved-diffusion/blob/e94489283bb876ac1477d5dd7709bbbd2d9902ce/improved_diffusion/gaussian_diffusion.py
 https://github.com/CompVis/taming-transformers
--- merci
+-- merci.
 """
 import itertools
 import logging
@@ -66,7 +66,7 @@ class DDPM(pl.LightningModule):
         beta_schedule="linear",
         loss_type="l2",
         ckpt_path=None,
-        ignore_keys=tuple(),
+        ignore_keys=(),
         load_only_unet=False,
         monitor="val/loss",
         use_ema=True,
@@ -286,7 +286,7 @@ class DDPM(pl.LightningModule):
                     print(f"{context}: Restored training weights")
 
     @torch.no_grad()
-    def init_from_ckpt(self, path, ignore_keys=tuple(), only_model=False):
+    def init_from_ckpt(self, path, ignore_keys=(), only_model=False):
         sd = torch.load(path, map_location="cpu")
         if "state_dict" in list(sd.keys()):
             sd = sd["state_dict"]
@@ -664,7 +664,7 @@ def _TileModeConv2DConvForward(
 
 
 class LatentDiffusion(DDPM):
-    """main class"""
+    """main class."""
 
     def __init__(
         self,
@@ -728,7 +728,7 @@ class LatentDiffusion(DDPM):
                 )
 
     def tile_mode(self, tile_mode):
-        """For creating seamless tiles"""
+        """For creating seamless tiles."""
         tile_mode = tile_mode or ""
         tile_x = "x" in tile_mode
         tile_y = "y" in tile_mode
@@ -904,9 +904,12 @@ class LatentDiffusion(DDPM):
         Lx = (w - kernel_size[1]) // stride[1] + 1
 
         if uf == 1 and df == 1:
-            fold_params = dict(
-                kernel_size=kernel_size, dilation=1, padding=0, stride=stride
-            )
+            fold_params = {
+                "kernel_size": kernel_size,
+                "dilation": 1,
+                "padding": 0,
+                "stride": stride,
+            }
             unfold = torch.nn.Unfold(**fold_params)
 
             fold = torch.nn.Fold(output_size=x.shape[2:], **fold_params)
@@ -918,17 +921,20 @@ class LatentDiffusion(DDPM):
             weighting = weighting.view((1, 1, kernel_size[0], kernel_size[1], Ly * Lx))
 
         elif uf > 1 and df == 1:
-            fold_params = dict(
-                kernel_size=kernel_size, dilation=1, padding=0, stride=stride
-            )
+            fold_params = {
+                "kernel_size": kernel_size,
+                "dilation": 1,
+                "padding": 0,
+                "stride": stride,
+            }
             unfold = torch.nn.Unfold(**fold_params)
 
-            fold_params2 = dict(
-                kernel_size=(kernel_size[0] * uf, kernel_size[0] * uf),
-                dilation=1,
-                padding=0,
-                stride=(stride[0] * uf, stride[1] * uf),
-            )
+            fold_params2 = {
+                "kernel_size": (kernel_size[0] * uf, kernel_size[0] * uf),
+                "dilation": 1,
+                "padding": 0,
+                "stride": (stride[0] * uf, stride[1] * uf),
+            }
             fold = torch.nn.Fold(
                 output_size=(x.shape[2] * uf, x.shape[3] * uf), **fold_params2
             )
@@ -944,17 +950,20 @@ class LatentDiffusion(DDPM):
             )
 
         elif df > 1 and uf == 1:
-            fold_params = dict(
-                kernel_size=kernel_size, dilation=1, padding=0, stride=stride
-            )
+            fold_params = {
+                "kernel_size": kernel_size,
+                "dilation": 1,
+                "padding": 0,
+                "stride": stride,
+            }
             unfold = torch.nn.Unfold(**fold_params)
 
-            fold_params2 = dict(
-                kernel_size=(kernel_size[0] // df, kernel_size[0] // df),
-                dilation=1,
-                padding=0,
-                stride=(stride[0] // df, stride[1] // df),
-            )
+            fold_params2 = {
+                "kernel_size": (kernel_size[0] // df, kernel_size[0] // df),
+                "dilation": 1,
+                "padding": 0,
+                "stride": (stride[0] // df, stride[1] // df),
+            }
             fold = torch.nn.Fold(
                 output_size=(x.shape[2] // df, x.shape[3] // df), **fold_params2
             )
@@ -1370,7 +1379,7 @@ class DiffusionWrapper(pl.LightningModule):
 class LatentFinetuneDiffusion(LatentDiffusion):
     """
     Basis for different finetunas, such as inpainting or depth2image
-    To disable finetuning mode, set finetune_keys to None
+    To disable finetuning mode, set finetune_keys to None.
     """
 
     def __init__(
@@ -1399,7 +1408,7 @@ class LatentFinetuneDiffusion(LatentDiffusion):
         if ckpt_path is not None:
             self.init_from_ckpt(ckpt_path, ignore_keys)
 
-    def init_from_ckpt(self, path, ignore_keys=tuple(), only_model=False):
+    def init_from_ckpt(self, path, ignore_keys=(), only_model=False):
         sd = torch.load(path, map_location="cpu")
         if "state_dict" in list(sd.keys()):
             sd = sd["state_dict"]
@@ -1606,7 +1615,7 @@ class LatentInpaintDiffusion(LatentDiffusion):
 
 class LatentDepth2ImageDiffusion(LatentFinetuneDiffusion):
     """
-    condition on monocular depth estimation
+    condition on monocular depth estimation.
     """
 
     def __init__(self, depth_stage_config, concat_keys=("midas_in",), **kwargs):
@@ -1671,7 +1680,7 @@ class LatentDepth2ImageDiffusion(LatentFinetuneDiffusion):
 
 class LatentUpscaleFinetuneDiffusion(LatentFinetuneDiffusion):
     """
-    condition on low-res image (and optionally on some spatial noise augmentation)
+    condition on low-res image (and optionally on some spatial noise augmentation).
     """
 
     def __init__(

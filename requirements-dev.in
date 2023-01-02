@@ -1,7 +1,7 @@
 black
 coverage
 isort
-pycln
+ruff
 pydocstyle
 pylama
 pylint

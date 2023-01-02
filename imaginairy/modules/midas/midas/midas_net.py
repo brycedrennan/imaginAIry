@@ -1,7 +1,7 @@
 """
 MidashNet: Network for monocular depth estimation trained by mixing several datasets.
 This file contains code that is adapted from
-https://github.com/thomasjpfan/pytorch_refinenet/blob/master/pytorch_refinenet/refinenet/refinenet_4cascade.py
+https://github.com/thomasjpfan/pytorch_refinenet/blob/master/pytorch_refinenet/refinenet/refinenet_4cascade.py.
 """
 import torch
 from torch import nn

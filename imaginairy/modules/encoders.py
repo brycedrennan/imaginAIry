@@ -54,7 +54,7 @@ def disabled_train(self, mode=True):  # noqa
 
 
 class FrozenT5Embedder(AbstractEncoder):
-    """Uses the T5 transformer encoder for text"""
+    """Uses the T5 transformer encoder for text."""
 
     def __init__(
         self, version="google/t5-v1_1-large", device="cuda", max_length=77, freeze=True
@@ -94,7 +94,7 @@ class FrozenT5Embedder(AbstractEncoder):
 
 
 class FrozenCLIPEmbedder(AbstractEncoder):
-    """Uses the CLIP transformer encoder for text (from huggingface)"""
+    """Uses the CLIP transformer encoder for text (from huggingface)."""
 
     LAYERS = ["last", "pooled", "hidden"]
 
@@ -155,7 +155,7 @@ class FrozenCLIPEmbedder(AbstractEncoder):
 
 class FrozenOpenCLIPEmbedder(AbstractEncoder):
     """
-    Uses the OpenCLIP transformer encoder for text
+    Uses the OpenCLIP transformer encoder for text.
     """
 
     LAYERS = [

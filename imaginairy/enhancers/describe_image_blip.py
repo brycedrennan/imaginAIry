@@ -17,7 +17,7 @@ if "mps" in device:
 BLIP_EVAL_SIZE = 384
 
 
-@lru_cache()
+@lru_cache
 def blip_model():
     from imaginairy.paths import PKG_ROOT  # noqa
 
@@ -35,7 +35,7 @@ def blip_model():
 
 
 def generate_caption(image, min_length=30):
-    """Given an image, return a caption"""
+    """Given an image, return a caption."""
     gpu_image = (
         transforms.Compose(
             [

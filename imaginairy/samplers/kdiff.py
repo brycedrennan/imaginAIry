@@ -208,7 +208,7 @@ class LMSSampler(KDiffusionSampler):
 
 class CFGDenoiser(nn.Module):
     """
-    Conditional forward guidance wrapper
+    Conditional forward guidance wrapper.
     """
 
     def __init__(self, model):

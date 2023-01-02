@@ -20,7 +20,7 @@ astroid==2.12.13
     # via pylint
 async-timeout==4.0.2
     # via aiohttp
-attrs==22.1.0
+attrs==22.2.0
     # via
     #   aiohttp
     #   pytest
@@ -28,11 +28,11 @@ basicsr==1.4.2
     # via
     #   gfpgan
     #   realesrgan
-black==22.10.0
+black==22.12.0
     # via -r requirements-dev.in
 cachetools==5.2.0
     # via google-auth
-certifi==2022.9.24
+certifi==2022.12.7
     # via requests
 charset-normalizer==2.1.1
     # via
@@ -43,30 +43,29 @@ click==8.1.3
     #   black
     #   click-shell
     #   imaginAIry (setup.py)
-    #   typer
 click-shell==2.1
     # via imaginAIry (setup.py)
 contourpy==1.0.6
     # via matplotlib
-coverage==6.5.0
+coverage==7.0.1
     # via -r requirements-dev.in
 cycler==0.11.0
     # via matplotlib
-diffusers==0.8.1
+diffusers==0.11.1
     # via imaginAIry (setup.py)
 dill==0.3.6
     # via pylint
 einops==0.3.0
     # via imaginAIry (setup.py)
-exceptiongroup==1.0.4
+exceptiongroup==1.1.0
     # via pytest
 facexlib==0.2.5
     # via
     #   gfpgan
     #   realesrgan
-fairscale==0.4.12
+fairscale==0.4.13
     # via imaginAIry (setup.py)
-filelock==3.8.0
+filelock==3.9.0
     # via
     #   diffusers
     #   huggingface-hub
@@ -93,7 +92,7 @@ gfpgan==1.3.8
     # via
     #   imaginAIry (setup.py)
     #   realesrgan
-google-auth==2.14.1
+google-auth==2.15.0
     # via
     #   google-auth-oauthlib
     #   tb-nightly
@@ -102,11 +101,11 @@ google-auth-oauthlib==0.4.6
     # via
     #   tb-nightly
     #   tensorboard
-grpcio==1.50.0
+grpcio==1.51.1
     # via
     #   tb-nightly
     #   tensorboard
-huggingface-hub==0.11.0
+huggingface-hub==0.11.1
     # via
     #   diffusers
     #   open-clip-torch
@@ -120,11 +119,11 @@ imageio==2.9.0
     # via
     #   imaginAIry (setup.py)
     #   scikit-image
-importlib-metadata==5.1.0
+importlib-metadata==6.0.0
     # via diffusers
 iniconfig==1.1.1
     # via pytest
-isort==5.10.1
+isort==5.11.4
     # via
     #   -r requirements-dev.in
     #   pylint
@@ -134,11 +133,9 @@ kornia==0.6
     # via imaginAIry (setup.py)
 lazy-object-proxy==1.8.0
     # via astroid
-libcst==0.4.9
-    # via pycln
 llvmlite==0.39.1
     # via numba
-lmdb==1.3.0
+lmdb==1.4.0
     # via
     #   basicsr
     #   gfpgan
@@ -154,14 +151,12 @@ mccabe==0.7.0
     # via
     #   pylama
     #   pylint
-multidict==6.0.2
+multidict==6.0.4
     # via
     #   aiohttp
     #   yarl
 mypy-extensions==0.4.3
-    # via
-    #   black
-    #   typing-inspect
+    # via black
 networkx==2.8.8
     # via scikit-image
 numba==0.56.4
@@ -195,15 +190,15 @@ oauthlib==3.2.2
     # via requests-oauthlib
 omegaconf==2.1.1
     # via imaginAIry (setup.py)
-open-clip-torch==2.7.0
+open-clip-torch==2.9.1
     # via imaginAIry (setup.py)
-opencv-python==4.6.0.66
+opencv-python==4.7.0.68
     # via
     #   basicsr
     #   facexlib
     #   gfpgan
     #   realesrgan
-packaging==21.3
+packaging==22.0
     # via
     #   huggingface-hub
     #   kornia
@@ -214,11 +209,9 @@ packaging==21.3
     #   scikit-image
     #   torchmetrics
     #   transformers
-pathspec==0.9.0
-    # via
-    #   black
-    #   pycln
-pillow==9.3.0
+pathspec==0.10.3
+    # via black
+pillow==9.4.0
     # via
     #   basicsr
     #   diffusers
@@ -229,7 +222,7 @@ pillow==9.3.0
     #   realesrgan
     #   scikit-image
     #   torchvision
-platformdirs==2.5.4
+platformdirs==2.6.2
     # via
     #   black
     #   pylint
@@ -238,6 +231,7 @@ pluggy==1.0.0
 protobuf==3.20.3
     # via
     #   imaginAIry (setup.py)
+    #   open-clip-torch
     #   tb-nightly
     #   tensorboard
 psutil==5.9.4
@@ -248,8 +242,6 @@ pyasn1==0.4.8
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
-pycln==2.1.2
-    # via -r requirements-dev.in
 pycodestyle==2.10.0
     # via pylama
 pydeprecate==0.3.1
@@ -262,12 +254,10 @@ pyflakes==3.0.1
     # via pylama
 pylama==8.4.1
     # via -r requirements-dev.in
-pylint==2.15.6
+pylint==2.15.9
     # via -r requirements-dev.in
 pyparsing==3.0.9
-    # via
-    #   matplotlib
-    #   packaging
+    # via matplotlib
 pytest==7.2.0
     # via
     #   -r requirements-dev.in
@@ -288,9 +278,7 @@ pyyaml==6.0
     #   basicsr
     #   gfpgan
     #   huggingface-hub
-    #   libcst
     #   omegaconf
-    #   pycln
     #   pytorch-lightning
     #   timm
     #   transformers
@@ -307,6 +295,7 @@ requests==2.28.1
     #   diffusers
     #   fsspec
     #   huggingface-hub
+    #   imaginAIry (setup.py)
     #   requests-oauthlib
     #   responses
     #   tb-nightly
@@ -319,6 +308,8 @@ responses==0.22.0
     # via -r requirements-dev.in
 rsa==4.9
     # via google-auth
+ruff==0.0.206
+    # via -r requirements-dev.in
 scikit-image==0.19.3
     # via basicsr
 scipy==1.9.3
@@ -329,14 +320,15 @@ scipy==1.9.3
     #   gfpgan
     #   scikit-image
     #   torchdiffeq
+sentencepiece==0.1.97
+    # via open-clip-torch
 six==1.16.0
     # via
     #   google-auth
-    #   grpcio
     #   python-dateutil
 snowballstemmer==2.2.0
     # via pydocstyle
-tb-nightly==2.12.0a20221125
+tb-nightly==2.12.0a20230101
     # via
     #   basicsr
     #   gfpgan
@@ -366,10 +358,8 @@ tomli==2.0.1
     #   pylint
     #   pytest
 tomlkit==0.11.6
-    # via
-    #   pycln
-    #   pylint
-torch==1.13.0
+    # via pylint
+torch==1.13.1
     # via
     #   basicsr
     #   facexlib
@@ -390,7 +380,7 @@ torchmetrics==0.6.0
     # via
     #   imaginAIry (setup.py)
     #   pytorch-lightning
-torchvision==0.14.0
+torchvision==0.14.1
     # via
     #   basicsr
     #   facexlib
@@ -412,20 +402,14 @@ tqdm==4.64.1
     #   transformers
 transformers==4.19.2
     # via imaginAIry (setup.py)
-typer==0.7.0
-    # via pycln
 types-toml==0.10.8.1
     # via responses
 typing-extensions==4.4.0
     # via
     #   huggingface-hub
-    #   libcst
     #   pytorch-lightning
     #   torch
     #   torchvision
-    #   typing-inspect
-typing-inspect==0.8.0
-    # via libcst
 urllib3==1.26.13
     # via
     #   requests
@@ -446,9 +430,9 @@ yapf==0.32.0
     # via
     #   basicsr
     #   gfpgan
-yarl==1.8.1
+yarl==1.8.2
     # via aiohttp
-zipp==3.10.0
+zipp==3.11.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

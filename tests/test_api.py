@@ -43,7 +43,7 @@ compare_prompts = [
     "model_version", ["SD-1.4", "SD-1.5", "SD-2.0", "SD-2.0-v", "SD-2.1", "SD-2.1-v"]
 )
 def test_model_versions(filename_base_for_orig_outputs, model_version):
-    """Test that we can switch between model versions"""
+    """Test that we can switch between model versions."""
     prompts = []
     for prompt_text in compare_prompts:
         prompts.append(
@@ -172,19 +172,19 @@ def test_img_to_img_fruit_2_gold_repeat():
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bowl_of_fruit.jpg")
     run_count = 1
 
-    kwargs = dict(
-        prompt="a white bowl filled with gold coins. sharp focus",
-        prompt_strength=12,
-        init_image=img,
-        init_image_strength=0.2,
-        mask_prompt="(fruit OR stem{*5} OR fruit stem)",
-        mask_mode="replace",
-        steps=20,
-        seed=946188797,
-        sampler_type="plms",
-        fix_faces=True,
-        upscale=True,
-    )
+    kwargs = {
+        "prompt": "a white bowl filled with gold coins. sharp focus",
+        "prompt_strength": 12,
+        "init_image": img,
+        "init_image_strength": 0.2,
+        "mask_prompt": "(fruit OR stem{*5} OR fruit stem)",
+        "mask_mode": "replace",
+        "steps": 20,
+        "seed": 946188797,
+        "sampler_type": "plms",
+        "fix_faces": True,
+        "upscale": True,
+    }
     prompts = [
         ImaginePrompt(**kwargs),
         ImaginePrompt(**kwargs),

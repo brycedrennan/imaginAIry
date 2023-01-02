@@ -216,7 +216,7 @@ class ImaginePrompt:
 
 
 class ExifCodes:
-    """https://www.awaresystems.be/imaging/tiff/tifftags/baseline.html"""
+    """https://www.awaresystems.be/imaging/tiff/tifftags/baseline.html."""
 
     ImageDescription = 0x010E
     Software = 0x0131
