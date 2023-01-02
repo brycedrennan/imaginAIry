@@ -51,6 +51,7 @@ setup(
         "open-clip-torch",
         "requests",
         "einops==0.3.0",
+        "safetensors",
         "timm>=0.4.12",  # for vendored blip
         "torchdiffeq",
         "transformers==4.19.2",
