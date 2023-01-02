@@ -132,6 +132,8 @@ vendorize_kdiffusion:
 	sed -i '' -e 's#return (x - denoised) / sigma#return ((x - denoised) / sigma.to("cpu")).to(x.device)#g' imaginairy/vendored/k_diffusion/sampling.py
 	sed -i '' -e 's#return t.neg().exp()#return t.to("cpu").neg().exp().to(self.model.device)#g' imaginairy/vendored/k_diffusion/sampling.py
 	sed -i '' -e 's#import torchsde##g' imaginairy/vendored/k_diffusion/sampling.py
+	sed -i '' -e 's#torch.randint(0, 2\*\*63 - 1, \[\])#torch.randint(0, 2**63 - 1, [], device="cpu")#g' imaginairy/vendored/k_diffusion/sampling.py
+	sed -i '' -e 's#torch.randint_like(x, 2)#torch.randint_like(x, 2, device="cpu")#g' imaginairy/vendored/k_diffusion/sampling.py
 	make af
 
 vendorize_noodle_soup:
