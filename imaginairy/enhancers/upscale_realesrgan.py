@@ -10,7 +10,7 @@ from imaginairy.model_manager import get_cached_url_path
 from imaginairy.utils import get_device
 
 
-@lru_cache()
+@lru_cache
 def realesrgan_upsampler():
     model = RRDBNet(
         num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4

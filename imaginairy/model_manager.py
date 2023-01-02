@@ -29,7 +29,7 @@ class HuggingFaceAuthorizationError(RuntimeError):
 
 
 class MemoryAwareModel:
-    """Wraps a model to allow dynamic loading/unloading as needed"""
+    """Wraps a model to allow dynamic loading/unloading as needed."""
 
     def __init__(self, config_path, weights_path, half_mode=None):
         self._config_path = config_path
@@ -122,7 +122,7 @@ def get_diffusion_model(
     for_inpainting=False,
 ):
     """
-    Load a diffusion model
+    Load a diffusion model.
 
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
@@ -148,7 +148,7 @@ def _get_diffusion_model(
     for_inpainting=False,
 ):
     """
-    Load a diffusion model
+    Load a diffusion model.
 
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
@@ -217,7 +217,7 @@ def get_cache_dir():
 
 def get_cached_url_path(url):
     """
-    Gets the contents of a url, but caches the response indefinitely
+    Gets the contents of a url, but caches the response indefinitely.
 
     While we attempt to use the cached_path from huggingface transformers, we fall back
     to our own implementation if the url does not provide an etag header, which `cached_path`

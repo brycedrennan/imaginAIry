@@ -3,8 +3,10 @@
  * All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- * By Junnan Li
+ * By Junnan Li.
 """
+from typing import List
+
 import transformers
 from models.med import BertConfig, BertLMHeadModel, BertModel
 
@@ -32,7 +34,7 @@ class BLIP_Pretrain(nn.Module):
         Args:
             med_config (str): path for the mixture of encoder-decoder model's configuration file
             image_size (int): input image size
-            vit (str): model size of vision transformer
+            vit (str): model size of vision transformer.
         """
         super().__init__()
 
@@ -329,9 +331,6 @@ def concat_all_gather(tensor):
     return output
 
 
-from typing import List
-
-
 def tie_encoder_decoder_weights(
     encoder: nn.Module, decoder: nn.Module, base_model_prefix: str, skip_key: str
 ):
@@ -368,9 +367,9 @@ def tie_encoder_decoder_weights(
                 len(encoder_modules) > 0
             ), f"Encoder module {encoder_pointer} does not match decoder module {decoder_pointer}"
 
-            all_encoder_weights = set(
-                [module_name + "/" + sub_name for sub_name in encoder_modules.keys()]
-            )
+            all_encoder_weights = {
+                module_name + "/" + sub_name for sub_name in encoder_modules.keys()
+            }
             encoder_layer_pos = 0
             for name, module in decoder_modules.items():
                 if name.isdigit():

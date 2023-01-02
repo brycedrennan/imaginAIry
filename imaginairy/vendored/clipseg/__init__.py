@@ -4,7 +4,6 @@ from os.path import basename, dirname, isfile, join
 import torch
 from torch import nn
 from torch.nn import functional as nnf
-from torch.nn.modules.activation import ReLU
 
 
 def precompute_clip_vectors():
@@ -182,7 +181,7 @@ class CLIPDenseBase(nn.Module):
                 k: torch.from_numpy(v) for k, v in precomp.items()
             }
         else:
-            self.precomputed_prompts = dict()
+            self.precomputed_prompts = {}
 
     def rescaled_pos_emb(self, new_size):
         assert len(new_size) == 2
@@ -383,11 +382,7 @@ def clip_load_untrained(version):
     transformer_width = state_dict["ln_final.weight"].shape[0]
     transformer_heads = transformer_width // 64
     transformer_layers = len(
-        set(
-            k.split(".")[2]
-            for k in state_dict
-            if k.startswith(f"transformer.resblocks")
-        )
+        {k.split(".")[2] for k in state_dict if k.startswith(f"transformer.resblocks")}
     )
 
     return CLIP(
@@ -717,12 +712,11 @@ class CLIPSegMultiLabel(nn.Module):
     def __init__(self, model) -> None:
         super().__init__()
 
-        from third_party.JoEm.data_loader import VOC, get_seen_idx, get_unseen_idx
+        from third_party.JoEm.data_loader import VOC
 
         self.pascal_classes = VOC
 
         from general_utils import load_model
-        from models.clipseg import CLIPDensePredT
 
         # self.clipseg = load_model('rd64-vit16-neg0.2-phrasecut', strict=False)
         self.clipseg = load_model(model, strict=False)

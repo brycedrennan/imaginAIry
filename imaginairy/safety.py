@@ -115,7 +115,7 @@ class EnhancedStableDiffusionSafetyChecker(
         return safety_results
 
 
-@lru_cache()
+@lru_cache
 def safety_models():
     safety_model_id = "CompVis/stable-diffusion-safety-checker"
     monkeypatch_safety_cosine_distance()
@@ -126,14 +126,14 @@ def safety_models():
     return safety_feature_extractor, safety_checker
 
 
-@lru_cache()
+@lru_cache
 def monkeypatch_safety_cosine_distance():
     orig_cosine_distance = safety_checker_mod.cosine_distance
 
     def cosine_distance_float32(image_embeds, text_embeds):
         """
         In some environments we need to distance to be in float32
-        but it was coming as BFloat16
+        but it was coming as BFloat16.
         """
         return orig_cosine_distance(image_embeds, text_embeds).to(torch.float32)
 

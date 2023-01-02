@@ -13,9 +13,9 @@ from torch.overrides import handle_torch_function, has_torch_function_variadic
 logger = logging.getLogger(__name__)
 
 
-@lru_cache()
+@lru_cache
 def get_device() -> str:
-    """Return the best torch backend available"""
+    """Return the best torch backend available."""
     if torch.cuda.is_available():
         return "cuda"
 
@@ -25,9 +25,9 @@ def get_device() -> str:
     return "cpu"
 
 
-@lru_cache()
+@lru_cache
 def get_hardware_description(device_type: str) -> str:
-    """Description of the hardware being used"""
+    """Description of the hardware being used."""
     desc = platform.platform()
     if device_type == "cuda":
         desc += "-" + torch.cuda.get_device_name(0)
@@ -37,7 +37,7 @@ def get_hardware_description(device_type: str) -> str:
 
 def get_obj_from_str(import_path: str, reload=False) -> Any:
     """
-    Gets a python object from a string reference if it's location
+    Gets a python object from a string reference if it's location.
 
     Example: "functools.lru_cache"
     """
@@ -50,7 +50,7 @@ def get_obj_from_str(import_path: str, reload=False) -> Any:
 
 
 def instantiate_from_config(config: Union[dict, str]) -> Any:
-    """Instantiate an object from a config dict"""
+    """Instantiate an object from a config dict."""
     if "target" not in config:
         if config == "__is_first_stage__":
             return None
@@ -65,7 +65,7 @@ def instantiate_from_config(config: Union[dict, str]) -> Any:
 @contextmanager
 def platform_appropriate_autocast(precision="autocast"):
     """
-    Allow calculations to run in mixed precision, which can be faster
+    Allow calculations to run in mixed precision, which can be faster.
     """
     precision_scope = nullcontext
     # autocast not supported on CPU
@@ -111,7 +111,7 @@ def _fixed_layer_norm(
 
 @contextmanager
 def fix_torch_nn_layer_norm():
-    """https://github.com/CompVis/stable-diffusion/issues/25#issuecomment-1221416526"""
+    """https://github.com/CompVis/stable-diffusion/issues/25#issuecomment-1221416526."""
     orig_function = functional.layer_norm
     functional.layer_norm = _fixed_layer_norm
     try:
@@ -123,7 +123,7 @@ def fix_torch_nn_layer_norm():
 @contextmanager
 def fix_torch_group_norm():
     """
-    Patch group_norm to cast the weights to the same type as the inputs
+    Patch group_norm to cast the weights to the same type as the inputs.
 
     From what I can understand all the other repos just switch to full precision instead
     of addressing this.  I think this would make things slower but I'm not sure.
@@ -158,7 +158,7 @@ def fix_torch_group_norm():
 
 
 def randn_seeded(seed: int, size: List[int]) -> Tensor:
-    """Generate a random tensor with a given seed"""
+    """Generate a random tensor with a given seed."""
     g_cpu = torch.Generator()
     g_cpu.manual_seed(seed)
     noise = torch.randn(
@@ -170,7 +170,7 @@ def randn_seeded(seed: int, size: List[int]) -> Tensor:
 
 
 def check_torch_working():
-    """Check that torch is working"""
+    """Check that torch is working."""
     try:
         torch.randn(1, device=get_device())
     except RuntimeError as e:

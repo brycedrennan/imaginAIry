@@ -288,7 +288,7 @@ class MemoryEfficientAttnBlock(nn.Module):
     """
     Uses xformers efficient implementation,
     see https://github.com/MatthieuTPHR/diffusers/blob/d80b531ff8060ec1ea982b65a1b8df70f73aa67c/src/diffusers/models/attention.py#L223
-    Note: this is a single-head self-attention operation
+    Note: this is a single-head self-attention operation.
     """
 
     #
@@ -320,16 +320,16 @@ class MemoryEfficientAttnBlock(nn.Module):
 
         # compute attention
         B, C, H, W = q.shape
-        q, k, v = map(lambda x: rearrange(x, "b c h w -> b (h w) c"), (q, k, v))
-
-        q, k, v = map(
-            lambda t: t.unsqueeze(3)
+        q, k, v = (rearrange(x, "b c h w -> b (h w) c") for x in (q, k, v))
+        q, k, v = (
+            t.unsqueeze(3)
             .reshape(B, t.shape[1], 1, C)
             .permute(0, 2, 1, 3)
             .reshape(B * 1, t.shape[1], C)
-            .contiguous(),
-            (q, k, v),
+            .contiguous()
+            for t in (q, k, v)
         )
+
         out = xformers.ops.memory_efficient_attention(
             q, k, v, attn_bias=None, op=self.attention_op
         )
@@ -704,8 +704,7 @@ class Decoder(nn.Module):
         self.give_pre_end = give_pre_end
         self.tanh_out = tanh_out
 
-        # compute in_ch_mult, block_in and curr_res at lowest res
-        in_ch_mult = (1,) + tuple(ch_mult)
+        # compute block_in and curr_res at lowest res
         block_in = ch * ch_mult[self.num_resolutions - 1]
         curr_res = resolution // 2 ** (self.num_resolutions - 1)
         self.z_shape = (1, z_channels, curr_res, curr_res)

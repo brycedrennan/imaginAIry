@@ -223,7 +223,7 @@ def imagine_cmd(
     model_weights_path,
     prompt_library_path,
 ):
-    """Have the AI generate images. alias:imagine"""
+    """Have the AI generate images. alias:imagine."""
     if ctx.invoked_subcommand is not None:
         return
 
@@ -303,7 +303,7 @@ def aimg():
 @click.argument("image_filepaths", nargs=-1)
 @aimg.command()
 def describe(image_filepaths):
-    """Generate text descriptions of images"""
+    """Generate text descriptions of images."""
     imgs = []
     for p in image_filepaths:
         if p.startswith("http"):

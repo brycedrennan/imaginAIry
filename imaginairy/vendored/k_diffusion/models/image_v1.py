@@ -56,18 +56,20 @@ class DBlock(layers.ConditionedSequential):
                 )
             )
             if self_attn:
-                norm = lambda c_in: layers.AdaGN(
-                    feats_in, c_in, max(1, my_c_out // group_size)
-                )
+
+                def norm(c_in):
+                    return layers.AdaGN(feats_in, c_in, max(1, my_c_out // group_size))
+
                 modules.append(
                     layers.SelfAttention2d(
                         my_c_out, max(1, my_c_out // head_size), norm, dropout_rate
                     )
                 )
             if cross_attn:
-                norm = lambda c_in: layers.AdaGN(
-                    feats_in, c_in, max(1, my_c_out // group_size)
-                )
+
+                def norm(c_in):
+                    return layers.AdaGN(feats_in, c_in, max(1, my_c_out // group_size))
+
                 modules.append(
                     layers.CrossAttention2d(
                         my_c_out,
@@ -111,18 +113,20 @@ class UBlock(layers.ConditionedSequential):
                 )
             )
             if self_attn:
-                norm = lambda c_in: layers.AdaGN(
-                    feats_in, c_in, max(1, my_c_out // group_size)
-                )
+
+                def norm(c_in):
+                    return layers.AdaGN(feats_in, c_in, max(1, my_c_out // group_size))
+
                 modules.append(
                     layers.SelfAttention2d(
                         my_c_out, max(1, my_c_out // head_size), norm, dropout_rate
                     )
                 )
             if cross_attn:
-                norm = lambda c_in: layers.AdaGN(
-                    feats_in, c_in, max(1, my_c_out // group_size)
-                )
+
+                def norm(c_in):
+                    return layers.AdaGN(feats_in, c_in, max(1, my_c_out // group_size))
+
                 modules.append(
                     layers.CrossAttention2d(
                         my_c_out,

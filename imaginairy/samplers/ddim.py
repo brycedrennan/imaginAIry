@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class DDIMSampler(ImageSampler):
     """
-    Denoising Diffusion Implicit Models
+    Denoising Diffusion Implicit Models.
 
     https://arxiv.org/abs/2010.02502
     """

@@ -15,9 +15,9 @@ formatter = Formatter()
 PROMPT_EXPANSION_PATTERN = re.compile(r"[|a-z0-9_ -]+")
 
 
-@lru_cache()
+@lru_cache
 def prompt_library_filepaths(prompt_library_paths=None):
-    """Return all available category/filepath pairs"""
+    """Return all available category/filepath pairs."""
     prompt_library_paths = [] if not prompt_library_paths else prompt_library_paths
     combined_prompt_library_filepaths = {}
     for prompt_path in DEFAULT_PROMPT_LIBRARY_PATHS + list(prompt_library_paths):
@@ -27,15 +27,15 @@ def prompt_library_filepaths(prompt_library_paths=None):
     return combined_prompt_library_filepaths
 
 
-@lru_cache()
+@lru_cache
 def category_list(prompt_library_paths=None):
-    """Return the names of available phrase-lists"""
+    """Return the names of available phrase-lists."""
     categories = list(prompt_library_filepaths(prompt_library_paths).keys())
     categories.sort()
     return categories
 
 
-@lru_cache()
+@lru_cache
 def prompt_library_filepath(library_path):
     lookup = {}
 
@@ -70,7 +70,7 @@ def get_phrases(category_name, prompt_library_paths=None):
 
 def expand_prompts(prompt_text, n=1, prompt_library_paths=None):
     """
-    Replaces {vars} with random samples of corresponding phraselists
+    Replaces {vars} with random samples of corresponding phraselists.
 
     Example:
         p = "a happy {animal}"

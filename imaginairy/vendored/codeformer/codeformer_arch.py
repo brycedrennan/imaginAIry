@@ -95,7 +95,7 @@ class PositionEmbeddingSine(nn.Module):
 
 
 def _get_activation_fn(activation):
-    """Return an activation function given a string"""
+    """Return an activation function given a string."""
     if activation == "relu":
         return F.relu
     if activation == "gelu":
@@ -186,9 +186,7 @@ class CodeFormer(VQAutoEncoder):
         connect_list=["32", "64", "128", "256"],
         fix_modules=["quantize", "generator"],
     ):
-        super(CodeFormer, self).__init__(
-            512, 64, [1, 2, 2, 4, 4, 8], "nearest", 2, [16], codebook_size
-        )
+        super().__init__(512, 64, [1, 2, 2, 4, 4, 8], "nearest", 2, [16], codebook_size)
 
         if fix_modules is not None:
             for module in fix_modules:

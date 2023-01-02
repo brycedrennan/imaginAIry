@@ -21,7 +21,10 @@ def pillow_fit_image_within(image: PIL.Image.Image, max_height=512, max_width=51
 
     if resize_ratio != 1:
         w, h = int(w * resize_ratio), int(h * resize_ratio)
-    w, h = map(lambda x: x - x % 64, (w, h))  # resize to integer multiple of 64
+    # resize to integer multiple of 64
+    w -= w % 64
+    h -= h % 64
+
     if (w, h) != image.size:
         image = image.resize((w, h), resample=Image.Resampling.LANCZOS)
     return image

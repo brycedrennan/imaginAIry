@@ -51,7 +51,7 @@ def timed(description):
 def make_txts():
     src_json = f"{CURDIR}/../downloads/noodle-soup-prompts/nsp_pantry.json"
     dst_folder = f"{CURDIR}/../imaginairy/vendored/noodle_soup_prompts"
-    with open(src_json, "r", encoding="utf-8") as f:
+    with open(src_json, encoding="utf-8") as f:
         prompts = json.load(f)
     categories = []
     for c in prompts.keys():
@@ -65,7 +65,7 @@ def make_txts():
         renamed_c = category_renames.get(c, c)
         with gzip.open(f"{dst_folder}/{renamed_c}.txt.gz", "wb") as f:
             for p in filtered_phrases:
-                f.write(f"{p}\n".encode("utf-8"))
+                f.write(f"{p}\n".encode())
 
 
 if __name__ == "__main__":

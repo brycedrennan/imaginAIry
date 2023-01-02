@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  * By Junnan Li
  * Based on timm code base
- * https://github.com/rwightman/pytorch-image-models/tree/master/timm
+ * https://github.com/rwightman/pytorch-image-models/tree/master/timm.
 """
 
 from functools import partial
@@ -19,7 +19,7 @@ from timm.models.vision_transformer import PatchEmbed
 
 
 class Mlp(nn.Module):
-    """MLP as used in Vision Transformer, MLP-Mixer and related networks"""
+    """MLP as used in Vision Transformer, MLP-Mixer and related networks."""
 
     def __init__(
         self,
@@ -156,7 +156,7 @@ class Block(nn.Module):
 class VisionTransformer(nn.Module):
     """Vision Transformer
     A PyTorch impl of : `An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale`  -
-        https://arxiv.org/abs/2010.11929
+        https://arxiv.org/abs/2010.11929.
     """
 
     def __init__(
@@ -195,7 +195,7 @@ class VisionTransformer(nn.Module):
             drop_rate (float): dropout rate
             attn_drop_rate (float): attention dropout rate
             drop_path_rate (float): stochastic depth rate
-            norm_layer: (nn.Module): normalization layer
+            norm_layer: (nn.Module): normalization layer.
         """
         super().__init__()
         self.num_features = (
@@ -282,7 +282,7 @@ class VisionTransformer(nn.Module):
 
 @torch.no_grad()
 def _load_weights(model: VisionTransformer, checkpoint_path: str, prefix: str = ""):
-    """Load weights from .npz checkpoints for official Google Brain Flax implementation"""
+    """Load weights from .npz checkpoints for official Google Brain Flax implementation."""
     import numpy as np
 
     def _n2p(w, t=True):

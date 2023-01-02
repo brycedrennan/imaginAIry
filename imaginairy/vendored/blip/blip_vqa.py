@@ -19,7 +19,7 @@ class BLIP_VQA(nn.Module):
         Args:
             med_config (str): path for the mixture of encoder-decoder model's configuration file
             image_size (int): input image size
-            vit (str): model size of vision transformer
+            vit (str): model size of vision transformer.
         """
         super().__init__()
 

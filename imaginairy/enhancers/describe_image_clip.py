@@ -10,7 +10,7 @@ from imaginairy.vendored import clip
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-@lru_cache()
+@lru_cache
 def get_model():
     model_name = "ViT-L/14"
     model, preprocess = clip.load(model_name, device=device)
@@ -18,7 +18,7 @@ def get_model():
 
 
 def find_img_text_similarity(image: Image.Image, phrases: Sequence):
-    """Find the likelihood of a list of textual concepts existing in the image"""
+    """Find the likelihood of a list of textual concepts existing in the image."""
 
     model, preprocess = get_model()
     image = preprocess(image).unsqueeze(0).to(device)

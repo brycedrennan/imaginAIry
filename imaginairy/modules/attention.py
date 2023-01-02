@@ -184,7 +184,7 @@ class CrossAttention(nn.Module):
         k = self.to_k(context) * self.scale
         v = self.to_v(context)
 
-        q, k, v = map(lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=h), (q, k, v))
+        q, k, v = (rearrange(t, "b n (h d) -> (b h) n d", h=h) for t in (q, k, v))
 
         # force cast to fp32 to avoid overflowing
         if ATTENTION_PRECISION_OVERRIDE == "fp32":
@@ -219,8 +219,8 @@ class CrossAttention(nn.Module):
         v_in = self.to_v(context)
         del context, x
 
-        q, k, v = map(
-            lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=h), (q_in, k_in, v_in)
+        q, k, v = (
+            rearrange(t, "b n (h d) -> (b h) n d", h=h) for t in (q_in, k_in, v_in)
         )
         del q_in, k_in, v_in
 
@@ -300,13 +300,13 @@ class MemoryEfficientCrossAttention(nn.Module):
         v = self.to_v(context)
 
         b, _, _ = q.shape
-        q, k, v = map(
-            lambda t: t.unsqueeze(3)
+        q, k, v = (
+            t.unsqueeze(3)
             .reshape(b, t.shape[1], self.heads, self.dim_head)
             .permute(0, 2, 1, 3)
             .reshape(b * self.heads, t.shape[1], self.dim_head)
-            .contiguous(),
-            (q, k, v),
+            .contiguous()
+            for t in (q, k, v)
         )
 
         # actually compute the attention, what we cannot get enough of
@@ -392,7 +392,7 @@ class SpatialTransformer(nn.Module):
     and reshape to b, t, d.
     Then apply standard transformer action.
     Finally, reshape to image
-    NEW: use_linear for more efficiency instead of the 1x1 convs
+    NEW: use_linear for more efficiency instead of the 1x1 convs.
     """
 
     def __init__(

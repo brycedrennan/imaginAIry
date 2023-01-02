@@ -9,7 +9,7 @@ from imaginairy.vendored import clip
 
 
 class FrozenCLIPEmbedder(nn.Module):
-    """Uses the CLIP transformer encoder for text (from Hugging Face)"""
+    """Uses the CLIP transformer encoder for text (from Hugging Face)."""
 
     def __init__(
         self,

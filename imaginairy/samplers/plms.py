@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class PLMSSampler(ImageSampler):
     """
-    probabilistic least-mean-squares
+    probabilistic least-mean-squares.
 
     Provenance:
     https://github.com/CompVis/latent-diffusion/commit/f0c4e092c156986e125f48c61a0edd38ba8ad059
