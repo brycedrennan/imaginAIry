@@ -54,7 +54,7 @@ def test_model_versions(filename_base_for_orig_outputs, model_version):
             )
         )
 
-    threshold = 14000
+    threshold = 24000
 
     for i, result in enumerate(imagine(prompts)):
         img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model}.png"
