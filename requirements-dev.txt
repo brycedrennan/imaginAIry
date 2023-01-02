@@ -47,7 +47,7 @@ click-shell==2.1
     # via imaginAIry (setup.py)
 contourpy==1.0.6
     # via matplotlib
-coverage==7.0.1
+coverage==7.0.2
     # via -r requirements-dev.in
 cycler==0.11.0
     # via matplotlib
@@ -310,6 +310,8 @@ rsa==4.9
     # via google-auth
 ruff==0.0.206
     # via -r requirements-dev.in
+safetensors==0.2.7
+    # via imaginAIry (setup.py)
 scikit-image==0.19.3
     # via basicsr
 scipy==1.9.3
@@ -328,7 +330,7 @@ six==1.16.0
     #   python-dateutil
 snowballstemmer==2.2.0
     # via pydocstyle
-tb-nightly==2.12.0a20230101
+tb-nightly==2.12.0a20230102
     # via
     #   basicsr
     #   gfpgan
