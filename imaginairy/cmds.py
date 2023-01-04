@@ -315,6 +315,30 @@ def describe(image_filepaths):
         print(generate_caption(img.copy()))
 
 
+# @click.option(
+#     "--caption",
+#     default=False,
+#     is_flag=True,
+#     help="Generate a text description of the generated image.",
+# )
+# @click.option(
+#     "--model-config-path",
+#     help=f"Model to use. Should be one of {', '.join(MODEL_SHORT_NAMES)}, or a path to custom weights.",
+#     show_default=True,
+#     default=None,
+# )
+# @click.option(
+#     "--model-weights-path",
+#     "--model",
+#     help=f"Model to use. Should be one of {', '.join(MODEL_SHORT_NAMES)}, or a path to custom weights.",
+#     show_default=True,
+#     default=config.DEFAULT_MODEL,
+# )
+@aimg.command()
+def train():
+    """Train the model on a set of images."""
+
+
 aimg.add_command(imagine_cmd, name="imagine")
 
 if __name__ == "__main__":

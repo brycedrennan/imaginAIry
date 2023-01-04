@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 1.0e-4
+  base_learning_rate: 1.0e-6
   target: imaginairy.modules.diffusion.ddpm.LatentDiffusion
   params:
     linear_start: 0.00085
@@ -80,7 +80,7 @@ data:
       target: imaginairy.datasources.single_concept.SingleConceptDataset
       params:
         concept_label: "photo of Bryce"
-        concept_images_dir: "/root/project/other/images/bryce/cropped"
+        concept_images_dir: "./other/images/bryce/cropped"
         class_label: "photo of a man"
         image_transforms:
         - target: torchvision.transforms.Resize
@@ -116,7 +116,7 @@ lightning:
     image_logger:
       target: imaginairy.train.ImageLogger
       params:
-        batch_frequency: 2000
+        batch_frequency: 100
         max_images: 4
         increase_log_steps: False
         log_first_step: True
@@ -127,10 +127,11 @@ lightning:
           plot_progressive_rows: False
           plot_diffusion_rows: False
           N: 1
-          unconditional_guidance_scale: 7.0
+          unconditional_guidance_scale: 7.5
           unconditional_guidance_label: [""]
 
   trainer:
     benchmark: True
     num_sanity_val_steps: 0
     accumulate_grad_batches: 1
+

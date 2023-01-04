@@ -3,7 +3,7 @@ import numpy as np
 
 class LambdaWarmUpCosineScheduler:
     """
-    note: use with a base_lr of 1.0
+    note: use with a base_lr of 1.0.
     """
 
     def __init__(

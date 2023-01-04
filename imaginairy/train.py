@@ -3,20 +3,13 @@ import datetime
 import glob
 import logging
 import os
-import socket
-import sys
 import time
 from functools import partial
 
 import numpy as np
 import pytorch_lightning as pl
-import requests
 import torch
 import torchvision
-
-# from ldm.data.base import Txt2ImgIterableBaseDataset
-# from ldm.log_utils import configure_logging
-# from ldm.util import TimedLogger, instantiate_from_config
 from omegaconf import OmegaConf
 from packaging import version
 from PIL import Image
@@ -29,9 +22,8 @@ from torch.utils.data import DataLoader, Dataset
 
 from imaginairy.datasources.single_concept import SingleConceptDataset
 from imaginairy.log_utils import configure_logging
-from imaginairy.utils import instantiate_from_config
+from imaginairy.utils import get_device, instantiate_from_config
 
-MULTINODE_HACKS = False
 configure_logging(level="DEBUG")
 
 logger = logging.getLogger(__name__)
@@ -45,24 +37,24 @@ def rank_zero_log(*args):
 
 
 def modify_weights(w, scale=1e-6):
-    """Modify weights to accomodate concatenation to unet"""
+    """Modify weights to accomodate concatenation to unet."""
     extra_w = scale * torch.randn_like(w)
     new_w = torch.cat((w, extra_w), dim=1)
     return new_w
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    elif v.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Boolean value expected.")
 
-def get_parser(**parser_kwargs):
-    def str2bool(v):
-        if isinstance(v, bool):
-            return v
-        if v.lower() in ("yes", "true", "t", "y", "1"):
-            return True
-        elif v.lower() in ("no", "false", "f", "n", "0"):
-            return False
-        else:
-            raise argparse.ArgumentTypeError("Boolean value expected.")
+def get_parser():
 
-    parser = argparse.ArgumentParser(**parser_kwargs)
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "--finetune_from",
         type=str,
@@ -95,7 +87,7 @@ def get_parser(**parser_kwargs):
         metavar="base_config.yaml",
         help="paths to base configs. Loaded from left-to-right. "
         "Parameters can be overwritten or added with command-line options of the form `--key value`.",
-        default=list(),
+        default=[],
     )
     parser.add_argument(
         "-t",
@@ -166,7 +158,7 @@ def nondefault_trainer_args(opt):
 
 
 class WrappedDataset(Dataset):
-    """Wraps an arbitrary object with __len__ and __getitem__ into a pytorch dataset"""
+    """Wraps an arbitrary object with __len__ and __getitem__ into a pytorch dataset."""
 
     def __init__(self, dataset):
         self.data = dataset
@@ -209,11 +201,11 @@ class DataModuleFromConfig(pl.LightningDataModule):
         shuffle_test_loader=False,
         use_worker_init_fn=False,
         shuffle_val_dataloader=False,
-        num_val_workers=None,
+        num_val_workers=0,
     ):
         super().__init__()
         self.batch_size = batch_size
-        self.dataset_configs = dict()
+        self.dataset_configs = {}
         self.num_workers = num_workers if num_workers is not None else batch_size * 2
         if num_val_workers is None:
             self.num_val_workers = self.num_workers
@@ -243,10 +235,10 @@ class DataModuleFromConfig(pl.LightningDataModule):
             instantiate_from_config(data_cfg)
 
     def setup(self, stage=None):
-        self.datasets = dict(
-            (k, instantiate_from_config(self.dataset_configs[k]))
+        self.datasets = {
+            k: instantiate_from_config(self.dataset_configs[k])
             for k in self.dataset_configs
-        )
+        }
         if self.wrap:
             for k in self.datasets:
                 self.datasets[k] = WrappedDataset(self.datasets[k])
@@ -354,10 +346,7 @@ class SetupCallback(Callback):
                     )
             rank_zero_log("Project config")
             rank_zero_log(OmegaConf.to_yaml(self.config))
-            if MULTINODE_HACKS:
-                import time
 
-                time.sleep(5)
             OmegaConf.save(
                 self.config,
                 os.path.join(self.cfgdir, "{}-project.yaml".format(self.now)),
@@ -372,7 +361,7 @@ class SetupCallback(Callback):
 
         else:
             # ModelCheckpoint callback created log directory --- remove it
-            if not MULTINODE_HACKS and not self.resume and os.path.exists(self.logdir):
+            if not self.resume and os.path.exists(self.logdir):
                 dst, name = os.path.split(self.logdir)
                 dst = os.path.join(dst, "child_runs", name)
                 os.makedirs(os.path.split(dst)[0], exist_ok=True)
@@ -524,27 +513,29 @@ class CUDACallback(Callback):
     # see https://github.com/SeanNaren/minGPT/blob/master/mingpt/callback.py
     def on_train_epoch_start(self, trainer, pl_module):
         # Reset the memory use counter
-        torch.cuda.reset_peak_memory_stats(trainer.root_gpu)
-        torch.cuda.synchronize(trainer.root_gpu)
+        if "cuda" in get_device():
+            torch.cuda.reset_peak_memory_stats(trainer.root_gpu)
+            torch.cuda.synchronize(trainer.root_gpu)
         self.start_time = time.time()
 
     def on_train_epoch_end(self, trainer, pl_module, outputs):
-        torch.cuda.synchronize(trainer.root_gpu)
-        max_memory = torch.cuda.max_memory_allocated(trainer.root_gpu) / 2**20
-        epoch_time = time.time() - self.start_time
+        if "cuda" in get_device():
+            torch.cuda.synchronize(trainer.root_gpu)
+            max_memory = torch.cuda.max_memory_allocated(trainer.root_gpu) / 2**20
+            epoch_time = time.time() - self.start_time
 
-        try:
-            max_memory = trainer.training_type_plugin.reduce(max_memory)
-            epoch_time = trainer.training_type_plugin.reduce(epoch_time)
+            try:
+                max_memory = trainer.training_type_plugin.reduce(max_memory)
+                epoch_time = trainer.training_type_plugin.reduce(epoch_time)
 
-            rank_zero_info(f"Average Epoch time: {epoch_time:.2f} seconds")
-            rank_zero_info(f"Average Peak memory {max_memory:.2f}MiB")
-        except AttributeError:
-            pass
+                rank_zero_info(f"Average Epoch time: {epoch_time:.2f} seconds")
+                rank_zero_info(f"Average Peak memory {max_memory:.2f}MiB")
+            except AttributeError:
+                pass
 
 
 class SingleImageLogger(Callback):
-    """does not save as grid but as single images"""
+    """does not save as grid but as single images."""
 
     def __init__(
         self,
@@ -610,7 +601,7 @@ class SingleImageLogger(Callback):
                 base_count += 1
 
     def log_img(self, pl_module, batch, batch_idx, split="train", save_dir=None):
-        check_idx = batch_idx if self.log_on_batch_idx else pl_module.global_step
+        check_idx = batch_idx if self.log_on_batch_idx else pl_module.global_stepk
         if (
             self.check_frequency(check_idx)
             and hasattr(pl_module, "log_images")  # batch_idx % self.batch_freq == 0
@@ -666,114 +657,101 @@ class SingleImageLogger(Callback):
 
 
 def main():
-    logger.info("Starting training script...")
-    # custom parser to specify config files, train, test and debug mode,
-    # postfix, resume.
-    # `--key value` arguments are interpreted as arguments to the trainer.
-    # `nested.key=value` arguments are interpreted as config parameters.
-    # configs are merged from left-to-right followed by command line parameters.
-
-    # model:
-    #   base_learning_rate: float
-    #   target: path to lightning module
-    #   params:
-    #       key: value
-    # data:
-    #   target: main.DataModuleFromConfig
-    #   params:
-    #      batch_size: int
-    #      wrap: bool
-    #      train:
-    #          target: path to train dataset
-    #          params:
-    #              key: value
-    #      validation:
-    #          target: path to validation dataset
-    #          params:
-    #              key: value
-    #      test:
-    #          target: path to test dataset
-    #          params:
-    #              key: value
-    # lightning: (optional, has sane defaults and can be specified on cmdline)
-    #   trainer:
-    #       additional arguments to trainer
-    #   logger:
-    #       logger to instantiate
-    #   modelcheckpoint:
-    #       modelcheckpoint to instantiate
-    #   callbacks:
-    #       callback1:
-    #           target: importpath
-    #           params:
-    #               key: value
-
-    now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-
-    # add cwd for convenience and to make classes in this file available when
-    # running as `python main.py`
-    # (in particular `main.DataModuleFromConfig`)
-    sys.path.append(os.getcwd())
-
     parser = get_parser()
     parser = Trainer.add_argparse_args(parser)
-
     opt, unknown = parser.parse_known_args()
-    if opt.name and opt.resume:
+
+    configs = [OmegaConf.load(cfg) for cfg in opt.base]
+    cli = OmegaConf.from_dotlist(unknown)
+    config = OmegaConf.merge(*configs, cli)
+
+    lightning_config = config.get("lightning", OmegaConf.create())
+
+    trainer_config = lightning_config.get("trainer", OmegaConf.create())
+    trainer_config["accelerator"] = "ddp"
+
+    for k in nondefault_trainer_args(opt):
+        trainer_config[k] = getattr(opt, k)
+
+    train_diffusion_model(
+        name=opt.name,
+        resume=opt.resume,
+        base=opt.base,
+        logdir=opt.logdir,
+        postfix=opt.postfix,
+        seed=opt.seed,
+        finetune_from=opt.finetune_from,
+        debug=opt.debug,
+        scale_lr=opt.scale_lr,
+        train=opt.train,
+        trainer_config=trainer_config,
+        no_test=opt.no_test,
+        lightning_config=lightning_config,
+        config=config,
+    )
+
+
+def train_diffusion_model(
+    name,
+    resume,
+    base,
+    postfix,
+    logdir,
+    seed,
+    finetune_from,
+    debug,
+    train,
+    trainer_config,
+    no_test,
+    lightning_config,
+    config,
+    scale_lr=False,
+):
+    now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+
+    if name and resume:
         raise ValueError(
             "-n/--name and -r/--resume cannot be specified both."
             "If you want to resume training in a new log folder, "
             "use -n/--name in combination with --resume_from_checkpoint"
         )
-    if opt.resume:
-        if not os.path.exists(opt.resume):
-            raise ValueError("Cannot find {}".format(opt.resume))
-        if os.path.isfile(opt.resume):
-            paths = opt.resume.split("/")
-            # idx = len(paths)-paths[::-1].index("logs")+1
-            # logdir = "/".join(paths[:idx])
+    if resume:
+        if not os.path.exists(resume):
+            raise ValueError("Cannot find {}".format(resume))
+        if os.path.isfile(resume):
+            paths = resume.split("/")
             logdir = "/".join(paths[:-2])
-            ckpt = opt.resume
+            ckpt = resume
         else:
-            assert os.path.isdir(opt.resume), opt.resume
-            logdir = opt.resume.rstrip("/")
+            assert os.path.isdir(resume), resume
+            logdir = resume.rstrip("/")
             ckpt = os.path.join(logdir, "checkpoints", "last.ckpt")
 
-        opt.resume_from_checkpoint = ckpt
+        resume_from_checkpoint = ckpt
         base_configs = sorted(glob.glob(os.path.join(logdir, "configs/*.yaml")))
-        opt.base = base_configs + opt.base
+        base = base_configs + base
         _tmp = logdir.split("/")
         nowname = _tmp[-1]
     else:
-        if opt.name:
-            name = "_" + opt.name
-        elif opt.base:
-            cfg_fname = os.path.split(opt.base[0])[-1]
+        if name:
+            name = "_" + name
+        elif base:
+            cfg_fname = os.path.split(base[0])[-1]
             cfg_name = os.path.splitext(cfg_fname)[0]
             name = "_" + cfg_name
         else:
             name = ""
-        nowname = now + name + opt.postfix
-        logdir = os.path.join(opt.logdir, nowname)
+        nowname = now + name + postfix
+        logdir = os.path.join(logdir, nowname)
 
     ckptdir = os.path.join(logdir, "checkpoints")
     cfgdir = os.path.join(logdir, "configs")
-    seed_everything(opt.seed)
+    seed_everything(seed)
 
     try:
-        # init and save configs
-        configs = [OmegaConf.load(cfg) for cfg in opt.base]
-        cli = OmegaConf.from_dotlist(unknown)
-        config = OmegaConf.merge(*configs, cli)
-        lightning_config = config.pop("lightning", OmegaConf.create())
-        # merge trainer cli with config
-        trainer_config = lightning_config.get("trainer", OmegaConf.create())
-        # default to ddp
-        trainer_config["accelerator"] = "ddp"
-        for k in nondefault_trainer_args(opt):
-            trainer_config[k] = getattr(opt, k)
-        if not "gpus" in trainer_config:
-            del trainer_config["accelerator"]
+
+        if "gpus" not in trainer_config:
+            # del trainer_config["accelerator"]
             cpu = True
         else:
             gpuinfo = trainer_config["gpus"]
@@ -783,14 +761,12 @@ def main():
         lightning_config.trainer = trainer_config
         rank_zero_info(trainer_config)
 
-        # model
         model = instantiate_from_config(config.model)
-        # model.cpu()
 
-        if not opt.finetune_from == "":
-            logger.info(f"Attempting to load state from {opt.finetune_from}")
+        if not finetune_from == "":
+            logger.info(f"Attempting to load state from {finetune_from}")
 
-            old_state = torch.load(opt.finetune_from, map_location="cpu")
+            old_state = torch.load(finetune_from, map_location="cpu")
             if "state_dict" in old_state:
                 logger.info(
                     f"Found nested key 'state_dict' in checkpoint, loading this instead"
@@ -821,37 +797,8 @@ def main():
                 logger.warning(f"unexpected keys: {u}")
 
         # trainer and callbacks
-        trainer_kwargs = dict()
+        trainer_kwargs = {}
 
-        # default logger configs
-        default_logger_cfgs = {
-            "wandb": {
-                "target": "pytorch_lightning.loggers.WandbLogger",
-                "params": {
-                    "name": nowname,
-                    "save_dir": logdir,
-                    "offline": opt.debug,
-                    "id": nowname,
-                },
-            },
-            # "testtube": {
-            #     "target": "pytorch_lightning.loggers.TestTubeLogger",
-            #     "params": {
-            #         "name": "testtube",
-            #         "save_dir": logdir,
-            #     },
-            # },
-        }
-        # default_logger_cfg = default_logger_cfgs["testtube"]
-        # if "logger" in lightning_config:
-        #     logger_cfg = lightning_config.logger
-        # else:
-        #     logger_cfg = OmegaConf.create()
-        # logger_cfg = OmegaConf.merge(default_logger_cfg, logger_cfg)
-        # trainer_kwargs["logger"] = instantiate_from_config(logger_cfg)
-
-        # modelcheckpoint - use TrainResult/EvalResult(checkpoint_on=metric) to
-        # specify which metric is used to determine best models
         default_modelckpt_cfg = {
             "target": "pytorch_lightning.callbacks.ModelCheckpoint",
             "params": {
@@ -882,14 +829,14 @@ def main():
             "setup_callback": {
                 "target": "imaginairy.train.SetupCallback",
                 "params": {
-                    "resume": opt.resume,
+                    "resume": resume,
                     "now": now,
                     "logdir": logdir,
                     "ckptdir": ckptdir,
                     "cfgdir": cfgdir,
                     "config": config,
                     "lightning_config": lightning_config,
-                    "debug": opt.debug,
+                    "debug": debug,
                 },
             },
             "image_logger": {
@@ -945,23 +892,12 @@ def main():
         trainer_kwargs["callbacks"] = [
             instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg
         ]
-        if not "plugins" in trainer_kwargs:
-            trainer_kwargs["plugins"] = list()
+        if "plugins" not in trainer_kwargs:
+            trainer_kwargs["plugins"] = []
         if not lightning_config.get("find_unused_parameters", True):
             from pytorch_lightning.plugins import DDPPlugin
 
             trainer_kwargs["plugins"].append(DDPPlugin(find_unused_parameters=False))
-        if MULTINODE_HACKS:
-            # disable resume from hpc ckpts
-            # NOTE below only works in later versions
-            # from pytorch_lightning.plugins.environments import SLURMEnvironment
-            # trainer_kwargs["plugins"].append(SLURMEnvironment(auto_requeue=False))
-            # hence we monkey patch things
-            from pytorch_lightning.trainer.connectors.checkpoint_connector import (
-                CheckpointConnector,
-            )
-
-            setattr(CheckpointConnector, "hpc_resume_path", None)
 
         trainer = Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
         trainer.logdir = logdir  ###
@@ -986,7 +922,7 @@ def main():
             accumulate_grad_batches = 1
         logger.info(f"accumulate_grad_batches = {accumulate_grad_batches}")
         lightning_config.trainer.accumulate_grad_batches = accumulate_grad_batches
-        if opt.scale_lr:
+        if scale_lr:
             model.learning_rate = accumulate_grad_batches * ngpu * bs * base_lr
             logger.info(
                 "Setting learning rate to {:.2e} = {} (accumulate_grad_batches) * {} (num_gpus) * {} (batchsize) * {:.2e} (base_lr)".format(
@@ -1005,55 +941,19 @@ def main():
                 ckpt_path = os.path.join(ckptdir, "last.ckpt")
                 trainer.save_checkpoint(ckpt_path)
 
-        def divein(*args, **kwargs):
-            if trainer.global_rank == 0:
-                import pudb
-
-                pudb.set_trace()
-
         import signal
 
         signal.signal(signal.SIGUSR1, melk)
-        signal.signal(signal.SIGUSR2, divein)
 
         # run
-        if opt.train:
+        if train:
             try:
                 trainer.fit(model, data)
             except Exception:
-                if not opt.debug:
-                    melk()
+                melk()
                 raise
-        if not opt.no_test and not trainer.interrupted:
-            trainer.test(model, data)
-    except RuntimeError as err:
-        if MULTINODE_HACKS:
-            device = os.environ.get("CUDA_VISIBLE_DEVICES", "?")
-            hostname = socket.gethostname()
-            ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-            resp = requests.get("http://169.254.169.254/latest/meta-data/instance-id")
-            logger.error(
-                f"ERROR at {ts} on {hostname}/{resp.text} (CUDA_VISIBLE_DEVICES={device}): {type(err).__name__}: {err}",
-                flush=True,
-            )
-        raise err
-    except Exception:
-        if opt.debug and trainer.global_rank == 0:
-            try:
-                import pudb as debugger
-            except ImportError:
-                import pdb as debugger
-            debugger.post_mortem()
-        raise
     finally:
-        # move newly created debug project to debug_runs
-        if opt.debug and not opt.resume and trainer.global_rank == 0:
-            dst, name = os.path.split(logdir)
-            dst = os.path.join(dst, "debug_runs", name)
-            os.makedirs(os.path.split(dst)[0], exist_ok=True)
-            os.rename(logdir, dst)
-        if "trainer" in locals():
-            logger.info(trainer.profiler.summary())
+        logger.info(trainer.profiler.summary())
 
 
 if __name__ == "__main__":
