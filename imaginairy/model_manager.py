@@ -30,11 +30,12 @@ class HuggingFaceAuthorizationError(RuntimeError):
 class MemoryAwareModel:
     """Wraps a model to allow dynamic loading/unloading as needed."""
 
-    def __init__(self, config_path, weights_path, half_mode=None):
+    def __init__(self, config_path, weights_path, half_mode=None, for_training=False):
         self._config_path = config_path
         self._weights_path = weights_path
         self._half_mode = half_mode
         self._model = None
+        self._for_training = for_training
 
         LOADED_MODELS[(self._config_path, self._weights_path)] = self
 
@@ -47,9 +48,12 @@ class MemoryAwareModel:
             # unload all models in LOADED_MODELS
             for model in LOADED_MODELS.values():
                 model.unload_model()
+            model_config = OmegaConf.load(f"{PKG_ROOT}/{self._config_path}")
+            if self._for_training:
+                model_config.use_ema = True
 
             model = load_model_from_config(
-                config=OmegaConf.load(f"{PKG_ROOT}/{self._config_path}"),
+                config=model_config,
                 weights_location=self._weights_path,
             )
 
@@ -119,6 +123,7 @@ def get_diffusion_model(
     config_path="configs/stable-diffusion-v1.yaml",
     half_mode=None,
     for_inpainting=False,
+    for_training=False,
 ):
     """
     Load a diffusion model.
@@ -127,7 +132,11 @@ def get_diffusion_model(
     """
     try:
         return _get_diffusion_model(
-            weights_location, config_path, half_mode, for_inpainting
+            weights_location,
+            config_path,
+            half_mode,
+            for_inpainting,
+            for_training=for_training,
         )
     except HuggingFaceAuthorizationError as e:
         if for_inpainting:
@@ -135,7 +144,11 @@ def get_diffusion_model(
                 f"Failed to load inpainting model. Attempting to fall-back to standard model.   {str(e)}"
             )
             return _get_diffusion_model(
-                iconfig.DEFAULT_MODEL, config_path, half_mode, for_inpainting=False
+                iconfig.DEFAULT_MODEL,
+                config_path,
+                half_mode,
+                for_inpainting=False,
+                for_training=for_training,
             )
         raise e
 
@@ -145,6 +158,7 @@ def _get_diffusion_model(
     config_path="configs/stable-diffusion-v1.yaml",
     half_mode=None,
     for_inpainting=False,
+    for_training=False,
 ):
     """
     Load a diffusion model.
@@ -160,16 +174,17 @@ def _get_diffusion_model(
         and f"{weights_location}-inpaint" in iconfig.MODEL_CONFIG_SHORTCUTS
     ):
         model_config = iconfig.MODEL_CONFIG_SHORTCUTS[f"{weights_location}-inpaint"]
-        config_path, weights_location = (
-            model_config.config_path,
-            model_config.weights_url,
-        )
     elif weights_location in iconfig.MODEL_CONFIG_SHORTCUTS:
         model_config = iconfig.MODEL_CONFIG_SHORTCUTS[weights_location]
-        config_path, weights_location = (
-            model_config.config_path,
-            model_config.weights_url,
-        )
+
+    if model_config:
+        config_path = model_config.config_path
+        if for_training:
+            weights_location = model_config.weights_url_full
+            if weights_location is None:
+                raise ValueError("No full training weights available for this model.")
+        else:
+            weights_location = model_config.weights_url
 
     # some models need the attention calculated in float32
     if model_config is not None:
@@ -180,7 +195,10 @@ def _get_diffusion_model(
     key = (config_path, weights_location)
     if key not in LOADED_MODELS:
         MemoryAwareModel(
-            config_path=config_path, weights_path=weights_location, half_mode=half_mode
+            config_path=config_path,
+            weights_path=weights_location,
+            half_mode=half_mode,
+            for_training=for_training,
         )
 
     model = LOADED_MODELS[key]

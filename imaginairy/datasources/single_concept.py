@@ -1,14 +1,12 @@
 import os
-import re
 from abc import abstractmethod
 
 from einops import rearrange
 from omegaconf import ListConfig
+from PIL import Image
 from torch.utils.data import Dataset, IterableDataset
-from torchvision.io import ImageReadMode, read_image
 from torchvision.transforms import transforms
 
-from imaginairy.model_manager import get_cache_dir
 from imaginairy.utils import instantiate_from_config
 
 
@@ -58,10 +56,11 @@ class SingleConceptDataset(Dataset):
         self.concept_images_dir = concept_images_dir
         self.class_images_dir = class_images_dir
 
-        if isinstance(image_transforms, ListConfig):
+        if isinstance(image_transforms, (ListConfig, list)):
             image_transforms = [instantiate_from_config(tt) for tt in image_transforms]
         image_transforms.extend(
             [
+                transforms.ToTensor(),
                 transforms.Lambda(_rearrange),
             ]
         )
@@ -73,10 +72,10 @@ class SingleConceptDataset(Dataset):
         self._class_image_filenames = None
 
         # path to a temporary folder where the class images are stored (using tempfile)
-        class_key = re.sub(r"[ -_]+", "-", class_label)
-        class_key = re.sub(r"[^a-zA-Z0-9-]", "", class_key)
+        # class_key = re.sub(r"[ -_]+", "-", class_label)
+        # class_key = re.sub(r"[^a-zA-Z0-9-]", "", class_key)
 
-        self.class_images_dir = os.path.join(get_cache_dir(), "class_images", class_key)
+        # self.class_images_dir = os.path.join(get_cache_dir(), "class_images", class_key)
 
     def __len__(self):
         return len(self.concept_image_filenames)
@@ -93,11 +92,10 @@ class SingleConceptDataset(Dataset):
             )
             txt = self.class_label
         try:
-            image = read_image(img_path, mode=ImageReadMode.RGB)
+            image = Image.open(img_path).convert("RGB")
         except RuntimeError as e:
             raise RuntimeError(f"Could not read image {img_path}") from e
-        if self.image_transforms:
-            image = self.image_transforms(image)
+        image = self.image_transforms(image)
         data = {"image": image, "txt": txt}
         return data
 

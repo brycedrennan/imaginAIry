@@ -11,6 +11,7 @@ from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.log_utils import configure_logging
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
+from imaginairy.train import train_diffusion_model
 
 logger = logging.getLogger(__name__)
 
@@ -336,7 +337,27 @@ def describe(image_filepaths):
 # )
 @aimg.command()
 def train():
-    """Train the model on a set of images."""
+    """
+    Train the model on a set of images.
+
+    aimg train --caption "photo of Bryce" \
+                --images-dir ./images/bryce \
+                --class-label "photo of a man" \
+                --class-images-dir ./images/man \
+
+    """
+    train_diffusion_model(
+        concept_label="photo of Bryce",
+        concept_images_dir="./other/images/bryce/cropped",
+        class_label="photo of a man",
+        class_images_dir="./other/images/men",
+        weights_location=config.DEFAULT_MODEL,
+        logdir="logs",
+        seed=23,
+        batch_size=1,
+        learning_rate=1e-6,
+        accumulate_grad_batches=8,
+    )
 
 
 aimg.add_command(imagine_cmd, name="imagine")

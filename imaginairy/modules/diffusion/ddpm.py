@@ -43,7 +43,7 @@ def log_txt_as_img(wh, xc, size=10):
     # wh a tuple of (width, height)
     # xc a list of captions to plot
     b = len(xc)
-    txts = list()
+    txts = []
     for bi in range(b):
         txt = Image.new("RGB", wh, color="white")
         draw = ImageDraw.Draw(txt)
@@ -1454,7 +1454,7 @@ class LatentDiffusion(DDPM):
             num_steps=ddim_steps,
             positive_conditioning=positive_conditioning,
             neutral_conditioning=neutral_conditioning,
-            guidance_scale=kwargs.get("unconditional_guidance_scale", 1.0),
+            guidance_scale=kwargs.get("unconditional_guidance_scale", 5.0),
             shape=shape,
             batch_size=1,
         )
@@ -1502,7 +1502,7 @@ class LatentDiffusion(DDPM):
         ema_scope = self.ema_scope if use_ema_scope else nullcontext
         use_ddim = ddim_steps is not None
 
-        log = dict()
+        log = {}
         z, c, x, xrec, xc = self.get_input(
             batch,
             self.first_stage_key,
@@ -1540,7 +1540,7 @@ class LatentDiffusion(DDPM):
 
         if plot_diffusion_rows:
             # get diffusion row
-            diffusion_row = list()
+            diffusion_row = []
             z_start = z[:n_row]
             for t in range(self.num_timesteps):
                 if t % self.log_every_t == 0 or t == self.num_timesteps - 1:

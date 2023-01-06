@@ -82,6 +82,7 @@ data:
         concept_label: "photo of Bryce"
         concept_images_dir: "./other/images/bryce/cropped"
         class_label: "photo of a man"
+        class_images_dir: "./other/images/men"
         image_transforms:
         - target: torchvision.transforms.Resize
           params:
