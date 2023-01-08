@@ -113,9 +113,6 @@ class SingleConceptDataset(Dataset):
             self._class_image_filenames = _load_image_filenames(self.class_images_dir)
         return self._class_image_filenames
 
-    def generate_class_images(self):
-        """generate class images for use in training."""
-
     @property
     def num_records(self):
         return len(self.concept_image_filenames)

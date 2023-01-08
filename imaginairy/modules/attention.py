@@ -18,6 +18,7 @@ except ImportError:
     XFORMERS_IS_AVAILBLE = False
 
 
+ALLOW_SPLITMEM = True
 ATTENTION_PRECISION_OVERRIDE = "default"
 
 
@@ -174,7 +175,7 @@ class CrossAttention(nn.Module):
         #     mask = _global_mask_hack.to(torch.bool)
 
         if get_device() == "cuda" or "mps" in get_device():
-            if not XFORMERS_IS_AVAILBLE and False:
+            if not XFORMERS_IS_AVAILBLE and ALLOW_SPLITMEM:
                 return self.forward_splitmem(x, context=context, mask=mask)
 
         h = self.heads

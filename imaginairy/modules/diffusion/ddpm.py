@@ -32,7 +32,7 @@ from imaginairy.modules.diffusion.util import (
 )
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.modules.ema import LitEma
-from imaginairy.samplers import DDIMSampler
+from imaginairy.samplers.kdiff import DPMPP2MSampler
 from imaginairy.utils import instantiate_from_config
 
 logger = logging.getLogger(__name__)
@@ -637,7 +637,9 @@ class DDPM(pl.LightningModule):
         return denoise_grid
 
     @torch.no_grad()
-    def log_images(self, batch, N=8, n_row=2, sample=True, return_keys=None, **kwargs):
+    def log_images(
+        self, batch, N=8, n_row=2, *, sample=True, return_keys=None, **kwargs
+    ):
         log = {}
         x = self.get_input(batch, self.first_stage_key)
         N = min(x.shape[0], N)
@@ -1297,7 +1299,7 @@ class LatentDiffusion(DDPM):
 
         return x_recon
 
-    def p_losses(self, x_start, cond, t, noise=None):
+    def p_losses(self, x_start, cond, t, noise=None):  # noqa
         noise = noise if noise is not None else torch.randn_like(x_start)
         x_noisy = self.q_sample(x_start=x_start, t=t, noise=noise)
         model_output = self.apply_model(x_noisy, t, cond)
@@ -1436,7 +1438,7 @@ class LatentDiffusion(DDPM):
 
     @torch.no_grad()
     def sample_log(self, cond, batch_size, ddim, ddim_steps, **kwargs):
-        sampler = DDIMSampler(self)
+        sampler = DPMPP2MSampler(self)
         shape = (batch_size, self.channels, self.image_size, self.image_size)
         uncond = kwargs.get("unconditional_conditioning")
         if uncond is None:
@@ -1467,7 +1469,7 @@ class LatentDiffusion(DDPM):
             xc = null_label
             if isinstance(xc, ListConfig):
                 xc = list(xc)
-            if isinstance(xc, dict) or isinstance(xc, list):
+            if isinstance(xc, (dict, list)):
                 c = self.get_learned_conditioning(xc)
             else:
                 if hasattr(xc, "to"):
@@ -1662,8 +1664,8 @@ class LatentDiffusion(DDPM):
         if return_keys:
             if np.intersect1d(list(log.keys()), return_keys).shape[0] == 0:
                 return log
-            else:
-                return {key: log[key] for key in return_keys}
+
+            return {key: log[key] for key in return_keys}
         return log
 
     def configure_optimizers(self):
@@ -1710,7 +1712,7 @@ class LatentDiffusion(DDPM):
     def to_rgb(self, x):
         x = x.float()
         if not hasattr(self, "colorize"):
-            self.colorize = torch.randn(3, x.shape[1], 1, 1).to(x)
+            self.colorize = torch.randn(3, x.shape[1], 1, 1).to(x)  # noqa
         x = nn.functional.conv2d(x, weight=self.colorize)
         x = 2.0 * (x - x.min()) / (x.max() - x.min()) - 1.0
         return x

@@ -33,16 +33,13 @@ class LambdaWarmUpCosineScheduler:
             ) / self.lr_warm_up_steps * n + self.lr_start
             self.last_lr = lr
             return lr
-        else:
-            t = (n - self.lr_warm_up_steps) / (
-                self.lr_max_decay_steps - self.lr_warm_up_steps
-            )
-            t = min(t, 1.0)
-            lr = self.lr_min + 0.5 * (self.lr_max - self.lr_min) * (
-                1 + np.cos(t * np.pi)
-            )
-            self.last_lr = lr
-            return lr
+        t = (n - self.lr_warm_up_steps) / (
+            self.lr_max_decay_steps - self.lr_warm_up_steps
+        )
+        t = min(t, 1.0)
+        lr = self.lr_min + 0.5 * (self.lr_max - self.lr_min) * (1 + np.cos(t * np.pi))
+        self.last_lr = lr
+        return lr
 
     def __call__(self, n, **kwargs):
         return self.schedule(n, **kwargs)
@@ -79,6 +76,7 @@ class LambdaWarmUpCosineScheduler2:
             if n <= cl:
                 return interval
             interval += 1
+        return None
 
     def schedule(self, n, **kwargs):
         cycle = self.find_in_interval(n)
@@ -95,16 +93,16 @@ class LambdaWarmUpCosineScheduler2:
             ] * n + self.f_start[cycle]
             self.last_f = f
             return f
-        else:
-            t = (n - self.lr_warm_up_steps[cycle]) / (
-                self.cycle_lengths[cycle] - self.lr_warm_up_steps[cycle]
-            )
-            t = min(t, 1.0)
-            f = self.f_min[cycle] + 0.5 * (self.f_max[cycle] - self.f_min[cycle]) * (
-                1 + np.cos(t * np.pi)
-            )
-            self.last_f = f
-            return f
+
+        t = (n - self.lr_warm_up_steps[cycle]) / (
+            self.cycle_lengths[cycle] - self.lr_warm_up_steps[cycle]
+        )
+        t = min(t, 1.0)
+        f = self.f_min[cycle] + 0.5 * (self.f_max[cycle] - self.f_min[cycle]) * (
+            1 + np.cos(t * np.pi)
+        )
+        self.last_f = f
+        return f
 
     def __call__(self, n, **kwargs):
         return self.schedule(n, **kwargs)
@@ -127,9 +125,9 @@ class LambdaLinearScheduler(LambdaWarmUpCosineScheduler2):
             ] * n + self.f_start[cycle]
             self.last_f = f
             return f
-        else:
-            f = self.f_min[cycle] + (self.f_max[cycle] - self.f_min[cycle]) * (
-                self.cycle_lengths[cycle] - n
-            ) / (self.cycle_lengths[cycle])
-            self.last_f = f
-            return f
+
+        f = self.f_min[cycle] + (self.f_max[cycle] - self.f_min[cycle]) * (
+            self.cycle_lengths[cycle] - n
+        ) / (self.cycle_lengths[cycle])
+        self.last_f = f
+        return f

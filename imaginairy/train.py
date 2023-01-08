@@ -22,10 +22,8 @@ from torch.utils.data import DataLoader, Dataset
 
 from imaginairy import config
 from imaginairy.datasources.single_concept import SingleConceptDataset
-from imaginairy.log_utils import configure_logging
 from imaginairy.model_manager import get_diffusion_model
 from imaginairy.utils import get_device, instantiate_from_config
-
 
 mod_logger = logging.getLogger(__name__)
 
@@ -59,8 +57,8 @@ def worker_init_fn(_):
         # ]
         current_id = np.random.choice(len(np.random.get_state()[1]), 1)
         return np.random.seed(np.random.get_state()[1][current_id] + worker_id)
-    else:
-        return np.random.seed(np.random.get_state()[1][0] + worker_id)
+
+    return np.random.seed(np.random.get_state()[1][0] + worker_id)
 
 
 class DataModuleFromConfig(pl.LightningDataModule):
@@ -104,6 +102,7 @@ class DataModuleFromConfig(pl.LightningDataModule):
             self.dataset_configs["predict"] = predict
             self.predict_dataloader = self._predict_dataloader
         self.wrap = wrap
+        self.datasets = None
 
     def prepare_data(self):
         for data_cfg in self.dataset_configs.values():
@@ -111,12 +110,10 @@ class DataModuleFromConfig(pl.LightningDataModule):
 
     def setup(self, stage=None):
         self.datasets = {
-            k: instantiate_from_config(self.dataset_configs[k])
-            for k in self.dataset_configs
+            k: instantiate_from_config(c) for k, c in self.dataset_configs.items()
         }
         if self.wrap:
-            for k in self.datasets:
-                self.datasets[k] = WrappedDataset(self.datasets[k])
+            self.datasets = {k: WrappedDataset(v) for k, v in self.datasets.items()}
 
     def _train_dataloader(self):
         is_iterable_dataset = isinstance(self.datasets["train"], SingleConceptDataset)
@@ -237,7 +234,7 @@ class ImageLogger(Callback):
         log_first_step=False,
         log_images_kwargs=None,
         log_all_val=False,
-        concept_label=None
+        concept_label=None,
     ):
         super().__init__()
         self.rescale = rescale
@@ -265,15 +262,15 @@ class ImageLogger(Callback):
             grid = grid.transpose(0, 1).transpose(1, 2).squeeze(-1)
             grid = grid.numpy()
             grid = (grid * 255).astype(np.uint8)
-            filename = "{}_gs-{:06}_e-{:06}_b-{:06}.png".format(
-                k, global_step, current_epoch, batch_idx
+            filename = (
+                f"{k}_gs-{global_step:06}_e-{current_epoch:06}_b-{batch_idx:06}.png"
             )
             path = os.path.join(root, filename)
             os.makedirs(os.path.split(path)[0], exist_ok=True)
             Image.fromarray(grid).save(path)
 
     def log_img(self, pl_module, batch, batch_idx, split="train"):
-        if batch['txt'][0] != self.concept_label:
+        if batch["txt"][0] != self.concept_label:
             return
         check_idx = batch_idx if self.log_on_batch_idx else pl_module.global_step
         if self.log_all_val and split == "val":
@@ -359,9 +356,9 @@ class CUDACallback(Callback):
         if "cuda" in get_device():
             torch.cuda.reset_peak_memory_stats(trainer.root_gpu)
             torch.cuda.synchronize(trainer.root_gpu)
-        self.start_time = time.time()
+        self.start_time = time.time()  # noqa
 
-    def on_train_epoch_end(self, trainer, pl_module, outputs):
+    def on_train_epoch_end(self, trainer, pl_module, outputs):  # noqa
         if "cuda" in get_device():
             torch.cuda.synchronize(trainer.root_gpu)
             max_memory = torch.cuda.max_memory_allocated(trainer.root_gpu) / 2**20
@@ -436,11 +433,9 @@ class SingleImageLogger(Callback):
                 img = img.transpose(0, 1).transpose(1, 2).squeeze(-1)
                 img = img.numpy()
                 img = (img * 255).astype(np.uint8)
-                filename = "{}_gs-{:06}_e-{:06}_b-{:06}_{:08}.png".format(
-                    k, global_step, current_epoch, batch_idx, base_count
-                )
+                filename = f"{k}_gs-{global_step:06}_e-{current_epoch:06}_b-{batch_idx:06}_{base_count:08}.jpg"
                 path = os.path.join(subroot, filename)
-                Image.fromarray(img).save(path)
+                Image.fromarray(img).save(path, quality=95)
                 base_count += 1
 
     def log_img(self, pl_module, batch, batch_idx, split="train", save_dir=None):
@@ -506,11 +501,11 @@ def train_diffusion_model(
     class_images_dir,
     weights_location=config.DEFAULT_MODEL,
     logdir="logs",
-    seed=23,
-    batch_size=8,
     learning_rate=1e-6,
-    accumulate_grad_batches=8,
+    accumulate_grad_batches=32,
 ):
+    batch_size = 1
+    seed = 23
     num_workers = 1
     num_val_workers = 0
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -519,10 +514,10 @@ def train_diffusion_model(
     ckpt_output_dir = os.path.join(logdir, "checkpoints")
     cfg_output_dir = os.path.join(logdir, "configs")
     seed_everything(seed)
-    model = get_diffusion_model(
+    model = get_diffusion_model(  # noqa
         weights_location=weights_location, half_mode=False, for_training=True
     )._model
-    model.learning_rate = learning_rate
+    model.learning_rate = learning_rate * accumulate_grad_batches * batch_size
 
     # add callback which sets up log directory
     default_callbacks_cfg = {
@@ -613,9 +608,11 @@ def train_diffusion_model(
         num_sanity_val_steps=0,
         accumulate_grad_batches=accumulate_grad_batches,
         plugins=[DDPPlugin(find_unused_parameters=False)],
-        callbacks=[instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg],
+        callbacks=[
+            instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg  # noqa
+        ],
         gpus=1,
-        default_root_dir="."
+        default_root_dir=".",
     )
     trainer.logdir = logdir
 
