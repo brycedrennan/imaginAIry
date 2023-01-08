@@ -317,18 +317,6 @@ def describe(image_filepaths):
         print(generate_caption(img.copy()))
 
 
-# @click.option(
-#     "--caption",
-#     default=False,
-#     is_flag=True,
-#     help="Generate a text description of the generated image.",
-# )
-# @click.option(
-#     "--model-config-path",
-#     help=f"Model to use. Should be one of {', '.join(MODEL_SHORT_NAMES)}, or a path to custom weights.",
-#     show_default=True,
-#     default=None,
-# )
 @click.option(
     "--concept-label",
     help=(
@@ -361,6 +349,7 @@ def describe(image_filepaths):
 @click.option(
     "--model-weights-path",
     "--model",
+    "model",
     help=f"Model to use. Should be one of {', '.join(MODEL_SHORT_NAMES)}, or a path to custom weights.",
     show_default=True,
     default=config.DEFAULT_MODEL,

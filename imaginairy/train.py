@@ -270,8 +270,9 @@ class ImageLogger(Callback):
             Image.fromarray(grid).save(path)
 
     def log_img(self, pl_module, batch, batch_idx, split="train"):
-        if batch["txt"][0] != self.concept_label:
-            return
+        # always generate the concept label
+        batch["txt"][0] = self.concept_label
+
         check_idx = batch_idx if self.log_on_batch_idx else pl_module.global_step
         if self.log_all_val and split == "val":
             should_log = True
@@ -421,7 +422,7 @@ class SingleImageLogger(Callback):
 
     @rank_zero_only
     def log_local(self, save_dir, split, images, global_step, current_epoch, batch_idx):
-        root = os.path.join(save_dir, "images", split)
+        root = os.path.join(save_dir, "logs", "images", split)
         os.makedirs(root, exist_ok=True)
         for k in images:
             subroot = os.path.join(root, k)
@@ -549,6 +550,7 @@ def train_diffusion_model(
                     "N": 1,
                     "unconditional_guidance_scale:": 7.5,
                     "unconditional_guidance_label": [""],
+                    "ddim_steps": 20,
                 },
             },
         },
