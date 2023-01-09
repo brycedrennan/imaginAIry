@@ -59,6 +59,5 @@ setup(
         "torchvision>=0.13.1",
         "kornia>=0.6",
         "realesrgan",
-        "gfpgan>=1.3.7",
     ],
 )

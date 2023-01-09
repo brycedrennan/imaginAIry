@@ -3,12 +3,12 @@ from functools import lru_cache
 
 import numpy as np
 import torch
-from basicsr.utils import img2tensor, tensor2img
 from facexlib.utils.face_restoration_helper import FaceRestoreHelper
 from PIL import Image
 from torchvision.transforms.functional import normalize
 
 from imaginairy.model_manager import get_cached_url_path
+from imaginairy.vendored.basicsr.img_util import img2tensor, tensor2img
 from imaginairy.vendored.codeformer.codeformer_arch import CodeFormer
 
 logger = logging.getLogger(__name__)

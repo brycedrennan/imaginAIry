@@ -2,12 +2,12 @@ from functools import lru_cache
 
 import numpy as np
 import torch
-from basicsr.archs.rrdbnet_arch import RRDBNet
 from PIL import Image
 from realesrgan import RealESRGANer
 
 from imaginairy.model_manager import get_cached_url_path
 from imaginairy.utils import get_device
+from imaginairy.vendored.basicsr.rrdbnet_arch import RRDBNet
 
 
 @lru_cache

@@ -3,9 +3,6 @@ from typing import Optional
 
 import torch
 import torch.nn.functional as F
-
-# from basicsr.archs.vqgan_arch import *
-from basicsr.utils.registry import ARCH_REGISTRY
 from torch import Tensor, nn
 
 from imaginairy.vendored.codeformer.vqgan_arch import ResBlock, VQAutoEncoder
@@ -174,7 +171,7 @@ class Fuse_sft_block(nn.Module):
         return out
 
 
-@ARCH_REGISTRY.register()
+# @ARCH_REGISTRY.register()
 class CodeFormer(VQAutoEncoder):
     def __init__(
         self,
