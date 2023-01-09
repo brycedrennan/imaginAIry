@@ -199,7 +199,7 @@ class CLIPDenseBase(nn.Module):
 
         with torch.no_grad():
 
-            inp_size = x_inp.shape[2:]
+            x_inp.shape[2:]
 
             if self.n_tokens is not None:
                 stride2 = x_inp.shape[2] // self.n_tokens
@@ -382,7 +382,7 @@ def clip_load_untrained(version):
     transformer_width = state_dict["ln_final.weight"].shape[0]
     transformer_heads = transformer_width // 64
     transformer_layers = len(
-        {k.split(".")[2] for k in state_dict if k.startswith(f"transformer.resblocks")}
+        {k.split(".")[2] for k in state_dict if k.startswith("transformer.resblocks")}
     )
 
     return CLIP(
@@ -649,7 +649,6 @@ class CLIPDenseBaseline(CLIPDenseBase):
     ):
 
         super().__init__(version, reduce_cond, reduce_dim, prompt, n_tokens)
-        device = "cpu"
 
         # self.cond_layer = cond_layer
         self.extract_layer = extract_layer

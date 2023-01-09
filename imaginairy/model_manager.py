@@ -1,15 +1,14 @@
 import gc
-import glob
 import logging
 import os
 import sys
+import urllib.parse
 
 import requests
 import torch
+from huggingface_hub import hf_hub_download, try_to_load_from_cache
 from omegaconf import OmegaConf
-from transformers import cached_path
-from transformers.utils.hub import TRANSFORMERS_CACHE, HfFolder
-from transformers.utils.hub import url_to_filename as tf_url_to_filename
+from transformers.utils.hub import HfFolder
 
 from imaginairy import config as iconfig
 from imaginairy.config import MODEL_SHORT_NAMES
@@ -226,7 +225,8 @@ def get_cached_url_path(url):
     """
 
     try:
-        return huggingface_cached_path(url)
+        if url.startswith("https://huggingface.co"):
+            return huggingface_cached_path(url)
     except (OSError, ValueError):
         pass
     filename = url.split("/")[-1]
@@ -240,16 +240,6 @@ def get_cached_url_path(url):
     with open(dest_path, "wb") as f:
         f.write(r.content)
     return dest_path
-
-
-def find_url_in_huggingface_cache(url):
-    huggingface_filename = os.path.join(TRANSFORMERS_CACHE, tf_url_to_filename(url))
-    for name in glob.glob(huggingface_filename + "*"):
-        if name.endswith((".json", ".lock")):
-            continue
-
-        return name
-    return None
 
 
 def check_huggingface_url_authorized(url):
@@ -272,9 +262,27 @@ def check_huggingface_url_authorized(url):
 
 def huggingface_cached_path(url):
     # bypass all the HEAD calls done by the default `cached_path`
-    dest_path = find_url_in_huggingface_cache(url)
+    repo, commit_hash, filepath = extract_huggingface_repo_commit_file_from_url(url)
+    dest_path = try_to_load_from_cache(
+        repo_id=repo, revision=commit_hash, filename=filepath
+    )
     if not dest_path:
         check_huggingface_url_authorized(url)
         token = HfFolder.get_token()
-        dest_path = cached_path(url, use_auth_token=token)
+        logger.info(f"Downloading {url} from huggingface")
+        dest_path = hf_hub_download(
+            repo_id=repo, revision=commit_hash, filename=filepath, token=token
+        )
     return dest_path
+
+
+def extract_huggingface_repo_commit_file_from_url(url):
+    parsed_url = urllib.parse.urlparse(url)
+    path_components = parsed_url.path.strip("/").split("/")
+
+    repo = "/".join(path_components[0:2])
+    assert path_components[2] == "resolve"
+    commit_hash = path_components[3]
+    filepath = "/".join(path_components[4:])
+
+    return repo, commit_hash, filepath

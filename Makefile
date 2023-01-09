@@ -59,7 +59,7 @@ run-dev: build-dev-image
 	docker run -it -v $$HOME/.cache/huggingface:/root/.cache/huggingface -v $$HOME/.cache/torch:/root/.cache/torch -v `pwd`/outputs:/outputs imaginairy-dev /bin/bash
 
 requirements:  ## Freeze the requirements.txt file
-	pip-compile setup.py requirements-dev.in --output-file=requirements-dev.txt --upgrade
+	pip-compile setup.py requirements-dev.in --output-file=requirements-dev.txt --upgrade --resolver=backtracking
 
 require_pyenv:
 	@if ! [ -x "$$(command -v pyenv)" ]; then\

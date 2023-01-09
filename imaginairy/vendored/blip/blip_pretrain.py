@@ -49,7 +49,7 @@ class BLIP_Pretrain(nn.Module):
                 check_hash=True,
             )
             state_dict = checkpoint["model"]
-            msg = self.visual_encoder.load_state_dict(state_dict, strict=False)
+            self.visual_encoder.load_state_dict(state_dict, strict=False)
         elif vit == "large":
             from timm.models.helpers import load_custom_pretrained
             from timm.models.vision_transformer import default_cfgs

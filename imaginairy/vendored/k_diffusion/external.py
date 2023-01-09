@@ -27,9 +27,9 @@ class VDenoiser(nn.Module):
         return (t * math.pi / 2).tan()
 
     def loss(self, input, noise, sigma, **kwargs):
-        c_skip, c_out, c_in = [
+        c_skip, c_out, c_in = (
             utils.append_dims(x, input.ndim) for x in self.get_scalings(sigma)
-        ]
+        )
         noised_input = input + noise * utils.append_dims(sigma, input.ndim)
         model_output = self.inner_model(
             noised_input * c_in, self.sigma_to_t(sigma), **kwargs
@@ -38,9 +38,9 @@ class VDenoiser(nn.Module):
         return (model_output - target).pow(2).flatten(1).mean(1)
 
     def forward(self, input, sigma, **kwargs):
-        c_skip, c_out, c_in = [
+        c_skip, c_out, c_in = (
             utils.append_dims(x, input.ndim) for x in self.get_scalings(sigma)
-        ]
+        )
         return (
             self.inner_model(input * c_in, self.sigma_to_t(sigma), **kwargs) * c_out
             + input * c_skip
@@ -116,17 +116,17 @@ class DiscreteEpsDDPMDenoiser(DiscreteSchedule):
         return self.inner_model(*args, **kwargs)
 
     def loss(self, input, noise, sigma, **kwargs):
-        c_out, c_in = [
+        c_out, c_in = (
             utils.append_dims(x, input.ndim) for x in self.get_scalings(sigma)
-        ]
+        )
         noised_input = input + noise * utils.append_dims(sigma, input.ndim)
         eps = self.get_eps(noised_input * c_in, self.sigma_to_t(sigma), **kwargs)
         return (eps - noise).pow(2).flatten(1).mean(1)
 
     def forward(self, input, sigma, **kwargs):
-        c_out, c_in = [
+        c_out, c_in = (
             utils.append_dims(x, input.ndim) for x in self.get_scalings(sigma)
-        ]
+        )
         eps = self.get_eps(input * c_in, self.sigma_to_t(sigma), **kwargs)
         return input + eps * c_out
 
@@ -178,18 +178,18 @@ class DiscreteVDDPMDenoiser(DiscreteSchedule):
         return self.inner_model(*args, **kwargs)
 
     def loss(self, input, noise, sigma, **kwargs):
-        c_skip, c_out, c_in = [
+        c_skip, c_out, c_in = (
             utils.append_dims(x, input.ndim) for x in self.get_scalings(sigma)
-        ]
+        )
         noised_input = input + noise * utils.append_dims(sigma, input.ndim)
         model_output = self.get_v(noised_input * c_in, self.sigma_to_t(sigma), **kwargs)
         target = (input - c_skip * noised_input) / c_out
         return (model_output - target).pow(2).flatten(1).mean(1)
 
     def forward(self, input, sigma, **kwargs):
-        c_skip, c_out, c_in = [
+        c_skip, c_out, c_in = (
             utils.append_dims(x, input.ndim) for x in self.get_scalings(sigma)
-        ]
+        )
         return (
             self.get_v(input * c_in, self.sigma_to_t(sigma), **kwargs) * c_out
             + input * c_skip

@@ -2,7 +2,6 @@ black
 coverage
 isort
 ruff
-pydocstyle
 pylama
 pylint
 pytest
