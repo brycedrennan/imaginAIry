@@ -1,4 +1,5 @@
 import os
+import random
 from abc import abstractmethod
 
 from einops import rearrange
@@ -124,4 +125,5 @@ def _load_image_filenames(img_dir, image_extensions=(".jpg", ".jpeg", ".png")):
     for filename in os.listdir(img_dir):
         if filename.lower().endswith(image_extensions) and not filename.startswith("."):
             image_filenames.append(filename)
+    random.shuffle(image_filenames)
     return image_filenames
