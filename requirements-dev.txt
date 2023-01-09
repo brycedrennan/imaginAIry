@@ -4,10 +4,6 @@
 #
 #    pip-compile --output-file=requirements-dev.txt --resolver=backtracking requirements-dev.in setup.py
 #
-absl-py==1.3.0
-    # via tb-nightly
-addict==2.4.0
-    # via basicsr
 aiohttp==3.8.3
     # via fsspec
 aiosignal==1.3.1
@@ -22,14 +18,8 @@ attrs==22.2.0
     # via
     #   aiohttp
     #   pytest
-basicsr==1.4.2
-    # via
-    #   gfpgan
-    #   realesrgan
 black==22.12.0
     # via -r requirements-dev.in
-cachetools==5.2.1
-    # via google-auth
 certifi==2022.12.7
     # via requests
 charset-normalizer==2.1.1
@@ -41,6 +31,7 @@ click==8.1.3
     #   black
     #   click-shell
     #   imaginAIry (setup.py)
+    #   typer
 click-shell==2.1
     # via imaginAIry (setup.py)
 contourpy==1.0.6
@@ -58,9 +49,7 @@ einops==0.6.0
 exceptiongroup==1.1.0
     # via pytest
 facexlib==0.2.5
-    # via
-    #   gfpgan
-    #   realesrgan
+    # via imaginAIry (setup.py)
 fairscale==0.4.13
     # via imaginAIry (setup.py)
 filelock==3.9.0
@@ -82,18 +71,6 @@ ftfy==6.1.1
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
-future==0.18.2
-    # via basicsr
-gfpgan==1.3.8
-    # via realesrgan
-google-auth==2.15.0
-    # via
-    #   google-auth-oauthlib
-    #   tb-nightly
-google-auth-oauthlib==0.4.6
-    # via tb-nightly
-grpcio==1.51.1
-    # via tb-nightly
 huggingface-hub==0.11.1
     # via
     #   diffusers
@@ -105,9 +82,7 @@ idna==3.4
     #   requests
     #   yarl
 imageio==2.24.0
-    # via
-    #   imaginAIry (setup.py)
-    #   scikit-image
+    # via imaginAIry (setup.py)
 importlib-metadata==6.0.0
     # via diffusers
 iniconfig==2.0.0
@@ -122,18 +97,12 @@ kornia==0.6.9
     # via imaginAIry (setup.py)
 lazy-object-proxy==1.9.0
     # via astroid
+libcst==0.4.9
+    # via pycln
 lightning-utilities==0.5.0
     # via pytorch-lightning
 llvmlite==0.39.1
     # via numba
-lmdb==1.4.0
-    # via
-    #   basicsr
-    #   gfpgan
-markdown==3.4.1
-    # via tb-nightly
-markupsafe==2.1.1
-    # via werkzeug
 matplotlib==3.6.2
     # via filterpy
 mccabe==0.7.0
@@ -145,48 +114,37 @@ multidict==6.0.4
     #   aiohttp
     #   yarl
 mypy-extensions==0.4.3
-    # via black
-networkx==3.0
-    # via scikit-image
+    # via
+    #   black
+    #   typing-inspect
 numba==0.56.4
     # via facexlib
 numpy==1.23.5
     # via
-    #   basicsr
     #   contourpy
     #   diffusers
     #   facexlib
     #   fairscale
     #   filterpy
-    #   gfpgan
     #   imageio
     #   imaginAIry (setup.py)
     #   matplotlib
     #   numba
     #   opencv-python
     #   pytorch-lightning
-    #   pywavelets
-    #   realesrgan
-    #   scikit-image
     #   scipy
-    #   tb-nightly
     #   tensorboardx
-    #   tifffile
     #   torchmetrics
     #   torchvision
     #   transformers
-oauthlib==3.2.2
-    # via requests-oauthlib
 omegaconf==2.3.0
     # via imaginAIry (setup.py)
 open-clip-torch==2.9.2
     # via imaginAIry (setup.py)
 opencv-python==4.7.0.68
     # via
-    #   basicsr
     #   facexlib
-    #   gfpgan
-    #   realesrgan
+    #   imaginAIry (setup.py)
 packaging==23.0
     # via
     #   huggingface-hub
@@ -196,21 +154,19 @@ packaging==23.0
     #   pytest
     #   pytest-sugar
     #   pytorch-lightning
-    #   scikit-image
     #   torchmetrics
     #   transformers
-pathspec==0.10.3
-    # via black
+pathspec==0.9.0
+    # via
+    #   black
+    #   pycln
 pillow==9.4.0
     # via
-    #   basicsr
     #   diffusers
     #   facexlib
     #   imageio
     #   imaginAIry (setup.py)
     #   matplotlib
-    #   realesrgan
-    #   scikit-image
     #   torchvision
 platformdirs==2.6.2
     # via
@@ -222,16 +178,11 @@ protobuf==3.20.1
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
-    #   tb-nightly
     #   tensorboardx
 psutil==5.9.4
     # via imaginAIry (setup.py)
-pyasn1==0.4.8
-    # via
-    #   pyasn1-modules
-    #   rsa
-pyasn1-modules==0.2.8
-    # via google-auth
+pycln==2.1.2
+    # via -r requirements-dev.in
 pycodestyle==2.10.0
     # via pylama
 pydocstyle==6.2.3
@@ -257,19 +208,15 @@ python-dateutil==2.8.2
     # via matplotlib
 pytorch-lightning==1.8.6
     # via imaginAIry (setup.py)
-pywavelets==1.4.1
-    # via scikit-image
 pyyaml==6.0
     # via
-    #   basicsr
-    #   gfpgan
     #   huggingface-hub
+    #   libcst
     #   omegaconf
+    #   pycln
     #   pytorch-lightning
     #   timm
     #   transformers
-realesrgan==0.3.0
-    # via imaginAIry (setup.py)
 regex==2022.10.31
     # via
     #   diffusers
@@ -277,58 +224,34 @@ regex==2022.10.31
     #   transformers
 requests==2.28.1
     # via
-    #   basicsr
     #   diffusers
     #   fsspec
     #   huggingface-hub
     #   imaginAIry (setup.py)
-    #   requests-oauthlib
     #   responses
-    #   tb-nightly
     #   torchvision
     #   transformers
-requests-oauthlib==1.3.1
-    # via google-auth-oauthlib
 responses==0.22.0
     # via -r requirements-dev.in
-rsa==4.9
-    # via google-auth
 ruff==0.0.215
     # via -r requirements-dev.in
 safetensors==0.2.7
     # via imaginAIry (setup.py)
-scikit-image==0.19.3
-    # via basicsr
 scipy==1.10.0
     # via
-    #   basicsr
     #   facexlib
     #   filterpy
-    #   gfpgan
-    #   scikit-image
     #   torchdiffeq
 sentencepiece==0.1.97
     # via open-clip-torch
 six==1.16.0
-    # via
-    #   google-auth
-    #   python-dateutil
+    # via python-dateutil
 snowballstemmer==2.2.0
     # via pydocstyle
-tb-nightly==2.12.0a20230107
-    # via
-    #   basicsr
-    #   gfpgan
-tensorboard-data-server==0.6.1
-    # via tb-nightly
-tensorboard-plugin-wit==1.8.1
-    # via tb-nightly
 tensorboardx==2.5.1
     # via pytorch-lightning
 termcolor==2.2.0
     # via pytest-sugar
-tifffile==2022.10.10
-    # via scikit-image
 timm==0.6.12
     # via imaginAIry (setup.py)
 tokenizers==0.13.2
@@ -341,18 +264,17 @@ tomli==2.0.1
     #   pylint
     #   pytest
 tomlkit==0.11.6
-    # via pylint
+    # via
+    #   pycln
+    #   pylint
 torch==1.13.1
     # via
-    #   basicsr
     #   facexlib
     #   fairscale
-    #   gfpgan
     #   imaginAIry (setup.py)
     #   kornia
     #   open-clip-torch
     #   pytorch-lightning
-    #   realesrgan
     #   timm
     #   torchdiffeq
     #   torchmetrics
@@ -365,52 +287,46 @@ torchmetrics==0.11.0
     #   pytorch-lightning
 torchvision==0.14.1
     # via
-    #   basicsr
     #   facexlib
-    #   gfpgan
     #   imaginAIry (setup.py)
     #   open-clip-torch
-    #   realesrgan
     #   timm
 tqdm==4.64.1
     # via
-    #   basicsr
     #   facexlib
-    #   gfpgan
     #   huggingface-hub
     #   imaginAIry (setup.py)
     #   open-clip-torch
     #   pytorch-lightning
-    #   realesrgan
     #   transformers
 transformers==4.25.1
     # via imaginAIry (setup.py)
+typer==0.7.0
+    # via pycln
 types-toml==0.10.8.1
     # via responses
 typing-extensions==4.4.0
     # via
     #   astroid
     #   huggingface-hub
+    #   libcst
     #   lightning-utilities
     #   pytorch-lightning
     #   torch
     #   torchvision
+    #   typing-inspect
+typing-inspect==0.8.0
+    # via libcst
 urllib3==1.26.13
     # via
     #   requests
     #   responses
 wcwidth==0.2.5
     # via ftfy
-werkzeug==2.2.2
-    # via tb-nightly
 wheel==0.38.4
-    # via tb-nightly
+    # via -r requirements-dev.in
 wrapt==1.14.1
     # via astroid
-yapf==0.32.0
-    # via
-    #   basicsr
-    #   gfpgan
 yarl==1.8.2
     # via aiohttp
 zipp==3.11.0

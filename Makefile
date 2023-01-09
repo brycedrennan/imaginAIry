@@ -17,6 +17,8 @@ init: require_pyenv  ## Setup a dev environment for local development.
 	pip install --upgrade pip pip-tools
 	pip-sync requirements-dev.txt
 	pip install -e . --no-deps
+	# the compiled requirements don't included OS specific subdependencies so we trigger those this way
+	pip install `pip freeze | grep "^torch=="`
 	@echo -e "\nEnvironment setup! ✨ 🍰 ✨ 🐍 \n\nCopy this path to tell PyCharm where your virtualenv is. You may have to click the refresh button in the pycharm file explorer.\n"
 	@echo -e "\033[0;32m"
 	@pyenv which python
@@ -86,7 +88,6 @@ vendor_openai_clip:
 
 revendorize: vendorize_kdiffusion
 	make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip COMMIT=d50d76daa670286dd6cacf3bcd80b5e4823fc8e1
-
 	make af
 
 vendorize_clipseg:

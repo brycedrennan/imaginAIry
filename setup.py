@@ -37,6 +37,7 @@ setup(
         "click",
         "click-shell",
         "protobuf != 3.20.2, != 3.19.5",
+        "facexlib",
         "fairscale>=0.4.4",  # for vendored blip
         "ftfy",  # for vendored clip
         "torch>=1.2.0",
@@ -49,6 +50,7 @@ setup(
         "pytorch-lightning>=1.4.2",
         "omegaconf>=2.1.1",
         "open-clip-torch",
+        "opencv-python",
         "requests",
         "einops>=0.3.0",
         "safetensors",
@@ -58,6 +60,5 @@ setup(
         "torchmetrics>=0.6.0",
         "torchvision>=0.13.1",
         "kornia>=0.6",
-        "realesrgan",
     ],
 )
