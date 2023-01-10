@@ -1,12 +1,15 @@
 import gc
+import inspect
 import logging
 import os
 import sys
 import urllib.parse
+from functools import wraps
 
 import requests
 import torch
-from huggingface_hub import hf_hub_download, try_to_load_from_cache
+from huggingface_hub import hf_hub_download as _hf_hub_download
+from huggingface_hub import try_to_load_from_cache
 from omegaconf import OmegaConf
 from transformers.utils.hub import HfFolder
 
@@ -278,6 +281,20 @@ def check_huggingface_url_authorized(url):
             "See https://huggingface.co/docs/huggingface_hub/quick-start#login for more information"
         )
     return None
+
+
+@wraps(_hf_hub_download)
+def hf_hub_download(*args, **kwargs):
+    """
+    backwards compatible wrapper for huggingface's hf_hub_download.
+
+    they changed ther argument name from `use_auth_token` to `token`
+    """
+    arg_names = inspect.getfullargspec(_hf_hub_download)
+    if "use_auth_token" in arg_names.args and "token" in kwargs:
+        kwargs["use_auth_token"] = kwargs.pop("token")
+
+    return _hf_hub_download(*args, **kwargs)
 
 
 def huggingface_cached_path(url):
