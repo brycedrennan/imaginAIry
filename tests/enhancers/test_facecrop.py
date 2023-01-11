@@ -9,4 +9,4 @@ logger = logging.getLogger(__name__)
 
 def test_facecrop():
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png")
-    crops = generate_face_crops(img, max_width=img.width, max_height=img.height)
+    generate_face_crops(img, max_width=img.width, max_height=img.height)

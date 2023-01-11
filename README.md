@@ -505,6 +505,14 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ deploy to pypi
    - find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&index=laion5B&useMclip=false
    - https://github.com/vicgalle/stable-diffusion-aesthetic-gradients
+ - Training
+   - Finetuning "dreambooth" style
+   - Textual Inversion
+   - Performance Improvements
+    - [ColoassalAI](https://github.com/hpcaitech/ColossalAI/tree/main/examples/images/diffusion) - almost got it working but it's not easy enough to install to merit inclusion in imaginairy. We should check back in on this.
+    - Xformers
+    - Deepspeed
+    - 
 
 ## Notable Stable Diffusion Implementations
  - https://github.com/ahrm/UnstableFusion
