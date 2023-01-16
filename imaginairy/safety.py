@@ -5,6 +5,8 @@ import torch
 from diffusers.pipelines.stable_diffusion import safety_checker as safety_checker_mod
 from transformers import AutoFeatureExtractor
 
+from imaginairy.enhancers.blur_detect import is_blurry
+
 logger = logging.getLogger(__name__)
 
 
@@ -145,6 +147,14 @@ _SPECIAL_CARE_DESCRIPTIONS = []
 
 
 def create_safety_score(img, safety_mode=SafetyMode.STRICT):
+    if is_blurry(img):
+        sr = SafetyResult()
+        sr.add_special_care_score(0, 0, 1)
+        sr.add_special_care_score(1, 0, 1)
+        sr.add_special_care_score(2, 0, 1)
+        sr.add_nsfw_score(0, 0, 1)
+        return sr
+
     safety_feature_extractor, safety_checker = safety_models()
     safety_checker_input = safety_feature_extractor([img], return_tensors="pt")
     clip_input = safety_checker_input.pixel_values
