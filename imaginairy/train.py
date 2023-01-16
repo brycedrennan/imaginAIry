@@ -382,6 +382,11 @@ def train_diffusion_model(
     accumulate_grad_batches=32,
     resume=None,
 ):
+    """
+    Train a diffusion model on a single concept.
+
+    accumulate_grad_batches used to simulate a bigger batch size - https://arxiv.org/pdf/1711.00489.pdf
+    """
     batch_size = 1
     seed = 23
     num_workers = 1

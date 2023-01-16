@@ -13,6 +13,9 @@ from imaginairy.vendored.codeformer.codeformer_arch import CodeFormer
 
 logger = logging.getLogger(__name__)
 
+face_restore_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+half_mode = face_restore_device == "cuda"
+
 
 @lru_cache
 def codeformer_model():
@@ -22,12 +25,14 @@ def codeformer_model():
         n_head=8,
         n_layers=9,
         connect_list=["32", "64", "128", "256"],
-    ).to("cpu")
+    ).to(face_restore_device)
     url = "https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth"
     ckpt_path = get_cached_url_path(url)
     checkpoint = torch.load(ckpt_path)["params_ema"]
     model.load_state_dict(checkpoint)
     model.eval()
+    if half_mode:
+        model = model.half()
     return model
 
 
@@ -39,7 +44,6 @@ def face_restore_helper():
     FaceRestoreHelper loads a model internally so we need to cache it
     or we end up with a memory leak
     """
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     face_helper = FaceRestoreHelper(
         upscale_factor=1,
         face_size=512,
@@ -47,7 +51,7 @@ def face_restore_helper():
         det_model="retinaface_resnet50",
         save_ext="png",
         use_parse=True,
-        device=device,
+        device=face_restore_device,
     )
     return face_helper
 
@@ -77,16 +81,17 @@ def enhance_faces(img, fidelity=0):
         # prepare data
         cropped_face_t = img2tensor(cropped_face / 255.0, bgr2rgb=True, float32=True)
         normalize(cropped_face_t, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)
-        cropped_face_t = cropped_face_t.unsqueeze(0).to("cpu")
+        cropped_face_t = cropped_face_t.unsqueeze(0).to(face_restore_device)
 
         try:
             with torch.no_grad():
+
                 output = net(cropped_face_t, w=fidelity, adain=True)[0]  # noqa
                 restored_face = tensor2img(output, rgb2bgr=True, min_max=(-1, 1))
             del output
             torch.cuda.empty_cache()
         except Exception as error:  # noqa
-            logger.error(f"\tFailed inference for CodeFormer: {error}")
+            logger.exception(f"\tFailed inference for CodeFormer: {error}")
             restored_face = tensor2img(cropped_face_t, rgb2bgr=True, min_max=(-1, 1))
 
         restored_face = restored_face.astype("uint8")
