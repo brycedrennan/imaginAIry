@@ -182,6 +182,7 @@ def imagine(
                             max_height=prompt.height,
                             max_width=prompt.width,
                         )
+
                     except PIL.UnidentifiedImageError:
                         logger.warning(f"Could not load image: {prompt.init_image}")
                         continue
@@ -194,9 +195,16 @@ def imagine(
                         )
                     elif prompt.mask_image:
                         mask_image = prompt.mask_image.convert("L")
+                        mask_image = pillow_fit_image_within(
+                            mask_image,
+                            max_height=prompt.height,
+                            max_width=prompt.width,
+                            convert="L",
+                        )
 
                     if mask_image is not None:
                         log_img(mask_image, "init mask")
+
                         if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
                             mask_image = ImageOps.invert(mask_image)
 

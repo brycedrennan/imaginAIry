@@ -54,6 +54,7 @@ class MemoryAwareModel:
             model_config = OmegaConf.load(f"{PKG_ROOT}/{self._config_path}")
             if self._for_training:
                 model_config.use_ema = True
+                # model_config.use_scheduler = True
 
             model = load_model_from_config(
                 config=model_config,

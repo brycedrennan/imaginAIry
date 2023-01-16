@@ -1,6 +1,8 @@
 import os
 import random
+import re
 from abc import abstractmethod
+from collections import defaultdict
 
 from einops import rearrange
 from omegaconf import ListConfig
@@ -69,23 +71,18 @@ class SingleConceptDataset(Dataset):
 
         self.image_transforms = image_transforms
 
-        self._concept_image_filenames = None
+        self._concept_image_filename_groups = None
         self._class_image_filenames = None
 
-        # path to a temporary folder where the class images are stored (using tempfile)
-        # class_key = re.sub(r"[ -_]+", "-", class_label)
-        # class_key = re.sub(r"[^a-zA-Z0-9-]", "", class_key)
-
-        # self.class_images_dir = os.path.join(get_cache_dir(), "class_images", class_key)
-
     def __len__(self):
-        return len(self.concept_image_filenames)
+        return len(self.concept_image_filename_groups) * 2
 
     def __getitem__(self, idx):
         if idx % 2:
-            img_path = os.path.join(
-                self.concept_images_dir, self.concept_image_filenames[int(idx / 2)]
-            )
+            img_group = self._concept_image_filename_groups[int(idx / 2)]
+            img_filename = random.choice(img_group)
+            img_path = os.path.join(self.concept_images_dir, img_filename)
+
             txt = self.concept_label
         else:
             img_path = os.path.join(
@@ -101,12 +98,12 @@ class SingleConceptDataset(Dataset):
         return data
 
     @property
-    def concept_image_filenames(self):
-        if self._concept_image_filenames is None:
-            self._concept_image_filenames = _load_image_filenames(
+    def concept_image_filename_groups(self):
+        if self._concept_image_filename_groups is None:
+            self._concept_image_filename_groups = _load_image_filenames_and_alts(
                 self.concept_images_dir
             )
-        return self._concept_image_filenames
+        return self._concept_image_filename_groups
 
     @property
     def class_image_filenames(self):
@@ -116,11 +113,20 @@ class SingleConceptDataset(Dataset):
 
     @property
     def num_records(self):
-        return len(self.concept_image_filenames)
+        return len(self)
+
+
+def _load_image_filenames_and_alts(img_dir, image_extensions=(".jpg", ".jpeg", ".png")):
+    """Loads images into groups (filenames tagged with `[alt-{n:02d}]` are grouped together)."""
+    image_filenames = _load_image_filenames(img_dir, image_extensions)
+    grouped_img_filenames = defaultdict(list)
+    for filename in image_filenames:
+        base_filename = re.sub(r"\[alt-\d*\]", "", filename)
+        grouped_img_filenames[base_filename].append(filename)
+    return list(grouped_img_filenames.values())
 
 
 def _load_image_filenames(img_dir, image_extensions=(".jpg", ".jpeg", ".png")):
-    # load the image filenames of images in concept_images_dir into a list
     image_filenames = []
     for filename in os.listdir(img_dir):
         if filename.lower().endswith(image_extensions) and not filename.startswith("."):

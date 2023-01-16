@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def square_roi_coordinate(roi, max_width, max_height):
+def square_roi_coordinate(roi, max_width, max_height, best_effort=False):
     """Given a region of interest, returns a square region of interest."""
     x1, y1, x2, y2 = roi
     x1, y1, x2, y2 = int(round(x1)), int(round(y1)), int(round(x2)), int(round(y2))
@@ -18,10 +18,12 @@ def square_roi_coordinate(roi, max_width, max_height):
         y1 -= int(round(diff / 2))
         y2 += roi_width - (y2 - y1)
 
-    x1, y1, x2, y2 = move_roi_into_bounds((x1, y1, x2, y2), max_width, max_height)
+    x1, y1, x2, y2 = move_roi_into_bounds(
+        (x1, y1, x2, y2), max_width, max_height, force=best_effort
+    )
     width = x2 - x1
     height = y2 - y1
-    if width != height:
+    if not best_effort and width != height:
         raise RuntimeError(f"ROI is not square: {width}x{height}")
     return x1, y1, x2, y2
 
@@ -59,13 +61,7 @@ def resize_roi_coordinates(
         y2 += expansion_y
 
     x1, y1, x2, y2 = move_roi_into_bounds((x1, y1, x2, y2), max_width, max_height)
-    width = x2 - x1
-    height = y2 - y1
 
-    if width != height:
-        raise RuntimeError(
-            f"ROI is not square: {width}x{height}.  roi: {roi}, expansion_factor: {expansion_factor}"
-        )
     return x1, y1, x2, y2
 
 

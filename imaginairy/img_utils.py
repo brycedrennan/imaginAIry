@@ -9,8 +9,10 @@ from PIL import Image
 from imaginairy.utils import get_device
 
 
-def pillow_fit_image_within(image: PIL.Image.Image, max_height=512, max_width=512):
-    image = image.convert("RGB")
+def pillow_fit_image_within(
+    image: PIL.Image.Image, max_height=512, max_width=512, convert="RGB"
+):
+    image = image.convert(convert)
     w, h = image.size
     resize_ratio = 1
     if w > max_width or h > max_height:

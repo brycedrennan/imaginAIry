@@ -37,14 +37,16 @@ def generate_face_crops(face_roi, max_width, max_height):
     crops = []
     squared_roi = square_roi_coordinate(face_roi, max_width, max_height)
 
+    crops.append(resize_roi_coordinates(squared_roi, 1.1, max_width, max_height))
     # 1.6 generally enough to capture entire face
     base_expanded_roi = resize_roi_coordinates(squared_roi, 1.6, max_width, max_height)
+
     crops.append(base_expanded_roi)
     current_width = base_expanded_roi[2] - base_expanded_roi[0]
 
     # some zoomed out variations
-    for n in range(4):
-        factor = 1.25 + 0.3 * n
+    for n in range(2):
+        factor = 1.25 + 0.4 * n
 
         expanded_roi = resize_roi_coordinates(
             base_expanded_roi, factor, max_width, max_height, expand_up=False

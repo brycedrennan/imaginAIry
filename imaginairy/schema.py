@@ -56,14 +56,14 @@ class LazyLoadingImage:
 
         if self._lazy_filepath:
             self._img = Image.open(self._lazy_filepath)
-            logger.info(
+            logger.debug(
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_filepath}"
             )
         elif self._lazy_url:
             self._img = Image.open(
                 requests.get(self._lazy_url, stream=True, timeout=60).raw
             )
-            logger.info(
+            logger.debug(
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_url}"
             )
         # fix orientation

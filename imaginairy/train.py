@@ -1,5 +1,4 @@
 import datetime
-import glob
 import logging
 import os
 import signal
@@ -14,15 +13,15 @@ from omegaconf import OmegaConf
 from PIL import Image
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import Callback, LearningRateMonitor
-from pytorch_lightning.plugins import DDPPlugin
+from pytorch_lightning.strategies import DDPStrategy
 from pytorch_lightning.trainer import Trainer
 from pytorch_lightning.utilities import rank_zero_info
 from pytorch_lightning.utilities.distributed import rank_zero_only
 from torch.utils.data import DataLoader, Dataset
 
 from imaginairy import config
-from imaginairy.datasources.single_concept import SingleConceptDataset
 from imaginairy.model_manager import get_diffusion_model
+from imaginairy.training_tools.single_concept import SingleConceptDataset
 from imaginairy.utils import get_device, instantiate_from_config
 
 mod_logger = logging.getLogger(__name__)
@@ -50,7 +49,7 @@ def worker_init_fn(_):
     worker_id = worker_info.id
 
     if isinstance(dataset, SingleConceptDataset):
-        split_size = dataset.num_records // worker_info.num_workers
+        # split_size = dataset.num_records // worker_info.num_workers
         # reset num_records to the true number to retain reliable length information
         # dataset.sample_ids = dataset.valid_ids[
         #     worker_id * split_size : (worker_id + 1) * split_size
@@ -118,14 +117,14 @@ class DataModuleFromConfig(pl.LightningDataModule):
     def _train_dataloader(self):
         is_iterable_dataset = isinstance(self.datasets["train"], SingleConceptDataset)
         if is_iterable_dataset or self.use_worker_init_fn:
-            init_fn = worker_init_fn
+            pass
         else:
-            init_fn = None
+            pass
         return DataLoader(
             self.datasets["train"],
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            shuffle=False,
+            shuffle=True,
             worker_init_fn=worker_init_fn,
         )
 
@@ -202,7 +201,7 @@ class SetupCallback(Callback):
             ckpt_path = os.path.join(self.ckptdir, "last.ckpt")
             trainer.save_checkpoint(ckpt_path)
 
-    def on_pretrain_routine_start(self, trainer, pl_module):
+    def on_fit_start(self, trainer, pl_module):
         if trainer.global_rank == 0:
             # Create logdirs and save configs
             os.makedirs(self.logdir, exist_ok=True)
@@ -254,7 +253,7 @@ class ImageLogger(Callback):
 
     @rank_zero_only
     def log_local(self, save_dir, split, images, global_step, current_epoch, batch_idx):
-        root = os.path.join(save_dir, "images", split)
+        root = os.path.join(save_dir, "logs", "images", split)
         for k in images:
             grid = torchvision.utils.make_grid(images[k], nrow=4)
             if self.rescale:
@@ -322,13 +321,13 @@ class ImageLogger(Callback):
                 pl_module.train()
 
     def check_frequency(self, check_idx):
-        if (check_idx % self.batch_freq) == 0 and (check_idx > 0 or self.log_first_step):
+        if (check_idx % self.batch_freq) == 0 and (
+            check_idx > 0 or self.log_first_step
+        ):
             return True
         return False
 
-    def on_train_batch_end(
-        self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx
-    ):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         if not self.disabled and (pl_module.global_step > 0 or self.log_first_step):
             self.log_img(pl_module, batch, batch_idx, split="train")
 
@@ -349,14 +348,17 @@ class CUDACallback(Callback):
     def on_train_epoch_start(self, trainer, pl_module):
         # Reset the memory use counter
         if "cuda" in get_device():
-            torch.cuda.reset_peak_memory_stats(trainer.root_gpu)
-            torch.cuda.synchronize(trainer.root_gpu)
+            torch.cuda.reset_peak_memory_stats(trainer.strategy.root_device.index)
+            torch.cuda.synchronize(trainer.strategy.root_device.index)
         self.start_time = time.time()  # noqa
 
-    def on_train_epoch_end(self, trainer, pl_module, outputs):  # noqa
+    def on_train_epoch_end(self, trainer, pl_module):  # noqa
         if "cuda" in get_device():
-            torch.cuda.synchronize(trainer.root_gpu)
-            max_memory = torch.cuda.max_memory_allocated(trainer.root_gpu) / 2**20
+            torch.cuda.synchronize(trainer.strategy.root_device.index)
+            max_memory = (
+                torch.cuda.max_memory_allocated(trainer.strategy.root_device.index)
+                / 2**20
+            )
             epoch_time = time.time() - self.start_time
 
             try:
@@ -369,8 +371,6 @@ class CUDACallback(Callback):
                 pass
 
 
-
-
 def train_diffusion_model(
     concept_label,
     concept_images_dir,
@@ -380,6 +380,7 @@ def train_diffusion_model(
     logdir="logs",
     learning_rate=1e-6,
     accumulate_grad_batches=32,
+    resume=None,
 ):
     batch_size = 1
     seed = 23
@@ -412,9 +413,9 @@ def train_diffusion_model(
             "target": "imaginairy.train.ImageLogger",
             "params": {
                 "batch_frequency": 10,
-                "max_images": 4,
+                "max_images": 1,
                 "clamp": True,
-                "increase_log_steps": True,
+                "increase_log_steps": False,
                 "log_first_step": True,
                 "log_all_val": True,
                 "concept_label": concept_label,
@@ -447,7 +448,7 @@ def train_diffusion_model(
             "filename": "{epoch:06}",
             "verbose": True,
             "save_last": True,
-            "every_n_train_steps": 500,
+            "every_n_train_steps": 50,
             "save_top_k": -1,
             "monitor": None,
         },
@@ -477,7 +478,7 @@ def train_diffusion_model(
         "num_workers": num_workers,
         "num_val_workers": num_val_workers,
         "train": {
-            "target": "imaginairy.datasources.single_concept.SingleConceptDataset",
+            "target": "imaginairy.training_tools.single_concept.SingleConceptDataset",
             "params": dataset_config,
         },
     }
@@ -485,7 +486,7 @@ def train_diffusion_model(
         benchmark=True,
         num_sanity_val_steps=0,
         accumulate_grad_batches=accumulate_grad_batches,
-        plugins=[DDPPlugin(find_unused_parameters=False)],
+        strategy=DDPStrategy(),
         callbacks=[
             instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg  # noqa
         ],

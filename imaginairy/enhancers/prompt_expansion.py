@@ -151,3 +151,33 @@ def get_random_non_repeating_combination(  # noqa
                 idx = idx // len(sequence)
             yield values
         n -= sub_n
+
+# future use
+prompt_templates = [
+    # https://www.reddit.com/r/StableDiffusion/comments/ya4zxm/dreambooth_is_crazy_prompts_workflow_in_comments/
+    "cinematic still of #prompt-token# as rugged warrior, threatening xenomorph, alien movie (1986),ultrarealistic",
+    "colorful cinematic still of #prompt-token#, armor, cyberpunk,background made of brain cells, back light, organic, art by greg rutkowski, ultrarealistic, leica 30mm",
+    "colorful cinematic still of #prompt-token#, armor, cyberpunk, with a xenonorph, in alien movie (1986),background made of brain cells, organic, ultrarealistic, leic 30mm",
+    "colorful cinematic still of #prompt-token#, #prompt-token# with long hair, color lights, on stage, ultrarealistic",
+    "colorful portrait of #prompt-token# with dark glasses as eminem, gold chain necklace, relfective puffer jacket, short white hair, in front of music shop,ultrarealistic, leica 30mm",
+    "colorful photo of #prompt-token# as kurt cobain with glasses, on stage, lights, ultrarealistic, leica 30mm",
+    "impressionist painting of ((#prompt-token#)) by Daniel F Gerhartz, ((#prompt-token# painted in an impressionist style)), nature, trees",
+    "pencil sketch of #prompt-token#, #prompt-token#, #prompt-token#, inspired by greg rutkowski, digital art by artgem",
+    "photo, colorful cinematic still of #prompt-token#, organic armor,cyberpunk,background brain cells mesh, art by greg rutkowski",
+    "photo, colorful cinematic still of #prompt-token# with organic armor, cyberpunk background, #prompt-token#, greg rutkowski",
+    "photo of #prompt-token# astronaut, astronaut, glasses, helmet in alien world abstract oil painting, greg rutkowski, detailed face",
+    "photo of #prompt-token# as firefighter, helmet, ultrarealistic, leica 30mm",
+    "photo of #prompt-token#, bowler hat, in django unchained movie, ultrarealistic, leica 30mm",
+    "photo of #prompt-token# as serious spiderman with glasses, ultrarealistic, leica 30mm",
+    "photo of #prompt-token# as steampunk warrior, neon organic vines, glasses, digital painting",
+    "photo of #prompt-token# as supermario with glassesm mustach, blue overall, red short,#prompt-token#,#prompt-token#. ultrarealistic, leica 30mm",
+    "photo of #prompt-token# as targaryen warrior with glasses, long white hair, armor, ultrarealistic, leica 30mm",
+    "portrait of #prompt-token# as knight, with glasses white eyes, white mid hair, scar on face, handsome, elegant, intricate, headshot, highly detailed, digital",
+    "portrait of #prompt-token# as hulk, handsome, elegant, intricate luminescent cyberpunk background, headshot, highly detailed, digital painting",
+    "portrait of #prompt-token# as private eye detective, intricate, war torn, highly detailed, digital painting, concept art, smooth, sharp focus",
+    # https://publicprompts.art/
+    "Retro comic style artwork, highly detailed #prompt-token#, comic book cover, symmetrical, vibrant",
+    "Closeup face portrait of #prompt-token# wearing crown, smooth soft skin, big dreamy eyes, beautiful intricate colored hair, symmetrical, anime wide eyes, soft lighting, detailed face, by makoto shinkai, stanley artgerm lau, wlop, rossdraws, concept art, digital painting, looking into camera"
+    "highly detailed portrait brycedrennan man in gta v,  unreal engine, fantasy art by greg rutkowski, loish, rhads, ferdinand knab, makoto shinkai and lois van baarle, ilya kuvshinov, rossdraws, tom bagshaw, global illumination, radiant light, detailed and intricate environment "
+    "brycedrennan man: a highly detailed uncropped full-color epic corporate portrait headshot photograph. best portfolio photoraphy photo winner, meticulous detail, hyperrealistic, centered uncropped symmetrical beautiful masculine facial features, atmospheric, photorealistic texture, canon 5D mark III photo, professional studio lighting, aesthetic, very inspirational, motivational. ByKaren L Richard Photography, Photoweb, Splento, Americanoize, Lemonlight",
+]
