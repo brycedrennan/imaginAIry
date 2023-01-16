@@ -401,10 +401,14 @@ def imagine(
                     if not safety_score.is_filtered:
                         if prompt.fix_faces:
                             logger.info("Fixing 😊 's in 🖼  using CodeFormer...")
-                            img = enhance_faces(img, fidelity=prompt.fix_faces_fidelity)
+                            with lc.timing("face enhancement"):
+                                img = enhance_faces(
+                                    img, fidelity=prompt.fix_faces_fidelity
+                                )
                         if prompt.upscale:
                             logger.info("Upscaling 🖼  using real-ESRGAN...")
-                            upscaled_img = upscale_image(img)
+                            with lc.timing("upscaling"):
+                                upscaled_img = upscale_image(img)
 
                         # put the newly generated patch back into the original, full size image
                         if (
