@@ -195,7 +195,7 @@ logger = logging.getLogger(__name__)
     "--model-config-path",
     help="Model config file to use. If a model name is specified, the appropriate config will be used.",
     show_default=True,
-    default=config.DEFAULT_MODEL,
+    default=None,
 )
 @click.option(
     "--prompt-library-path",
