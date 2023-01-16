@@ -192,6 +192,12 @@ logger = logging.getLogger(__name__)
     default=config.DEFAULT_MODEL,
 )
 @click.option(
+    "--model-config-path",
+    help="Model config file to use. If a model name is specified, the appropriate config will be used.",
+    show_default=True,
+    default=config.DEFAULT_MODEL,
+)
+@click.option(
     "--prompt-library-path",
     help="Path to folder containing phrase lists in txt files. Use txt filename in prompt: {_filename_}.",
     type=click.Path(exists=True),
@@ -229,6 +235,7 @@ def imagine_cmd(
     caption,
     precision,
     model_weights_path,
+    model_config_path,
     prompt_library_path,
 ):
     """Have the AI generate images. alias:imagine."""
@@ -290,6 +297,7 @@ def imagine_cmd(
                 fix_faces_fidelity=fix_faces_fidelity,
                 tile_mode=_tile_mode,
                 model=model_weights_path,
+                model_config_path=model_config_path,
             )
             prompts.append(prompt)
 

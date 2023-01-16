@@ -134,6 +134,7 @@ def imagine(
             )
             model = get_diffusion_model(
                 weights_location=prompt.model,
+                config_path=prompt.model_config_path,
                 half_mode=half_mode,
                 for_inpainting=prompt.mask_image or prompt.mask_prompt,
             )

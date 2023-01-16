@@ -170,26 +170,12 @@ def _get_diffusion_model(
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
     global MOST_RECENTLY_LOADED_MODEL  # noqa
-    model_config = None
-    if weights_location is None:
-        weights_location = iconfig.DEFAULT_MODEL
-    if (
-        for_inpainting
-        and f"{weights_location}-inpaint" in iconfig.MODEL_CONFIG_SHORTCUTS
-    ):
-        model_config = iconfig.MODEL_CONFIG_SHORTCUTS[f"{weights_location}-inpaint"]
-    elif weights_location in iconfig.MODEL_CONFIG_SHORTCUTS:
-        model_config = iconfig.MODEL_CONFIG_SHORTCUTS[weights_location]
-
-    if model_config:
-        config_path = model_config.config_path
-        if for_training:
-            weights_location = model_config.weights_url_full
-            if weights_location is None:
-                raise ValueError("No full training weights available for this model.")
-        else:
-            weights_location = model_config.weights_url
-
+    model_config, weights_location, config_path = resolve_model_paths(
+        weights_path=weights_location,
+        config_path=config_path,
+        for_inpainting=for_inpainting,
+        for_training=for_training,
+    )
     # some models need the attention calculated in float32
     if model_config is not None:
         attention.ATTENTION_PRECISION_OVERRIDE = model_config.forced_attn_precision
@@ -210,6 +196,41 @@ def _get_diffusion_model(
     model.num_timesteps_cond  # noqa
     MOST_RECENTLY_LOADED_MODEL = model
     return model
+
+
+def resolve_model_paths(
+    weights_path=iconfig.DEFAULT_MODEL,
+    config_path=None,
+    for_inpainting=False,
+    for_training=False,
+):
+    """Resolve weight and config path if they happen to be shortcuts"""
+    model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(weights_path, None)
+    model_metadata_c = iconfig.MODEL_CONFIG_SHORTCUTS.get(config_path, None)
+    if for_inpainting:
+        model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(
+            f"{weights_path}-inpaint", model_metadata_w
+        )
+        model_metadata_c = iconfig.MODEL_CONFIG_SHORTCUTS.get(
+            f"{config_path}-inpaint", model_metadata_c
+        )
+
+    if model_metadata_w:
+        if config_path is None:
+            config_path = model_metadata_w.config_path
+        if for_training:
+            weights_path = model_metadata_w.weights_url_full
+            if weights_path is None:
+                raise ValueError(
+                    "No full training weights configured for this model. Edit the code or subimt a github issue."
+                )
+        else:
+            weights_path = model_metadata_w.weights_url
+
+    if model_metadata_c:
+        config_path = model_metadata_c.config_path
+    model_metadata = model_metadata_w or model_metadata_c
+    return model_metadata, weights_path, config_path
 
 
 def get_model_default_image_size(weights_location):

@@ -113,6 +113,7 @@ class ImaginePrompt:
         conditioning=None,
         tile_mode="",
         model=config.DEFAULT_MODEL,
+        model_config_path=None,
     ):
 
         self.prompts = self.process_prompt_input(prompt)
@@ -165,6 +166,7 @@ class ImaginePrompt:
 
         if self.model == "SD-2.0-v" and self.sampler_type == SamplerName.PLMS:
             raise ValueError("PLMS sampler is not supported for SD-2.0-v model.")
+        self.model_config_path = model_config_path
 
     @property
     def prompt_text(self):
