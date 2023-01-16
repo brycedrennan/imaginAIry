@@ -241,6 +241,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**7.4.2**
+- fix: run face enhancement on GPU for 10x speedup
+
 **7.4.1**
 - fix: incorrect config files being used for non-1.0 models
 
