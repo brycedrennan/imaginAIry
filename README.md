@@ -241,6 +241,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**7.4.1**
+- fix: incorrect config files being used for non-1.0 models
+
 **7.4.0**
 - feature: 🎉 finetune your own image model. kind of like dreambooth. Read instructions on ["Concept Training"](docs/concept-training.md) page
 - feature: image prep command. crops to face or other interesting parts of photo
