@@ -16,3 +16,8 @@ def test_is_nsfw():
     img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg")
     safety_score = create_safety_score(img)
     assert not safety_score.is_nsfw
+
+    img = Image.open(f"{TESTS_FOLDER}/data/black_square.jpg")
+
+    safety_score = create_safety_score(img)
+    assert not safety_score.is_nsfw
