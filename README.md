@@ -241,6 +241,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**7.4.3**
+- fix: handle old pytorch lightning imports with a graceful failure (fixes #161)
+- fix: handle failed image generations better (fixes #83)
+
 **7.4.2**
 - fix: run face enhancement on GPU for 10x speedup
 
