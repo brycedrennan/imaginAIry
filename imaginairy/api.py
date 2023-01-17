@@ -3,7 +3,6 @@ import os
 import re
 
 import numpy as np
-import PIL
 import torch
 import torch.nn
 from einops import rearrange, repeat
@@ -23,6 +22,7 @@ from imaginairy.log_utils import (
 )
 from imaginairy.model_manager import get_diffusion_model
 from imaginairy.modules.midas.utils import AddMiDaS
+from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
 from imaginairy.safety import SafetyMode, create_safety_score
 from imaginairy.samplers import SAMPLER_LOOKUP
 from imaginairy.samplers.base import NoiseSchedule, noise_an_image
@@ -136,7 +136,9 @@ def imagine(
                 weights_location=prompt.model,
                 config_path=prompt.model_config_path,
                 half_mode=half_mode,
-                for_inpainting=prompt.mask_image or prompt.mask_prompt,
+                for_inpainting=prompt.mask_image
+                or prompt.mask_prompt
+                or prompt.outpaint,
             )
             has_depth_channel = hasattr(model, "depth_stage_key")
             with ImageLoggingContext(
@@ -174,28 +176,31 @@ def imagine(
                 sampler = SamplerCls(model)
                 mask = mask_image = mask_image_orig = mask_grayscale = None
                 t_enc = init_latent = init_latent_noised = None
+                starting_image = None
                 if prompt.init_image:
+                    starting_image = prompt.init_image
                     generation_strength = 1 - prompt.init_image_strength
                     t_enc = int(prompt.steps * generation_strength)
-                    try:
-                        init_image = pillow_fit_image_within(
-                            prompt.init_image,
-                            max_height=prompt.height,
-                            max_width=prompt.width,
-                        )
-
-                    except PIL.UnidentifiedImageError:
-                        logger.warning(f"Could not load image: {prompt.init_image}")
-                        continue
-
-                    init_image_t = pillow_img_to_torch_image(init_image)
 
                     if prompt.mask_prompt:
                         mask_image, mask_grayscale = get_img_mask(
-                            init_image, prompt.mask_prompt, threshold=0.1
+                            starting_image, prompt.mask_prompt, threshold=0.1
                         )
                     elif prompt.mask_image:
                         mask_image = prompt.mask_image.convert("L")
+                    if prompt.outpaint:
+                        outpaint_kwargs = outpaint_arg_str_parse(prompt.outpaint)
+                        starting_image, mask_image = prepare_image_for_outpaint(
+                            starting_image, mask_image, **outpaint_kwargs
+                        )
+
+                    init_image = pillow_fit_image_within(
+                        starting_image,
+                        max_height=prompt.height,
+                        max_width=prompt.width,
+                    )
+
+                    if mask_image is not None:
                         mask_image = pillow_fit_image_within(
                             mask_image,
                             max_height=prompt.height,
@@ -203,7 +208,6 @@ def imagine(
                             convert="L",
                         )
 
-                    if mask_image is not None:
                         log_img(mask_image, "init mask")
 
                         if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
@@ -228,7 +232,7 @@ def imagine(
                         mask = mask[None, None]
                         mask = torch.from_numpy(mask)
                         mask = mask.to(get_device())
-
+                    init_image_t = pillow_img_to_torch_image(init_image)
                     init_image_t = init_image_t.to(get_device())
                     init_latent = model.get_first_stage_encoding(
                         model.encode_first_stage(init_image_t)
@@ -266,9 +270,9 @@ def imagine(
                 }
                 c_cat = []
                 depth_image_display = None
-                if has_depth_channel and prompt.init_image:
+                if has_depth_channel and starting_image:
                     midas_model = AddMiDaS()
-                    _init_image_d = np.array(prompt.init_image.convert("RGB"))
+                    _init_image_d = np.array(starting_image.convert("RGB"))
                     _init_image_d = (
                         torch.from_numpy(_init_image_d).to(dtype=torch.float32) / 127.5
                         - 1.0
@@ -414,20 +418,20 @@ def imagine(
                         if (
                             prompt.mask_modify_original
                             and mask_image_orig
-                            and prompt.init_image
+                            and starting_image
                         ):
                             img_to_add_back_to_original = (
                                 upscaled_img if upscaled_img else img
                             )
                             img_to_add_back_to_original = (
                                 img_to_add_back_to_original.resize(
-                                    prompt.init_image.size,
+                                    starting_image.size,
                                     resample=Image.Resampling.LANCZOS,
                                 )
                             )
 
                             mask_for_orig_size = mask_image_orig.resize(
-                                prompt.init_image.size,
+                                starting_image.size,
                                 resample=Image.Resampling.LANCZOS,
                             )
                             mask_for_orig_size = mask_for_orig_size.filter(
@@ -436,7 +440,7 @@ def imagine(
                             log_img(mask_for_orig_size, "mask for original image size")
 
                             rebuilt_orig_img = Image.composite(
-                                prompt.init_image,
+                                starting_image,
                                 img_to_add_back_to_original,
                                 mask_for_orig_size,
                             )

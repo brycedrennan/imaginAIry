@@ -259,6 +259,14 @@ def disable_transformers_custom_logging():
 
 
 def disable_pytorch_lighting_custom_logging():
+    try:
+        from pytorch_lightning.utilities.seed import log  # noqa
+
+        log.setLevel(logging.NOTSET)
+        log.handlers = []
+        log.propagate = False
+    except ImportError:
+        pass
     pytorch_logger.setLevel(logging.NOTSET)
 
 

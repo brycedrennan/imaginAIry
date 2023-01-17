@@ -172,6 +172,17 @@ logger = logging.getLogger(__name__)
     help="After the inpainting is done, apply the changes to a copy of the original image.",
 )
 @click.option(
+    "--outpaint",
+    help=(
+        "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 64. Examples\n"
+        "  `--outpaint up10,down300,left50,right50`\n"
+        "  `--outpaint u10,d300,l50,r50`\n"
+        "  `--outpaint all200`\n"
+        "  `--outpaint a200`\n"
+    ),
+    default="",
+)
+@click.option(
     "--caption",
     default=False,
     is_flag=True,
@@ -232,6 +243,7 @@ def imagine_cmd(
     mask_prompt,
     mask_mode,
     mask_modify_original,
+    outpaint,
     caption,
     precision,
     model_weights_path,
@@ -292,6 +304,7 @@ def imagine_cmd(
                 mask_prompt=mask_prompt,
                 mask_mode=mask_mode,
                 mask_modify_original=mask_modify_original,
+                outpaint=outpaint,
                 upscale=upscale,
                 fix_faces=fix_faces,
                 fix_faces_fidelity=fix_faces_fidelity,

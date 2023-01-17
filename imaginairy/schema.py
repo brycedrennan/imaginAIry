@@ -102,6 +102,7 @@ class ImaginePrompt:
         mask_image=None,
         mask_mode=MaskMode.REPLACE,
         mask_modify_original=True,
+        outpaint=None,
         seed=None,
         steps=None,
         height=None,
@@ -155,6 +156,7 @@ class ImaginePrompt:
         self.mask_image = mask_image
         self.mask_mode = mask_mode
         self.mask_modify_original = mask_modify_original
+        self.outpaint = outpaint
         self.tile_mode = tile_mode
         self.model = model
 

@@ -131,6 +131,17 @@ Use depth maps for amazing "translations" of existing images.
 <img src="assets/pearl_depth_2.jpg" height="512"> 
 <img src="assets/pearl_depth_3.jpg" height="512">
 
+
+### Outpainting
+
+Given a starting image, one can generate it's "surroundings".
+
+Example:
+`imagine --init-image pearl-earring.jpg --init-image-strength 0 --outpaint all250,up0,down600 "woman standing"`
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/data/girl_with_a_pearl_earring.jpg" height="256"> ➡️ 
+<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/tests/expected_output/test_outpainting_outpaint_.png" height="256">
+
+
 ### Prompt Expansion
 You can use `{}` to randomly pull values from lists.  A list of values separated by `|` 
  and enclosed in `{ }` will be randomly drawn from in a non-repeating fashion. Values that are surrounded by `_ _` will 
@@ -240,6 +251,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+
+**7.5.0**
+- feature:  🎉 outpainting. Examples: `--outpaint up10,down300,left50,right50` or `--outpaint all100` or `--outpaint u100,d200,l300,r400`
 
 **7.4.3**
 - fix: handle old pytorch lightning imports with a graceful failure (fixes #161)
