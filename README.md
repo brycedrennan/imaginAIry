@@ -222,7 +222,7 @@ imagine_image_files(prompts, outdir="./my-art")
 
 ## Requirements
 - ~10 gb space for models to download
-- A decent computer with either a CUDA supported graphics card (and CUDA installed) or an M1 processor.
+- A CUDA supported graphics card with >= 11gb VRAM (and CUDA installed) or an M1 processor.
 - Python installed. Preferably Python 3.10.  (not conda)
 - For macOS [rust](https://www.rust-lang.org/tools/install) and setuptools-rust must be installed to compile the `tokenizer` library.
 They can be installed via: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh` and `pip install setuptools-rust`
