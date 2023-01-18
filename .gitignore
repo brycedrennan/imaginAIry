@@ -26,3 +26,4 @@ tests/vastai_cli.py
 *.pyprof
 **/.polyscope.ini
 **/imgui.ini
+**/.eggs

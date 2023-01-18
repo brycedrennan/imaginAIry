@@ -5,9 +5,8 @@ import os.path
 import click
 from click_shell import shell
 
-from imaginairy import LazyLoadingImage, config, generate_caption
+from imaginairy import LazyLoadingImage, __version__, config, generate_caption
 from imaginairy.api import imagine_image_files
-from imaginairy.config import MODEL_SHORT_NAMES
 from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.log_utils import configure_logging
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
@@ -198,7 +197,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--model-weights-path",
     "--model",
-    help=f"Model to use. Should be one of {', '.join(MODEL_SHORT_NAMES)}, or a path to custom weights.",
+    help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
     show_default=True,
     default=config.DEFAULT_MODEL,
 )
@@ -214,6 +213,12 @@ logger = logging.getLogger(__name__)
     type=click.Path(exists=True),
     default=None,
     multiple=True,
+)
+@click.option(
+    "--version",
+    default=False,
+    is_flag=True,
+    help="Print the version and exit.",
 )
 @click.pass_context
 def imagine_cmd(
@@ -249,9 +254,14 @@ def imagine_cmd(
     model_weights_path,
     model_config_path,
     prompt_library_path,
+    version,  # noqa
 ):
     """Have the AI generate images. alias:imagine."""
     if ctx.invoked_subcommand is not None:
+        return
+
+    if version:
+        print(__version__)
         return
 
     if quiet:
@@ -329,6 +339,12 @@ def aimg():
     pass
 
 
+@aimg.command()
+def version():
+    """Print the version."""
+    print(__version__)
+
+
 @click.argument("image_filepaths", nargs=-1)
 @aimg.command()
 def describe(image_filepaths):
@@ -381,7 +397,7 @@ def describe(image_filepaths):
     "--model-weights-path",
     "--model",
     "model",
-    help=f"Model to use. Should be one of {', '.join(MODEL_SHORT_NAMES)}, or a path to custom weights.",
+    help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
     show_default=True,
     default=config.DEFAULT_MODEL,
 )
