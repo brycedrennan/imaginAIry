@@ -241,6 +241,9 @@ def resolve_model_paths(
 
     if model_metadata_c:
         config_path = model_metadata_c.config_path
+
+    if config_path is None:
+        config_path = iconfig.MODEL_CONFIG_SHORTCUTS[iconfig.DEFAULT_MODEL].config_path
     model_metadata = model_metadata_w or model_metadata_c
     logger.debug(f"Loading model weights from: {weights_path}")
     logger.debug(f"Loading model config from:  {config_path}")

@@ -2,10 +2,12 @@ import pytest
 
 from imaginairy import ImaginePrompt, LazyLoadingImage, imagine
 from imaginairy.outpaint import outpaint_arg_str_parse
+from imaginairy.utils import get_device
 from tests import TESTS_FOLDER
 from tests.utils import assert_image_similar_to_expectation
 
 
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_outpainting_outpaint(filename_base_for_outputs):
     img = LazyLoadingImage(
         filepath=f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring.jpg"
