@@ -94,7 +94,7 @@ class ImaginePrompt:
     def __init__(
         self,
         prompt=None,
-        negative_prompt=config.DEFAULT_NEGATIVE_PROMPT,
+        negative_prompt=None,
         prompt_strength=7.5,
         init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
         init_image_strength=0.3,
@@ -118,7 +118,6 @@ class ImaginePrompt:
     ):
 
         self.prompts = self.process_prompt_input(prompt)
-        self.negative_prompt = self.process_prompt_input(negative_prompt)
         self.prompt_strength = prompt_strength
         if tile_mode is True:
             tile_mode = "xy"
@@ -159,6 +158,7 @@ class ImaginePrompt:
         self.outpaint = outpaint
         self.tile_mode = tile_mode
         self.model = model
+        self.model_config_path = model_config_path
 
         if self.height is None or self.width is None or self.steps is None:
             SamplerCls = SAMPLER_LOOKUP[self.sampler_type]
@@ -166,9 +166,25 @@ class ImaginePrompt:
             self.width = self.width or get_model_default_image_size(self.model)
             self.height = self.height or get_model_default_image_size(self.model)
 
+        if negative_prompt is None:
+            model_config = config.MODEL_CONFIG_SHORTCUTS.get(self.model, None)
+            if model_config:
+                negative_prompt = model_config.default_negative_prompt
+            else:
+                negative_prompt = config.DEFAULT_NEGATIVE_PROMPT
+
+        self.negative_prompt = self.process_prompt_input(negative_prompt)
+
         if self.model == "SD-2.0-v" and self.sampler_type == SamplerName.PLMS:
             raise ValueError("PLMS sampler is not supported for SD-2.0-v model.")
-        self.model_config_path = model_config_path
+
+        if self.model == "edit" and self.sampler_type in (
+            SamplerName.PLMS,
+            SamplerName.DDIM,
+        ):
+            raise ValueError(
+                "PLMS and DDIM samplers are not supported for pix2pix edit model."
+            )
 
     @property
     def prompt_text(self):

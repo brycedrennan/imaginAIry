@@ -23,6 +23,7 @@ class ModelConfig:
     default_image_size: int
     weights_url_full: str = None
     forced_attn_precision: str = "default"
+    default_negative_prompt: str = DEFAULT_NEGATIVE_PROMPT
 
 
 midas_url = "https://github.com/intel-isl/DPT/releases/download/1_0/dpt_hybrid-midas-501f0c75.pt"
@@ -90,6 +91,13 @@ MODEL_CONFIGS = [
         weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-depth/resolve/main/512-depth-ema.ckpt",
         default_image_size=512,
     ),
+    ModelConfig(
+        short_name="edit",
+        config_path="configs/instruct-pix2pix.yaml",
+        weights_url="https://huggingface.co/imaginairy/instruct-pix2pix/resolve/ea0009b3d0d4888f410a40bd06d69516d0b5a577/instruct-pix2pix-00-22000-pruned.ckpt",
+        default_image_size=512,
+        default_negative_prompt="",
+    )
     # ModelConfig(
     #     short_name="SD-2.0-upscale",
     #     config_path="configs/stable-diffusion-v2-upscaling.yaml",

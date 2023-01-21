@@ -81,6 +81,7 @@ class KDiffusionSampler(ImageSampler, ABC):
         orig_latent=None,
         initial_latent=None,
         t_start=None,
+        denoiser_cls=None,
     ):
         # if positive_conditioning.shape[0] != batch_size:
         #     raise ValueError(
@@ -104,7 +105,9 @@ class KDiffusionSampler(ImageSampler, ABC):
 
         x = initial_latent * sigmas[0]
         log_latent(x, "initial_sigma_noised_tensor")
-        model_wrap_cfg = CFGDenoiser(self.cv_denoiser)
+        if denoiser_cls is None:
+            denoiser_cls = CFGDenoiser
+        model_wrap_cfg = denoiser_cls(self.cv_denoiser)
 
         mask_noise = None
         if mask is not None:

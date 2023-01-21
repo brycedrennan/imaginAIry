@@ -42,7 +42,27 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"  height="256"><br>
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
 
-### Prompt Based Editing  [by clipseg](https://github.com/timojl/clipseg)
+###  🎉 Edit Images with Instructions alone! [by InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix)
+Just tell imaginairy how to edit the image and it will do it for you!  
+Use prompt strength to control how strong the edit is. For extra control you can combine
+with prompt-based masking.
+
+```bash
+>> aimg edit scenic_landscape.jpg "make it winter" --prompt-strength 20
+>> aimg edit dog.jpg "make the dog red" --prompt-strength 5
+>> aimg edit bowl_of_fruit.jpg "replace the fruit with strawberries"
+>> aimg edit freckled_woman.jpg "make her a cyborg" --prompt-strength 13
+>> aimg edit pearl_girl.jpg "make her wear clown makup"
+>> aimg edit mona-lisa.jpg "make it a color professional photo headshot" --negative-prompt "old, ugly"
+```
+
+
+<img src="assets/scenic_landscape_winter.jpg" height="256"><img src="assets/dog_red.jpg" height="256"><br>
+<img src="assets/bowl_of_fruit_strawberries.jpg" height="256"><img src="assets/freckled_woman_cyborg.jpg" height="256"><br>
+<img src="assets/girl_with_a_pearl_earring_clown_makeup.jpg" height="256"><img src="assets/mona-lisa-headshot-photo.jpg" height="256"><br>
+
+
+### Prompt Based Masking  [by clipseg](https://github.com/timojl/clipseg)
 Specify advanced text based masks using boolean logic and strength modifiers. 
 Mask syntax:
   - mask descriptions must be lowercase
@@ -251,6 +271,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+
+**8.0.0**
+- feature: 🎉 edit images with instructions alone!
+- feature: prune-ckpt command also removes the non-ema weights
 
 **7.6.0**
 - fix: default model config was broken

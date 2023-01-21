@@ -122,12 +122,7 @@ def load_model_from_config(config, weights_location):
     else:
         state_dict = pl_sd
     model = instantiate_from_config(config.model)
-    missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
-
-    if len(missing_keys) > 0:
-        logger.debug(f"missing keys: {missing_keys}")
-    if len(unexpected_keys) > 0:
-        logger.debug(f"unexpected keys: {unexpected_keys}")
+    model.init_from_state_dict(state_dict)
 
     model.to(get_device())
     model.eval()

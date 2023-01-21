@@ -46,6 +46,7 @@ class DDIMSampler(ImageSampler):
         initial_latent=None,
         t_start=None,
         quantize_x0=False,
+        **kwargs,
     ):
         # print("Sampling with DDIM")
         # print("num_steps", num_steps)

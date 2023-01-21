@@ -26,6 +26,7 @@ from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpai
 from imaginairy.safety import SafetyMode, create_safety_score
 from imaginairy.samplers import SAMPLER_LOOKUP
 from imaginairy.samplers.base import NoiseSchedule, noise_an_image
+from imaginairy.samplers.editing import CFGEditingDenoiser
 from imaginairy.schema import ImaginePrompt, ImagineResult
 from imaginairy.utils import (
     fix_torch_group_norm,
@@ -180,7 +181,10 @@ def imagine(
                 if prompt.init_image:
                     starting_image = prompt.init_image
                     generation_strength = 1 - prompt.init_image_strength
-                    t_enc = int(prompt.steps * generation_strength)
+                    if model.cond_stage_key == "edit":
+                        t_enc = prompt.steps
+                    else:
+                        t_enc = int(prompt.steps * generation_strength)
 
                     if prompt.mask_prompt:
                         mask_image, mask_grayscale = get_img_mask(
@@ -269,6 +273,7 @@ def imagine(
                     "txt": batch_size * [prompt.prompt_text],
                 }
                 c_cat = []
+                c_cat_neutral = None
                 depth_image_display = None
                 if has_depth_channel and starting_image:
                     midas_model = AddMiDaS()
@@ -346,13 +351,21 @@ def imagine(
                         c_cat.append(cc)
                     if c_cat:
                         c_cat = [torch.cat(c_cat, dim=1)]
+                denoiser_cls = None
+                if model.cond_stage_key == "edit":
+                    c_cat = [model.encode_first_stage(init_image_t).mode()]
+                    c_cat_neutral = [torch.zeros_like(init_latent)]
+                    denoiser_cls = CFGEditingDenoiser
+
+                if c_cat_neutral is None:
+                    c_cat_neutral = c_cat
 
                 positive_conditioning = {
                     "c_concat": c_cat,
                     "c_crossattn": [positive_conditioning],
                 }
                 neutral_conditioning = {
-                    "c_concat": c_cat,
+                    "c_concat": c_cat_neutral,
                     "c_crossattn": [neutral_conditioning],
                 }
                 with lc.timing("sampling"):
@@ -367,6 +380,7 @@ def imagine(
                         orig_latent=init_latent,
                         shape=shape,
                         batch_size=1,
+                        denoiser_cls=denoiser_cls,
                     )
                 # from torch.nn.functional import interpolate
                 # samples = interpolate(samples, scale_factor=2, mode='nearest')
