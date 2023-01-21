@@ -25,7 +25,15 @@ def prune_diffusion_ckpt(ckpt_path, dst_path=None):
     logger.info(msg)
 
 
-def prune_model_data(data):
-    skip_keys = {"optimizer_states"}
-    new_data = {k: v for k, v in data.items() if k not in skip_keys}
-    return new_data
+def prune_model_data(data, only_keep_ema=True):
+    data.pop("optimizer_states", None)
+    if only_keep_ema:
+        state_dict = data["state_dict"]
+        model_keys = [k for k in state_dict.keys() if k.startswith("model.")]
+
+        for model_key in model_keys:
+            ema_key = "model_ema." + model_key[6:].replace(".", "")
+            state_dict[model_key] = state_dict[ema_key]
+            del state_dict[ema_key]
+
+    return data
