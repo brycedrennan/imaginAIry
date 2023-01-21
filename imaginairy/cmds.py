@@ -257,6 +257,345 @@ def imagine_cmd(
     version,  # noqa
 ):
     """Have the AI generate images. alias:imagine."""
+    return _imagine_cmd(
+        ctx,
+        prompt_texts,
+        negative_prompt,
+        prompt_strength,
+        init_image,
+        init_image_strength,
+        outdir,
+        repeats,
+        height,
+        width,
+        steps,
+        seed,
+        upscale,
+        fix_faces,
+        fix_faces_fidelity,
+        sampler_type,
+        log_level,
+        quiet,
+        show_work,
+        tile,
+        tile_x,
+        tile_y,
+        mask_image,
+        mask_prompt,
+        mask_mode,
+        mask_modify_original,
+        outpaint,
+        caption,
+        precision,
+        model_weights_path,
+        model_config_path,
+        prompt_library_path,
+        version,  # noqa
+    )
+
+
+@click.command()
+@click.argument("init_image", metavar="PATH|URL", required=True, nargs=1)
+@click.argument("prompt_texts", nargs=-1)
+@click.option(
+    "--negative-prompt",
+    default="",
+    show_default=True,
+    help="Negative prompt. Things to try and exclude from images. Same negative prompt will be used for all images.",
+)
+@click.option(
+    "--prompt-strength",
+    default=7.5,
+    show_default=True,
+    help="How closely to follow the prompt. Image looks unnatural at higher values",
+)
+@click.option(
+    "--init-image",
+    metavar="PATH|URL",
+    help="Starting image.",
+)
+@click.option(
+    "--outdir",
+    default="./outputs",
+    show_default=True,
+    type=click.Path(),
+    help="Where to write results to.",
+)
+@click.option(
+    "-r",
+    "--repeats",
+    default=1,
+    show_default=True,
+    type=int,
+    help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated.",
+)
+@click.option(
+    "-h",
+    "--height",
+    default=None,
+    show_default=True,
+    type=int,
+    help="Image height. Should be multiple of 64.",
+)
+@click.option(
+    "-w",
+    "--width",
+    default=None,
+    show_default=True,
+    type=int,
+    help="Image width. Should be multiple of 64.",
+)
+@click.option(
+    "--steps",
+    default=None,
+    type=int,
+    show_default=True,
+    help="How many diffusion steps to run. More steps, more detail, but with diminishing returns.",
+)
+@click.option(
+    "--seed",
+    default=None,
+    type=int,
+    help="What seed to use for randomness. Allows reproducible image renders.",
+)
+@click.option("--upscale", is_flag=True)
+@click.option("--fix-faces", is_flag=True)
+@click.option(
+    "--fix-faces-fidelity",
+    default=1,
+    type=float,
+    help="How faithful to the original should face enhancement be. 1 = best fidelity, 0 = best looking face.",
+)
+@click.option(
+    "--sampler-type",
+    "--sampler",
+    default=config.DEFAULT_SAMPLER,
+    show_default=True,
+    type=click.Choice(SAMPLER_TYPE_OPTIONS),
+    help="What sampling strategy to use.",
+)
+@click.option(
+    "--log-level",
+    default="INFO",
+    show_default=True,
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+    help="What level of logs to show.",
+)
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Suppress logs. Alias of `--log-level ERROR`.",
+)
+@click.option(
+    "--show-work",
+    default=False,
+    is_flag=True,
+    help="Output a debug images to `steps` folder.",
+)
+@click.option(
+    "--tile",
+    is_flag=True,
+    help="Any images rendered will be tileable in both X and Y directions.",
+)
+@click.option(
+    "--tile-x",
+    is_flag=True,
+    help="Any images rendered will be tileable in the X direction.",
+)
+@click.option(
+    "--tile-y",
+    is_flag=True,
+    help="Any images rendered will be tileable in the Y direction.",
+)
+@click.option(
+    "--mask-image",
+    metavar="PATH|URL",
+    help="A mask to use for inpainting. White gets painted, Black is left alone.",
+)
+@click.option(
+    "--mask-prompt",
+    help=(
+        "Describe what you want masked and the AI will mask it for you. "
+        "You can describe complex masks with AND, OR, NOT keywords and parentheses. "
+        "The strength of each mask can be modified with {*1.5} notation. \n\n"
+        "Examples:  \n"
+        "car AND (wheels{*1.1} OR trunk OR engine OR windows OR headlights) AND NOT (truck OR headlights){*10}\n"
+        "fruit|fruit stem"
+    ),
+)
+@click.option(
+    "--mask-mode",
+    default="replace",
+    show_default=True,
+    type=click.Choice(["keep", "replace"]),
+    help="Should we replace the masked area or keep it?",
+)
+@click.option(
+    "--mask-modify-original",
+    default=True,
+    is_flag=True,
+    help="After the inpainting is done, apply the changes to a copy of the original image.",
+)
+@click.option(
+    "--outpaint",
+    help=(
+        "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 64. Examples\n"
+        "  `--outpaint up10,down300,left50,right50`\n"
+        "  `--outpaint u10,d300,l50,r50`\n"
+        "  `--outpaint all200`\n"
+        "  `--outpaint a200`\n"
+    ),
+    default="",
+)
+@click.option(
+    "--caption",
+    default=False,
+    is_flag=True,
+    help="Generate a text description of the generated image.",
+)
+@click.option(
+    "--precision",
+    help="Evaluate at this precision.",
+    type=click.Choice(["full", "autocast"]),
+    default="autocast",
+    show_default=True,
+)
+@click.option(
+    "--model-weights-path",
+    "--model",
+    help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
+    show_default=True,
+    default="edit",
+)
+@click.option(
+    "--model-config-path",
+    help="Model config file to use. If a model name is specified, the appropriate config will be used.",
+    show_default=True,
+    default=None,
+)
+@click.option(
+    "--prompt-library-path",
+    help="Path to folder containing phrase lists in txt files. Use txt filename in prompt: {_filename_}.",
+    type=click.Path(exists=True),
+    default=None,
+    multiple=True,
+)
+@click.option(
+    "--version",
+    default=False,
+    is_flag=True,
+    help="Print the version and exit.",
+)
+@click.pass_context
+def edit_image(
+    ctx,
+    init_image,
+    prompt_texts,
+    negative_prompt,
+    prompt_strength,
+    outdir,
+    repeats,
+    height,
+    width,
+    steps,
+    seed,
+    upscale,
+    fix_faces,
+    fix_faces_fidelity,
+    sampler_type,
+    log_level,
+    quiet,
+    show_work,
+    tile,
+    tile_x,
+    tile_y,
+    mask_image,
+    mask_prompt,
+    mask_mode,
+    mask_modify_original,
+    outpaint,
+    caption,
+    precision,
+    model_weights_path,
+    model_config_path,
+    prompt_library_path,
+    version,  # noqa
+):
+    init_image_strength = 1
+    return _imagine_cmd(
+        ctx,
+        prompt_texts,
+        negative_prompt,
+        prompt_strength,
+        init_image,
+        init_image_strength,
+        outdir,
+        repeats,
+        height,
+        width,
+        steps,
+        seed,
+        upscale,
+        fix_faces,
+        fix_faces_fidelity,
+        sampler_type,
+        log_level,
+        quiet,
+        show_work,
+        tile,
+        tile_x,
+        tile_y,
+        mask_image,
+        mask_prompt,
+        mask_mode,
+        mask_modify_original,
+        outpaint,
+        caption,
+        precision,
+        model_weights_path,
+        model_config_path,
+        prompt_library_path,
+        version,  # noqa
+    )
+
+
+def _imagine_cmd(
+    ctx,
+    prompt_texts,
+    negative_prompt,
+    prompt_strength,
+    init_image,
+    init_image_strength,
+    outdir,
+    repeats,
+    height,
+    width,
+    steps,
+    seed,
+    upscale,
+    fix_faces,
+    fix_faces_fidelity,
+    sampler_type,
+    log_level,
+    quiet,
+    show_work,
+    tile,
+    tile_x,
+    tile_y,
+    mask_image,
+    mask_prompt,
+    mask_mode,
+    mask_modify_original,
+    outpaint,
+    caption,
+    precision,
+    model_weights_path,
+    model_config_path,
+    prompt_library_path,
+    version,  # noqa
+):
+    """Have the AI generate images. alias:imagine."""
     if ctx.invoked_subcommand is not None:
         return
 
@@ -595,6 +934,7 @@ def prune_ckpt(ckpt_paths):
 
 
 aimg.add_command(imagine_cmd, name="imagine")
+aimg.add_command(edit_image, name="edit")
 
 if __name__ == "__main__":
     imagine_cmd()  # noqa

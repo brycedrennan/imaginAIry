@@ -318,11 +318,30 @@ class DDPM(pl.LightningModule):
                     print(f"{context}: Restored training weights")
 
     @torch.no_grad()
-    def init_from_ckpt(self, path, ignore_keys=(), only_model=False):
-        sd = torch.load(path, map_location="cpu")
+    def init_from_state_dict(self, sd, ignore_keys=(), only_model=False):
         if "state_dict" in list(sd.keys()):
             sd = sd["state_dict"]
         keys = list(sd.keys())
+
+        if self.cond_stage_key == "edit":
+            # from https://github.com/timothybrooks/instruct-pix2pix/blob/main/stable_diffusion/ldm/models/diffusion/ddpm_edit.py#L203-L221
+            input_keys = [
+                "model.diffusion_model.input_blocks.0.0.weight",
+                "model_ema.diffusion_modelinput_blocks00weight",
+            ]
+
+            self_sd = self.state_dict()
+            for input_key in input_keys:
+                if input_key not in sd or input_key not in self_sd:
+                    continue
+
+                input_weight = self_sd[input_key]
+
+                if input_weight.size() != sd[input_key].size():
+                    input_weight.zero_()
+                    input_weight[:, :4, :, :].copy_(sd[input_key])
+                    ignore_keys.append(input_key)
+
         for k in keys:
             for ik in ignore_keys:
                 if k.startswith(ik):
@@ -390,6 +409,11 @@ class DDPM(pl.LightningModule):
         #     print(f"Missing Keys:\n {missing}")
         # if len(unexpected) > 0:
         #     print(f"\nUnexpected Keys:\n {unexpected}")
+
+    @torch.no_grad()
+    def init_from_ckpt(self, path, ignore_keys=(), only_model=False):
+        sd = torch.load(path, map_location="cpu")
+        self.init_from_state_dict(sd, ignore_keys=ignore_keys, only_model=only_model)
 
     def q_mean_variance(self, x_start, t):
         """
@@ -1782,6 +1806,11 @@ class LatentFinetuneDiffusion(LatentDiffusion):
 
     def init_from_ckpt(self, path, ignore_keys=(), only_model=False):
         sd = torch.load(path, map_location="cpu")
+        return self.init_from_state_dict(
+            sd, ignore_keys=ignore_keys, only_model=only_model
+        )
+
+    def init_from_state_dict(self, sd, ignore_keys=(), only_model=False):
         if "state_dict" in list(sd.keys()):
             sd = sd["state_dict"]
         keys = list(sd.keys())
@@ -1811,13 +1840,13 @@ class LatentFinetuneDiffusion(LatentDiffusion):
             if not only_model
             else self.model.load_state_dict(sd, strict=False)
         )
-        print(
-            f"Restored from {path} with {len(missing)} missing and {len(unexpected)} unexpected keys"
-        )
-        if len(missing) > 0:
-            print(f"Missing Keys: {missing}")
-        if len(unexpected) > 0:
-            print(f"Unexpected Keys: {unexpected}")
+        # print(
+        #     f"Restored from {path} with {len(missing)} missing and {len(unexpected)} unexpected keys"
+        # )
+        # if len(missing) > 0:
+        #     print(f"Missing Keys: {missing}")
+        # if len(unexpected) > 0:
+        #     print(f"Unexpected Keys: {unexpected}")
 
     @torch.no_grad()
     def log_images(  # noqa
