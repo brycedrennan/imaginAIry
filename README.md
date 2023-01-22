@@ -283,6 +283,12 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**8.0.2**
+- fix: hf_hub_download() got an unexpected keyword argument 'token'
+
+**8.0.1**
+- fix: spelling mistake of "surprise"
+
 **8.0.0**
 - feature: 🎉 edit images with instructions alone!
 - feature: when editing an image add `--gif` to create a comparision gif
