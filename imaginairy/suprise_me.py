@@ -46,7 +46,7 @@ person_prompts = [
     # ("make the person angry", 20, ""),
     ("make the person look like a celebrity", 10, ""),
     ("make the person younger", 10, ""),
-    ("make the person older", 10, ""),
+    ("make the person older", 6, ""),
     ("make the person a disney cartoon character", 7.5, ""),
 ]
 
