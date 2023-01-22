@@ -296,7 +296,7 @@ def imagine_cmd(
         model_config_path,
         prompt_library_path,
         version,  # noqa
-        make_gif
+        make_gif,
     )
 
 
