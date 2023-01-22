@@ -1,5 +1,4 @@
 import gc
-import inspect
 import logging
 import os
 import sys
@@ -322,13 +321,16 @@ def hf_hub_download(*args, **kwargs):
     """
     backwards compatible wrapper for huggingface's hf_hub_download.
 
-    they changed ther argument name from `use_auth_token` to `token`
+    they changed the argument name from `use_auth_token` to `token`
     """
-    arg_names = inspect.getfullargspec(_hf_hub_download)
-    if "use_auth_token" in arg_names.args and "token" in kwargs:
-        kwargs["use_auth_token"] = kwargs.pop("token")
 
-    return _hf_hub_download(*args, **kwargs)
+    try:
+        return _hf_hub_download(*args, **kwargs)
+    except TypeError as e:
+        if "unexpected keyword argument 'token'" in str(e):
+            kwargs["use_auth_token"] = kwargs.pop("token")
+            return _hf_hub_download(*args, **kwargs)
+        raise e
 
 
 def huggingface_cached_path(url):
