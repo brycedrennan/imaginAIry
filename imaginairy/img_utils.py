@@ -70,3 +70,15 @@ def pillow_img_to_model_latent(model, img, batch_size=1, half=True):
             model.encode_first_stage(init_image.half())
         )
     return model.get_first_stage_encoding(model.encode_first_stage(init_image))
+
+
+def make_gif_image(filepath, imgs, duration=1000, loop=0):
+
+    imgs[0].save(
+        filepath,
+        save_all=True,
+        append_images=imgs[1:],
+        duration=duration,
+        loop=loop,
+        optimize=False,
+    )

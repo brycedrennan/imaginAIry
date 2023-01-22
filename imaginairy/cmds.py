@@ -11,6 +11,7 @@ from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.log_utils import configure_logging
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
+from imaginairy.suprise_me import create_suprise_me_images
 from imaginairy.train import train_diffusion_model
 from imaginairy.training_tools.image_prep import (
     create_class_images,
@@ -220,6 +221,9 @@ logger = logging.getLogger(__name__)
     is_flag=True,
     help="Print the version and exit.",
 )
+@click.option(
+    "--gif", "make_gif", default=False, is_flag=True, help="Generate a gif of the edit."
+)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -255,6 +259,7 @@ def imagine_cmd(
     model_config_path,
     prompt_library_path,
     version,  # noqa
+    make_gif,
 ):
     """Have the AI generate images. alias:imagine."""
     return _imagine_cmd(
@@ -291,6 +296,7 @@ def imagine_cmd(
         model_config_path,
         prompt_library_path,
         version,  # noqa
+        make_gif
     )
 
 
@@ -487,8 +493,22 @@ def imagine_cmd(
     is_flag=True,
     help="Print the version and exit.",
 )
+@click.option(
+    "--gif",
+    "make_gif",
+    default=False,
+    is_flag=True,
+    help="Generate a gif comparing the original image to the modified one.",
+)
+@click.option(
+    "--suprise-me",
+    "suprise_me",
+    default=False,
+    is_flag=True,
+    help="make some fun edits to the provided image",
+)
 @click.pass_context
-def edit_image(
+def edit_image(  # noqa
     ctx,
     init_image,
     prompt_texts,
@@ -521,8 +541,21 @@ def edit_image(
     model_config_path,
     prompt_library_path,
     version,  # noqa
+    make_gif,
+    suprise_me,
 ):
     init_image_strength = 1
+    if suprise_me and prompt_texts:
+        raise ValueError("Cannot use suprise_me and prompt_texts together")
+
+    if suprise_me:
+        if quiet:
+            log_level = "ERROR"
+        configure_logging(log_level)
+        create_suprise_me_images(init_image, outdir=outdir, make_gif=make_gif)
+
+        return
+
     return _imagine_cmd(
         ctx,
         prompt_texts,
@@ -557,6 +590,7 @@ def edit_image(
         model_config_path,
         prompt_library_path,
         version,  # noqa
+        make_gif,
     )
 
 
@@ -593,7 +627,8 @@ def _imagine_cmd(
     model_weights_path,
     model_config_path,
     prompt_library_path,
-    version,  # noqa
+    version=False,  # noqa
+    make_gif=False,
 ):
     """Have the AI generate images. alias:imagine."""
     if ctx.invoked_subcommand is not None:
@@ -670,6 +705,7 @@ def _imagine_cmd(
         output_file_extension="jpg",
         print_caption=caption,
         precision=precision,
+        make_comparison_gif=make_gif,
     )
 
 

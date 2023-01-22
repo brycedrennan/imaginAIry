@@ -25,6 +25,7 @@ setup(
     package_data={
         "imaginairy": [
             "configs/*.yaml",
+            "data/*.*",
             "enhancers/phraselists/*.txt",
             "vendored/clip/*.txt.gz",
             "vendored/clipseg/*.pth",

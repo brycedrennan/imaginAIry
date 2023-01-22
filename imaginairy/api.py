@@ -13,7 +13,11 @@ from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
-from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
+from imaginairy.img_utils import (
+    make_gif_image,
+    pillow_fit_image_within,
+    pillow_img_to_torch_image,
+)
 from imaginairy.log_utils import (
     ImageLoggingContext,
     log_conditioning,
@@ -55,6 +59,8 @@ def imagine_image_files(
     record_step_images=False,
     output_file_extension="jpg",
     print_caption=False,
+    make_comparison_gif=False,
+    return_filename_type="generated",
 ):
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
@@ -74,6 +80,7 @@ def imagine_image_files(
         draw.text((10, 10), str(description))
         img.save(destination)
 
+    result_filenames = []
     for result in imagine(
         prompts,
         precision=precision,
@@ -97,8 +104,24 @@ def imagine_image_files(
             )
             result.save(filepath, image_type=image_type)
             logger.info(f"🖼  [{image_type}] saved to: {filepath}")
+            if image_type == return_filename_type:
+                result_filenames.append(filepath)
+        if make_comparison_gif and prompt.init_image:
+            subpath = os.path.join(outdir, "gif")
+            os.makedirs(subpath, exist_ok=True)
+            filepath = os.path.join(subpath, f"{basefilename}.gif")
+            resized_init_image = pillow_fit_image_within(
+                prompt.init_image, prompt.width, prompt.height
+            )
+            make_gif_image(
+                filepath,
+                imgs=[result.images["generated"], resized_init_image],
+                duration=1750,
+            )
         base_count += 1
         del result
+
+    return result_filenames
 
 
 def imagine(
