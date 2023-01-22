@@ -11,7 +11,7 @@ from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.log_utils import configure_logging
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
-from imaginairy.suprise_me import create_suprise_me_images
+from imaginairy.surprise_me import create_surprise_me_images
 from imaginairy.train import train_diffusion_model
 from imaginairy.training_tools.image_prep import (
     create_class_images,
@@ -501,8 +501,8 @@ def imagine_cmd(
     help="Generate a gif comparing the original image to the modified one.",
 )
 @click.option(
-    "--suprise-me",
-    "suprise_me",
+    "--surprise-me",
+    "surprise_me",
     default=False,
     is_flag=True,
     help="make some fun edits to the provided image",
@@ -542,17 +542,17 @@ def edit_image(  # noqa
     prompt_library_path,
     version,  # noqa
     make_gif,
-    suprise_me,
+    surprise_me,
 ):
     init_image_strength = 1
-    if suprise_me and prompt_texts:
-        raise ValueError("Cannot use suprise_me and prompt_texts together")
+    if surprise_me and prompt_texts:
+        raise ValueError("Cannot use surprise_me and prompt_texts together")
 
-    if suprise_me:
+    if surprise_me:
         if quiet:
             log_level = "ERROR"
         configure_logging(log_level)
-        create_suprise_me_images(init_image, outdir=outdir, make_gif=make_gif)
+        create_surprise_me_images(init_image, outdir=outdir, make_gif=make_gif)
 
         return
 

@@ -51,7 +51,7 @@ person_prompts = [
 ]
 
 
-def suprise_me_prompts(img, person=None):
+def rsurprise_me_prompts(img, person=None):
     prompts = []
     if isinstance(img, str):
         if img.startswith("http"):
@@ -90,13 +90,13 @@ def suprise_me_prompts(img, person=None):
     return prompts
 
 
-def create_suprise_me_images(img, outdir, person=None, make_gif=True):
+def create_rsurprise_me_images(img, outdir, person=None, make_gif=True):
     if isinstance(img, str):
         if img.startswith("http"):
             img = LazyLoadingImage(url=img)
         else:
             img = LazyLoadingImage(filepath=img)
-    prompts = suprise_me_prompts(img, person=person)
+    prompts = rsurprise_me_prompts(img, person=person)
     generated_filenames = imagine_image_files(
         prompts,
         outdir=outdir,
@@ -109,7 +109,7 @@ def create_suprise_me_images(img, outdir, person=None, make_gif=True):
         imgs_path = os.path.join(outdir, "compilations")
         os.makedirs(imgs_path, exist_ok=True)
         base_count = len(os.listdir(imgs_path))
-        new_filename = os.path.join(imgs_path, f"suprise_me_{base_count:03d}.gif")
+        new_filename = os.path.join(imgs_path, f"surprise_me_{base_count:03d}.gif")
         simg = pillow_fit_image_within(img, prompts[0].width, prompts[0].height)
         gif_imgs = [simg]
         for prompt, filename in zip(prompts, generated_filenames):
