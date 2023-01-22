@@ -32,6 +32,7 @@ from imaginairy.modules.diffusion.util import (
 )
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.modules.ema import LitEma
+from imaginairy.paths import PKG_ROOT
 from imaginairy.samplers.kdiff import DPMPP2MSampler
 from imaginairy.utils import instantiate_from_config
 
@@ -47,7 +48,7 @@ def log_txt_as_img(wh, xc, size=10):
     for bi in range(b):
         txt = Image.new("RGB", wh, color="white")
         draw = ImageDraw.Draw(txt)
-        font = ImageFont.truetype("data/DejaVuSans.ttf", size=size)
+        font = ImageFont.truetype(f"{PKG_ROOT}/data/DejaVuSans.ttf", size=size)
         nc = int(40 * (wh[0] / 256))
         lines = "\n".join(
             xc[bi][start : start + nc] for start in range(0, len(xc[bi]), nc)
