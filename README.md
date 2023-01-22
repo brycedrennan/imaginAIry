@@ -61,12 +61,12 @@ with prompt-based masking.
 <img src="assets/bowl_of_fruit_strawberries.jpg" height="256"><img src="assets/freckled_woman_cyborg.jpg" height="256"><br>
 <img src="assets/girl_with_a_pearl_earring_clown_makeup.jpg" height="256"><img src="assets/mona-lisa-headshot-photo.jpg" height="256"><br>
 
-Want just quickly have some fun? Try `--suprise-me` to apply some pre-defined edits.
+Want just quickly have some fun? Try `--surprise-me` to apply some pre-defined edits.
 ```bash
->> aimg edit --gif --suprise-me pearl_girl.jpg
->> aimg edit --gif --suprise-me mona-lisa.jpg
->> aimg edit --gif --suprise-me luke.jpg
->> aimg edit --gif --suprise-me spock.jpg
+>> aimg edit --gif --surprise-me pearl_girl.jpg
+>> aimg edit --gif --surprise-me mona-lisa.jpg
+>> aimg edit --gif --surprise-me luke.jpg
+>> aimg edit --gif --surprise-me spock.jpg
 ```
 <img src="assets/girl_with_a_pearl_earring_suprise.gif" height="256"><img src="assets/mona-lisa-suprise.gif" height="256"><br>
 <img src="assets/luke-suprise.gif" height="256"><img src="assets/spock-suprise.gif" height="256"><br>
@@ -286,7 +286,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 **8.0.0**
 - feature: 🎉 edit images with instructions alone!
 - feature: when editing an image add `--gif` to create a comparision gif
-- feature: `aimg edit --suprise-me --gif my-image.jpg` for some fun pre-programmed edits
+- feature: `aimg edit --surprise-me --gif my-image.jpg` for some fun pre-programmed edits
 - feature: prune-ckpt command also removes the non-ema weights
 
 **7.6.0**
