@@ -17,7 +17,7 @@ def realesrgan_upsampler():
     )
     url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
     model_path = get_cached_url_path(url)
-    upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=0)
+    upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=512)
 
     device = get_device()
     if "mps" in device:
