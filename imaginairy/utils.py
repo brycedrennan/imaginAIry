@@ -13,7 +13,7 @@ from torch.overrides import handle_torch_function, has_torch_function_variadic
 logger = logging.getLogger(__name__)
 
 
-@lru_cache
+@lru_cache()
 def get_device() -> str:
     """Return the best torch backend available."""
     if torch.cuda.is_available():
@@ -25,7 +25,7 @@ def get_device() -> str:
     return "cpu"
 
 
-@lru_cache
+@lru_cache()
 def get_hardware_description(device_type: str) -> str:
     """Description of the hardware being used."""
     desc = platform.platform()

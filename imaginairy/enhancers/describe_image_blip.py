@@ -17,7 +17,7 @@ if "mps" in device:
 BLIP_EVAL_SIZE = 384
 
 
-@lru_cache
+@lru_cache()
 def blip_model():
     from imaginairy.paths import PKG_ROOT  # noqa
 

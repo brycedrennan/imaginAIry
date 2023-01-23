@@ -10,7 +10,7 @@ from imaginairy.vendored import clip
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-@lru_cache
+@lru_cache()
 def get_model():
     model_name = "ViT-L/14"
     model, preprocess = clip.load(model_name, device=device)
