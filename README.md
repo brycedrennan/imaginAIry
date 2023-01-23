@@ -282,6 +282,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+**8.0.3**
+- fix: use python 3.7 compatible lru_cache
+- fix: use windows compatible filenames
 
 **8.0.2**
 - fix: hf_hub_download() got an unexpected keyword argument 'token'
