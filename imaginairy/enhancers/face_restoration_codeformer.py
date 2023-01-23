@@ -17,7 +17,7 @@ face_restore_device = torch.device("cuda" if torch.cuda.is_available() else "cpu
 half_mode = face_restore_device == "cuda"
 
 
-@lru_cache
+@lru_cache()
 def codeformer_model():
     model = CodeFormer(
         dim_embd=512,
@@ -36,7 +36,7 @@ def codeformer_model():
     return model
 
 
-@lru_cache
+@lru_cache()
 def face_restore_helper():
     """
     Provide a singleton of FaceRestoreHelper.

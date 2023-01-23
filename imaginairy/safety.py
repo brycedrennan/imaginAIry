@@ -117,7 +117,7 @@ class EnhancedStableDiffusionSafetyChecker(
         return safety_results
 
 
-@lru_cache
+@lru_cache()
 def safety_models():
     safety_model_id = "CompVis/stable-diffusion-safety-checker"
     monkeypatch_safety_cosine_distance()
@@ -128,7 +128,7 @@ def safety_models():
     return safety_feature_extractor, safety_checker
 
 
-@lru_cache
+@lru_cache()
 def monkeypatch_safety_cosine_distance():
     orig_cosine_distance = safety_checker_mod.cosine_distance
 
