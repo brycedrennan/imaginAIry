@@ -282,6 +282,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+**8.0.4**
+- fix: limit attention slice size on MacOS machines with 64gb (#175)
+
 **8.0.3**
 - fix: use python 3.7 compatible lru_cache
 - fix: use windows compatible filenames
