@@ -36,7 +36,10 @@ def test_clip_masking(filename_base_for_outputs):
             f"face AND NOT (bandana OR hair OR blue fabric){{{mask_modifier}}}",
             threshold=0.5,
         )
+
+        mask_modifier = mask_modifier.replace("*", "x")
         img_path = f"{filename_base_for_outputs}_mask{mask_modifier}_g.png"
+
         assert_image_similar_to_expectation(
             pred_grayscale, img_path=img_path, threshold=300
         )
