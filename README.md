@@ -282,6 +282,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+
+**8.1.0**
+- feature: image sizes can now be multiples of 8 instead of 64. Inputs will be silently rounded down.
+
 **8.0.5**
 - fix: bypass huggingface cache retrieval bug
 
@@ -483,14 +487,14 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
 ## Todo
 
  - Performance Optimizations
-   - ✅ https://github.com/huggingface/diffusers/blob/main/docs/source/optimization/fp16.mdx
-   - ✅ https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#
-   - ✅ https://www.reddit.com/r/StableDiffusion/comments/xalaws/test_update_for_less_memory_usage_and_higher/
+   - ✅ fp16
+   - ✅ [Doggettx Sliced attention](https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#)
+   - ✅ xformers support https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/
    - https://github.com/neonsecret/stable-diffusion  
    - https://github.com/CompVis/stable-diffusion/pull/177
    - https://github.com/huggingface/diffusers/pull/532/files
    - https://github.com/HazyResearch/flash-attention
-   - ✅ xformers improvements https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/
+   
  - Development Environment
    - ✅ add tests
    - ✅ set up ci (test/lint/format)

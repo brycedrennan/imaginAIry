@@ -836,6 +836,10 @@ class UNetModel(nn.Module):
             hs.append(h)
         h = self.middle_block(h, emb, context)
         for module in self.output_blocks:
+            # allows us to work with multiples of 8 instead of 64 for image sizes
+            # https://github.com/CompVis/stable-diffusion/issues/60#issuecomment-1240294667
+            if h.shape[-2:] != hs[-1].shape[-2:]:
+                h = F.interpolate(h, hs[-1].shape[-2:], mode="nearest")
             h = th.cat([h, hs.pop()], dim=1)
             h = module(h, emb, context)
         h = h.type(x.dtype)

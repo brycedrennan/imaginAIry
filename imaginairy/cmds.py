@@ -69,7 +69,7 @@ logger = logging.getLogger(__name__)
     default=None,
     show_default=True,
     type=int,
-    help="Image height. Should be multiple of 64.",
+    help="Image height. Should be multiple of 8.",
 )
 @click.option(
     "-w",
@@ -77,7 +77,7 @@ logger = logging.getLogger(__name__)
     default=None,
     show_default=True,
     type=int,
-    help="Image width. Should be multiple of 64.",
+    help="Image width. Should be multiple of 8.",
 )
 @click.option(
     "--steps",
@@ -174,7 +174,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--outpaint",
     help=(
-        "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 64. Examples\n"
+        "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 8. Examples\n"
         "  `--outpaint up10,down300,left50,right50`\n"
         "  `--outpaint u10,d300,l50,r50`\n"
         "  `--outpaint all200`\n"
@@ -341,7 +341,7 @@ def imagine_cmd(
     default=None,
     show_default=True,
     type=int,
-    help="Image height. Should be multiple of 64.",
+    help="Image height. Should be multiple of 8.",
 )
 @click.option(
     "-w",
@@ -349,7 +349,7 @@ def imagine_cmd(
     default=None,
     show_default=True,
     type=int,
-    help="Image width. Should be multiple of 64.",
+    help="Image width. Should be multiple of 8.",
 )
 @click.option(
     "--steps",
@@ -446,7 +446,7 @@ def imagine_cmd(
 @click.option(
     "--outpaint",
     help=(
-        "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 64. Examples\n"
+        "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 8. Examples\n"
         "  `--outpaint up10,down300,left50,right50`\n"
         "  `--outpaint u10,d300,l50,r50`\n"
         "  `--outpaint all200`\n"

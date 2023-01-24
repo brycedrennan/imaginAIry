@@ -10,7 +10,7 @@ from imaginairy.utils import get_device
 
 
 def pillow_fit_image_within(
-    image: PIL.Image.Image, max_height=512, max_width=512, convert="RGB"
+    image: PIL.Image.Image, max_height=512, max_width=512, convert="RGB", snap_size=8
 ):
     image = image.convert(convert)
     w, h = image.size
@@ -23,9 +23,9 @@ def pillow_fit_image_within(
 
     if resize_ratio != 1:
         w, h = int(w * resize_ratio), int(h * resize_ratio)
-    # resize to integer multiple of 64
-    w -= w % 64
-    h -= h % 64
+    # resize to integer multiple of snap_size
+    w -= w % snap_size
+    h -= h % snap_size
 
     if (w, h) != image.size:
         image = image.resize((w, h), resample=Image.Resampling.LANCZOS)
