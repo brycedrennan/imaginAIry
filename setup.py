@@ -7,7 +7,7 @@ setup(
     name="imaginAIry",
     author="Bryce Drennan",
     # author_email="b r y p y d o t io",
-    version="8.0.4",
+    version="8.0.5",
     description="AI imagined images. Pythonic generation of stable diffusion images.",
     long_description=readme,
     long_description_content_type="text/markdown",

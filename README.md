@@ -282,6 +282,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
 ## ChangeLog
+**8.0.5**
+- fix: bypass huggingface cache retrieval bug
+
 **8.0.4**
 - fix: limit attention slice size on MacOS machines with 64gb (#175)
 
