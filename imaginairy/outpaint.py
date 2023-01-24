@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw
 
 
 def prepare_image_for_outpaint(
-    img, mask=None, up=None, down=None, left=None, right=None, _all=0, snap_multiple=64
+    img, mask=None, up=None, down=None, left=None, right=None, _all=0, snap_multiple=8
 ):
     up = up if up is not None else _all
     down = down if down is not None else _all
@@ -31,7 +31,7 @@ def prepare_image_for_outpaint(
     expanded_image.paste(img, (left, up))
 
     # extend border pixels outward, this helps prevents lines at the boundary because masks getting reduced to
-    # 64x64 latent space can cause som inaccuracies
+    # 64x64 latent space can cause some inaccuracies
 
     if up > 0:
         expanded_image.paste(
