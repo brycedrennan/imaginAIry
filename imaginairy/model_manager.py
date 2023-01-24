@@ -346,6 +346,12 @@ def huggingface_cached_path(url):
         dest_path = hf_hub_download(
             repo_id=repo, revision=commit_hash, filename=filepath, token=token
         )
+        # make a refs folder so caching works
+        # work-around for
+        # https://github.com/huggingface/huggingface_hub/pull/1306
+        # https://github.com/brycedrennan/imaginAIry/issues/171
+        refs_url = dest_path[: dest_path.index("/snapshots/")] + "/refs/"
+        os.makedirs(refs_url, exist_ok=True)
     return dest_path
 
 
