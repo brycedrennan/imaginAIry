@@ -1,6 +1,7 @@
 import gc
 import logging
 import os
+import re
 import sys
 import urllib.parse
 from functools import wraps
@@ -288,6 +289,8 @@ def get_cached_url_path(url, category=None):
     if category:
         dest = os.path.join(dest, category)
     os.makedirs(dest, exist_ok=True)
+    # Replace possibly illegal destination path characters
+    filename = re.sub('[*<>:"|?]', '_', filename)
     dest_path = os.path.join(dest, filename)
     if os.path.exists(dest_path):
         return dest_path
