@@ -525,7 +525,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - https://github.com/LambdaLabsML/lambda-diffusers
      - https://www.reddit.com/r/MachineLearning/comments/x6k5bm/n_stable_diffusion_image_variations_released/
  - Image Editing
-   - outpainting
+   - ✅outpainting
      - https://github.com/parlance-zz/g-diffuser-bot/search?q=noise&type=issues
      - lama cleaner
    - ✅ inpainting
@@ -598,7 +598,9 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - https://github.com/vicgalle/stable-diffusion-aesthetic-gradients
  - Training
    - Finetuning "dreambooth" style
-   - Textual Inversion
+   - [Textual Inversion](https://arxiv.org/abs/2208.01618)
+     - [Fast Textual Inversion](https://github.com/peterwilli/sd-leap-booster) 
+   - [Low-rank Adaptation for Fast Text-to-Image Diffusion Fine-tuning (LORA)](https://github.com/cloneofsimo/lora)
    - Performance Improvements
     - [ColoassalAI](https://github.com/hpcaitech/ColossalAI/tree/main/examples/images/diffusion) - almost got it working but it's not easy enough to install to merit inclusion in imaginairy. We should check back in on this.
     - Xformers
