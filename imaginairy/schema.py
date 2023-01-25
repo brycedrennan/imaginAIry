@@ -115,6 +115,7 @@ class ImaginePrompt:
         tile_mode="",
         model=config.DEFAULT_MODEL,
         model_config_path=None,
+        is_intermediate=False,
     ):
 
         self.prompts = self.process_prompt_input(prompt)
@@ -128,10 +129,12 @@ class ImaginePrompt:
             assert tile_mode in ("", "x", "y", "xy")
 
         if isinstance(init_image, str):
-            init_image = LazyLoadingImage(filepath=init_image)
+            if not init_image.startswith("*prev."):
+                init_image = LazyLoadingImage(filepath=init_image)
 
         if isinstance(mask_image, str):
-            mask_image = LazyLoadingImage(filepath=mask_image)
+            if not init_image.startswith("*prev."):
+                mask_image = LazyLoadingImage(filepath=mask_image)
 
         if mask_image is not None and mask_prompt is not None:
             raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
@@ -159,6 +162,8 @@ class ImaginePrompt:
         self.tile_mode = tile_mode
         self.model = model
         self.model_config_path = model_config_path
+        # we don't want to save intermediate images
+        self.is_intermediate = is_intermediate
 
         if self.height is None or self.width is None or self.steps is None:
             SamplerCls = SAMPLER_LOOKUP[self.sampler_type]
