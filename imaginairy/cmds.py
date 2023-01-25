@@ -552,7 +552,9 @@ def edit_image(  # noqa
         if quiet:
             log_level = "ERROR"
         configure_logging(log_level)
-        create_surprise_me_images(init_image, outdir=outdir, make_gif=make_gif)
+        create_surprise_me_images(
+            init_image, outdir=outdir, make_gif=make_gif, width=width, height=height
+        )
 
         return
 
@@ -644,7 +646,7 @@ def _imagine_cmd(
 
     total_image_count = len(prompt_texts) * repeats
     logger.info(
-        f"🤖🧠 imaginAIry received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
+        f"received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
     )
 
     if init_image and init_image.startswith("http"):
@@ -709,7 +711,7 @@ def _imagine_cmd(
     )
 
 
-@shell(prompt="imaginAIry> ", intro="Starting imaginAIry...")
+@shell(prompt="🤖🧠> ", intro="Starting imaginAIry...")
 def aimg():
     pass
 
