@@ -714,12 +714,18 @@ class DDPM(pl.LightningModule):
 def _TileModeConv2DConvForward(
     self, input: torch.Tensor, weight: torch.Tensor, bias: torch.Tensor  # noqa
 ):
-    working = F.pad(input, self.paddingX, mode=self.padding_modeX)
-    working = F.pad(working, self.paddingY, mode=self.padding_modeY)
+    if self.padding_modeX == self.padding_modeY:
+        return F.conv2d(
+            input, weight, bias, self.stride, self.padding, self.dilation, self.groups
+        )
 
-    return F.conv2d(
-        working, weight, bias, self.stride, _pair(0), self.dilation, self.groups
-    )
+    w1 = F.pad(input, self.paddingX, mode=self.padding_modeX)
+    del input
+
+    w2 = F.pad(w1, self.paddingY, mode=self.padding_modeY)
+    del w1
+
+    return F.conv2d(w2, weight, bias, self.stride, _pair(0), self.dilation, self.groups)
 
 
 class LatentDiffusion(DDPM):
@@ -798,6 +804,8 @@ class LatentDiffusion(DDPM):
             if isinstance(m, nn.Conv2d):
                 m.padding_modeX = "circular" if tile_x else "constant"
                 m.padding_modeY = "circular" if tile_y else "constant"
+                if m.padding_modeY == m.padding_modeX:
+                    m.padding_mode = m.padding_modeX
                 m.paddingX = (
                     m._reversed_padding_repeated_twice[0],  # noqa
                     m._reversed_padding_repeated_twice[1],  # noqa

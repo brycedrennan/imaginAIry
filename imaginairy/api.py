@@ -8,6 +8,7 @@ import torch.nn
 from einops import rearrange, repeat
 from PIL import Image, ImageDraw, ImageOps
 from pytorch_lightning import seed_everything
+from torch.cuda import OutOfMemoryError
 
 from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
@@ -440,9 +441,17 @@ def _generate_single_image(
             )
         # from torch.nn.functional import interpolate
         # samples = interpolate(samples, scale_factor=2, mode='nearest')
+        with lc.timing("decoding"):
+            try:
+                x_samples = model.decode_first_stage(samples)
+            except OutOfMemoryError:
+                model.cond_stage_model.to("cpu")
+                model.model.to("cpu")
+                x_samples = model.decode_first_stage(samples)
+                model.cond_stage_model.to(get_device())
+                model.model.to(get_device())
 
-        x_samples = model.decode_first_stage(samples)
-        x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
+            x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
 
         for x_sample in x_samples:
             x_sample = x_sample.to(torch.float32)

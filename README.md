@@ -283,9 +283,17 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
-**8.1.0**
-- feature: image sizes can now be multiples of 8 instead of 64. Inputs will be silently rounded down.
 
+
+**8.1.0**
+- feature: some memory optimizations and documentation
+- feature: surprise-me improvements
+- feature: image sizes can now be multiples of 8 instead of 64. Inputs will be silently rounded down.
+- feature: cleaned up `aimg` shell logs  
+- feature: auto-regen for unsafe images
+- fix: make blip filename windows compatible
+- fix: make captioning work with alpha pngs
+ 
 **8.0.5**
 - fix: bypass huggingface cache retrieval bug
 
