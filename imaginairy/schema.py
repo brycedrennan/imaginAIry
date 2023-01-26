@@ -55,7 +55,7 @@ class LazyLoadingImage:
             return getattr(self._img, key)
 
         if self._lazy_filepath:
-            self._img = Image.open(self._lazy_filepath).convert('RGB')
+            self._img = Image.open(self._lazy_filepath)
             logger.debug(
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_filepath}"
             )

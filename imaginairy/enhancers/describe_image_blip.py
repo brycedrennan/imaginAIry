@@ -36,6 +36,7 @@ def blip_model():
 
 def generate_caption(image, min_length=30):
     """Given an image, return a caption."""
+    image = image.convert("RGB")
     gpu_image = (
         transforms.Compose(
             [
