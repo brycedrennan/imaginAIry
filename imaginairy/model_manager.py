@@ -289,11 +289,19 @@ def get_cached_url_path(url, category=None):
     if category:
         dest = os.path.join(dest, category)
     os.makedirs(dest, exist_ok=True)
+
     # Replace possibly illegal destination path characters
-    filename = re.sub('[*<>:"|?]', '_', filename)
-    dest_path = os.path.join(dest, filename)
+    safe_filename = re.sub('[*<>:"|?]', "_", filename)
+    dest_path = os.path.join(dest, safe_filename)
     if os.path.exists(dest_path):
         return dest_path
+
+    # check if it's saved at previous path and rename it
+    old_dest_path = os.path.join(dest, filename)
+    if os.path.exists(old_dest_path):
+        os.rename(old_dest_path, dest_path)
+        return dest_path
+
     r = requests.get(url)  # noqa
 
     with open(dest_path, "wb") as f:
