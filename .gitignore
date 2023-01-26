@@ -27,3 +27,4 @@ tests/vastai_cli.py
 **/.polyscope.ini
 **/imgui.ini
 **/.eggs
+/img_size_memory_usage.csv
