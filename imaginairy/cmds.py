@@ -7,6 +7,7 @@ from click_shell import shell
 
 from imaginairy import LazyLoadingImage, __version__, config, generate_caption
 from imaginairy.api import imagine_image_files
+from imaginairy.debug_info import get_debug_info
 from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.log_utils import configure_logging
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
@@ -969,6 +970,16 @@ def prune_ckpt(ckpt_paths):
     configure_logging()
     for p in ckpt_paths:
         prune_diffusion_ckpt(p)
+
+
+@aimg.command("system-info")
+def system_info():
+    """
+    Display system information. Submit this when reporting bugs.
+    """
+    for k, v in get_debug_info().items():
+        k += ":"
+        click.secho(f"{k: <30} {v}")
 
 
 aimg.add_command(imagine_cmd, name="imagine")
