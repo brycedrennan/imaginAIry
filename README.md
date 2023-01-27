@@ -283,6 +283,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**8.2.0**
 - feature: added `aimg system-info` command to help debug issues
 
 **8.1.0**
