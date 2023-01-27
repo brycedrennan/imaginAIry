@@ -97,6 +97,20 @@ MODEL_CONFIGS = [
         weights_url="https://huggingface.co/imaginairy/instruct-pix2pix/resolve/ea0009b3d0d4888f410a40bd06d69516d0b5a577/instruct-pix2pix-00-22000-pruned.ckpt",
         default_image_size=512,
         default_negative_prompt="",
+    ),
+    ModelConfig(
+        short_name="openjourney",
+        config_path="configs/stable-diffusion-v1.yaml",
+        weights_url="https://huggingface.co/prompthero/openjourney/resolve/main/mdjrny-v4.ckpt",
+        default_image_size=512,
+        default_negative_prompt="",
+    ),
+    ModelConfig(
+        short_name="openjourney-v2",
+        config_path="configs/stable-diffusion-v1.yaml",
+        weights_url="https://huggingface.co/prompthero/openjourney-v2/resolve/main/openjourney-v2.ckpt",
+        default_image_size=512,
+        default_negative_prompt="",
     )
     # ModelConfig(
     #     short_name="SD-2.0-upscale",
