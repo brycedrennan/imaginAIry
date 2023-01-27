@@ -116,6 +116,7 @@ class ImaginePrompt:
         model=config.DEFAULT_MODEL,
         model_config_path=None,
         is_intermediate=False,
+        collect_progress_latents=False,
     ):
 
         self.prompts = self.process_prompt_input(prompt)
@@ -164,6 +165,7 @@ class ImaginePrompt:
         self.model_config_path = model_config_path
         # we don't want to save intermediate images
         self.is_intermediate = is_intermediate
+        self.collect_progress_latents = collect_progress_latents
 
         if self.height is None or self.width is None or self.steps is None:
             SamplerCls = SAMPLER_LOOKUP[self.sampler_type]
@@ -263,6 +265,7 @@ class ImagineResult:
         mask_grayscale=None,
         depth_image=None,
         timings=None,
+        progress_latents=None,
     ):
         self.prompt = prompt
 
@@ -284,6 +287,7 @@ class ImagineResult:
             self.images["depth_image"] = depth_image
 
         self.timings = timings
+        self.progress_latents = progress_latents
 
         # for backward compat
         self.img = img
