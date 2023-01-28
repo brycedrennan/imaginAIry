@@ -223,7 +223,11 @@ logger = logging.getLogger(__name__)
     help="Print the version and exit.",
 )
 @click.option(
-    "--gif", "make_gif", default=False, is_flag=True, help="Generate a gif of the edit."
+    "--gif",
+    "make_gif",
+    default=False,
+    is_flag=True,
+    help="Generate a gif of the generation.",
 )
 @click.pass_context
 def imagine_cmd(
@@ -708,7 +712,7 @@ def _imagine_cmd(
         output_file_extension="jpg",
         print_caption=caption,
         precision=precision,
-        make_comparison_gif=make_gif,
+        make_gif=make_gif,
     )
 
 

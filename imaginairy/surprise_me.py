@@ -191,7 +191,7 @@ def create_surprise_me_images(
         record_step_images=False,
         output_file_extension="jpg",
         print_caption=False,
-        make_comparison_gif=make_gif,
+        make_gif=make_gif,
     )
     if make_gif:
         imgs_path = os.path.join(outdir, "compilations")

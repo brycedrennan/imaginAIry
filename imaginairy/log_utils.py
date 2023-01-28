@@ -79,6 +79,7 @@ class ImageLoggingContext:
         progress_img_callback=None,
         progress_img_interval_steps=3,
         progress_img_interval_min_s=0.1,
+        progress_latent_callback=None,
     ):
         self.prompt = prompt
         self.model = model
@@ -89,6 +90,7 @@ class ImageLoggingContext:
         self.progress_img_callback = progress_img_callback
         self.progress_img_interval_steps = progress_img_interval_steps
         self.progress_img_interval_min_s = progress_img_interval_min_s
+        self.progress_latent_callback = progress_latent_callback
 
         self.start_ts = time.perf_counter()
         self.timings = {}
@@ -124,6 +126,8 @@ class ImageLoggingContext:
         from imaginairy.img_utils import model_latents_to_pillow_imgs  # noqa
 
         if "predicted_latent" in description:
+            if self.progress_latent_callback is not None:
+                self.progress_latent_callback(latents)
             if (
                 self.step_count - self.last_progress_img_step
             ) > self.progress_img_interval_steps:
