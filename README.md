@@ -284,6 +284,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 ## ChangeLog
 
 - feature: `openjourney-v1` and `openjourney-v2` models added. available via `--model openjourney-v2`
+- fix: tile mode was broken since latest perf improvements
 
 **8.2.0**
 - feature: added `aimg system-info` command to help debug issues

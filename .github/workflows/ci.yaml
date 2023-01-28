@@ -69,6 +69,6 @@ jobs:
           ~/.cache/torch
         key: ${{ steps.date.outputs.curmonth }}-b
     - name: Test with pytest
-      timeout-minutes: 10
+      timeout-minutes: 20
       run: |
         pytest --durations=50 -v
