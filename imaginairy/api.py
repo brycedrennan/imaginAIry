@@ -10,16 +10,12 @@ from PIL import Image, ImageDraw, ImageOps
 from pytorch_lightning import seed_everything
 from torch.cuda import OutOfMemoryError
 
+from imaginairy.animations import make_bounce_animation
 from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
-from imaginairy.img_utils import (
-    make_gif_image,
-    model_latents_to_pillow_imgs,
-    pillow_fit_image_within,
-    pillow_img_to_torch_image,
-)
+from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
 from imaginairy.log_utils import (
     ImageLoggingContext,
     log_conditioning,
@@ -65,6 +61,7 @@ def imagine_image_files(
     output_file_extension="jpg",
     print_caption=False,
     make_gif=False,
+    make_compare_gif=False,
     return_filename_type="generated",
 ):
     generated_imgs_path = os.path.join(outdir, "generated")
@@ -123,44 +120,31 @@ def imagine_image_files(
             os.makedirs(subpath, exist_ok=True)
             filepath = os.path.join(subpath, f"{basefilename}.gif")
 
-            transition_length = 1500
-            pause_length_ms = 500
-            max_fps = 20
-            max_frames = int(round(transition_length / 1000 * max_fps))
+            frames = result.progress_latents + [result.images["generated"]]
 
-            usable_latents = shrink_list(result.progress_latents, max_frames)
-            progress_imgs = [
-                model_latents_to_pillow_imgs(latent)[0] for latent in usable_latents
-            ]
-            frames = (
-                progress_imgs
-                + [result.images["generated"]]
-                + list(reversed(progress_imgs))
-            )
-            progress_duration = int(round(300 / len(frames)))
-            min_duration = int(1000 / 20)
-            progress_duration = max(progress_duration, min_duration)
-            durations = (
-                [progress_duration] * len(progress_imgs)
-                + [pause_length_ms]
-                + [progress_duration] * len(progress_imgs)
-            )
-            assert len(frames) == len(durations)
             if prompt.init_image:
                 resized_init_image = pillow_fit_image_within(
                     prompt.init_image, prompt.width, prompt.height
                 )
                 frames = [resized_init_image] + frames
-                durations = [pause_length_ms] + durations
-            else:
-                durations[0] = pause_length_ms
 
-            make_gif_image(
-                filepath,
-                imgs=frames,
-                duration=durations,
+            make_bounce_animation(imgs=frames, outpath=filepath)
+            logger.info(f"    [gif] {len(frames)} frames saved to: {filepath}")
+        if make_compare_gif and prompt.init_image:
+            subpath = os.path.join(outdir, "gif")
+            os.makedirs(subpath, exist_ok=True)
+            filepath = os.path.join(subpath, f"{basefilename}_[compare].gif")
+            resized_init_image = pillow_fit_image_within(
+                prompt.init_image, prompt.width, prompt.height
             )
-            logger.info(f"    [gif] saved to: {filepath}")
+            frames = [resized_init_image, result.images["generated"]]
+
+            make_bounce_animation(
+                imgs=frames,
+                outpath=filepath,
+            )
+            logger.info(f"    [gif-comparison] saved to: {filepath}")
+
         base_count += 1
         del result
 
@@ -589,12 +573,3 @@ def _prompts_to_embeddings(prompts, model):
 
 def prompt_normalized(prompt):
     return re.sub(r"[^a-zA-Z0-9.,\[\]-]+", "_", prompt)[:130]
-
-
-def shrink_list(items, max_size):
-    if len(items) <= max_size:
-        return items
-    num_to_remove = len(items) - max_size
-    interval = int(round(len(items) / num_to_remove))
-
-    return [val for i, val in enumerate(items) if i % interval != 0]

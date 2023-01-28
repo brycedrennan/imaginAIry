@@ -6,12 +6,10 @@ aimg.
 
 import os.path
 
-from PIL import ImageDraw, ImageFont
-
 from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
+from imaginairy.animations import make_gif_animation
 from imaginairy.enhancers.facecrop import detect_faces
-from imaginairy.img_utils import make_gif_image, pillow_fit_image_within
-from imaginairy.paths import PKG_ROOT
+from imaginairy.img_utils import add_caption_to_image, pillow_fit_image_within
 
 preserve_head_kwargs = {
     "mask_prompt": "head|face",
@@ -202,25 +200,11 @@ def create_surprise_me_images(
         gif_imgs = [simg]
         for prompt, filename in zip(prompts, generated_filenames):
             gen_img = LazyLoadingImage(filepath=filename)
-            draw = ImageDraw.Draw(gen_img)
+            add_caption_to_image(gen_img, prompt.prompt_text)
 
-            font_size = 16
-            font = ImageFont.truetype(f"{PKG_ROOT}/data/DejaVuSans.ttf", font_size)
-
-            x = 15
-            y = gen_img.height - 15 - font_size
-
-            draw.text(
-                (x, y),
-                prompt.prompt_text,
-                font=font,
-                fill=(255, 255, 255),
-                stroke_width=3,
-                stroke_fill=(0, 0, 0),
-            )
             gif_imgs.append(gen_img)
 
-        make_gif_image(new_filename, gif_imgs)
+        make_gif_animation(outpath=new_filename, imgs=gif_imgs)
 
 
 if __name__ == "__main__":

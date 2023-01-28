@@ -179,3 +179,24 @@ def check_torch_working():
                 "CUDA is not working.  Make sure you have a GPU and CUDA installed."
             ) from e
         raise e
+
+
+def frange(start, stop, step):
+    """Range but handles floats."""
+    x = start
+    while True:
+        if x >= stop:
+            return
+        yield x
+        x += step
+
+
+def shrink_list(items, max_size):
+    if len(items) <= max_size:
+        return items
+
+    removal_ratio = len(items) / (max_size - 1)
+    new_items = {}
+    for i, item in enumerate(items):
+        new_items[int(i / removal_ratio)] = item
+    return [items[0]] + list(new_items.values())
