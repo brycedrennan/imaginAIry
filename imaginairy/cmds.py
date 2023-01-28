@@ -4,11 +4,13 @@ import os.path
 
 import click
 from click_shell import shell
+from tqdm import tqdm
 
 from imaginairy import LazyLoadingImage, __version__, config, generate_caption
 from imaginairy.api import imagine_image_files
 from imaginairy.debug_info import get_debug_info
 from imaginairy.enhancers.prompt_expansion import expand_prompts
+from imaginairy.enhancers.upscale_realesrgan import upscale_image
 from imaginairy.log_utils import configure_logging
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
@@ -718,13 +720,51 @@ def _imagine_cmd(
 
 @shell(prompt="🤖🧠> ", intro="Starting imaginAIry...")
 def aimg():
-    pass
+    """
+    🤖🧠 ImaginAIry.
+
+    Pythonic generation of images via AI
+
+    ✨ Run `aimg` to start a persistent shell session.  This makes generation and editing much
+    quicker since the model can stay loaded in memory.
+    """
+    configure_logging()
 
 
 @aimg.command()
 def version():
     """Print the version."""
     print(__version__)
+
+
+@click.argument("image_filepaths", nargs=-1)
+@click.option(
+    "--outdir",
+    default="./outputs/upscaled",
+    show_default=True,
+    type=click.Path(),
+    help="Where to write results to.",
+)
+@aimg.command("upscale")
+def upscale_cmd(image_filepaths, outdir):
+    """
+    Upscale an image 4x using AI.
+    """
+    os.makedirs(outdir, exist_ok=True)
+
+    for p in tqdm(image_filepaths):
+        savepath = os.path.join(outdir, os.path.basename(p))
+        if p.startswith("http"):
+            img = LazyLoadingImage(url=p)
+        else:
+            img = LazyLoadingImage(filepath=p)
+        logger.info(
+            f"Upscaling {p} from {img.width}x{img.height } to {img.width * 4}x{img.height*4} and saving it to {savepath}"
+        )
+
+        img = upscale_image(img)
+
+        img.save(os.path.join(outdir, os.path.basename(p)))
 
 
 @click.argument("image_filepaths", nargs=-1)
@@ -863,7 +903,6 @@ def train_concept(
 
     You can find a lot of relevant instructions here: https://github.com/JoePenna/Dreambooth-Stable-Diffusion
     """
-    configure_logging()
     target_size = 512
     # Step 1. Crop and enhance the training images
     prepped_images_path = os.path.join(concept_images_dir, "prepped-images")
