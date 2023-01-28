@@ -715,9 +715,8 @@ def _TileModeConv2DConvForward(
     self, input: torch.Tensor, weight: torch.Tensor, bias: torch.Tensor  # noqa
 ):
     if self.padding_modeX == self.padding_modeY:
-        return F.conv2d(
-            input, weight, bias, self.stride, self.padding, self.dilation, self.groups
-        )
+        self.padding_mode = self.padding_modeX
+        return self._orig_conv_forward(input, weight, bias)  # noqa
 
     w1 = F.pad(input, self.paddingX, mode=self.padding_modeX)
     del input
@@ -790,6 +789,7 @@ class LatentDiffusion(DDPM):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 m._initial_padding_mode = m.padding_mode
+                m._orig_conv_forward = m._conv_forward
                 m._conv_forward = _TileModeConv2DConvForward.__get__(  # noqa
                     m, nn.Conv2d
                 )
