@@ -51,6 +51,7 @@ logger = logging.getLogger(__name__)
     "--init-image-strength",
     default=None,
     show_default=False,
+    type=float,
     help="Starting image strength. Between 0 and 1.",
 )
 @click.option(
