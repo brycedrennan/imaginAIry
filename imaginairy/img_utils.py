@@ -4,8 +4,10 @@ import numpy as np
 import PIL
 import torch
 from einops import rearrange, repeat
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
+from imaginairy.paths import PKG_ROOT
+from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import get_device
 
 
@@ -72,13 +74,33 @@ def pillow_img_to_model_latent(model, img, batch_size=1, half=True):
     return model.get_first_stage_encoding(model.encode_first_stage(init_image))
 
 
-def make_gif_image(filepath, imgs, duration=1000, loop=0):
+def imgpaths_to_imgs(imgpaths):
+    imgs = []
+    for imgpath in imgpaths:
+        if isinstance(imgpath, str):
+            img = LazyLoadingImage(filepath=imgpath)
+            imgs.append(img)
+        else:
+            imgs.append(imgpath)
 
-    imgs[0].save(
-        filepath,
-        save_all=True,
-        append_images=imgs[1:],
-        duration=duration,
-        loop=loop,
-        optimize=False,
+    return imgs
+
+
+def add_caption_to_image(
+    img, caption, font_size=16, font_path=f"{PKG_ROOT}/data/DejaVuSans.ttf"
+):
+    draw = ImageDraw.Draw(img)
+
+    font = ImageFont.truetype(font_path, font_size)
+
+    x = 15
+    y = img.height - 15 - font_size
+
+    draw.text(
+        (x, y),
+        caption,
+        font=font,
+        fill=(255, 255, 255),
+        stroke_width=3,
+        stroke_fill=(0, 0, 0),
     )

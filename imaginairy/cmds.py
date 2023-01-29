@@ -7,11 +7,13 @@ from click_shell import shell
 from tqdm import tqdm
 
 from imaginairy import LazyLoadingImage, __version__, config, generate_caption
+from imaginairy.animations import make_bounce_animation
 from imaginairy.api import imagine_image_files
 from imaginairy.debug_info import get_debug_info
 from imaginairy.enhancers.prompt_expansion import expand_prompts
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
 from imaginairy.log_utils import configure_logging
+from imaginairy.prompt_schedules import parse_schedule_strs, prompt_mutator
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.schema import ImaginePrompt
 from imaginairy.surprise_me import create_surprise_me_images
@@ -47,8 +49,8 @@ logger = logging.getLogger(__name__)
 )
 @click.option(
     "--init-image-strength",
-    default=0.6,
-    show_default=True,
+    default=None,
+    show_default=False,
     help="Starting image strength. Between 0 and 1.",
 )
 @click.option(
@@ -231,6 +233,26 @@ logger = logging.getLogger(__name__)
     is_flag=True,
     help="Generate a gif of the generation.",
 )
+@click.option(
+    "--compare-gif",
+    "make_compare_gif",
+    default=False,
+    is_flag=True,
+    help="Create a gif comparing the original image to the modified one.",
+)
+@click.option(
+    "--arg-schedule",
+    "arg_schedules",
+    multiple=True,
+    help="Schedule how an argument should change over several generations. Format: `--arg-schedule arg_name[start:end:increment]` or `--arg-schedule arg_name[val,val2,val3]`",
+)
+@click.option(
+    "--compilation-anim",
+    "make_compilation_animation",
+    default=None,
+    type=click.Choice(["gif", "mp4"]),
+    help="Generate an animation composed of all the images generated in this run.  Defaults to gif but `--compilation-anim mp4` will generate an mp4 instead.",
+)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -267,6 +289,9 @@ def imagine_cmd(
     prompt_library_path,
     version,  # noqa
     make_gif,
+    make_compare_gif,
+    arg_schedules,
+    make_compilation_animation,
 ):
     """Have the AI generate images. alias:imagine."""
     return _imagine_cmd(
@@ -304,6 +329,9 @@ def imagine_cmd(
         prompt_library_path,
         version,  # noqa
         make_gif,
+        make_compare_gif,
+        arg_schedules,
+        make_compilation_animation,
     )
 
 
@@ -505,7 +533,14 @@ def imagine_cmd(
     "make_gif",
     default=False,
     is_flag=True,
-    help="Generate a gif comparing the original image to the modified one.",
+    help="Create a gif showing the generation process.",
+)
+@click.option(
+    "--compare-gif",
+    "make_compare_gif",
+    default=False,
+    is_flag=True,
+    help="Create a gif comparing the original image to the modified one.",
 )
 @click.option(
     "--surprise-me",
@@ -513,6 +548,19 @@ def imagine_cmd(
     default=False,
     is_flag=True,
     help="make some fun edits to the provided image",
+)
+@click.option(
+    "--arg-schedule",
+    "arg_schedules",
+    multiple=True,
+    help="Schedule how an argument should change over several generations. Format: `--arg-schedule arg_name[start:end:increment]` or `--arg-schedule arg_name[val,val2,val3]`",
+)
+@click.option(
+    "--compilation-anim",
+    "make_compilation_animation",
+    default=None,
+    type=click.Choice(["gif", "mp4"]),
+    help="Generate an animation composed of all the images generated in this run.  Defaults to gif but `--compilation-anim mp4` will generate an mp4 instead.",
 )
 @click.pass_context
 def edit_image(  # noqa
@@ -549,7 +597,10 @@ def edit_image(  # noqa
     prompt_library_path,
     version,  # noqa
     make_gif,
+    make_compare_gif,
     surprise_me,
+    arg_schedules,
+    make_compilation_animation,
 ):
     init_image_strength = 1
     if surprise_me and prompt_texts:
@@ -600,6 +651,9 @@ def edit_image(  # noqa
         prompt_library_path,
         version,  # noqa
         make_gif,
+        make_compare_gif,
+        arg_schedules,
+        make_compilation_animation,
     )
 
 
@@ -638,6 +692,9 @@ def _imagine_cmd(
     prompt_library_path,
     version=False,  # noqa
     make_gif=False,
+    make_compare_gif=False,
+    arg_schedules=None,
+    make_compilation_animation=False,
 ):
     """Have the AI generate images. alias:imagine."""
     if ctx.invoked_subcommand is not None:
@@ -661,6 +718,12 @@ def _imagine_cmd(
 
     if mask_image and mask_image.startswith("http"):
         mask_image = LazyLoadingImage(url=mask_image)
+
+    if init_image_strength is None:
+        if outpaint or mask_image or mask_prompt:
+            init_image_strength = 0
+        else:
+            init_image_strength = 0.6
 
     prompts = []
     prompt_expanding_iterators = {}
@@ -705,9 +768,14 @@ def _imagine_cmd(
                 model=model_weights_path,
                 model_config_path=model_config_path,
             )
-            prompts.append(prompt)
+            if arg_schedules:
+                schedules = parse_schedule_strs(arg_schedules)
+                for new_prompt in prompt_mutator(prompt, schedules):
+                    prompts.append(new_prompt)
+            else:
+                prompts.append(prompt)
 
-    imagine_image_files(
+    filenames = imagine_image_files(
         prompts,
         outdir=outdir,
         record_step_images=show_work,
@@ -715,7 +783,20 @@ def _imagine_cmd(
         print_caption=caption,
         precision=precision,
         make_gif=make_gif,
+        make_compare_gif=make_compare_gif,
     )
+    if make_compilation_animation:
+        ext = make_compilation_animation
+
+        compilation_outdir = os.path.join(outdir, "compilations")
+        base_count = len(os.listdir(compilation_outdir))
+        new_filename = os.path.join(
+            compilation_outdir, f"{base_count:04d}_compilation.{ext}"
+        )
+        comp_imgs = [LazyLoadingImage(filepath=f) for f in filenames]
+        make_bounce_animation(outpath=new_filename, imgs=comp_imgs)
+
+        logger.info(f"[compilation] saved to: {new_filename}")
 
 
 @shell(prompt="🤖🧠> ", intro="Starting imaginAIry...")

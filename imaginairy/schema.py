@@ -118,42 +118,20 @@ class ImaginePrompt:
         is_intermediate=False,
         collect_progress_latents=False,
     ):
-
-        self.prompts = self.process_prompt_input(prompt)
+        self.prompts = prompt
+        self.negative_prompt = negative_prompt
         self.prompt_strength = prompt_strength
-        if tile_mode is True:
-            tile_mode = "xy"
-        elif tile_mode is False:
-            tile_mode = ""
-        else:
-            tile_mode = tile_mode.lower()
-            assert tile_mode in ("", "x", "y", "xy")
-
-        if isinstance(init_image, str):
-            if not init_image.startswith("*prev."):
-                init_image = LazyLoadingImage(filepath=init_image)
-
-        if isinstance(mask_image, str):
-            if not init_image.startswith("*prev."):
-                mask_image = LazyLoadingImage(filepath=mask_image)
-
-        if mask_image is not None and mask_prompt is not None:
-            raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
-        if model is None:
-            model = config.DEFAULT_MODEL
-
         self.init_image = init_image
         self.init_image_strength = init_image_strength
-        self.seed = random.randint(1, 1_000_000_000) if seed is None else seed
+        self._orig_seed = seed
+        self.seed = seed
         self.steps = steps
         self.height = height
         self.width = width
         self.upscale = upscale
         self.fix_faces = fix_faces
-        self.fix_faces_fidelity = (
-            fix_faces_fidelity if fix_faces_fidelity else self.DEFAULT_FACE_FIDELITY
-        )
-        self.sampler_type = sampler_type.lower()
+        self.fix_faces_fidelity = fix_faces_fidelity
+        self.sampler_type = sampler_type
         self.conditioning = conditioning
         self.mask_prompt = mask_prompt
         self.mask_image = mask_image
@@ -167,20 +145,56 @@ class ImaginePrompt:
         self.is_intermediate = is_intermediate
         self.collect_progress_latents = collect_progress_latents
 
+        self.validate()
+
+    def validate(self):
+        self.prompts = self.process_prompt_input(self.prompts)
+
+        if self.tile_mode is True:
+            self.tile_mode = "xy"
+        elif self.tile_mode is False:
+            self.tile_mode = ""
+        else:
+            self.tile_mode = self.tile_mode.lower()
+            assert self.tile_mode in ("", "x", "y", "xy")
+
+        if isinstance(self.init_image, str):
+            if not self.init_image.startswith("*prev."):
+                self.init_image = LazyLoadingImage(filepath=self.init_image)
+
+        if isinstance(self.mask_image, str):
+            if not self.mask_image.startswith("*prev."):
+                self.mask_image = LazyLoadingImage(filepath=self.mask_image)
+
+        if self.mask_image is not None and self.mask_prompt is not None:
+            raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
+        if self.model is None:
+            self.model = config.DEFAULT_MODEL
+
+        self.seed = random.randint(1, 1_000_000_000) if self.seed is None else self.seed
+
+        self.sampler_type = self.sampler_type.lower()
+
+        self.fix_faces_fidelity = (
+            self.fix_faces_fidelity
+            if self.fix_faces_fidelity
+            else self.DEFAULT_FACE_FIDELITY
+        )
+
         if self.height is None or self.width is None or self.steps is None:
             SamplerCls = SAMPLER_LOOKUP[self.sampler_type]
             self.steps = self.steps or SamplerCls.default_steps
             self.width = self.width or get_model_default_image_size(self.model)
             self.height = self.height or get_model_default_image_size(self.model)
 
-        if negative_prompt is None:
+        if self.negative_prompt is None:
             model_config = config.MODEL_CONFIG_SHORTCUTS.get(self.model, None)
             if model_config:
-                negative_prompt = model_config.default_negative_prompt
+                self.negative_prompt = model_config.default_negative_prompt
             else:
-                negative_prompt = config.DEFAULT_NEGATIVE_PROMPT
+                self.negative_prompt = config.DEFAULT_NEGATIVE_PROMPT
 
-        self.negative_prompt = self.process_prompt_input(negative_prompt)
+        self.negative_prompt = self.process_prompt_input(self.negative_prompt)
 
         if self.model == "SD-2.0-v" and self.sampler_type == SamplerName.PLMS:
             raise ValueError("PLMS sampler is not supported for SD-2.0-v model.")

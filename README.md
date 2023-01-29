@@ -16,6 +16,9 @@ AI imagined images. Pythonic generation of stable diffusion images.
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman"
 # Stable Diffusion 2.1
 >> imagine --model SD-2.1 "a forest"
+# Make generation gif
+>> imagine --gif "a flower"
+
 ```
 
 <details closed>
@@ -41,6 +44,7 @@ Generating 🖼  : "portrait photo of a freckled woman" 512x512px seed:500686645
 
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"  height="256"><br>
 <img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256"><img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/master/assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg"  height="256">
+<img src="assets/009719_942389026_kdpmpp2m15_PS7.5_a_flower.gif" height="256">
 
 ###  🎉 Edit Images with Instructions alone! [by InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix)
 Just tell imaginairy how to edit the image and it will do it for you!  
@@ -49,17 +53,20 @@ with prompt-based masking.
 
 ```bash
 >> aimg edit scenic_landscape.jpg "make it winter" --prompt-strength 20
+>> aimg edit scenic_landscape.jpg "make it winter" --steps 30 --arg-schedule "prompt_strength[2:25:0.5]" --compilation-anim
 >> aimg edit dog.jpg "make the dog red" --prompt-strength 5
 >> aimg edit bowl_of_fruit.jpg "replace the fruit with strawberries"
 >> aimg edit freckled_woman.jpg "make her a cyborg" --prompt-strength 13
->> aimg edit pearl_girl.jpg "make her wear clown makup"
->> aimg edit mona-lisa.jpg "make it a color professional photo headshot" --negative-prompt "old, ugly"
+# create a comparison gif
+>> aimg edit pearl_girl.jpg "make her wear clown makeup" --compare-gif
+# create an animation showing the edit with increasing prompt strengths
+>> aimg edit mona-lisa.jpg "make it a color professional photo headshot" --negative-prompt "old, ugly, blurry" --arg-schedule "prompt-strength[2:8:0.5]" --compilation-anim gif
 ```
 
 
 <img src="assets/scenic_landscape_winter.jpg" height="256"><img src="assets/dog_red.jpg" height="256"><br>
 <img src="assets/bowl_of_fruit_strawberries.jpg" height="256"><img src="assets/freckled_woman_cyborg.jpg" height="256"><br>
-<img src="assets/girl_with_a_pearl_earring_clown_makeup.jpg" height="256"><img src="assets/mona-lisa-headshot-photo.jpg" height="256"><br>
+<img src="assets/girl-pearl-clown-compare.gif" height="256"><img src="assets/mona-lisa-headshot-anim.gif" height="256"><br>
 
 Want just quickly have some fun? Try `--surprise-me` to apply some pre-defined edits.
 ```bash
@@ -283,8 +290,12 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- feature: create `gifs` or `mp4s` from any images made in a single run with `--compilation-anim gif`
+- feature: create a series of images or edits by iterating over a parameter with the `--arg-schedule` argument
 - feature: `openjourney-v1` and `openjourney-v2` models added. available via `--model openjourney-v2`
 - feature: add upscale command line function: `aimg upscale`
+- feature: `--gif` option will create a gif showing the generation process for a single image
+- feature: `--compare-gif` option will create a comparison gif for any image edits
 - fix: tile mode was broken since latest perf improvements
 
 **8.2.0**
