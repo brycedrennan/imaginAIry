@@ -291,6 +291,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**8.3.1**
+- fix: init-image-strength type
+
 **8.3.0**
 - feature: create `gifs` or `mp4s` from any images made in a single run with `--compilation-anim gif`
 - feature: create a series of images or edits by iterating over a parameter with the `--arg-schedule` argument
