@@ -795,7 +795,13 @@ def _imagine_cmd(
             compilation_outdir, f"{base_count:04d}_compilation.{ext}"
         )
         comp_imgs = [LazyLoadingImage(filepath=f) for f in filenames]
-        make_bounce_animation(outpath=new_filename, imgs=comp_imgs)
+        comp_imgs.reverse()
+        make_bounce_animation(
+            outpath=new_filename,
+            imgs=comp_imgs,
+            start_pause_duration_ms=1500,
+            end_pause_duration_ms=1000,
+        )
 
         logger.info(f"[compilation] saved to: {new_filename}")
 

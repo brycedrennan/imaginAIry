@@ -127,8 +127,13 @@ def imagine_image_files(
                     prompt.init_image, prompt.width, prompt.height
                 )
                 frames = [resized_init_image] + frames
-
-            make_bounce_animation(imgs=frames, outpath=filepath)
+            frames.reverse()
+            make_bounce_animation(
+                imgs=frames,
+                outpath=filepath,
+                start_pause_duration_ms=1500,
+                end_pause_duration_ms=1000,
+            )
             logger.info(f"    [gif] {len(frames)} frames saved to: {filepath}")
         if make_compare_gif and prompt.init_image:
             subpath = os.path.join(outdir, "gif")
@@ -137,7 +142,7 @@ def imagine_image_files(
             resized_init_image = pillow_fit_image_within(
                 prompt.init_image, prompt.width, prompt.height
             )
-            frames = [resized_init_image, result.images["generated"]]
+            frames = [result.images["generated"], resized_init_image]
 
             make_bounce_animation(
                 imgs=frames,
