@@ -290,6 +290,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**8.3.0**
 - feature: create `gifs` or `mp4s` from any images made in a single run with `--compilation-anim gif`
 - feature: create a series of images or edits by iterating over a parameter with the `--arg-schedule` argument
 - feature: `openjourney-v1` and `openjourney-v2` models added. available via `--model openjourney-v2`
