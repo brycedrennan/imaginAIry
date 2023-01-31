@@ -2,239 +2,313 @@ import logging
 import math
 
 import click
-from click_shell import shell
+from click_help_colors import HelpColorsCommand, HelpColorsMixin
+from click_shell import Shell
 
 from imaginairy import config
 
 logger = logging.getLogger(__name__)
 
+common_options = [
+    click.option(
+        "--negative-prompt",
+        default=config.DEFAULT_NEGATIVE_PROMPT,
+        show_default=True,
+        help="Negative prompt. Things to try and exclude from images. Same negative prompt will be used for all images.",
+    ),
+    click.option(
+        "--prompt-strength",
+        default=7.5,
+        show_default=True,
+        help="How closely to follow the prompt. Image looks unnatural at higher values",
+    ),
+    click.option(
+        "--init-image",
+        metavar="PATH|URL",
+        help="Starting image.",
+    ),
+    click.option(
+        "--init-image-strength",
+        default=None,
+        show_default=False,
+        type=float,
+        help="Starting image strength. Between 0 and 1.",
+    ),
+    click.option(
+        "--outdir",
+        default="./outputs",
+        show_default=True,
+        type=click.Path(),
+        help="Where to write results to.",
+    ),
+    click.option(
+        "-r",
+        "--repeats",
+        default=1,
+        show_default=True,
+        type=int,
+        help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated.",
+    ),
+    click.option(
+        "-h",
+        "--height",
+        default=None,
+        show_default=True,
+        type=int,
+        help="Image height. Should be multiple of 8.",
+    ),
+    click.option(
+        "-w",
+        "--width",
+        default=None,
+        show_default=True,
+        type=int,
+        help="Image width. Should be multiple of 8.",
+    ),
+    click.option(
+        "--steps",
+        default=None,
+        type=int,
+        show_default=True,
+        help="How many diffusion steps to run. More steps, more detail, but with diminishing returns.",
+    ),
+    click.option(
+        "--seed",
+        default=None,
+        type=int,
+        help="What seed to use for randomness. Allows reproducible image renders.",
+    ),
+    click.option("--upscale", is_flag=True),
+    click.option("--fix-faces", is_flag=True),
+    click.option(
+        "--fix-faces-fidelity",
+        default=None,
+        type=float,
+        help="How faithful to the original should face enhancement be. 1 = best fidelity, 0 = best looking face.",
+    ),
+    click.option(
+        "--sampler-type",
+        "--sampler",
+        default=config.DEFAULT_SAMPLER,
+        show_default=True,
+        type=click.Choice(config.SAMPLER_TYPE_OPTIONS),
+        help="What sampling strategy to use.",
+    ),
+    click.option(
+        "--log-level",
+        default="INFO",
+        show_default=True,
+        type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+        help="What level of logs to show.",
+    ),
+    click.option(
+        "--quiet",
+        "-q",
+        is_flag=True,
+        help="Suppress logs. Alias of `--log-level ERROR`.",
+    ),
+    click.option(
+        "--show-work",
+        default=False,
+        is_flag=True,
+        help="Output a debug images to `steps` folder.",
+    ),
+    click.option(
+        "--tile",
+        is_flag=True,
+        help="Any images rendered will be tileable in both X and Y directions.",
+    ),
+    click.option(
+        "--tile-x",
+        is_flag=True,
+        help="Any images rendered will be tileable in the X direction.",
+    ),
+    click.option(
+        "--tile-y",
+        is_flag=True,
+        help="Any images rendered will be tileable in the Y direction.",
+    ),
+    click.option(
+        "--mask-image",
+        metavar="PATH|URL",
+        help="A mask to use for inpainting. White gets painted, Black is left alone.",
+    ),
+    click.option(
+        "--mask-prompt",
+        help=(
+            "Describe what you want masked and the AI will mask it for you. "
+            "You can describe complex masks with AND, OR, NOT keywords and parentheses. "
+            "The strength of each mask can be modified with {*1.5} notation. \n\n"
+            "Examples:  \n"
+            "car AND (wheels{*1.1} OR trunk OR engine OR windows OR headlights) AND NOT (truck OR headlights){*10}\n"
+            "fruit|fruit stem"
+        ),
+    ),
+    click.option(
+        "--mask-mode",
+        default="replace",
+        show_default=True,
+        type=click.Choice(["keep", "replace"]),
+        help="Should we replace the masked area or keep it?",
+    ),
+    click.option(
+        "--mask-modify-original",
+        default=True,
+        is_flag=True,
+        help="After the inpainting is done, apply the changes to a copy of the original image.",
+    ),
+    click.option(
+        "--outpaint",
+        help=(
+            "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 8. Examples\n"
+            "  `--outpaint up10,down300,left50,right50`\n"
+            "  `--outpaint u10,d300,l50,r50`\n"
+            "  `--outpaint all200`\n"
+            "  `--outpaint a200`\n"
+        ),
+        default="",
+    ),
+    click.option(
+        "--caption",
+        default=False,
+        is_flag=True,
+        help="Generate a text description of the generated image.",
+    ),
+    click.option(
+        "--precision",
+        help="Evaluate at this precision.",
+        type=click.Choice(["full", "autocast"]),
+        default="autocast",
+        show_default=True,
+    ),
+    click.option(
+        "--model-weights-path",
+        "--model",
+        help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
+        show_default=True,
+        default=config.DEFAULT_MODEL,
+    ),
+    click.option(
+        "--model-config-path",
+        help="Model config file to use. If a model name is specified, the appropriate config will be used.",
+        show_default=True,
+        default=None,
+    ),
+    click.option(
+        "--prompt-library-path",
+        help="Path to folder containing phrase lists in txt files. Use txt filename in prompt: {_filename_}.",
+        type=click.Path(exists=True),
+        default=None,
+        multiple=True,
+    ),
+    click.option(
+        "--version",
+        default=False,
+        is_flag=True,
+        help="Print the version and exit.",
+    ),
+    click.option(
+        "--gif",
+        "make_gif",
+        default=False,
+        is_flag=True,
+        help="Create a gif of the generation.",
+    ),
+    click.option(
+        "--compare-gif",
+        "make_compare_gif",
+        default=False,
+        is_flag=True,
+        help="Create a gif comparing the original image to the modified one.",
+    ),
+    click.option(
+        "--arg-schedule",
+        "arg_schedules",
+        multiple=True,
+        help="Schedule how an argument should change over several generations. Format: `--arg-schedule arg_name[start:end:increment]` or `--arg-schedule arg_name[val,val2,val3]`",
+    ),
+    click.option(
+        "--compilation-anim",
+        "make_compilation_animation",
+        default=None,
+        type=click.Choice(["gif", "mp4"]),
+        help="Generate an animation composed of all the images generated in this run.  Defaults to gif but `--compilation-anim mp4` will generate an mp4 instead.",
+    ),
+]
 
-@click.command()
+
+def add_options(options):
+    def _add_options(func):
+        for option in reversed(options):
+            func = option(func)
+        return func
+
+    return _add_options
+
+
+def replace_option(options, option_name, new_option):
+    for i, option in enumerate(options):
+
+        if option.name == option_name:
+            options[i] = new_option
+            return
+    raise ValueError(f"Option {option_name} not found")
+
+
+def remove_option(options, option_name):
+    for i, option_dec in enumerate(options):
+
+        def temp_f():
+            return True
+
+        temp_f = option_dec(temp_f)
+        option = temp_f.__click_params__[0]
+
+        if option.name == option_name:
+            del options[i]
+            return
+    raise ValueError(f"Option {option_name} not found")
+
+
+class ColorShell(HelpColorsMixin, Shell):
+    pass
+
+
+class ImagineColorsCommand(HelpColorsCommand):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.help_headers_color = "yellow"
+        self.help_options_color = "green"
+
+
+@click.command(
+    prompt="🤖🧠> ",
+    intro="Starting imaginAIry shell...",
+    help_headers_color="yellow",
+    help_options_color="green",
+    context_settings={"max_content_width": 140},
+    cls=ColorShell,
+)
+@click.pass_context
+def aimg(ctx):
+    """
+    🤖🧠 ImaginAIry.
+
+    Pythonic generation of images via AI
+    """
+    import sys
+
+    is_shell = len(sys.argv) == 1
+    if is_shell:
+        print(ctx.get_help())
+
+
+aimg.command_class = ImagineColorsCommand
+
+
+@click.command(context_settings={"max_content_width": 140}, cls=ImagineColorsCommand)
 @click.argument("prompt_texts", nargs=-1)
-@click.option(
-    "--negative-prompt",
-    default=config.DEFAULT_NEGATIVE_PROMPT,
-    show_default=True,
-    help="Negative prompt. Things to try and exclude from images. Same negative prompt will be used for all images.",
-)
-@click.option(
-    "--prompt-strength",
-    default=7.5,
-    show_default=True,
-    help="How closely to follow the prompt. Image looks unnatural at higher values",
-)
-@click.option(
-    "--init-image",
-    metavar="PATH|URL",
-    help="Starting image.",
-)
-@click.option(
-    "--init-image-strength",
-    default=None,
-    show_default=False,
-    type=float,
-    help="Starting image strength. Between 0 and 1.",
-)
-@click.option(
-    "--outdir",
-    default="./outputs",
-    show_default=True,
-    type=click.Path(),
-    help="Where to write results to.",
-)
-@click.option(
-    "-r",
-    "--repeats",
-    default=1,
-    show_default=True,
-    type=int,
-    help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated.",
-)
-@click.option(
-    "-h",
-    "--height",
-    default=None,
-    show_default=True,
-    type=int,
-    help="Image height. Should be multiple of 8.",
-)
-@click.option(
-    "-w",
-    "--width",
-    default=None,
-    show_default=True,
-    type=int,
-    help="Image width. Should be multiple of 8.",
-)
-@click.option(
-    "--steps",
-    default=None,
-    type=int,
-    show_default=True,
-    help="How many diffusion steps to run. More steps, more detail, but with diminishing returns.",
-)
-@click.option(
-    "--seed",
-    default=None,
-    type=int,
-    help="What seed to use for randomness. Allows reproducible image renders.",
-)
-@click.option("--upscale", is_flag=True)
-@click.option("--fix-faces", is_flag=True)
-@click.option(
-    "--fix-faces-fidelity",
-    default=None,
-    type=float,
-    help="How faithful to the original should face enhancement be. 1 = best fidelity, 0 = best looking face.",
-)
-@click.option(
-    "--sampler-type",
-    "--sampler",
-    default=config.DEFAULT_SAMPLER,
-    show_default=True,
-    type=click.Choice(config.SAMPLER_TYPE_OPTIONS),
-    help="What sampling strategy to use.",
-)
-@click.option(
-    "--log-level",
-    default="INFO",
-    show_default=True,
-    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
-    help="What level of logs to show.",
-)
-@click.option(
-    "--quiet",
-    "-q",
-    is_flag=True,
-    help="Suppress logs. Alias of `--log-level ERROR`.",
-)
-@click.option(
-    "--show-work",
-    default=False,
-    is_flag=True,
-    help="Output a debug images to `steps` folder.",
-)
-@click.option(
-    "--tile",
-    is_flag=True,
-    help="Any images rendered will be tileable in both X and Y directions.",
-)
-@click.option(
-    "--tile-x",
-    is_flag=True,
-    help="Any images rendered will be tileable in the X direction.",
-)
-@click.option(
-    "--tile-y",
-    is_flag=True,
-    help="Any images rendered will be tileable in the Y direction.",
-)
-@click.option(
-    "--mask-image",
-    metavar="PATH|URL",
-    help="A mask to use for inpainting. White gets painted, Black is left alone.",
-)
-@click.option(
-    "--mask-prompt",
-    help=(
-        "Describe what you want masked and the AI will mask it for you. "
-        "You can describe complex masks with AND, OR, NOT keywords and parentheses. "
-        "The strength of each mask can be modified with {*1.5} notation. \n\n"
-        "Examples:  \n"
-        "car AND (wheels{*1.1} OR trunk OR engine OR windows OR headlights) AND NOT (truck OR headlights){*10}\n"
-        "fruit|fruit stem"
-    ),
-)
-@click.option(
-    "--mask-mode",
-    default="replace",
-    show_default=True,
-    type=click.Choice(["keep", "replace"]),
-    help="Should we replace the masked area or keep it?",
-)
-@click.option(
-    "--mask-modify-original",
-    default=True,
-    is_flag=True,
-    help="After the inpainting is done, apply the changes to a copy of the original image.",
-)
-@click.option(
-    "--outpaint",
-    help=(
-        "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 8. Examples\n"
-        "  `--outpaint up10,down300,left50,right50`\n"
-        "  `--outpaint u10,d300,l50,r50`\n"
-        "  `--outpaint all200`\n"
-        "  `--outpaint a200`\n"
-    ),
-    default="",
-)
-@click.option(
-    "--caption",
-    default=False,
-    is_flag=True,
-    help="Generate a text description of the generated image.",
-)
-@click.option(
-    "--precision",
-    help="Evaluate at this precision.",
-    type=click.Choice(["full", "autocast"]),
-    default="autocast",
-    show_default=True,
-)
-@click.option(
-    "--model-weights-path",
-    "--model",
-    help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
-    show_default=True,
-    default=config.DEFAULT_MODEL,
-)
-@click.option(
-    "--model-config-path",
-    help="Model config file to use. If a model name is specified, the appropriate config will be used.",
-    show_default=True,
-    default=None,
-)
-@click.option(
-    "--prompt-library-path",
-    help="Path to folder containing phrase lists in txt files. Use txt filename in prompt: {_filename_}.",
-    type=click.Path(exists=True),
-    default=None,
-    multiple=True,
-)
-@click.option(
-    "--version",
-    default=False,
-    is_flag=True,
-    help="Print the version and exit.",
-)
-@click.option(
-    "--gif",
-    "make_gif",
-    default=False,
-    is_flag=True,
-    help="Generate a gif of the generation.",
-)
-@click.option(
-    "--compare-gif",
-    "make_compare_gif",
-    default=False,
-    is_flag=True,
-    help="Create a gif comparing the original image to the modified one.",
-)
-@click.option(
-    "--arg-schedule",
-    "arg_schedules",
-    multiple=True,
-    help="Schedule how an argument should change over several generations. Format: `--arg-schedule arg_name[start:end:increment]` or `--arg-schedule arg_name[val,val2,val3]`",
-)
-@click.option(
-    "--compilation-anim",
-    "make_compilation_animation",
-    default=None,
-    type=click.Choice(["gif", "mp4"]),
-    help="Generate an animation composed of all the images generated in this run.  Defaults to gif but `--compilation-anim mp4` will generate an mp4 instead.",
-)
+@add_options(common_options)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -275,7 +349,11 @@ def imagine_cmd(
     arg_schedules,
     make_compilation_animation,
 ):
-    """Have the AI generate images. alias:imagine."""
+    """
+    Generate images via AI.
+
+    Can be invoked via either `aimg imagine` or just `imagine`.
+    """
     return _imagine_cmd(
         ctx,
         prompt_texts,
@@ -317,213 +395,14 @@ def imagine_cmd(
     )
 
 
-@click.command()
+edit_options = common_options.copy()
+
+remove_option(edit_options, "init_image")
+
+
+@aimg.command("edit")
 @click.argument("init_image", metavar="PATH|URL", required=True, nargs=1)
 @click.argument("prompt_texts", nargs=-1)
-@click.option(
-    "--negative-prompt",
-    default="",
-    show_default=True,
-    help="Negative prompt. Things to try and exclude from images. Same negative prompt will be used for all images.",
-)
-@click.option(
-    "--prompt-strength",
-    default=7.5,
-    show_default=True,
-    help="How closely to follow the prompt. Image looks unnatural at higher values",
-)
-@click.option(
-    "--init-image",
-    metavar="PATH|URL",
-    help="Starting image.",
-)
-@click.option(
-    "--outdir",
-    default="./outputs",
-    show_default=True,
-    type=click.Path(),
-    help="Where to write results to.",
-)
-@click.option(
-    "-r",
-    "--repeats",
-    default=1,
-    show_default=True,
-    type=int,
-    help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated.",
-)
-@click.option(
-    "-h",
-    "--height",
-    default=None,
-    show_default=True,
-    type=int,
-    help="Image height. Should be multiple of 8.",
-)
-@click.option(
-    "-w",
-    "--width",
-    default=None,
-    show_default=True,
-    type=int,
-    help="Image width. Should be multiple of 8.",
-)
-@click.option(
-    "--steps",
-    default=None,
-    type=int,
-    show_default=True,
-    help="How many diffusion steps to run. More steps, more detail, but with diminishing returns.",
-)
-@click.option(
-    "--seed",
-    default=None,
-    type=int,
-    help="What seed to use for randomness. Allows reproducible image renders.",
-)
-@click.option("--upscale", is_flag=True)
-@click.option("--fix-faces", is_flag=True)
-@click.option(
-    "--fix-faces-fidelity",
-    default=1,
-    type=float,
-    help="How faithful to the original should face enhancement be. 1 = best fidelity, 0 = best looking face.",
-)
-@click.option(
-    "--sampler-type",
-    "--sampler",
-    default=config.DEFAULT_SAMPLER,
-    show_default=True,
-    type=click.Choice(config.SAMPLER_TYPE_OPTIONS),
-    help="What sampling strategy to use.",
-)
-@click.option(
-    "--log-level",
-    default="INFO",
-    show_default=True,
-    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
-    help="What level of logs to show.",
-)
-@click.option(
-    "--quiet",
-    "-q",
-    is_flag=True,
-    help="Suppress logs. Alias of `--log-level ERROR`.",
-)
-@click.option(
-    "--show-work",
-    default=False,
-    is_flag=True,
-    help="Output a debug images to `steps` folder.",
-)
-@click.option(
-    "--tile",
-    is_flag=True,
-    help="Any images rendered will be tileable in both X and Y directions.",
-)
-@click.option(
-    "--tile-x",
-    is_flag=True,
-    help="Any images rendered will be tileable in the X direction.",
-)
-@click.option(
-    "--tile-y",
-    is_flag=True,
-    help="Any images rendered will be tileable in the Y direction.",
-)
-@click.option(
-    "--mask-image",
-    metavar="PATH|URL",
-    help="A mask to use for inpainting. White gets painted, Black is left alone.",
-)
-@click.option(
-    "--mask-prompt",
-    help=(
-        "Describe what you want masked and the AI will mask it for you. "
-        "You can describe complex masks with AND, OR, NOT keywords and parentheses. "
-        "The strength of each mask can be modified with {*1.5} notation. \n\n"
-        "Examples:  \n"
-        "car AND (wheels{*1.1} OR trunk OR engine OR windows OR headlights) AND NOT (truck OR headlights){*10}\n"
-        "fruit|fruit stem"
-    ),
-)
-@click.option(
-    "--mask-mode",
-    default="replace",
-    show_default=True,
-    type=click.Choice(["keep", "replace"]),
-    help="Should we replace the masked area or keep it?",
-)
-@click.option(
-    "--mask-modify-original",
-    default=True,
-    is_flag=True,
-    help="After the inpainting is done, apply the changes to a copy of the original image.",
-)
-@click.option(
-    "--outpaint",
-    help=(
-        "Specify in what directions to expand the image. Values will be snapped such that output image size is multiples of 8. Examples\n"
-        "  `--outpaint up10,down300,left50,right50`\n"
-        "  `--outpaint u10,d300,l50,r50`\n"
-        "  `--outpaint all200`\n"
-        "  `--outpaint a200`\n"
-    ),
-    default="",
-)
-@click.option(
-    "--caption",
-    default=False,
-    is_flag=True,
-    help="Generate a text description of the generated image.",
-)
-@click.option(
-    "--precision",
-    help="Evaluate at this precision.",
-    type=click.Choice(["full", "autocast"]),
-    default="autocast",
-    show_default=True,
-)
-@click.option(
-    "--model-weights-path",
-    "--model",
-    help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
-    show_default=True,
-    default="edit",
-)
-@click.option(
-    "--model-config-path",
-    help="Model config file to use. If a model name is specified, the appropriate config will be used.",
-    show_default=True,
-    default=None,
-)
-@click.option(
-    "--prompt-library-path",
-    help="Path to folder containing phrase lists in txt files. Use txt filename in prompt: {_filename_}.",
-    type=click.Path(exists=True),
-    default=None,
-    multiple=True,
-)
-@click.option(
-    "--version",
-    default=False,
-    is_flag=True,
-    help="Print the version and exit.",
-)
-@click.option(
-    "--gif",
-    "make_gif",
-    default=False,
-    is_flag=True,
-    help="Create a gif showing the generation process.",
-)
-@click.option(
-    "--compare-gif",
-    "make_compare_gif",
-    default=False,
-    is_flag=True,
-    help="Create a gif comparing the original image to the modified one.",
-)
 @click.option(
     "--surprise-me",
     "surprise_me",
@@ -531,19 +410,7 @@ def imagine_cmd(
     is_flag=True,
     help="make some fun edits to the provided image",
 )
-@click.option(
-    "--arg-schedule",
-    "arg_schedules",
-    multiple=True,
-    help="Schedule how an argument should change over several generations. Format: `--arg-schedule arg_name[start:end:increment]` or `--arg-schedule arg_name[val,val2,val3]`",
-)
-@click.option(
-    "--compilation-anim",
-    "make_compilation_animation",
-    default=None,
-    type=click.Choice(["gif", "mp4"]),
-    help="Generate an animation composed of all the images generated in this run.  Defaults to gif but `--compilation-anim mp4` will generate an mp4 instead.",
-)
+@add_options(common_options)
 @click.pass_context
 def edit_image(  # noqa
     ctx,
@@ -584,6 +451,13 @@ def edit_image(  # noqa
     arg_schedules,
     make_compilation_animation,
 ):
+    """
+    Edit an image via AI.
+
+    Provide a path or URL to an image and directions on how to alter it.
+
+    Example: aimg edit my-dog.jpg "make the dog red"
+    """
     from imaginairy.log_utils import configure_logging
     from imaginairy.surprise_me import create_surprise_me_images
 
@@ -682,15 +556,6 @@ def _imagine_cmd(
     make_compilation_animation=False,
 ):
     """Have the AI generate images. alias:imagine."""
-    import os.path
-
-    from imaginairy import LazyLoadingImage
-    from imaginairy.animations import make_bounce_animation
-    from imaginairy.api import imagine_image_files
-    from imaginairy.enhancers.prompt_expansion import expand_prompts
-    from imaginairy.log_utils import configure_logging
-    from imaginairy.prompt_schedules import parse_schedule_strs, prompt_mutator
-    from imaginairy.schema import ImaginePrompt
 
     if ctx.invoked_subcommand is not None:
         return
@@ -703,12 +568,26 @@ def _imagine_cmd(
 
     if quiet:
         log_level = "ERROR"
+
+    import sys
+
+    if len(sys.argv) > 1:
+        msg = (
+            "✨ Generate images faster using a persistent shell session. Just run `aimg` to start. "
+            "This makes generation and editing much quicker since the model can stay loaded in memory.\n"
+        )
+        print(msg)
+
+    from imaginairy.log_utils import configure_logging
+
     configure_logging(log_level)
 
     total_image_count = len(prompt_texts) * repeats
     logger.info(
-        f"received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
+        f"Received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
     )
+
+    from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
 
     if init_image and init_image.startswith("http"):
         init_image = LazyLoadingImage(url=init_image)
@@ -724,6 +603,8 @@ def _imagine_cmd(
 
     prompts = []
     prompt_expanding_iterators = {}
+    from imaginairy.enhancers.prompt_expansion import expand_prompts
+
     for _ in range(repeats):
         for prompt_text in prompt_texts:
             if prompt_text not in prompt_expanding_iterators:
@@ -765,6 +646,8 @@ def _imagine_cmd(
                 model=model_weights_path,
                 model_config_path=model_config_path,
             )
+            from imaginairy.prompt_schedules import parse_schedule_strs, prompt_mutator
+
             if arg_schedules:
                 schedules = parse_schedule_strs(arg_schedules)
                 for new_prompt in prompt_mutator(prompt, schedules):
@@ -783,6 +666,8 @@ def _imagine_cmd(
         make_compare_gif=make_compare_gif,
     )
     if make_compilation_animation:
+        import os.path
+
         ext = make_compilation_animation
 
         compilation_outdir = os.path.join(outdir, "compilations")
@@ -792,6 +677,9 @@ def _imagine_cmd(
         )
         comp_imgs = [LazyLoadingImage(filepath=f) for f in filenames]
         comp_imgs.reverse()
+
+        from imaginairy.animations import make_bounce_animation
+
         make_bounce_animation(
             outpath=new_filename,
             imgs=comp_imgs,
@@ -800,18 +688,6 @@ def _imagine_cmd(
         )
 
         logger.info(f"[compilation] saved to: {new_filename}")
-
-
-@shell(prompt="🤖🧠> ", intro="Starting imaginAIry...")
-def aimg():
-    """
-    🤖🧠 ImaginAIry.
-
-    Pythonic generation of images via AI
-
-    ✨ Run `aimg` to start a persistent shell session.  This makes generation and editing much
-    quicker since the model can stay loaded in memory.
-    """
 
 
 @aimg.command()
@@ -1136,7 +1012,6 @@ def system_info():
 
 
 aimg.add_command(imagine_cmd, name="imagine")
-aimg.add_command(edit_image, name="edit")
 
 if __name__ == "__main__":
     imagine_cmd()  # noqa

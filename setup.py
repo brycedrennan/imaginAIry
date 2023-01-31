@@ -32,6 +32,7 @@ setup(
     },
     install_requires=[
         "click",
+        "click-help-colors",
         "click-shell",
         "protobuf != 3.20.2, != 3.19.5",
         "facexlib",
