@@ -1,29 +1,10 @@
 import logging
 import math
-import os.path
 
 import click
 from click_shell import shell
-from tqdm import tqdm
 
-from imaginairy import LazyLoadingImage, __version__, config, generate_caption
-from imaginairy.animations import make_bounce_animation
-from imaginairy.api import imagine_image_files
-from imaginairy.debug_info import get_debug_info
-from imaginairy.enhancers.prompt_expansion import expand_prompts
-from imaginairy.enhancers.upscale_realesrgan import upscale_image
-from imaginairy.log_utils import configure_logging
-from imaginairy.prompt_schedules import parse_schedule_strs, prompt_mutator
-from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
-from imaginairy.schema import ImaginePrompt
-from imaginairy.surprise_me import create_surprise_me_images
-from imaginairy.train import train_diffusion_model
-from imaginairy.training_tools.image_prep import (
-    create_class_images,
-    get_image_filenames,
-    prep_images,
-)
-from imaginairy.training_tools.prune_model import prune_diffusion_ckpt
+from imaginairy import config
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +92,7 @@ logger = logging.getLogger(__name__)
     "--sampler",
     default=config.DEFAULT_SAMPLER,
     show_default=True,
-    type=click.Choice(SAMPLER_TYPE_OPTIONS),
+    type=click.Choice(config.SAMPLER_TYPE_OPTIONS),
     help="What sampling strategy to use.",
 )
 @click.option(
@@ -413,7 +394,7 @@ def imagine_cmd(
     "--sampler",
     default=config.DEFAULT_SAMPLER,
     show_default=True,
-    type=click.Choice(SAMPLER_TYPE_OPTIONS),
+    type=click.Choice(config.SAMPLER_TYPE_OPTIONS),
     help="What sampling strategy to use.",
 )
 @click.option(
@@ -603,6 +584,9 @@ def edit_image(  # noqa
     arg_schedules,
     make_compilation_animation,
 ):
+    from imaginairy.log_utils import configure_logging
+    from imaginairy.surprise_me import create_surprise_me_images
+
     init_image_strength = 1
     if surprise_me and prompt_texts:
         raise ValueError("Cannot use surprise_me and prompt_texts together")
@@ -698,11 +682,23 @@ def _imagine_cmd(
     make_compilation_animation=False,
 ):
     """Have the AI generate images. alias:imagine."""
+    import os.path
+
+    from imaginairy import LazyLoadingImage
+    from imaginairy.animations import make_bounce_animation
+    from imaginairy.api import imagine_image_files
+    from imaginairy.enhancers.prompt_expansion import expand_prompts
+    from imaginairy.log_utils import configure_logging
+    from imaginairy.prompt_schedules import parse_schedule_strs, prompt_mutator
+    from imaginairy.schema import ImaginePrompt
+
     if ctx.invoked_subcommand is not None:
         return
 
     if version:
-        print(__version__)
+        from imaginairy.version import get_version
+
+        print(get_version())
         return
 
     if quiet:
@@ -816,13 +812,14 @@ def aimg():
     ✨ Run `aimg` to start a persistent shell session.  This makes generation and editing much
     quicker since the model can stay loaded in memory.
     """
-    configure_logging()
 
 
 @aimg.command()
 def version():
     """Print the version."""
-    print(__version__)
+    from imaginairy.version import get_version
+
+    print(get_version())
 
 
 @click.argument("image_filepaths", nargs=-1)
@@ -838,6 +835,13 @@ def upscale_cmd(image_filepaths, outdir):
     """
     Upscale an image 4x using AI.
     """
+    import os.path
+
+    from tqdm import tqdm
+
+    from imaginairy import LazyLoadingImage
+    from imaginairy.enhancers.upscale_realesrgan import upscale_image
+
     os.makedirs(outdir, exist_ok=True)
 
     for p in tqdm(image_filepaths):
@@ -847,7 +851,7 @@ def upscale_cmd(image_filepaths, outdir):
         else:
             img = LazyLoadingImage(filepath=p)
         logger.info(
-            f"Upscaling {p} from {img.width}x{img.height } to {img.width * 4}x{img.height*4} and saving it to {savepath}"
+            f"Upscaling {p} from {img.width}x{img.height} to {img.width * 4}x{img.height * 4} and saving it to {savepath}"
         )
 
         img = upscale_image(img)
@@ -859,6 +863,10 @@ def upscale_cmd(image_filepaths, outdir):
 @aimg.command()
 def describe(image_filepaths):
     """Generate text descriptions of images."""
+
+    from imaginairy import LazyLoadingImage
+    from imaginairy.enhancers.describe_image_blip import generate_caption
+
     imgs = []
     for p in image_filepaths:
         if p.startswith("http"):
@@ -991,6 +999,15 @@ def train_concept(
 
     You can find a lot of relevant instructions here: https://github.com/JoePenna/Dreambooth-Stable-Diffusion
     """
+    import os.path
+
+    from imaginairy.train import train_diffusion_model
+    from imaginairy.training_tools.image_prep import (
+        create_class_images,
+        get_image_filenames,
+        prep_images,
+    )
+
     target_size = 512
     # Step 1. Crop and enhance the training images
     prepped_images_path = os.path.join(concept_images_dir, "prepped-images")
@@ -1081,7 +1098,9 @@ def prepare_images(images_dir, is_person, target_size):
         aimg prep-images --person ./images/selfies
         aimg prep-images ./images/toy-train
     """
-    configure_logging()
+
+    from imaginairy.training_tools.image_prep import prep_images
+
     prep_images(images_dir=images_dir, is_person=is_person, target_size=target_size)
 
 
@@ -1097,8 +1116,9 @@ def prune_ckpt(ckpt_paths):
     Example:
         aimg prune-ckpt ./path/to/checkpoint.ckpt
     """
+    from imaginairy.training_tools.prune_model import prune_diffusion_ckpt
+
     click.secho("Pruning checkpoint files...")
-    configure_logging()
     for p in ckpt_paths:
         prune_diffusion_ckpt(p)
 
@@ -1108,6 +1128,8 @@ def system_info():
     """
     Display system information. Submit this when reporting bugs.
     """
+    from imaginairy.debug_info import get_debug_info
+
     for k, v in get_debug_info().items():
         k += ":"
         click.secho(f"{k: <30} {v}")

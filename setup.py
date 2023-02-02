@@ -16,16 +16,12 @@ setup(
         "Source": "https://github.com/brycedrennan/imaginAIry",
     },
     packages=find_packages(include=("imaginairy", "imaginairy.*")),
-    entry_points={
-        "console_scripts": [
-            "imagine=imaginairy.cmds:imagine_cmd",
-            "aimg=imaginairy.cmds:aimg",
-        ],
-    },
+    scripts=["imaginairy/bin/aimg", "imaginairy/bin/imagine"],
     package_data={
         "imaginairy": [
             "configs/*.yaml",
             "data/*.*",
+            "bin/*.*",
             "enhancers/phraselists/*.txt",
             "vendored/clip/*.txt.gz",
             "vendored/clipseg/*.pth",

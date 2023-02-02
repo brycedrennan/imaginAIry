@@ -1,6 +1,7 @@
-from importlib.metadata import PackageNotFoundError, version
+def get_version():
+    from importlib.metadata import PackageNotFoundError, version
 
-try:
-    __version__ = version("imaginairy")
-except PackageNotFoundError:
-    __version__ = None
+    try:
+        return version("imaginairy")
+    except PackageNotFoundError:
+        return None

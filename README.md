@@ -291,6 +291,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- perf: cli now has minimal overhead such that `aimg --help` runs in ~650ms instead of ~3400ms
+
 **8.3.1**
 - fix: init-image-strength type
 
