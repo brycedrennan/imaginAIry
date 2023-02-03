@@ -4,17 +4,8 @@ import logging
 import os.path
 import random
 from datetime import datetime, timezone
-from functools import lru_cache
-
-import requests
-from PIL import Image, ImageOps
-from urllib3.exceptions import LocationParseError
-from urllib3.util import parse_url
 
 from imaginairy import config
-from imaginairy.model_manager import get_model_default_image_size
-from imaginairy.samplers import SAMPLER_LOOKUP, SamplerName
-from imaginairy.utils import get_device, get_hardware_description
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +27,9 @@ class LazyLoadingImage:
 
         # validate url is valid url
         if url:
+            from urllib3.exceptions import LocationParseError
+            from urllib3.util import parse_url
+
             try:
                 parsed_url = parse_url(url)
             except LocationParseError:
@@ -53,6 +47,7 @@ class LazyLoadingImage:
             raise AttributeError()
         if self._img:
             return getattr(self._img, key)
+        from PIL import Image, ImageOps
 
         if self._lazy_filepath:
             self._img = Image.open(self._lazy_filepath)
@@ -60,6 +55,8 @@ class LazyLoadingImage:
                 f"Loaded input 🖼  of size {self._img.size} from {self._lazy_filepath}"
             )
         elif self._lazy_url:
+            import requests
+
             self._img = Image.open(
                 requests.get(self._lazy_url, stream=True, timeout=60).raw
             )
@@ -148,6 +145,8 @@ class ImaginePrompt:
         self.validate()
 
     def validate(self):
+        from imaginairy.samplers import SAMPLER_LOOKUP, SamplerName
+
         self.prompts = self.process_prompt_input(self.prompts)
 
         if self.tile_mode is True:
@@ -182,6 +181,8 @@ class ImaginePrompt:
         )
 
         if self.height is None or self.width is None or self.steps is None:
+            from imaginairy.model_manager import get_model_default_image_size
+
             SamplerCls = SAMPLER_LOOKUP[self.sampler_type]
             self.steps = self.steps or SamplerCls.default_steps
             self.width = self.width or get_model_default_image_size(self.model)
@@ -281,6 +282,8 @@ class ImagineResult:
         timings=None,
         progress_latents=None,
     ):
+        from imaginairy.utils import get_device, get_hardware_description
+
         self.prompt = prompt
 
         self.images = {"generated": img}
@@ -327,6 +330,8 @@ class ImagineResult:
         return " ".join(f"{k}:{v:.2f}s" for k, v in self.timings.items())
 
     def _exif(self):
+        from PIL import Image
+
         exif = Image.Exif()
         exif[ExifCodes.ImageDescription] = self.prompt.prompt_description()
         exif[ExifCodes.UserComment] = json.dumps(self.metadata_dict())
@@ -349,6 +354,6 @@ class ImagineResult:
         img.convert("RGB").save(save_path, exif=self._exif())
 
 
-@lru_cache(maxsize=2)
-def _get_briefly_cached_url(url):
-    return requests.get(url, timeout=60)
+class SafetyMode:
+    STRICT = "strict"
+    RELAXED = "relaxed"

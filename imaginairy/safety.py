@@ -6,13 +6,9 @@ from diffusers.pipelines.stable_diffusion import safety_checker as safety_checke
 from transformers import AutoFeatureExtractor
 
 from imaginairy.enhancers.blur_detect import is_blurry
+from imaginairy.schema import SafetyMode
 
 logger = logging.getLogger(__name__)
-
-
-class SafetyMode:
-    STRICT = "strict"
-    RELAXED = "relaxed"
 
 
 class SafetyResult:

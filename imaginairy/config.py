@@ -142,3 +142,18 @@ MODEL_CONFIG_SHORTCUTS["openjourney"] = MODEL_CONFIG_SHORTCUTS["openjourney-v2"]
 MODEL_CONFIG_SHORTCUTS["oj"] = MODEL_CONFIG_SHORTCUTS["openjourney-v2"]
 
 MODEL_SHORT_NAMES = sorted(MODEL_CONFIG_SHORTCUTS.keys())
+
+SAMPLER_TYPE_OPTIONS = [
+    "plms",
+    "ddim",
+    "k_dpm_fast",
+    "k_dpm_adaptive",
+    "k_lms",
+    "k_dpm_2",
+    "k_dpm_2_a",
+    "k_dpmpp_2m",
+    "k_dpmpp_2s_a",
+    "k_euler",
+    "k_euler_a",
+    "k_heun",
+]

@@ -2,41 +2,7 @@ import logging
 import os
 import re
 
-import numpy as np
-import torch
-import torch.nn
-from einops import rearrange, repeat
-from PIL import Image, ImageDraw, ImageOps
-from pytorch_lightning import seed_everything
-from torch.cuda import OutOfMemoryError
-
-from imaginairy.animations import make_bounce_animation
-from imaginairy.enhancers.clip_masking import get_img_mask
-from imaginairy.enhancers.describe_image_blip import generate_caption
-from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
-from imaginairy.enhancers.upscale_realesrgan import upscale_image
-from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
-from imaginairy.log_utils import (
-    ImageLoggingContext,
-    log_conditioning,
-    log_img,
-    log_latent,
-)
-from imaginairy.model_manager import get_diffusion_model
-from imaginairy.modules.midas.utils import AddMiDaS
-from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
-from imaginairy.safety import SafetyMode, create_safety_score
-from imaginairy.samplers import SAMPLER_LOOKUP
-from imaginairy.samplers.base import NoiseSchedule, noise_an_image
-from imaginairy.samplers.editing import CFGEditingDenoiser
-from imaginairy.schema import ImaginePrompt, ImagineResult
-from imaginairy.utils import (
-    fix_torch_group_norm,
-    fix_torch_nn_layer_norm,
-    get_device,
-    platform_appropriate_autocast,
-    randn_seeded,
-)
+from imaginairy.schema import SafetyMode
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +30,11 @@ def imagine_image_files(
     make_compare_gif=False,
     return_filename_type="generated",
 ):
+    from PIL import ImageDraw
+
+    from imaginairy.animations import make_bounce_animation
+    from imaginairy.img_utils import pillow_fit_image_within
+
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
 
@@ -167,6 +138,16 @@ def imagine(
     add_caption=False,
     unsafe_retry_count=1,
 ):
+    import torch.nn
+
+    from imaginairy.schema import ImaginePrompt
+    from imaginairy.utils import (
+        fix_torch_group_norm,
+        fix_torch_nn_layer_norm,
+        get_device,
+        platform_appropriate_autocast,
+    )
+
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
 
@@ -214,6 +195,34 @@ def _generate_single_image(
     half_mode=None,
     add_caption=False,
 ):
+    import numpy as np
+    import torch.nn
+    from einops import rearrange, repeat
+    from PIL import Image, ImageOps
+    from pytorch_lightning import seed_everything
+    from torch.cuda import OutOfMemoryError
+
+    from imaginairy.enhancers.clip_masking import get_img_mask
+    from imaginairy.enhancers.describe_image_blip import generate_caption
+    from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
+    from imaginairy.enhancers.upscale_realesrgan import upscale_image
+    from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
+    from imaginairy.log_utils import (
+        ImageLoggingContext,
+        log_conditioning,
+        log_img,
+        log_latent,
+    )
+    from imaginairy.model_manager import get_diffusion_model
+    from imaginairy.modules.midas.utils import AddMiDaS
+    from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
+    from imaginairy.safety import create_safety_score
+    from imaginairy.samplers import SAMPLER_LOOKUP
+    from imaginairy.samplers.base import NoiseSchedule, noise_an_image
+    from imaginairy.samplers.editing import CFGEditingDenoiser
+    from imaginairy.schema import ImaginePrompt, ImagineResult
+    from imaginairy.utils import get_device, randn_seeded
+
     latent_channels = 4
     downsampling_factor = 8
     batch_size = 1

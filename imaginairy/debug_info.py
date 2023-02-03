@@ -3,13 +3,14 @@ import sys
 
 import torch
 
-from imaginairy import __version__
 from imaginairy.utils import get_device, get_hardware_description
+from imaginairy.version import get_version
 
 
 def get_debug_info():
+
     data = {
-        "imaginairy_version": __version__,
+        "imaginairy_version": get_version(),
         "imaginairy_path": os.path.dirname(__file__),
         "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         "python_installation_path": sys.executable,
