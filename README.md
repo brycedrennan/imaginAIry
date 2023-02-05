@@ -302,6 +302,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 - feature: `edit` and `imagine` commands now accept multiple images (which they will process separately).  This allows 
 batch editing of images as requested in [#229](https://github.com/brycedrennan/imaginAIry/issues/229)
 - refactor: move `--surprise-me` to its own subcommand `edit-demo`
+- feature: allow selection of output image format with `--output-file-extension`
+- docs: make training fail on MPS platform with useful error message
+- docs: add directions on how to change model cache path
 
 **8.3.1**
 - fix: init-image-strength type
