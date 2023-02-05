@@ -181,7 +181,7 @@ def imagine(
                 if not result.is_nsfw:
                     break
                 if attempt < unsafe_retry_count:
-                    logger.info("   Image was unsafe, retrying with new seed...")
+                    logger.info("    Image was unsafe, retrying with new seed...")
 
             yield result
 

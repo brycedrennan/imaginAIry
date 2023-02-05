@@ -43,6 +43,13 @@ common_options = [
         help="Where to write results to.",
     ),
     click.option(
+        "--output-file-extension",
+        default="jpg",
+        show_default=True,
+        type=click.Choice(["jpg", "png"]),
+        help="Where to write results to.",
+    ),
+    click.option(
         "-r",
         "--repeats",
         default=1,
@@ -319,6 +326,7 @@ def imagine_cmd(
     init_image,
     init_image_strength,
     outdir,
+    output_file_extension,
     repeats,
     height,
     width,
@@ -363,6 +371,7 @@ def imagine_cmd(
         init_image,
         init_image_strength,
         outdir,
+        output_file_extension,
         repeats,
         height,
         width,
@@ -476,6 +485,7 @@ def edit_image(  # noqa
     negative_prompt,
     prompt_strength,
     outdir,
+    output_file_extension,
     repeats,
     height,
     width,
@@ -525,6 +535,7 @@ def edit_image(  # noqa
         image_paths,
         image_strength,
         outdir,
+        output_file_extension,
         repeats,
         height,
         width,
@@ -566,6 +577,7 @@ def _imagine_cmd(
     init_image,
     init_image_strength,
     outdir,
+    output_file_extension,
     repeats,
     height,
     width,
@@ -628,9 +640,9 @@ def _imagine_cmd(
         init_images = [init_image]
     else:
         init_images = init_image
-    total_image_count = len(prompt_texts) * len(init_images) * repeats
+    total_image_count = len(prompt_texts) * max(len(init_images), 1) * repeats
     logger.info(
-        f"Received {len(prompt_texts)} prompt(s) and {len(init_images)} input image(s). Will repeat them {repeats} times to create {total_image_count} images."
+        f"Received {len(prompt_texts)} prompt(s) and {len(init_images)} input image(s). Will repeat the generations {repeats} times to create {total_image_count} images."
     )
 
     from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
@@ -641,6 +653,8 @@ def _imagine_cmd(
             init_image = LazyLoadingImage(url=init_image)
         new_init_images.append(init_image)
     init_images = new_init_images
+    if not init_images:
+        init_images = [None]
 
     if mask_image and mask_image.startswith("http"):
         mask_image = LazyLoadingImage(url=mask_image)
@@ -712,7 +726,7 @@ def _imagine_cmd(
         prompts,
         outdir=outdir,
         record_step_images=show_work,
-        output_file_extension="jpg",
+        output_file_extension=output_file_extension,
         print_caption=caption,
         precision=precision,
         make_gif=make_gif,
