@@ -19,7 +19,7 @@ def generate_image_morph_video():
     seed = 290124740
 
     for year in frange(1900, 2100, 1 / 6):
-        pearl_weight = max(max(2000 - year, 0), 1)
+        pearl_weight = max(2000 - year, 1)
         robotic_weight = min(max(year - 2025, 0), 25) * 2
         print(
             f"year: {year}, pearl_weight: {pearl_weight}, robotic_weight: {robotic_weight}"

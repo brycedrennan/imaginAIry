@@ -39,26 +39,19 @@ def read_pfm(path):
         tuple: (data, scale)
     """
     with open(path, "rb") as file:
-
-        color = None
-        width = None
-        height = None
-        scale = None
-        endian = None
-
         header = file.readline().rstrip()
         if header.decode("ascii") == "PF":
             color = True
         elif header.decode("ascii") == "Pf":
             color = False
         else:
-            raise Exception("Not a PFM file: " + path)
+            raise ValueError("Not a PFM file: " + path)
 
         dim_match = re.match(r"^(\d+)\s(\d+)\s$", file.readline().decode("ascii"))
         if dim_match:
             width, height = list(map(int, dim_match.groups()))
         else:
-            raise Exception("Malformed PFM header.")
+            raise RuntimeError("Malformed PFM header.")
 
         scale = float(file.readline().decode("ascii").rstrip())
         if scale < 0:
@@ -89,10 +82,8 @@ def write_pfm(path, image, scale=1):
     """
 
     with open(path, "wb") as file:
-        color = None
-
         if image.dtype.name != "float32":
-            raise Exception("Image dtype must be float32.")
+            raise ValueError("Image dtype must be float32.")
 
         image = np.flipud(image)
 
@@ -103,7 +94,9 @@ def write_pfm(path, image, scale=1):
         ):  # greyscale
             color = False
         else:
-            raise Exception("Image must have H x W x 3, H x W x 1 or H x W dimensions.")
+            raise ValueError(
+                "Image must have H x W x 3, H x W x 1 or H x W dimensions."
+            )
 
         file.write("PF\n" if color else b"Pf\n")
         file.write(b"%d %d\n" % (image.shape[1], image.shape[0]))
