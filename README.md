@@ -298,6 +298,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**9.0.0**
+
 - perf: cli now has minimal overhead such that `aimg --help` runs in ~650ms instead of ~3400ms
 - feature: `edit` and `imagine` commands now accept multiple images (which they will process separately).  This allows 
 batch editing of images as requested in [#229](https://github.com/brycedrennan/imaginAIry/issues/229)
@@ -530,7 +532,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
 
 ## Todo
 
- - Performance Optimizations
+ - Inference Performance Optimizations
    - ✅ fp16
    - ✅ [Doggettx Sliced attention](https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#)
    - ✅ xformers support https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/
@@ -538,6 +540,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - https://github.com/CompVis/stable-diffusion/pull/177
    - https://github.com/huggingface/diffusers/pull/532/files
    - https://github.com/HazyResearch/flash-attention
+   - https://github.com/chavinlo/sda-node
    
  - Development Environment
    - ✅ add tests
@@ -545,8 +548,8 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ unified pipeline (txt2img & img2img combined)
    - ✅ setup parallel testing
    - add docs
-   - remove yaml config
-   - delete more unused code
+   - 🚫 remove yaml config
+   - 🚫 delete more unused code
    - faster latent logging https://discuss.huggingface.co/t/decoding-latents-to-rgb-without-upscaling/23204/9
  - Interface improvements
    - ✅ init-image at command line
@@ -555,14 +558,17 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
  - Image Generation Features
    - ✅ add k-diffusion sampling methods
    - ✅ tiling
-   - generation videos/gifs
+   - ✅ generation videos/gifs
    - Compositional Visual Generation
      - https://github.com/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch
      - https://colab.research.google.com/github/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch/blob/main/notebooks/demo.ipynb#scrollTo=wt_j3uXZGFAS
    - ✅ negative prompting
      - some syntax to allow it in a text string
-   - 🚫 images as actual prompts instead of just init images. 
+   - [paint with words](https://www.reddit.com/r/StableDiffusion/comments/10lzgze/i_figured_out_a_way_to_apply_different_prompts_to/)
+     - https://github.com/cloneofsimo/paint-with-words-sd 
+   - images as actual prompts instead of just init images. 
      - not directly possible due to model architecture.
+     - can it just be integrated into sampler? 
      - requires model fine-tuning since SD1.4 expects 77x768 text encoding input
      - https://twitter.com/Buntworthy/status/1566744186153484288
      - https://github.com/justinpinkney/stable-diffusion
@@ -645,6 +651,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - [Textual Inversion](https://arxiv.org/abs/2208.01618)
      - [Fast Textual Inversion](https://github.com/peterwilli/sd-leap-booster) 
    - [Low-rank Adaptation for Fast Text-to-Image Diffusion Fine-tuning (LORA)](https://github.com/cloneofsimo/lora)
+     - https://huggingface.co/spaces/lora-library/Low-rank-Adaptation 
    - Performance Improvements
     - [ColoassalAI](https://github.com/hpcaitech/ColossalAI/tree/main/examples/images/diffusion) - almost got it working but it's not easy enough to install to merit inclusion in imaginairy. We should check back in on this.
     - Xformers
