@@ -875,6 +875,15 @@ def train_concept(
 
     You can find a lot of relevant instructions here: https://github.com/JoePenna/Dreambooth-Stable-Diffusion
     """
+    from imaginairy.utils import get_device
+
+    if "mps" in get_device():
+        click.secho(
+            "⚠️  MPS (MacOS) is not supported for training. Please use a GPU or CPU.",
+            fg="yellow",
+        )
+        return
+
     import os.path
 
     from imaginairy.train import train_diffusion_model
