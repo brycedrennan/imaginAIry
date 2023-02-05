@@ -289,6 +289,13 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 ## Running on Google Colab
 [Example Colab](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 
+## Q&A
+
+**Q**: How do I change the cache directory for where models are stored?
+
+**A**: Set the `HUGGINGFACE_HUB_CACHE` environment variable. 
+
+
 ## ChangeLog
 
 - perf: cli now has minimal overhead such that `aimg --help` runs in ~650ms instead of ~3400ms
