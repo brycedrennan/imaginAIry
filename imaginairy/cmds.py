@@ -441,8 +441,6 @@ def edit_demo(image_paths, outdir, height, width):
             image_path, outdir=outdir, make_gif=True, width=width, height=height
         )
 
-    return
-
 
 edit_options = common_options.copy()
 remove_option(edit_options, "model_weights_path")
@@ -648,10 +646,10 @@ def _imagine_cmd(
     from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
 
     new_init_images = []
-    for init_image in init_images:
-        if init_image and init_image.startswith("http"):
-            init_image = LazyLoadingImage(url=init_image)
-        new_init_images.append(init_image)
+    for _init_image in init_images:
+        if _init_image and _init_image.startswith("http"):
+            _init_image = LazyLoadingImage(url=_init_image)
+        new_init_images.append(_init_image)
     init_images = new_init_images
     if not init_images:
         init_images = [None]
