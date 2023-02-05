@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 common_options = [
     click.option(
         "--negative-prompt",
-        default=config.DEFAULT_NEGATIVE_PROMPT,
-        show_default=True,
+        default=None,
+        show_default=False,
         help="Negative prompt. Things to try and exclude from images. Same negative prompt will be used for all images.",
     ),
     click.option(
@@ -26,6 +26,7 @@ common_options = [
         "--init-image",
         metavar="PATH|URL",
         help="Starting image.",
+        multiple=True,
     ),
     click.option(
         "--init-image-strength",
@@ -395,27 +396,83 @@ def imagine_cmd(
     )
 
 
-edit_options = common_options.copy()
+@aimg.command("edit-demo")
+@click.argument("image_paths", metavar="PATH|URL", required=True, nargs=-1)
+@click.option(
+    "--outdir",
+    default="./outputs",
+    show_default=True,
+    type=click.Path(),
+    help="Where to write results to.",
+)
+@click.option(
+    "-h",
+    "--height",
+    default=512,
+    show_default=True,
+    type=int,
+    help="Image height. Should be multiple of 8.",
+)
+@click.option(
+    "-w",
+    "--width",
+    default=512,
+    show_default=True,
+    type=int,
+    help="Image width. Should be multiple of 8.",
+)
+def edit_demo(image_paths, outdir, height, width):
 
+    from imaginairy.log_utils import configure_logging
+    from imaginairy.surprise_me import create_surprise_me_images
+
+    configure_logging()
+    for image_path in image_paths:
+        create_surprise_me_images(
+            image_path, outdir=outdir, make_gif=True, width=width, height=height
+        )
+
+    return
+
+
+edit_options = common_options.copy()
+remove_option(edit_options, "model_weights_path")
 remove_option(edit_options, "init_image")
+remove_option(edit_options, "init_image_strength")
+remove_option(edit_options, "prompt_strength")
+remove_option(edit_options, "negative_prompt")
 
 
 @aimg.command("edit")
-@click.argument("init_image", metavar="PATH|URL", required=True, nargs=1)
-@click.argument("prompt_texts", nargs=-1)
+@click.argument("image_paths", metavar="PATH|URL", required=True, nargs=-1)
 @click.option(
-    "--surprise-me",
-    "surprise_me",
-    default=False,
-    is_flag=True,
-    help="make some fun edits to the provided image",
+    "--image-strength",
+    default=1,
+    show_default=False,
+    type=float,
+    help="Starting image strength. Between 0 and 1.",
 )
-@add_options(common_options)
+@click.option("--prompt", "-p", required=True, multiple=True)
+@click.option(
+    "--model-weights-path",
+    "--model",
+    help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
+    show_default=True,
+    default="edit",
+)
+@click.option(
+    "--negative-prompt",
+    default=None,
+    show_default=False,
+    help="Negative prompt. Things to try and exclude from images. Same negative prompt will be used for all images. A default negative prompt is used if none is selected.",
+)
+@add_options(edit_options)
 @click.pass_context
 def edit_image(  # noqa
     ctx,
-    init_image,
-    prompt_texts,
+    image_paths,
+    image_strength,
+    prompt,
     negative_prompt,
     prompt_strength,
     outdir,
@@ -447,41 +504,26 @@ def edit_image(  # noqa
     version,  # noqa
     make_gif,
     make_compare_gif,
-    surprise_me,
     arg_schedules,
     make_compilation_animation,
 ):
     """
     Edit an image via AI.
 
-    Provide a path or URL to an image and directions on how to alter it.
+    Provide paths or URLs to images and directions on how to alter them.
 
-    Example: aimg edit my-dog.jpg "make the dog red"
+    Example: aimg edit --prompt "make the dog red" my-dog.jpg my-dog2.jpg
+
+    Same as calling `aimg imagine --model edit --init-image my-dog.jpg --init-image-strength 1` except this command
+    can batch edit images.
     """
-    from imaginairy.log_utils import configure_logging
-    from imaginairy.surprise_me import create_surprise_me_images
-
-    init_image_strength = 1
-    if surprise_me and prompt_texts:
-        raise ValueError("Cannot use surprise_me and prompt_texts together")
-
-    if surprise_me:
-        if quiet:
-            log_level = "ERROR"
-        configure_logging(log_level)
-        create_surprise_me_images(
-            init_image, outdir=outdir, make_gif=make_gif, width=width, height=height
-        )
-
-        return
-
     return _imagine_cmd(
         ctx,
-        prompt_texts,
+        prompt,
         negative_prompt,
         prompt_strength,
-        init_image,
-        init_image_strength,
+        image_paths,
+        image_strength,
         outdir,
         repeats,
         height,
@@ -582,15 +624,23 @@ def _imagine_cmd(
 
     configure_logging(log_level)
 
-    total_image_count = len(prompt_texts) * repeats
+    if isinstance(init_image, str):
+        init_images = [init_image]
+    else:
+        init_images = init_image
+    total_image_count = len(prompt_texts) * len(init_images) * repeats
     logger.info(
-        f"Received {len(prompt_texts)} prompt(s) and will repeat them {repeats} times to create {total_image_count} images."
+        f"Received {len(prompt_texts)} prompt(s) and {len(init_images)} input image(s). Will repeat them {repeats} times to create {total_image_count} images."
     )
 
     from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
 
-    if init_image and init_image.startswith("http"):
-        init_image = LazyLoadingImage(url=init_image)
+    new_init_images = []
+    for init_image in init_images:
+        if init_image and init_image.startswith("http"):
+            init_image = LazyLoadingImage(url=init_image)
+        new_init_images.append(init_image)
+    init_images = new_init_images
 
     if mask_image and mask_image.startswith("http"):
         mask_image = LazyLoadingImage(url=mask_image)
@@ -622,38 +672,41 @@ def _imagine_cmd(
                 _tile_mode = "y"
             else:
                 _tile_mode = ""
+            for _init_image in init_images:
+                prompt = ImaginePrompt(
+                    next(prompt_iterator),
+                    negative_prompt=negative_prompt,
+                    prompt_strength=prompt_strength,
+                    init_image=_init_image,
+                    init_image_strength=init_image_strength,
+                    seed=seed,
+                    sampler_type=sampler_type,
+                    steps=steps,
+                    height=height,
+                    width=width,
+                    mask_image=mask_image,
+                    mask_prompt=mask_prompt,
+                    mask_mode=mask_mode,
+                    mask_modify_original=mask_modify_original,
+                    outpaint=outpaint,
+                    upscale=upscale,
+                    fix_faces=fix_faces,
+                    fix_faces_fidelity=fix_faces_fidelity,
+                    tile_mode=_tile_mode,
+                    model=model_weights_path,
+                    model_config_path=model_config_path,
+                )
+                from imaginairy.prompt_schedules import (
+                    parse_schedule_strs,
+                    prompt_mutator,
+                )
 
-            prompt = ImaginePrompt(
-                next(prompt_iterator),
-                negative_prompt=negative_prompt,
-                prompt_strength=prompt_strength,
-                init_image=init_image,
-                init_image_strength=init_image_strength,
-                seed=seed,
-                sampler_type=sampler_type,
-                steps=steps,
-                height=height,
-                width=width,
-                mask_image=mask_image,
-                mask_prompt=mask_prompt,
-                mask_mode=mask_mode,
-                mask_modify_original=mask_modify_original,
-                outpaint=outpaint,
-                upscale=upscale,
-                fix_faces=fix_faces,
-                fix_faces_fidelity=fix_faces_fidelity,
-                tile_mode=_tile_mode,
-                model=model_weights_path,
-                model_config_path=model_config_path,
-            )
-            from imaginairy.prompt_schedules import parse_schedule_strs, prompt_mutator
-
-            if arg_schedules:
-                schedules = parse_schedule_strs(arg_schedules)
-                for new_prompt in prompt_mutator(prompt, schedules):
-                    prompts.append(new_prompt)
-            else:
-                prompts.append(prompt)
+                if arg_schedules:
+                    schedules = parse_schedule_strs(arg_schedules)
+                    for new_prompt in prompt_mutator(prompt, schedules):
+                        prompts.append(new_prompt)
+                else:
+                    prompts.append(prompt)
 
     filenames = imagine_image_files(
         prompts,

@@ -69,12 +69,12 @@ with prompt-based masking.
 <img src="assets/bowl_of_fruit_strawberries.jpg" height="256"><img src="assets/freckled_woman_cyborg.jpg" height="256"><br>
 <img src="assets/girl-pearl-clown-compare.gif" height="256"><img src="assets/mona-lisa-headshot-anim.gif" height="256"><br>
 
-Want just quickly have some fun? Try `--surprise-me` to apply some pre-defined edits.
+Want just quickly have some fun? Try `edit-demo` to apply some pre-defined edits.
 ```bash
->> aimg edit --gif --surprise-me pearl_girl.jpg
->> aimg edit --gif --surprise-me mona-lisa.jpg
->> aimg edit --gif --surprise-me luke.jpg
->> aimg edit --gif --surprise-me spock.jpg
+>> aimg edit-demo pearl_girl.jpg
+>> aimg edit-demo mona-lisa.jpg
+>> aimg edit-demo luke.jpg
+>> aimg edit-demo spock.jpg
 ```
 <img src="assets/girl_with_a_pearl_earring_suprise.gif" height="256"><img src="assets/mona-lisa-suprise.gif" height="256"><br>
 <img src="assets/luke-suprise.gif" height="256"><img src="assets/spock-suprise.gif" height="256"><br>
@@ -299,6 +299,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 ## ChangeLog
 
 - perf: cli now has minimal overhead such that `aimg --help` runs in ~650ms instead of ~3400ms
+- feature: `edit` and `imagine` commands now accept multiple images (which they will process separately).  This allows 
+batch editing of images as requested in [#229](https://github.com/brycedrennan/imaginAIry/issues/229)
+- refactor: move `--surprise-me` to its own subcommand `edit-demo`
 
 **8.3.1**
 - fix: init-image-strength type
