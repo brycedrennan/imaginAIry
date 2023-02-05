@@ -98,7 +98,7 @@ When writing strength modifiers keep in mind that pixel values are between 0 and
 
 ```bash
 >> imagine \
-    --init-image pearl_earring.jpg \ 
+    --init-image pearl_earring.jpg \
     --mask-prompt "face AND NOT (bandana OR hair OR blue fabric){*6}" \
     --mask-mode keep \
     --init-image-strength .2 \
