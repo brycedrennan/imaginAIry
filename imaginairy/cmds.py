@@ -431,6 +431,7 @@ def imagine_cmd(
     help="Image width. Should be multiple of 8.",
 )
 def edit_demo(image_paths, outdir, height, width):
+    """Make some fun pre-set edits to input photos."""
 
     from imaginairy.log_utils import configure_logging
     from imaginairy.surprise_me import create_surprise_me_images
