@@ -447,7 +447,6 @@ edit_options = common_options.copy()
 remove_option(edit_options, "model_weights_path")
 remove_option(edit_options, "init_image")
 remove_option(edit_options, "init_image_strength")
-remove_option(edit_options, "prompt_strength")
 remove_option(edit_options, "negative_prompt")
 
 
