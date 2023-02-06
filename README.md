@@ -298,6 +298,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**9.0.1**
+- fix: use entry_points for windows since setup.py scripts doesn't work on windows [#239](https://github.com/brycedrennan/imaginAIry/issues/239)
+
 **9.0.0**
 
 - perf: cli now has minimal overhead such that `aimg --help` runs in ~650ms instead of ~3400ms
