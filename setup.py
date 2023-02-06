@@ -1,4 +1,21 @@
+import sys
+
 from setuptools import find_packages, setup
+
+is_for_windows = len(sys.argv) >= 3 and sys.argv[2].startswith("--plat-name=win")
+
+if is_for_windows:
+    scripts = None
+    entry_points = {
+        "console_scripts": [
+            "imagine=imaginairy.cmds:imagine_cmd",
+            "aimg=imaginairy.cmds:aimg",
+        ],
+    }
+else:
+    scripts = ["imaginairy/bin/aimg", "imaginairy/bin/imagine"]
+    entry_points = None
+
 
 with open("README.md", encoding="utf-8") as f:
     readme = f.read()
@@ -16,7 +33,8 @@ setup(
         "Source": "https://github.com/brycedrennan/imaginAIry",
     },
     packages=find_packages(include=("imaginairy", "imaginairy.*")),
-    scripts=["imaginairy/bin/aimg", "imaginairy/bin/imagine"],
+    scripts=scripts,
+    entry_points=entry_points,
     package_data={
         "imaginairy": [
             "configs/*.yaml",
