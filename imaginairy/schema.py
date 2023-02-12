@@ -94,7 +94,10 @@ class ImaginePrompt:
         negative_prompt=None,
         prompt_strength=7.5,
         init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
-        init_image_strength=0.3,
+        init_image_strength=None,
+        control_image=None,
+        control_image_raw=None,
+        control_mode=None,
         mask_prompt=None,
         mask_image=None,
         mask_mode=MaskMode.REPLACE,
@@ -121,6 +124,9 @@ class ImaginePrompt:
         self.prompt_strength = prompt_strength
         self.init_image = init_image
         self.init_image_strength = init_image_strength
+        self.control_image = control_image
+        self.control_image_raw = control_image_raw
+        self.control_mode = control_mode
         self._orig_seed = seed
         self.seed = seed
         self.steps = steps
@@ -160,6 +166,10 @@ class ImaginePrompt:
             self.tile_mode = self.tile_mode.lower()
             assert self.tile_mode in ("", "x", "y", "xy")
 
+        if isinstance(self.control_image, str):
+            if not self.control_image.startswith("*prev."):
+                self.control_image = LazyLoadingImage(filepath=self.control_image)
+
         if isinstance(self.init_image, str):
             if not self.init_image.startswith("*prev."):
                 self.init_image = LazyLoadingImage(filepath=self.init_image)
@@ -168,10 +178,37 @@ class ImaginePrompt:
             if not self.mask_image.startswith("*prev."):
                 self.mask_image = LazyLoadingImage(filepath=self.mask_image)
 
+        if self.control_image is not None and self.control_image_raw is not None:
+            raise ValueError(
+                "You can only set one of `control_image` and `control_image_raw`"
+            )
+
+        if self.control_image is not None and self.init_image is None:
+            self.init_image = self.control_image
+
+        if (
+            self.control_mode
+            and self.control_image is None
+            and self.init_image is not None
+        ):
+            self.control_image = self.init_image
+
+        if self.control_mode and not self.control_image:
+            raise ValueError("You must set `control_image` when using `control_mode`")
+
         if self.mask_image is not None and self.mask_prompt is not None:
             raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
+
         if self.model is None:
             self.model = config.DEFAULT_MODEL
+
+        if self.init_image_strength is None:
+            if self.control_mode is not None:
+                self.init_image_strength = 0.0
+            elif self.outpaint or self.mask_image or self.mask_prompt:
+                self.init_image_strength = 0.0
+            else:
+                self.init_image_strength = 0.2
 
         self.seed = random.randint(1, 1_000_000_000) if self.seed is None else self.seed
 

@@ -124,13 +124,7 @@ MODEL_CONFIGS = [
         default_image_size=512,
         default_negative_prompt="",
         alias="oj2",
-    )
-    # ModelConfig(
-    #     short_name="SD-2.0-upscale",
-    #     config_path="configs/stable-diffusion-v2-upscaling.yaml",
-    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler/resolve/main/x4-upscaler-ema.ckpt",
-    #     default_image_size=512,
-    # ),
+    ),
 ]
 
 MODEL_CONFIG_SHORTCUTS = {m.short_name: m for m in MODEL_CONFIGS}
@@ -142,6 +136,60 @@ MODEL_CONFIG_SHORTCUTS["openjourney"] = MODEL_CONFIG_SHORTCUTS["openjourney-v2"]
 MODEL_CONFIG_SHORTCUTS["oj"] = MODEL_CONFIG_SHORTCUTS["openjourney-v2"]
 
 MODEL_SHORT_NAMES = sorted(MODEL_CONFIG_SHORTCUTS.keys())
+
+
+@dataclass
+class ControlNetConfig:
+    short_name: str
+    control_type: str
+    config_path: str
+    weights_url: str
+    alias: str = None
+
+
+CONTROLNET_CONFIGS = [
+    ControlNetConfig(
+        short_name="canny15",
+        control_type="canny",
+        config_path="configs/control-net-v15.yaml",
+        weights_url="https://huggingface.co/imaginairy/controlnet/resolve/df27095611818a31c20046e10a3617c66df717b0/controlnet15_diff_canny.safetensors",
+        alias="canny",
+    ),
+    ControlNetConfig(
+        short_name="depth15",
+        control_type="depth",
+        config_path="configs/control-net-v15.yaml",
+        weights_url="https://huggingface.co/imaginairy/controlnet/resolve/df27095611818a31c20046e10a3617c66df717b0/controlnet15_diff_depth.safetensors",
+        alias="depth",
+    ),
+    ControlNetConfig(
+        short_name="normal15",
+        control_type="normal",
+        config_path="configs/control-net-v15.yaml",
+        weights_url="https://huggingface.co/imaginairy/controlnet/resolve/7f591ca101c550e94eb6c221b0b71915a247f244/controlnet15_diff_normal.safetensors",
+        alias="normal",
+    ),
+    ControlNetConfig(
+        short_name="hed15",
+        control_type="hed",
+        config_path="configs/control-net-v15.yaml",
+        weights_url="https://huggingface.co/imaginairy/controlnet/resolve/df27095611818a31c20046e10a3617c66df717b0/controlnet15_diff_hed.safetensors",
+        alias="hed",
+    ),
+    ControlNetConfig(
+        short_name="openpose15",
+        control_type="openpose",
+        config_path="configs/control-net-v15.yaml",
+        weights_url="https://huggingface.co/imaginairy/controlnet/resolve/7f591ca101c550e94eb6c221b0b71915a247f244/controlnet15_diff_openpose.safetensors",
+        alias="openpose",
+    ),
+]
+
+CONTROLNET_CONFIG_SHORTCUTS = {m.short_name: m for m in CONTROLNET_CONFIGS}
+for m in CONTROLNET_CONFIGS:
+    if m.alias:
+        CONTROLNET_CONFIG_SHORTCUTS[m.alias] = m
+
 
 SAMPLER_TYPE_OPTIONS = [
     "plms",

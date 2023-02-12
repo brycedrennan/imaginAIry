@@ -4,13 +4,13 @@
 #
 #    pip-compile --output-file=requirements-dev.txt --resolver=backtracking requirements-dev.in setup.py
 #
-aiohttp==3.8.3
+aiohttp==3.8.4
     # via fsspec
 aiosignal==1.3.1
     # via aiohttp
 antlr4-python3-runtime==4.9.3
     # via omegaconf
-astroid==2.14.1
+astroid==2.14.2
     # via pylint
 async-timeout==4.0.2
     # via aiohttp
@@ -22,7 +22,7 @@ black==23.1.0
     # via -r requirements-dev.in
 certifi==2022.12.7
     # via requests
-charset-normalizer==2.1.1
+charset-normalizer==3.0.1
     # via
     #   aiohttp
     #   requests
@@ -43,7 +43,7 @@ coverage==7.1.0
     # via -r requirements-dev.in
 cycler==0.11.0
     # via matplotlib
-diffusers==0.12.1
+diffusers==0.13.1
     # via imaginAIry (setup.py)
 dill==0.3.6
     # via pylint
@@ -74,7 +74,7 @@ ftfy==6.1.1
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
-huggingface-hub==0.12.0
+huggingface-hub==0.12.1
     # via
     #   diffusers
     #   open-clip-torch
@@ -84,7 +84,7 @@ idna==3.4
     # via
     #   requests
     #   yarl
-imageio==2.25.0
+imageio==2.25.1
     # via imaginAIry (setup.py)
 importlib-metadata==6.0.0
     # via diffusers
@@ -96,17 +96,17 @@ isort==5.12.0
     #   pylint
 kiwisolver==1.4.4
     # via matplotlib
-kornia==0.6.9
+kornia==0.6.10
     # via imaginAIry (setup.py)
 lazy-object-proxy==1.9.0
     # via astroid
 libcst==0.4.9
     # via pycln
-lightning-utilities==0.6.0.post0
+lightning-utilities==0.7.0
     # via pytorch-lightning
 llvmlite==0.39.1
     # via numba
-matplotlib==3.6.3
+matplotlib==3.7.0
     # via filterpy
 mccabe==0.7.0
     # via
@@ -139,6 +139,7 @@ numpy==1.23.5
     #   torchmetrics
     #   torchvision
     #   transformers
+    #   xformers
 nvidia-cublas-cu11==11.10.3.66
     # via
     #   nvidia-cudnn-cu11
@@ -151,7 +152,7 @@ nvidia-cudnn-cu11==8.5.0.96
     # via torch
 omegaconf==2.3.0
     # via imaginAIry (setup.py)
-open-clip-torch==2.11.1
+open-clip-torch==2.14.0
     # via imaginAIry (setup.py)
 opencv-python==4.7.0.68
     # via
@@ -181,7 +182,7 @@ pillow==9.4.0
     #   imaginAIry (setup.py)
     #   matplotlib
     #   torchvision
-platformdirs==2.6.2
+platformdirs==3.0.0
     # via
     #   black
     #   pylint
@@ -203,10 +204,12 @@ pyflakes==3.0.1
     # via pylama
 pylama==8.4.1
     # via -r requirements-dev.in
-pylint==2.16.1
+pylint==2.16.2
     # via -r requirements-dev.in
 pyparsing==3.0.9
     # via matplotlib
+pyre-extensions==0.0.23
+    # via xformers
 pytest==7.2.1
     # via
     #   -r requirements-dev.in
@@ -218,7 +221,7 @@ pytest-sugar==0.9.6
     # via -r requirements-dev.in
 python-dateutil==2.8.2
     # via matplotlib
-pytorch-lightning==1.9.0
+pytorch-lightning==1.9.2
     # via imaginAIry (setup.py)
 pyyaml==6.0
     # via
@@ -245,11 +248,11 @@ requests==2.28.2
     #   transformers
 responses==0.22.0
     # via -r requirements-dev.in
-ruff==0.0.241
+ruff==0.0.249
     # via -r requirements-dev.in
 safetensors==0.2.8
     # via imaginAIry (setup.py)
-scipy==1.10.0
+scipy==1.10.1
     # via
     #   facexlib
     #   filterpy
@@ -291,6 +294,7 @@ torch==1.13.1
     #   torchdiffeq
     #   torchmetrics
     #   torchvision
+    #   xformers
 torchdiffeq==0.2.3
     # via imaginAIry (setup.py)
 torchmetrics==0.11.1
@@ -311,24 +315,27 @@ tqdm==4.64.1
     #   open-clip-torch
     #   pytorch-lightning
     #   transformers
-transformers==4.26.0
+transformers==4.26.1
     # via imaginAIry (setup.py)
 typer==0.7.0
     # via pycln
-types-toml==0.10.8.2
+types-toml==0.10.8.5
     # via responses
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via
     #   astroid
     #   huggingface-hub
     #   libcst
     #   lightning-utilities
+    #   pyre-extensions
     #   pytorch-lightning
     #   torch
     #   torchvision
     #   typing-inspect
 typing-inspect==0.8.0
-    # via libcst
+    # via
+    #   libcst
+    #   pyre-extensions
 urllib3==1.26.14
     # via
     #   requests
@@ -342,9 +349,11 @@ wheel==0.38.4
     #   nvidia-cuda-runtime-cu11
 wrapt==1.14.1
     # via astroid
+xformers==0.0.16 ; sys_platform != "darwin"
+    # via imaginAIry (setup.py)
 yarl==1.8.2
     # via aiohttp
-zipp==3.12.0
+zipp==3.14.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

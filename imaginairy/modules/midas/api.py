@@ -15,7 +15,6 @@ from imaginairy.modules.midas.midas.transforms import (
     PrepareForNet,
     Resize,
 )
-from imaginairy.utils import get_device
 
 ISL_PATHS = {
     "dpt_large": "midas_models/dpt_large-midas-2f21e586.pt",
@@ -84,6 +83,7 @@ def load_midas_transform(model_type="dpt_hybrid"):
     return transform
 
 
+@lru_cache(maxsize=1)
 def load_model(model_type):
     # https://github.com/isl-org/MiDaS/blob/master/run.py
     # load network
@@ -155,9 +155,15 @@ def load_model(model_type):
 
 
 @lru_cache()
+def midas_device():
+    # mps returns incorrect results ~50% of the time
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+@lru_cache()
 def load_midas(model_type="dpt_hybrid"):
     model = MiDaSInference(model_type)
-    model.to(get_device())
+    model.to(midas_device())
     return model
 
 
@@ -168,7 +174,7 @@ def torch_image_to_depth_map(image_t: torch.Tensor, model_type="dpt_hybrid"):
     image_np = ((image_t + 1.0) * 0.5).detach().cpu().numpy()
     image_np = transform({"image": image_np})["image"]
     image_t = torch.from_numpy(image_np[None, ...])
-    image_t = image_t.to(device=get_device())
+    image_t = image_t.to(device=midas_device())
 
     depth_t = model(image_t)
     depth_min = torch.amin(depth_t, dim=[1, 2, 3], keepdim=True)
@@ -193,6 +199,7 @@ class MiDaSInference(nn.Module):
         model, _ = load_model(model_type)
         self.model = model
         self.model.train = disabled_train
+        self.model.eval()
 
     def forward(self, x):
         # x in 0..1 as produced by calling self.transform on a 0..1 float64 numpy array

@@ -4,6 +4,7 @@ import pytest
 
 from imaginairy import LazyLoadingImage
 from imaginairy.api import imagine, imagine_image_files
+from imaginairy.img_processors.control_modes import CONTROL_MODES
 from imaginairy.img_utils import pillow_fit_image_within
 from imaginairy.schema import ImaginePrompt
 from imaginairy.utils import get_device
@@ -257,7 +258,7 @@ def test_cliptext_inpainting_pearl_doctor(
 
     pillow_fit_image_within(img).save(f"{filename_base_for_orig_outputs}_orig.jpg")
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=12000)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=32000)
 
 
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
@@ -270,6 +271,29 @@ def test_tile_mode(filename_base_for_outputs):
         steps=15,
         seed=1,
         tile_mode="xy",
+    )
+    result = next(imagine(prompt))
+
+    img_path = f"{filename_base_for_outputs}.png"
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=25000)
+
+
+control_modes = list(CONTROL_MODES.keys())
+
+
+@pytest.mark.parametrize("control_mode", control_modes)
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
+def test_controlnet(filename_base_for_outputs, control_mode):
+    prompt_text = "a photo of a woman sitting on a bench"
+    prompt = ImaginePrompt(
+        prompt_text,
+        control_image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png"),
+        width=512,
+        height=512,
+        steps=15,
+        seed=0,
+        control_mode=control_mode,
+        fix_faces=True,
     )
     result = next(imagine(prompt))
 

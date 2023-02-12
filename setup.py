@@ -56,7 +56,7 @@ setup(
         "facexlib",
         "fairscale>=0.4.4",  # for vendored blip
         "ftfy",  # for vendored clip
-        "torch>=1.2.0",
+        "torch>=1.13.1",
         "numpy",
         "tqdm",
         "diffusers",

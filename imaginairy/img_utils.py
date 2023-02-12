@@ -1,3 +1,14 @@
+"""
+image utils.
+
+Library format cheat sheet:
+
+Library     Dim Order       Channel Order       Value Range     Type
+Pillow                      R, G, B, A          0-255           PIL.Image.Image
+OpenCV                      B, G, R, A          0-255           np.ndarray
+Torch       (B), C, H, W    R, G, B             -1.0-1.0        torch.Tensor
+
+"""
 from typing import Sequence
 
 import numpy as np
@@ -38,6 +49,7 @@ def pillow_img_to_torch_image(img: PIL.Image.Image, convert="RGB"):
     if convert:
         img = img.convert(convert)
     img = np.array(img).astype(np.float32) / 255.0
+    # b, h, w, c => b, c, h, w
     img = img[None].transpose(0, 3, 1, 2)
     img = torch.from_numpy(img)
     return 2.0 * img - 1.0
@@ -63,6 +75,19 @@ def pillow_img_to_opencv_img(img: PIL.Image.Image):
     # Convert RGB to BGR
     open_cv_image = open_cv_image[:, :, ::-1].copy()
     return open_cv_image
+
+
+def torch_image_to_openvcv_img(img: torch.Tensor):
+    img = (img + 1) / 2
+    img = img.detach().cpu().numpy()
+    # assert there is only one image
+    assert img.shape[0] == 1
+    img = img[0]
+    img = img.transpose(1, 2, 0)
+    img = (img * 255).astype(np.uint8)
+    # RGB to BGR
+    img = img[:, :, ::-1]
+    return img
 
 
 def torch_img_to_pillow_img(img_t: torch.Tensor):
