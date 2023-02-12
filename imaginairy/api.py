@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 import re
 
@@ -194,6 +195,8 @@ def _generate_single_image(
     progress_img_interval_min_s=0.1,
     half_mode=None,
     add_caption=False,
+    suppress_inpaint=False,
+    return_latent=False,
 ):
     import torch.nn
     from PIL import Image, ImageOps
@@ -241,7 +244,8 @@ def _generate_single_image(
         weights_location=prompt.model,
         config_path=prompt.model_config_path,
         half_mode=half_mode,
-        for_inpainting=prompt.mask_image or prompt.mask_prompt or prompt.outpaint,
+        for_inpainting=(prompt.mask_image or prompt.mask_prompt or prompt.outpaint)
+        and not suppress_inpaint,
     )
     progress_latents = []
 
@@ -288,6 +292,9 @@ def _generate_single_image(
         c_cat = []
         c_cat_neutral = None
         result_images = {}
+        seed_everything(prompt.seed)
+        noise = randn_seeded(seed=prompt.seed, size=shape).to(get_device())
+
         if prompt.init_image:
             starting_image = prompt.init_image
             generation_strength = 1 - prompt.init_image_strength
@@ -341,10 +348,11 @@ def _generate_single_image(
             shape = init_latent.shape
 
             log_latent(init_latent, "init_latent")
-
             seed_everything(prompt.seed)
-            noise = randn_seeded(seed=prompt.seed, size=init_latent.size())
-            noise = noise.to(get_device())
+            noise = randn_seeded(seed=prompt.seed, size=init_latent.shape).to(
+                get_device()
+            )
+            # noise = noise[:, :, : init_latent.shape[2], : init_latent.shape[3]]
 
             schedule = NoiseSchedule(
                 model_num_timesteps=model.num_timesteps,
@@ -417,6 +425,40 @@ def _generate_single_image(
         }
         log_latent(init_latent_noised, "init_latent_noised")
 
+        comp_samples = _generate_composition_latent(
+            sampler=sampler,
+            sampler_kwargs={
+                "num_steps": prompt.steps,
+                "initial_latent": init_latent_noised,
+                "positive_conditioning": positive_conditioning,
+                "neutral_conditioning": neutral_conditioning,
+                "guidance_scale": prompt.prompt_strength,
+                "t_start": t_enc,
+                "mask": mask_latent,
+                "orig_latent": init_latent,
+                "shape": shape,
+                "batch_size": 1,
+                "denoiser_cls": denoiser_cls,
+            },
+        )
+        if comp_samples is not None:
+            noise = noise[:, :, : comp_samples.shape[2], : comp_samples.shape[3]]
+
+            schedule = NoiseSchedule(
+                model_num_timesteps=model.num_timesteps,
+                ddim_num_steps=prompt.steps,
+                model_alphas_cumprod=model.alphas_cumprod,
+                ddim_discretize="uniform",
+            )
+            t_enc = int(prompt.steps * 0.8)
+            init_latent_noised = noise_an_image(
+                comp_samples,
+                torch.tensor([t_enc - 1]).to(get_device()),
+                schedule=schedule,
+                noise=noise,
+            )
+
+        log_latent(comp_samples, "comp_samples")
         with lc.timing("sampling"):
             samples = sampler.sample(
                 num_steps=prompt.steps,
@@ -431,6 +473,8 @@ def _generate_single_image(
                 batch_size=1,
                 denoiser_cls=denoiser_cls,
             )
+        if return_latent:
+            return samples
 
         with lc.timing("decoding"):
             gen_imgs_t = model.decode_first_stage(samples)
@@ -441,6 +485,11 @@ def _generate_single_image(
             log_img(mask_final, "reconstituting mask")
             mask_final = ImageOps.invert(mask_final)
             gen_img = Image.composite(gen_img, init_image, mask_final)
+            gen_img = combine_image(
+                original_img=init_image,
+                generated_img=gen_img,
+                mask_img=mask_image_orig,
+            )
             log_img(gen_img, "reconstituted image")
 
         upscaled_img = None
@@ -502,6 +551,80 @@ def _prompts_to_embeddings(prompts, model):
         for wp in prompts
     )
     return conditioning
+
+
+def calc_scale_to_fit_within(
+    height,
+    width,
+    max_size,
+):
+    if max(height, width) < max_size:
+        return 1
+
+    if width > height:
+        return max_size / width
+
+    return max_size / height
+
+
+def _generate_composition_latent(
+    sampler,
+    sampler_kwargs,
+):
+    from copy import deepcopy
+
+    from torch.nn import functional as F
+
+    new_kwargs = deepcopy(sampler_kwargs)
+    b, c, h, w = orig_shape = new_kwargs["shape"]
+    max_compose_gen_size = 768
+    shrink_scale = calc_scale_to_fit_within(
+        height=h,
+        width=w,
+        max_size=int(math.ceil(max_compose_gen_size / 8)),
+    )
+    if shrink_scale >= 1:
+        return None
+
+    # shrink everything
+    new_shape = b, c, int(round(h * shrink_scale)), int(round(w * shrink_scale))
+    initial_latent = new_kwargs["initial_latent"]
+    if initial_latent is not None:
+        initial_latent = F.interpolate(initial_latent, size=new_shape[2:], mode="area")
+
+    for cond in [
+        new_kwargs["positive_conditioning"],
+        new_kwargs["neutral_conditioning"],
+    ]:
+        cond["c_concat"] = [
+            F.interpolate(c, size=new_shape[2:], mode="area") for c in cond["c_concat"]
+        ]
+
+    mask_latent = new_kwargs["mask"]
+    if mask_latent is not None:
+        mask_latent = F.interpolate(mask_latent, size=new_shape[2:], mode="area")
+
+    orig_latent = new_kwargs["orig_latent"]
+    if orig_latent is not None:
+        orig_latent = F.interpolate(orig_latent, size=new_shape[2:], mode="area")
+    t_start = new_kwargs["t_start"]
+    if t_start is not None:
+        gen_strength = new_kwargs["t_start"] / new_kwargs["num_steps"]
+        t_start = int(round(15 * gen_strength))
+    new_kwargs.update(
+        {
+            "num_steps": 15,
+            "initial_latent": initial_latent,
+            "t_start": t_start,
+            "mask": mask_latent,
+            "orig_latent": orig_latent,
+            "shape": new_shape,
+        }
+    )
+    samples = sampler.sample(**new_kwargs)
+    # samples = upscale_latent(samples)
+    samples = F.interpolate(samples, size=orig_shape[2:], mode="bilinear")
+    return samples
 
 
 def prompt_normalized(prompt):

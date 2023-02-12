@@ -238,7 +238,7 @@ class ImaginePrompt:
             "negative_prompt": negative_prompts,
             "init_image": str(self.init_image),
             "init_image_strength": self.init_image_strength,
-            "seed": self.seed,
+            # "seed": self.seed,
             "steps": self.steps,
             "height": self.height,
             "width": self.width,

@@ -53,15 +53,17 @@ Use prompt strength to control how strong the edit is. For extra control you can
 with prompt-based masking.
 
 ```bash
->> aimg edit scenic_landscape.jpg "make it winter" --prompt-strength 20
->> aimg edit scenic_landscape.jpg "make it winter" --steps 30 --arg-schedule "prompt_strength[2:25:0.5]" --compilation-anim
->> aimg edit dog.jpg "make the dog red" --prompt-strength 5
->> aimg edit bowl_of_fruit.jpg "replace the fruit with strawberries"
->> aimg edit freckled_woman.jpg "make her a cyborg" --prompt-strength 13
+# enter imaginairy shell
+>> aimg
+🤖🧠> edit scenic_landscape.jpg -p "make it winter" --prompt-strength 20
+🤖🧠> edit scenic_landscape.jpg -p "make it winter" --steps 30 --arg-schedule "prompt_strength[2:25:0.5]" --compilation-anim
+🤖🧠> edit dog.jpg -p "make the dog red" --prompt-strength 5
+🤖🧠> edit bowl_of_fruit.jpg -p "replace the fruit with strawberries"
+🤖🧠> edit freckled_woman.jpg -p "make her a cyborg" --prompt-strength 13
 # create a comparison gif
->> aimg edit pearl_girl.jpg "make her wear clown makeup" --compare-gif
+🤖🧠> edit pearl_girl.jpg -p "make her wear clown makeup" --compare-gif
 # create an animation showing the edit with increasing prompt strengths
->> aimg edit mona-lisa.jpg "make it a color professional photo headshot" --negative-prompt "old, ugly, blurry" --arg-schedule "prompt-strength[2:8:0.5]" --compilation-anim gif
+🤖🧠> edit mona-lisa.jpg -p "make it a color professional photo headshot" --negative-prompt "old, ugly, blurry" --arg-schedule "prompt-strength[2:8:0.5]" --compilation-anim gif
 ```
 
 
@@ -570,6 +572,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ add k-diffusion sampling methods
    - ✅ tiling
    - ✅ generation videos/gifs
+   - [Attend and Excite](https://attendandexcite.github.io/Attend-and-Excite/)
    - Compositional Visual Generation
      - https://github.com/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch
      - https://colab.research.google.com/github/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch/blob/main/notebooks/demo.ipynb#scrollTo=wt_j3uXZGFAS
@@ -600,6 +603,10 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - ✅ text based image masking
      - ✅ ClipSeg - https://github.com/timojl/clipseg
      - https://github.com/facebookresearch/detectron2
+     - https://x-decoder-vl.github.io/
+   - Maskless editing
+     - ✅ instruct-pix2pix
+     - 
    - Attention Control Methods
      - https://github.com/bloc97/CrossAttentionControl
      - https://github.com/ChenWu98/cycle-diffusion
@@ -609,7 +616,10 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - ✅ realesrgan 
      - ldm
      - https://github.com/lowfuel/progrock-stable
-     - gobig
+     - [txt2imghd](https://github.com/jquesnelle/txt2imghd/blob/master/txt2imghd.py)
+     - latent scaling + reprocessing
+     - stability upscaler
+     - rivers have wings upscaler
      - stable super-res?
        - todo: try with 1-0-0-0 mask at full image resolution (rencoding entire image+predicted image at every step)
        - todo: use a gaussian pyramid and only include the "high-detail" level of the pyramid into the next step
@@ -684,6 +694,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
  - https://stablecog.com/ 
 
 ## Further Reading
+ - https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md
  - [Prompt Engineering Handbook](https://openart.ai/promptbook)
  - Differences between samplers
    - https://www.reddit.com/r/StableDiffusion/comments/xbeyw3/can_anyone_offer_a_little_guidance_on_the/
