@@ -91,14 +91,17 @@ class ImageLoggingContext:
         self.last_progress_img_ts = 0
         self.last_progress_img_step = -1000
 
+        self._prev_log_context = None
+
     def __enter__(self):
         global _CURRENT_LOGGING_CONTEXT  # noqa
+        self._prev_log_context = _CURRENT_LOGGING_CONTEXT
         _CURRENT_LOGGING_CONTEXT = self
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         global _CURRENT_LOGGING_CONTEXT  # noqa
-        _CURRENT_LOGGING_CONTEXT = None
+        _CURRENT_LOGGING_CONTEXT = self._prev_log_context
 
     def timing(self, description):
         return TimingContext(self, description)

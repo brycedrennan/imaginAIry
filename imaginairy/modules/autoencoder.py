@@ -1,5 +1,6 @@
 # pylama:ignore=W0613
 import logging
+import math
 from contextlib import contextmanager
 
 import pytorch_lightning as pl
@@ -317,3 +318,62 @@ class IdentityFirstStage(torch.nn.Module):
 
     def forward(self, x, *args, **kwargs):
         return x
+
+
+def chunk_latent(tensor, chunk_size=64, overlap_size=8):
+    # Get the shape of the tensor
+    batch_size, num_channels, height, width = tensor.shape
+
+    # Calculate the number of chunks along each dimension
+    num_rows = int(math.ceil(height / chunk_size))
+    num_cols = int(math.ceil(width / chunk_size))
+
+    # Initialize a list to store the chunks
+    chunks = []
+
+    # Loop over the rows and columns
+    for row in range(num_rows):
+        for col in range(num_cols):
+            # Calculate the start and end indices for the chunk along each dimension
+            row_start = max(row * chunk_size - overlap_size, 0)
+            row_end = min(row_start + chunk_size + overlap_size, height)
+            col_start = max(col * chunk_size - overlap_size, 0)
+            col_end = min(col_start + chunk_size + overlap_size, width)
+
+            # Extract the chunk from the tensor and append it to the list of chunks
+            chunk = tensor[:, :, row_start:row_end, col_start:col_end]
+            chunks.append((chunk, row_start, col_start))
+
+    return chunks, num_rows, num_cols
+
+
+def merge_tensors(tensor_list, num_rows, num_cols):
+    print(f"num_rows: {num_rows}")
+    print(f"num_cols: {num_cols}")
+    n, channel, h, w = tensor_list[0].size()
+    assert n == 1
+    final_width = 0
+    final_height = 0
+    for col_idx in range(num_cols):
+        final_width += tensor_list[col_idx].size()[3]
+
+    for row_idx in range(num_rows):
+        final_height += tensor_list[row_idx * num_cols].size()[2]
+
+    final_tensor = torch.zeros([1, channel, final_height, final_width])
+    print(f"final size {final_tensor.size()}")
+    for row_idx in range(num_rows):
+        for col_idx in range(num_cols):
+
+            list_idx = row_idx * num_cols + col_idx
+            chunk = tensor_list[list_idx]
+            print(f"chunk size: {chunk.size()}")
+            _, _, chunk_h, chunk_w = chunk.size()
+            final_tensor[
+                :,
+                :,
+                row_idx * h : row_idx * h + chunk_h,
+                col_idx * w : col_idx * w + chunk_w,
+            ] = chunk
+
+    return final_tensor

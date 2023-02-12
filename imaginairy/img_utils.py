@@ -76,7 +76,9 @@ def torch_img_to_pillow_img(img_t: torch.Tensor):
     elif img_t.shape[1] == 3:
         colorspace = "RGB"
     else:
-        raise ValueError("Unsupported colorspace")
+        raise ValueError(
+            f"Unsupported colorspace. {img_t.shape[1]} channels in {img_t.shape} shape"
+        )
     img_t = rearrange(img_t, "b c h w -> b h w c")
     img_t = torch.clamp((img_t + 1.0) / 2.0, min=0.0, max=1.0)
     img_np = (255.0 * img_t).cpu().numpy().astype(np.uint8)[0]
