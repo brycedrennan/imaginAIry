@@ -34,14 +34,24 @@ class HuggingFaceAuthorizationError(RuntimeError):
 class MemoryAwareModel:
     """Wraps a model to allow dynamic loading/unloading as needed."""
 
-    def __init__(self, config_path, weights_path, half_mode=None, for_training=False):
+    def __init__(
+        self,
+        config_path,
+        weights_path,
+        control_weights_path=None,
+        half_mode=None,
+        for_training=False,
+    ):
         self._config_path = config_path
         self._weights_path = weights_path
+        self._control_weights_path = control_weights_path
         self._half_mode = half_mode
         self._model = None
         self._for_training = for_training
 
-        LOADED_MODELS[(self._config_path, self._weights_path)] = self
+        LOADED_MODELS[
+            (self._config_path, self._weights_path, self._control_weights_path)
+        ] = self
 
     def __getattr__(self, key):
         if key == "_model":
@@ -63,8 +73,23 @@ class MemoryAwareModel:
             model = load_model_from_config(
                 config=model_config,
                 weights_location=self._weights_path,
+                control_weights_location=self._control_weights_path,
                 half_mode=half_mode,
             )
+            ks = 128
+            stride = 64
+            vqf = 8
+            model.split_input_params = {
+                "ks": (ks, ks),
+                "stride": (stride, stride),
+                "vqf": vqf,
+                "patch_distributed_vq": True,
+                "tie_braker": False,
+                "clip_max_weight": 0.5,
+                "clip_min_weight": 0.01,
+                "clip_max_tie_weight": 0.5,
+                "clip_min_tie_weight": 0.01,
+            }
 
             self._model = model
 
@@ -86,22 +111,22 @@ def load_tensors(tensorfile, map_location=None):
     if tensorfile == "empty":
         # used for testing
         return {}
-    if tensorfile.endswith(".ckpt"):
+    if tensorfile.endswith((".ckpt", ".pth")):
         return torch.load(tensorfile, map_location=map_location)
     if tensorfile.endswith(".safetensors"):
         return load_file(tensorfile, device=map_location)
     raise ValueError(f"Unknown tensorfile type: {tensorfile}")
 
 
-def load_model_from_config(config, weights_location, half_mode=False):
+def load_state_dict(weights_location):
     if weights_location.startswith("http"):
         ckpt_path = get_cached_url_path(weights_location, category="weights")
     else:
         ckpt_path = weights_location
     logger.info(f"Loading model {ckpt_path} onto {get_device()} backend...")
-    pl_sd = None
+    state_dict = None
     try:
-        pl_sd = load_tensors(ckpt_path, map_location="cpu")
+        state_dict = load_tensors(ckpt_path, map_location="cpu")
     except FileNotFoundError as e:
         if e.errno == 2:
             logger.error(
@@ -115,15 +140,22 @@ def load_model_from_config(config, weights_location, half_mode=False):
                 logger.warning("Corrupt checkpoint. deleting and re-downloading...")
                 os.remove(ckpt_path)
                 ckpt_path = get_cached_url_path(weights_location, category="weights")
-                pl_sd = load_tensors(ckpt_path, map_location="cpu")
-        if pl_sd is None:
+                state_dict = load_tensors(ckpt_path, map_location="cpu")
+        if state_dict is None:
             raise e
-    if "global_step" in pl_sd:
-        logger.debug(f"Global Step: {pl_sd['global_step']}")
-    if "state_dict" in pl_sd:
-        state_dict = pl_sd["state_dict"]
-    else:
-        state_dict = pl_sd
+
+    state_dict = state_dict.get("state_dict", state_dict)
+    return state_dict
+
+
+def load_model_from_config(
+    config, weights_location, control_weights_location=None, half_mode=False
+):
+    state_dict = load_state_dict(weights_location)
+    if control_weights_location:
+        controlnet_state_dict = load_state_dict(control_weights_location)
+        state_dict = add_controlnet(state_dict, controlnet_state_dict)
+
     model = instantiate_from_config(config.model)
     model.init_from_state_dict(state_dict)
     if half_mode:
@@ -134,9 +166,28 @@ def load_model_from_config(config, weights_location, half_mode=False):
     return model
 
 
+def add_controlnet(base_state_dict, controlnet_state_dict):
+    """Merges a base sd15 model with a controlnet model."""
+    for key in controlnet_state_dict:
+        if key.startswith("control_"):
+            sd15_key_name = "model.diffusion_" + key[len("control_") :]
+        else:
+            sd15_key_name = key
+
+        if sd15_key_name in base_state_dict:
+            b = base_state_dict[sd15_key_name]
+            c_diff = controlnet_state_dict[key]
+            new_c = b + c_diff
+            base_state_dict[key] = new_c
+        else:
+            base_state_dict[key] = controlnet_state_dict[key]
+    return base_state_dict
+
+
 def get_diffusion_model(
     weights_location=iconfig.DEFAULT_MODEL,
     config_path="configs/stable-diffusion-v1.yaml",
+    control_weights_location=None,
     half_mode=None,
     for_inpainting=False,
     for_training=False,
@@ -152,6 +203,7 @@ def get_diffusion_model(
             config_path,
             half_mode,
             for_inpainting,
+            control_weights_location=control_weights_location,
             for_training=for_training,
         )
     except HuggingFaceAuthorizationError as e:
@@ -165,6 +217,7 @@ def get_diffusion_model(
                 half_mode,
                 for_inpainting=False,
                 for_training=for_training,
+                control_weights_location=control_weights_location,
             )
         raise e
 
@@ -175,6 +228,7 @@ def _get_diffusion_model(
     half_mode=None,
     for_inpainting=False,
     for_training=False,
+    control_weights_location=None,
 ):
     """
     Load a diffusion model.
@@ -182,9 +236,15 @@ def _get_diffusion_model(
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
     global MOST_RECENTLY_LOADED_MODEL  # noqa
-    model_config, weights_location, config_path = resolve_model_paths(
+    (
+        model_config,
+        weights_location,
+        config_path,
+        control_weights_location,
+    ) = resolve_model_paths(
         weights_path=weights_location,
         config_path=config_path,
+        control_weights_path=control_weights_location,
         for_inpainting=for_inpainting,
         for_training=for_training,
     )
@@ -194,11 +254,12 @@ def _get_diffusion_model(
     else:
         attention.ATTENTION_PRECISION_OVERRIDE = "default"
 
-    key = (config_path, weights_location)
+    key = (config_path, weights_location, control_weights_location)
     if key not in LOADED_MODELS:
         MemoryAwareModel(
             config_path=config_path,
             weights_path=weights_location,
+            control_weights_path=control_weights_location,
             half_mode=half_mode,
             for_training=for_training,
         )
@@ -213,13 +274,18 @@ def _get_diffusion_model(
 def resolve_model_paths(
     weights_path=iconfig.DEFAULT_MODEL,
     config_path=None,
+    control_weights_path=None,
     for_inpainting=False,
     for_training=False,
 ):
     """Resolve weight and config path if they happen to be shortcuts."""
     model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(weights_path, None)
     model_metadata_c = iconfig.MODEL_CONFIG_SHORTCUTS.get(config_path, None)
-    if for_inpainting:
+    control_net_metadata = iconfig.CONTROLNET_CONFIG_SHORTCUTS.get(
+        control_weights_path, None
+    )
+
+    if not control_net_metadata and for_inpainting:
         model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(
             f"{weights_path}-inpaint", model_metadata_w
         )
@@ -244,10 +310,17 @@ def resolve_model_paths(
 
     if config_path is None:
         config_path = iconfig.MODEL_CONFIG_SHORTCUTS[iconfig.DEFAULT_MODEL].config_path
+    if control_net_metadata:
+        if "stable-diffusion-v1" not in config_path:
+            raise ValueError(
+                "Control net is only supported for stable diffusion v1. Please use a different model."
+            )
+        control_weights_path = control_net_metadata.weights_url
+        config_path = control_net_metadata.config_path
     model_metadata = model_metadata_w or model_metadata_c
     logger.debug(f"Loading model weights from: {weights_path}")
     logger.debug(f"Loading model config from:  {config_path}")
-    return model_metadata, weights_path, config_path
+    return model_metadata, weights_path, config_path, control_weights_path
 
 
 def get_model_default_image_size(weights_location):

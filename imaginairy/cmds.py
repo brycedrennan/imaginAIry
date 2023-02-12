@@ -322,6 +322,34 @@ aimg.command_class = ImagineColorsCommand
 @click.command(context_settings={"max_content_width": 140}, cls=ImagineColorsCommand)
 @click.argument("prompt_texts", nargs=-1)
 @add_options(common_options)
+@click.option(
+    "--control-image",
+    metavar="PATH|URL",
+    help=(
+        "Image used for control signal in image generation. "
+        "For example if control-mode is depth, then the generated image will match the depth map "
+        "extracted from the control image. "
+        "Defaults to the `--init-image`"
+    ),
+    multiple=False,
+)
+@click.option(
+    "--control-image-raw",
+    metavar="PATH|URL",
+    help=(
+        "Preprocessed image used for control signal in image generation. Like `--control-image` but "
+        " expects the already extracted signal.  For example the raw control image would be a depth map or"
+        "pose information."
+    ),
+    multiple=False,
+)
+@click.option(
+    "--control-mode",
+    default=None,
+    show_default=False,
+    type=click.Choice(["", "canny", "depth", "normal", "hed", "openpose"]),
+    help="how the control image is used as signal",
+)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -363,6 +391,9 @@ def imagine_cmd(
     make_compare_gif,
     arg_schedules,
     make_compilation_animation,
+    control_image,
+    control_image_raw,
+    control_mode,
 ):
     """
     Generate images via AI.
@@ -409,6 +440,9 @@ def imagine_cmd(
         make_compare_gif,
         arg_schedules,
         make_compilation_animation,
+        control_image,
+        control_image_raw,
+        control_mode,
     )
 
 
@@ -456,6 +490,9 @@ remove_option(edit_options, "init_image")
 remove_option(edit_options, "init_image_strength")
 remove_option(edit_options, "negative_prompt")
 remove_option(edit_options, "allow_compose_phase")
+# remove_option(edit_options, "control_mode")
+# remove_option(edit_options, "control_image")
+# remove_option(edit_options, "control_image_raw")
 
 
 @aimg.command("edit")
@@ -617,6 +654,9 @@ def _imagine_cmd(
     make_compare_gif=False,
     arg_schedules=None,
     make_compilation_animation=False,
+    control_image=None,
+    control_image_raw=None,
+    control_mode="",
 ):
     """Have the AI generate images. alias:imagine."""
 
@@ -656,6 +696,12 @@ def _imagine_cmd(
 
     from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
 
+    if control_image and control_image.startswith("http"):
+        control_image = LazyLoadingImage(url=control_image)
+
+    if control_image_raw and control_image_raw.startswith("http"):
+        control_image_raw = LazyLoadingImage(url=control_image_raw)
+
     new_init_images = []
     for _init_image in init_images:
         if _init_image and _init_image.startswith("http"):
@@ -667,12 +713,6 @@ def _imagine_cmd(
 
     if mask_image and mask_image.startswith("http"):
         mask_image = LazyLoadingImage(url=mask_image)
-
-    if init_image_strength is None:
-        if outpaint or mask_image or mask_prompt:
-            init_image_strength = 0
-        else:
-            init_image_strength = 0.6
 
     prompts = []
     prompt_expanding_iterators = {}
@@ -702,6 +742,9 @@ def _imagine_cmd(
                     prompt_strength=prompt_strength,
                     init_image=_init_image,
                     init_image_strength=init_image_strength,
+                    control_image=control_image,
+                    control_image_raw=control_image_raw,
+                    control_mode=control_mode,
                     seed=seed,
                     sampler_type=sampler_type,
                     steps=steps,

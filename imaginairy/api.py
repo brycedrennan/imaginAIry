@@ -3,7 +3,6 @@ import math
 import os
 import re
 
-from imaginairy.enhancers.upscale_riverwing import upscale_latent
 from imaginairy.schema import SafetyMode
 
 logger = logging.getLogger(__name__)
@@ -244,10 +243,13 @@ def _generate_single_image(
     model = get_diffusion_model(
         weights_location=prompt.model,
         config_path=prompt.model_config_path,
+        control_weights_location=prompt.control_mode,
         half_mode=half_mode,
         for_inpainting=(prompt.mask_image or prompt.mask_prompt or prompt.outpaint)
         and not suppress_inpaint,
     )
+    is_controlnet_model = hasattr(model, "control_key")
+
     progress_latents = []
 
     def latent_logger(latents):
@@ -287,7 +289,7 @@ def _generate_single_image(
         SamplerCls = SAMPLER_LOOKUP[prompt.sampler_type.lower()]
         sampler = SamplerCls(model)
         mask_latent = mask_image = mask_image_orig = mask_grayscale = None
-        t_enc = init_latent = init_latent_noised = None
+        t_enc = init_latent = init_latent_noised = control_image = None
         starting_image = None
         denoiser_cls = None
 
@@ -387,6 +389,42 @@ def _generate_single_image(
                 result_images["depth_image"] = depth_t
                 c_cat.append(depth_latent)
 
+            elif is_controlnet_model and starting_image:
+                from imaginairy.img_processors.control_modes import CONTROL_MODES
+
+                control_image_input = pillow_fit_image_within(
+                    prompt.control_image,
+                    max_height=prompt.height,
+                    max_width=prompt.width,
+                )
+                control_image_input_t = pillow_img_to_torch_image(control_image_input)
+                control_image_input_t = control_image_input_t.to(get_device())
+
+                control_image = CONTROL_MODES[prompt.control_mode](
+                    control_image_input_t
+                )
+                if len(control_image.shape) == 3:
+                    raise RuntimeError("Control image must be 4D")
+
+                if control_image.shape[1] != 3:
+                    raise RuntimeError("Control image must have 3 channels")
+
+                if control_image.min() < 0 or control_image.max() > 1:
+                    raise RuntimeError(
+                        f"Control image must be in [0, 1] but we received {control_image.min()} and {control_image.max()}"
+                    )
+
+                if control_image.max() <= 0.5:
+                    raise RuntimeError("Control image must be in [0, 1]")
+
+                if control_image.min() >= 0.5:
+                    raise RuntimeError("Control image must be in [0, 1]")
+
+                control_image_disp = control_image * 2 - 1
+                result_images["control"] = control_image_disp[:, [2, 0, 1], :, :]
+                log_img(control_image_disp, "control_image")
+                c_cat.append(control_image)
+
             elif hasattr(model, "masked_image_key"):
                 # inpainting model
                 mask_t = pillow_img_to_torch_image(ImageOps.invert(mask_image_orig)).to(
@@ -427,7 +465,11 @@ def _generate_single_image(
         }
         log_latent(init_latent_noised, "init_latent_noised")
 
-        if prompt.allow_compose_phase:
+        if (
+            prompt.allow_compose_phase
+            and not is_controlnet_model
+            and not model.cond_stage_key == "edit"
+        ):
             comp_samples = _generate_composition_latent(
                 sampler=sampler,
                 sampler_kwargs={
@@ -463,7 +505,6 @@ def _generate_single_image(
                 )
 
                 log_latent(comp_samples, "comp_samples")
-
         with lc.timing("sampling"):
             samples = sampler.sample(
                 num_steps=prompt.steps,
@@ -580,6 +621,8 @@ def _generate_composition_latent(
 
     from torch.nn import functional as F
 
+    from imaginairy.enhancers.upscale_riverwing import upscale_latent
+
     b, c, h, w = orig_shape = sampler_kwargs["shape"]
     max_compose_gen_size = 768
     shrink_scale = calc_scale_to_fit_within(
@@ -628,6 +671,7 @@ def _generate_composition_latent(
         }
     )
     samples = sampler.sample(**new_kwargs)
+
     samples = upscale_latent(samples)
     samples = F.interpolate(samples, size=orig_shape[2:], mode="bilinear")
     return samples

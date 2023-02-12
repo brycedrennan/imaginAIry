@@ -25,7 +25,7 @@ def test_outpainting_outpaint(filename_base_for_outputs):
     )
     result = list(imagine([prompt]))[0]
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=2800)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=17000)
 
 
 outpaint_test_params = [

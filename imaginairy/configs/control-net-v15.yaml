@@ -1,6 +1,5 @@
 model:
-  base_learning_rate: 1.0e-4
-  target: imaginairy.modules.diffusion.ddpm.LatentDiffusion
+  target: imaginairy.modules.cldm.ControlLDM
   params:
     linear_start: 0.00085
     linear_end: 0.0120
@@ -9,6 +8,7 @@ model:
     timesteps: 1000
     first_stage_key: "image"
     cond_stage_key: "txt"
+    control_key: "hint"
     image_size: 64
     channels: 4
     cond_stage_trainable: false
@@ -16,18 +16,11 @@ model:
     monitor: val/loss_simple_ema
     scale_factor: 0.18215
     use_ema: False
+    only_mid_control: False
 
-    scheduler_config: # 10000 warm-up steps
-      target: imaginairy.lr_scheduler.LambdaLinearScheduler
-      params:
-        warm_up_steps: [ 1 ] # NOTE for resuming. use 10000 if starting from scratch
-        cycle_lengths: [ 10000000000000 ] # incredibly large number to prevent corner cases
-        f_start: [ 1.e-6 ]
-        f_max: [ 1. ]
-        f_min: [ 1. ]
 
     unet_config:
-      target: imaginairy.modules.diffusion.openaimodel.UNetModel
+      target: imaginairy.modules.cldm.ControlledUnetModel
       params:
         use_checkpoint: True
         image_size: 32 # unused
@@ -68,3 +61,20 @@ model:
 
     cond_stage_config:
       target: imaginairy.modules.clip_embedders.FrozenCLIPEmbedder
+
+    control_stage_config:
+      target: imaginairy.modules.cldm.ControlNet
+      params:
+        image_size: 32 # unused
+        in_channels: 4
+        hint_channels: 3
+        model_channels: 320
+        attention_resolutions: [ 4, 2, 1 ]
+        num_res_blocks: 2
+        channel_mult: [ 1, 2, 4, 4 ]
+        num_heads: 8
+        use_spatial_transformer: True
+        transformer_depth: 1
+        context_dim: 768
+        use_checkpoint: True
+        legacy: False
