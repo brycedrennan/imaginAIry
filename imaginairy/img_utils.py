@@ -42,6 +42,14 @@ def pillow_img_to_torch_image(img: PIL.Image.Image):
     return 2.0 * img - 1.0
 
 
+def torch_img_to_pillow_img(img: torch.Tensor):
+    img = rearrange(img, "b c h w -> b h w c")
+    img = torch.clamp((img + 1.0) / 2.0, min=0.0, max=1.0)
+    img = (255.0 * img).cpu().numpy().astype(np.uint8)
+    img = Image.fromarray(img[0])
+    return img
+
+
 def pillow_img_to_opencv_img(img: PIL.Image.Image):
     open_cv_image = np.array(img)
     # Convert RGB to BGR

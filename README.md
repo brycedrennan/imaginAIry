@@ -298,6 +298,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- feature: sliced latent decoding - now possible to make much bigger images. 8 MP (3840x2160) on 11 GB GPU.
+
 **9.0.2**
 - fix: edit interface was broken
 

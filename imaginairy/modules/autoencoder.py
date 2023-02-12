@@ -4,7 +4,9 @@ from contextlib import contextmanager
 
 import pytorch_lightning as pl
 import torch
+from torch.cuda import OutOfMemoryError
 
+from imaginairy.feather_tile import rebuild_image, tile_image
 from imaginairy.modules.diffusion.model import Decoder, Encoder
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.modules.ema import LitEma
@@ -91,9 +93,48 @@ class AutoencoderKL(pl.LightningModule):
         return posterior
 
     def decode(self, z):
+        try:
+            return self.decode_all_at_once(z)
+        except OutOfMemoryError:
+            # Out of memory, trying sliced decoding.
+            try:
+                return self.decode_sliced(z, chunk_size=128)
+            except OutOfMemoryError:
+                return self.decode_sliced(z, chunk_size=64)
+
+    def decode_all_at_once(self, z):
         z = self.post_quant_conv(z)
         dec = self.decoder(z)
         return dec
+
+    def decode_sliced(self, z, chunk_size=128):
+        """
+        decodes the tensor in slices.
+
+        This results in images that don't exactly match, so we overlap, feather, and merge to reduce
+        (but not completely elminate) impact.
+        """
+        b, c, h, w = z.size()
+        final_tensor = torch.zeros([1, 3, h * 8, w * 8], device=z.device)
+        for z_latent in z.split(1):
+            decoded_chunks = []
+            overlap_pct = 0.5
+            chunks = tile_image(
+                z_latent, tile_size=chunk_size, overlap_percent=overlap_pct
+            )
+
+            for latent_chunk in chunks:
+                latent_chunk = self.post_quant_conv(latent_chunk)
+                dec = self.decoder(latent_chunk)
+                decoded_chunks.append(dec)
+            final_tensor = rebuild_image(
+                decoded_chunks,
+                base_img=final_tensor,
+                tile_size=chunk_size * 8,
+                overlap_percent=overlap_pct,
+            )
+
+            return final_tensor
 
     def forward(self, input, sample_posterior=True):  # noqa
         posterior = self.encode(input)
