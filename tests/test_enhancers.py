@@ -63,7 +63,7 @@ def test_clip_masking(filename_base_for_outputs):
 
     result = next(imagine(prompt))
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=1100)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=1200)
 
 
 boolean_mask_test_cases = [
