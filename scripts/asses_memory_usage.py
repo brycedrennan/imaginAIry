@@ -7,7 +7,7 @@ from imaginairy.utils import get_device
 
 def assess_memory_usage():
     assert get_device() == "cuda"
-    img_size = 1664
+    img_size = 3048
     prompt = ImaginePrompt("strawberries", width=64, height=64, seed=1)
     imagine_image_files([prompt], outdir="outputs")
     datalog = []
@@ -18,6 +18,7 @@ def assess_memory_usage():
             width=img_size,
             height=img_size,
             seed=1,
+            steps=2,
         )
         try:
             imagine_image_files([prompt], outdir="outputs")
