@@ -57,15 +57,15 @@ class MemoryAwareModel:
                 model_config.use_ema = True
                 # model_config.use_scheduler = True
 
+            # only run half-mode on cuda. run it by default
+            half_mode = self._half_mode is None and get_device() == "cuda"
+
             model = load_model_from_config(
                 config=model_config,
                 weights_location=self._weights_path,
+                half_mode=half_mode,
             )
 
-            # only run half-mode on cuda. run it by default
-            half_mode = self._half_mode is None and get_device() == "cuda"
-            if half_mode:
-                model = model.half()
             self._model = model
 
         return getattr(self._model, key)
@@ -90,7 +90,7 @@ def load_tensors(tensorfile, map_location=None):
     raise ValueError(f"Unknown tensorfile type: {tensorfile}")
 
 
-def load_model_from_config(config, weights_location):
+def load_model_from_config(config, weights_location, half_mode=False):
     if weights_location.startswith("http"):
         ckpt_path = get_cached_url_path(weights_location, category="weights")
     else:
@@ -123,6 +123,8 @@ def load_model_from_config(config, weights_location):
         state_dict = pl_sd
     model = instantiate_from_config(config.model)
     model.init_from_state_dict(state_dict)
+    if half_mode:
+        model = model.half()
 
     model.to(get_device())
     model.eval()
