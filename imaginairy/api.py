@@ -178,7 +178,7 @@ def imagine(
                     half_mode=half_mode,
                     add_caption=add_caption,
                 )
-                if not result.is_nsfw:
+                if not result.safety_score.is_filtered:
                     break
                 if attempt < unsafe_retry_count:
                     logger.info("    Image was unsafe, retrying with new seed...")
