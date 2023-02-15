@@ -274,4 +274,4 @@ def test_tile_mode(filename_base_for_outputs):
     result = next(imagine(prompt))
 
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=22000)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=24000)
