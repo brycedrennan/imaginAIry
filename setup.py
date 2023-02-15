@@ -76,5 +76,6 @@ setup(
         "torchmetrics>=0.6.0",
         "torchvision>=0.13.1",
         "kornia>=0.6",
+        "xformers>=0.0.16; sys_platform!='darwin'",
     ],
 )

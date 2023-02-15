@@ -298,7 +298,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
-- feature: sliced latent decoding - now possible to make much bigger images. 8 MP (3840x2160) on 11 GB GPU.
+- perf: `xformers` added as a dependency for linux and windows.  Gives a nice speed boost.
+- perf: sliced attention now runs on MacOS. A typo prevented that from happening previously.
+- perf: sliced latent decoding - now possible to make much bigger images. 3310x3310 on 11 GB GPU.
 
 **9.0.2**
 - fix: edit interface was broken
