@@ -66,6 +66,7 @@ def pillow_img_to_opencv_img(img: PIL.Image.Image):
 
 
 def torch_img_to_pillow_img(img_t: torch.Tensor):
+    img_t = img_t.to(torch.float32).detach().cpu()
     if len(img_t.shape) == 3:
         img_t = img_t.unsqueeze(0)
     if img_t.shape[0] != 1:
