@@ -11,14 +11,16 @@ from torch import nn
 from imaginairy.modules.attention import MemoryEfficientCrossAttention
 from imaginairy.utils import get_device
 
-try:
-    import xformers  # noqa
-    import xformers.ops  # noqa
+XFORMERS_IS_AVAILABLE = False
 
-    XFORMERS_IS_AVAILABLE = True
+try:
+    if get_device() == "cuda":
+        import xformers  # noqa
+        import xformers.ops  # noqa
+
+        XFORMERS_IS_AVAILABLE = True
 except ImportError:
-    XFORMERS_IS_AVAILABLE = False
-    # print("No module 'xformers'. Proceeding without it.")
+    pass
 
 
 def get_timestep_embedding(timesteps, embedding_dim):
