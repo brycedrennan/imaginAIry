@@ -58,9 +58,9 @@ def test_feather_tile_simple(img_ratio, tile_size, overlap_pct):
         tile_size, overlap_pct, (img.size(2), img.size(3))
     )
 
-    print(
-        f"tile_coords={tile_coords}, tile_size={tile_size}, overlap={overlap}, img.shape={img.shape}"
-    )
+    # print(
+    #     f"tile_coords={tile_coords}, tile_size={tile_size}, overlap={overlap}, img.shape={img.shape}"
+    # )
 
     rebuilt = rebuild_image(
         tiles, base_img=img, tile_size=tile_size, overlap_percent=overlap_pct
@@ -86,9 +86,9 @@ def test_feather_tile_brute():
         tile_coords, tile_size, overlap = tile_setup(
             tile_size, overlap_percent, (img.size(2), img.size(3))
         )
-        print(
-            f"tile_coords={tile_coords}, tile_size={tile_size}, overlap={overlap}, img.shape={img.shape}"
-        )
+        # print(
+        #     f"tile_coords={tile_coords}, tile_size={tile_size}, overlap={overlap}, img.shape={img.shape}"
+        # )
 
         rebuilt = rebuild_image(
             tiles, base_img=img, tile_size=tile_size, overlap_percent=overlap_percent
@@ -100,13 +100,11 @@ def test_feather_tile_brute():
             torch_img_to_pillow_img(rebuilt).show()
             torch_img_to_pillow_img((rebuilt - img) * 20).show()
 
-            status = "🚫  FAILED"
-
         else:
-            status = "✅  PASSED"
-        print(
-            f"{status}: img:{img.shape} tile_size={tile_size} overlap_percent={overlap_percent} diff={diff}"
-        )
+            pass
+        # print(
+        #     f"{status}: img:{img.shape} tile_size={tile_size} overlap_percent={overlap_percent} diff={diff}"
+        # )
         assert diff < 1
 
     for tile_size_pct, overlap_percent, img_ratio, flip_ratio in itertools.product(
@@ -123,9 +121,9 @@ def test_feather_tile_brute():
         if overlap_percent >= 0.5:
             continue
 
-        print(
-            f"img_ratio={img_ratio}, tile_size_pct={tile_size_pct}, overlap_percent={overlap_percent}, tile_size={tile_size} img.shape={img.shape}"
-        )
+        # print(
+        #     f"img_ratio={img_ratio}, tile_size_pct={tile_size_pct}, overlap_percent={overlap_percent}, tile_size={tile_size} img.shape={img.shape}"
+        # )
         tile_untile(img, tile_size=tile_size, overlap_percent=overlap_percent)
         del img
 

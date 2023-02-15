@@ -1,7 +1,9 @@
 # based on https://github.com/isl-org/MiDaS
+from functools import lru_cache
 
 import cv2
 import torch
+from einops import rearrange
 from torch import nn
 from torchvision.transforms import Compose
 
@@ -13,6 +15,7 @@ from imaginairy.modules.midas.midas.transforms import (
     PrepareForNet,
     Resize,
 )
+from imaginairy.utils import get_device
 
 ISL_PATHS = {
     "dpt_large": "midas_models/dpt_large-midas-2f21e586.pt",
@@ -149,6 +152,30 @@ def load_model(model_type):
     )
 
     return model.eval(), transform
+
+
+@lru_cache()
+def load_midas(model_type="dpt_hybrid"):
+    model = MiDaSInference(model_type)
+    model.to(get_device())
+    return model
+
+
+def torch_image_to_depth_map(image_t: torch.Tensor, model_type="dpt_hybrid"):
+    model = load_midas(model_type)
+    transform = load_midas_transform(model_type)
+    image_t = rearrange(image_t, "b c h w -> b h w c")[0]
+    image_np = ((image_t + 1.0) * 0.5).detach().cpu().numpy()
+    image_np = transform({"image": image_np})["image"]
+    image_t = torch.from_numpy(image_np[None, ...])
+    image_t = image_t.to(device=get_device())
+
+    depth_t = model(image_t)
+    depth_min = torch.amin(depth_t, dim=[1, 2, 3], keepdim=True)
+    depth_max = torch.amax(depth_t, dim=[1, 2, 3], keepdim=True)
+
+    depth_t = (depth_t - depth_min) / (depth_max - depth_min)
+    return depth_t
 
 
 class MiDaSInference(nn.Module):

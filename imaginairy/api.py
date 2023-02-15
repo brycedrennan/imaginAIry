@@ -195,18 +195,20 @@ def _generate_single_image(
     half_mode=None,
     add_caption=False,
 ):
-    import numpy as np
     import torch.nn
-    from einops import rearrange, repeat
     from PIL import Image, ImageOps
     from pytorch_lightning import seed_everything
-    from torch.cuda import OutOfMemoryError
 
     from imaginairy.enhancers.clip_masking import get_img_mask
     from imaginairy.enhancers.describe_image_blip import generate_caption
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
-    from imaginairy.img_utils import pillow_fit_image_within, pillow_img_to_torch_image
+    from imaginairy.img_utils import (
+        pillow_fit_image_within,
+        pillow_img_to_torch_image,
+        pillow_mask_to_latent_mask,
+        torch_img_to_pillow_img,
+    )
     from imaginairy.log_utils import (
         ImageLoggingContext,
         log_conditioning,
@@ -214,7 +216,7 @@ def _generate_single_image(
         log_latent,
     )
     from imaginairy.model_manager import get_diffusion_model
-    from imaginairy.modules.midas.utils import AddMiDaS
+    from imaginairy.modules.midas.api import torch_image_to_depth_map
     from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
     from imaginairy.safety import create_safety_score
     from imaginairy.samplers import SAMPLER_LOOKUP
@@ -241,7 +243,6 @@ def _generate_single_image(
         half_mode=half_mode,
         for_inpainting=prompt.mask_image or prompt.mask_prompt or prompt.outpaint,
     )
-    has_depth_channel = hasattr(model, "depth_stage_key")
     progress_latents = []
 
     def latent_logger(latents):
@@ -279,9 +280,14 @@ def _generate_single_image(
         ]
         SamplerCls = SAMPLER_LOOKUP[prompt.sampler_type.lower()]
         sampler = SamplerCls(model)
-        mask = mask_image = mask_image_orig = mask_grayscale = None
+        mask_latent = mask_image = mask_image_orig = mask_grayscale = None
         t_enc = init_latent = init_latent_noised = None
         starting_image = None
+        denoiser_cls = None
+
+        c_cat = []
+        c_cat_neutral = None
+        result_images = {}
         if prompt.init_image:
             starting_image = prompt.init_image
             generation_strength = 1 - prompt.init_image_strength
@@ -321,25 +327,12 @@ def _generate_single_image(
                 if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
                     mask_image = ImageOps.invert(mask_image)
 
-                log_img(
-                    Image.composite(init_image, mask_image, mask_image),
-                    "mask overlay",
-                )
                 mask_image_orig = mask_image
-                mask_image = mask_image.resize(
-                    (
-                        mask_image.width // downsampling_factor,
-                        mask_image.height // downsampling_factor,
-                    ),
-                    resample=Image.Resampling.LANCZOS,
-                )
                 log_img(mask_image, "latent_mask")
+                mask_latent = pillow_mask_to_latent_mask(
+                    mask_image, downsampling_factor=downsampling_factor
+                ).to(get_device())
 
-                mask = np.array(mask_image)
-                mask = mask.astype(np.float32) / 255.0
-                mask = mask[None, None]
-                mask = torch.from_numpy(mask)
-                mask = mask.to(get_device())
             init_image_t = pillow_img_to_torch_image(init_image)
             init_image_t = init_image_t.to(get_device())
             init_latent = model.get_first_stage_encoding(
@@ -348,7 +341,7 @@ def _generate_single_image(
             shape = init_latent.shape
 
             log_latent(init_latent, "init_latent")
-            # encode (scaled latent)
+
             seed_everything(prompt.seed)
             noise = randn_seeded(seed=prompt.seed, size=init_latent.size())
             noise = noise.to(get_device())
@@ -371,90 +364,45 @@ def _generate_single_image(
                     schedule=schedule,
                     noise=noise,
                 )
-        batch_size = 1
-        log_latent(init_latent_noised, "init_latent_noised")
-        batch = {
-            "txt": batch_size * [prompt.prompt_text],
-        }
-        c_cat = []
-        c_cat_neutral = None
-        depth_image_display = None
-        if has_depth_channel and starting_image:
-            midas_model = AddMiDaS()
-            _init_image_d = np.array(starting_image.convert("RGB"))
-            _init_image_d = (
-                torch.from_numpy(_init_image_d).to(dtype=torch.float32) / 127.5 - 1.0
-            )
-            depth_image = midas_model(_init_image_d)
-            depth_image = torch.from_numpy(depth_image[None, ...])
-            batch[model.depth_stage_key] = depth_image.to(device=get_device())
-            _init_image_d = rearrange(_init_image_d, "h w c -> 1 c h w")
-            batch["jpg"] = _init_image_d
-            for ck in model.concat_keys:
-                cc = batch[ck]
-                cc = model.depth_model(cc)
-                depth_min, depth_max = torch.amin(
-                    cc, dim=[1, 2, 3], keepdim=True
-                ), torch.amax(cc, dim=[1, 2, 3], keepdim=True)
-                display_depth = (cc - depth_min) / (depth_max - depth_min)
-                depth_image_display = Image.fromarray(
-                    (display_depth[0, 0, ...].cpu().numpy() * 255.0).astype(np.uint8)
-                )
-                cc = torch.nn.functional.interpolate(
-                    cc,
+
+            if hasattr(model, "depth_stage_key"):
+                # depth model
+                depth_t = torch_image_to_depth_map(init_image_t)
+                depth_latent = torch.nn.functional.interpolate(
+                    depth_t,
                     size=shape[2:],
                     mode="bicubic",
                     align_corners=False,
                 )
-                depth_min, depth_max = torch.amin(
-                    cc, dim=[1, 2, 3], keepdim=True
-                ), torch.amax(cc, dim=[1, 2, 3], keepdim=True)
-                cc = 2.0 * (cc - depth_min) / (depth_max - depth_min) - 1.0
-                c_cat.append(cc)
-            c_cat = [torch.cat(c_cat, dim=1)]
+                result_images["depth_image"] = depth_t
+                c_cat.append(depth_latent)
 
-        if mask_image_orig and not has_depth_channel:
-            mask_t = pillow_img_to_torch_image(ImageOps.invert(mask_image_orig)).to(
-                get_device()
-            )
-            inverted_mask = 1 - mask
-            masked_image_t = init_image_t * (mask_t < 0.5)
-            batch.update(
-                {
-                    "image": repeat(
-                        init_image_t.to(device=get_device()),
-                        "1 ... -> n ...",
-                        n=batch_size,
-                    ),
-                    "txt": batch_size * [prompt.prompt_text],
-                    "mask": repeat(
-                        inverted_mask.to(device=get_device()),
-                        "1 ... -> n ...",
-                        n=batch_size,
-                    ),
-                    "masked_image": repeat(
-                        masked_image_t.to(device=get_device()),
-                        "1 ... -> n ...",
-                        n=batch_size,
-                    ),
-                }
-            )
+            elif hasattr(model, "masked_image_key"):
+                # inpainting model
+                mask_t = pillow_img_to_torch_image(ImageOps.invert(mask_image_orig)).to(
+                    get_device()
+                )
+                inverted_mask = 1 - mask_latent
+                masked_image_t = init_image_t * (mask_t < 0.5)
+                log_img(masked_image_t, "masked_image")
 
-            for concat_key in getattr(model, "concat_keys", []):
-                cc = batch[concat_key].float()
-                if concat_key != model.masked_image_key:
-                    bchw = [batch_size, 4, shape[2], shape[3]]
-                    cc = torch.nn.functional.interpolate(cc, size=bchw[-2:])
-                else:
-                    cc = model.get_first_stage_encoding(model.encode_first_stage(cc))
-                c_cat.append(cc)
+                inverted_mask_latent = torch.nn.functional.interpolate(
+                    inverted_mask, size=shape[-2:]
+                )
+                c_cat.append(inverted_mask_latent)
+
+                masked_image_latent = model.get_first_stage_encoding(
+                    model.encode_first_stage(masked_image_t)
+                )
+                c_cat.append(masked_image_latent)
+
+            elif model.cond_stage_key == "edit":
+                # pix2pix model
+                c_cat = [model.encode_first_stage(init_image_t).mode()]
+                c_cat_neutral = [torch.zeros_like(init_latent)]
+                denoiser_cls = CFGEditingDenoiser
             if c_cat:
                 c_cat = [torch.cat(c_cat, dim=1)]
-        denoiser_cls = None
-        if model.cond_stage_key == "edit":
-            c_cat = [model.encode_first_stage(init_image_t).mode()]
-            c_cat_neutral = [torch.zeros_like(init_latent)]
-            denoiser_cls = CFGEditingDenoiser
 
         if c_cat_neutral is None:
             c_cat_neutral = c_cat
@@ -467,6 +415,8 @@ def _generate_single_image(
             "c_concat": c_cat_neutral,
             "c_crossattn": [neutral_conditioning],
         }
+        log_latent(init_latent_noised, "init_latent_noised")
+
         with lc.timing("sampling"):
             samples = sampler.sample(
                 num_steps=prompt.steps,
@@ -475,105 +425,74 @@ def _generate_single_image(
                 neutral_conditioning=neutral_conditioning,
                 guidance_scale=prompt.prompt_strength,
                 t_start=t_enc,
-                mask=mask,
+                mask=mask_latent,
                 orig_latent=init_latent,
                 shape=shape,
                 batch_size=1,
                 denoiser_cls=denoiser_cls,
             )
-        # from torch.nn.functional import interpolate
-        # samples = interpolate(samples, scale_factor=2, mode='nearest')
+
         with lc.timing("decoding"):
-            try:
-                x_samples = model.decode_first_stage(samples)
-            except OutOfMemoryError:
-                model.cond_stage_model.to("cpu")
-                model.model.to("cpu")
-                x_samples = model.decode_first_stage(samples)
-                model.cond_stage_model.to(get_device())
-                model.model.to(get_device())
+            gen_imgs_t = model.decode_first_stage(samples)
+            gen_img = torch_img_to_pillow_img(gen_imgs_t)
 
-            x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
+        if mask_image_orig and init_image:
+            mask_final = mask_image_orig.copy()
+            log_img(mask_final, "reconstituting mask")
+            mask_final = ImageOps.invert(mask_final)
+            gen_img = Image.composite(gen_img, init_image, mask_final)
+            log_img(gen_img, "reconstituted image")
 
-        for x_sample in x_samples:
-            x_sample = x_sample.to(torch.float32)
-            x_sample = 255.0 * rearrange(x_sample.cpu().numpy(), "c h w -> h w c")
-            x_sample_8_orig = x_sample.astype(np.uint8)
-            img = Image.fromarray(x_sample_8_orig)
-            if mask_image_orig and init_image:
-                # mask_final = mask_image_orig.filter(
-                #     ImageFilter.GaussianBlur(radius=3)
-                # )
-                mask_final = mask_image_orig.copy()
-                log_img(mask_final, "reconstituting mask")
-                mask_final = ImageOps.invert(mask_final)
-                img = Image.composite(img, init_image, mask_final)
-                log_img(img, "reconstituted image")
+        upscaled_img = None
+        rebuilt_orig_img = None
 
-            upscaled_img = None
-            rebuilt_orig_img = None
+        if add_caption:
+            caption = generate_caption(gen_img)
+            logger.info(f"Generated caption: {caption}")
 
-            if add_caption:
-                caption = generate_caption(img)
-                logger.info(f"Generated caption: {caption}")
-
-            with lc.timing("safety-filter"):
-                safety_score = create_safety_score(
-                    img,
-                    safety_mode=IMAGINAIRY_SAFETY_MODE,
-                )
-            if safety_score.is_filtered:
-                progress_latents.clear()
-            if not safety_score.is_filtered:
-                if prompt.fix_faces:
-                    logger.info("Fixing 😊 's in 🖼  using CodeFormer...")
-                    with lc.timing("face enhancement"):
-                        img = enhance_faces(img, fidelity=prompt.fix_faces_fidelity)
-                if prompt.upscale:
-                    logger.info("Upscaling 🖼  using real-ESRGAN...")
-                    with lc.timing("upscaling"):
-                        upscaled_img = upscale_image(img)
-
-                # put the newly generated patch back into the original, full size image
-                if prompt.mask_modify_original and mask_image_orig and starting_image:
-                    img_to_add_back_to_original = upscaled_img if upscaled_img else img
-                    img_to_add_back_to_original = img_to_add_back_to_original.resize(
-                        starting_image.size,
-                        resample=Image.Resampling.LANCZOS,
-                    )
-
-                    mask_for_orig_size = mask_image_orig.resize(
-                        starting_image.size,
-                        resample=Image.Resampling.LANCZOS,
-                    )
-                    # mask_for_orig_size = mask_for_orig_size.filter(
-                    #     ImageFilter.GaussianBlur(radius=5)
-                    # )
-                    log_img(mask_for_orig_size, "mask for original image size")
-
-                    rebuilt_orig_img = Image.composite(
-                        starting_image,
-                        img_to_add_back_to_original,
-                        mask_for_orig_size,
-                    )
-                    log_img(rebuilt_orig_img, "reconstituted original")
-
-            result = ImagineResult(
-                img=img,
-                prompt=prompt,
-                upscaled_img=upscaled_img,
-                is_nsfw=safety_score.is_nsfw,
-                safety_score=safety_score,
-                modified_original=rebuilt_orig_img,
-                mask_binary=mask_image_orig,
-                mask_grayscale=mask_grayscale,
-                depth_image=depth_image_display,
-                timings=lc.get_timings(),
-                progress_latents=progress_latents.copy(),
+        with lc.timing("safety-filter"):
+            safety_score = create_safety_score(
+                gen_img,
+                safety_mode=IMAGINAIRY_SAFETY_MODE,
             )
-            _most_recent_result = result
-            logger.info(f"Image Generated. Timings: {result.timings_str()}")
-            return result
+        if safety_score.is_filtered:
+            progress_latents.clear()
+        if not safety_score.is_filtered:
+            if prompt.fix_faces:
+                logger.info("Fixing 😊 's in 🖼  using CodeFormer...")
+                with lc.timing("face enhancement"):
+                    gen_img = enhance_faces(gen_img, fidelity=prompt.fix_faces_fidelity)
+            if prompt.upscale:
+                logger.info("Upscaling 🖼  using real-ESRGAN...")
+                with lc.timing("upscaling"):
+                    upscaled_img = upscale_image(gen_img)
+
+            # put the newly generated patch back into the original, full-size image
+            if prompt.mask_modify_original and mask_image_orig and starting_image:
+                img_to_add_back_to_original = upscaled_img if upscaled_img else gen_img
+                rebuilt_orig_img = combine_image(
+                    original_img=starting_image,
+                    generated_img=img_to_add_back_to_original,
+                    mask_img=mask_image_orig,
+                )
+
+        result = ImagineResult(
+            img=gen_img,
+            prompt=prompt,
+            upscaled_img=upscaled_img,
+            is_nsfw=safety_score.is_nsfw,
+            safety_score=safety_score,
+            modified_original=rebuilt_orig_img,
+            mask_binary=mask_image_orig,
+            mask_grayscale=mask_grayscale,
+            result_images=result_images,
+            timings=lc.get_timings(),
+            progress_latents=progress_latents.copy(),
+        )
+
+        _most_recent_result = result
+        logger.info(f"Image Generated. Timings: {result.timings_str()}")
+        return result
 
 
 def _prompts_to_embeddings(prompts, model):
@@ -587,3 +506,29 @@ def _prompts_to_embeddings(prompts, model):
 
 def prompt_normalized(prompt):
     return re.sub(r"[^a-zA-Z0-9.,\[\]-]+", "_", prompt)[:130]
+
+
+def combine_image(original_img, generated_img, mask_img):
+    """Combine the generated image with the original image using the mask image."""
+    from PIL import Image
+
+    from imaginairy.log_utils import log_img
+
+    generated_img = generated_img.resize(
+        original_img.size,
+        resample=Image.Resampling.LANCZOS,
+    )
+
+    mask_for_orig_size = mask_img.resize(
+        original_img.size,
+        resample=Image.Resampling.LANCZOS,
+    )
+    log_img(mask_for_orig_size, "mask for original image size")
+
+    rebuilt_orig_img = Image.composite(
+        original_img,
+        generated_img,
+        mask_for_orig_size,
+    )
+    log_img(rebuilt_orig_img, "reconstituted original")
+    return rebuilt_orig_img

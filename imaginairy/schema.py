@@ -278,10 +278,13 @@ class ImagineResult:
         modified_original=None,
         mask_binary=None,
         mask_grayscale=None,
-        depth_image=None,
+        result_images=None,
         timings=None,
         progress_latents=None,
     ):
+        import torch
+
+        from imaginairy.img_utils import torch_img_to_pillow_img
         from imaginairy.utils import get_device, get_hardware_description
 
         self.prompt = prompt
@@ -300,8 +303,10 @@ class ImagineResult:
         if mask_grayscale:
             self.images["mask_grayscale"] = mask_grayscale
 
-        if depth_image is not None:
-            self.images["depth_image"] = depth_image
+        for img_type, r_img in result_images.items():
+            if isinstance(r_img, torch.Tensor):
+                r_img = torch_img_to_pillow_img(r_img)
+            self.images[img_type] = r_img
 
         self.timings = timings
         self.progress_latents = progress_latents

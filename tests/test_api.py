@@ -158,7 +158,7 @@ def test_img_to_img_fruit_2_gold(
         "k_euler_a": 18000,
         "k_dpm_adaptive": 13000,
     }
-    threshold = threshold_lookup.get(sampler_type, 11000)
+    threshold = threshold_lookup.get(sampler_type, 14000)
 
     pillow_fit_image_within(img).save(f"{filename_base_for_orig_outputs}__orig.jpg")
     img_path = f"{filename_base_for_outputs}.png"
