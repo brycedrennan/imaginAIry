@@ -3,6 +3,7 @@ import math
 import os
 import re
 
+from imaginairy.enhancers.upscale_riverwing import upscale_latent
 from imaginairy.schema import SafetyMode
 
 logger = logging.getLogger(__name__)
@@ -269,6 +270,7 @@ def _generate_single_image(
         with lc.timing("conditioning"):
             # need to expand if doing batches
             neutral_conditioning = _prompts_to_embeddings(prompt.negative_prompt, model)
+            _prompts_to_embeddings("", model)
             log_conditioning(neutral_conditioning, "neutral conditioning")
             if prompt.conditioning is not None:
                 positive_conditioning = prompt.conditioning
@@ -425,40 +427,43 @@ def _generate_single_image(
         }
         log_latent(init_latent_noised, "init_latent_noised")
 
-        comp_samples = _generate_composition_latent(
-            sampler=sampler,
-            sampler_kwargs={
-                "num_steps": prompt.steps,
-                "initial_latent": init_latent_noised,
-                "positive_conditioning": positive_conditioning,
-                "neutral_conditioning": neutral_conditioning,
-                "guidance_scale": prompt.prompt_strength,
-                "t_start": t_enc,
-                "mask": mask_latent,
-                "orig_latent": init_latent,
-                "shape": shape,
-                "batch_size": 1,
-                "denoiser_cls": denoiser_cls,
-            },
-        )
-        if comp_samples is not None:
-            noise = noise[:, :, : comp_samples.shape[2], : comp_samples.shape[3]]
-
-            schedule = NoiseSchedule(
-                model_num_timesteps=model.num_timesteps,
-                ddim_num_steps=prompt.steps,
-                model_alphas_cumprod=model.alphas_cumprod,
-                ddim_discretize="uniform",
+        if prompt.allow_compose_phase:
+            comp_samples = _generate_composition_latent(
+                sampler=sampler,
+                sampler_kwargs={
+                    "num_steps": prompt.steps,
+                    "initial_latent": init_latent_noised,
+                    "positive_conditioning": positive_conditioning,
+                    "neutral_conditioning": neutral_conditioning,
+                    "guidance_scale": prompt.prompt_strength,
+                    "t_start": t_enc,
+                    "mask": mask_latent,
+                    "orig_latent": init_latent,
+                    "shape": shape,
+                    "batch_size": 1,
+                    "denoiser_cls": denoiser_cls,
+                },
             )
-            t_enc = int(prompt.steps * 0.8)
-            init_latent_noised = noise_an_image(
-                comp_samples,
-                torch.tensor([t_enc - 1]).to(get_device()),
-                schedule=schedule,
-                noise=noise,
-            )
+            if comp_samples is not None:
+                result_images["composition"] = comp_samples
+                noise = noise[:, :, : comp_samples.shape[2], : comp_samples.shape[3]]
 
-        log_latent(comp_samples, "comp_samples")
+                schedule = NoiseSchedule(
+                    model_num_timesteps=model.num_timesteps,
+                    ddim_num_steps=prompt.steps,
+                    model_alphas_cumprod=model.alphas_cumprod,
+                    ddim_discretize="uniform",
+                )
+                t_enc = int(prompt.steps * 0.75)
+                init_latent_noised = noise_an_image(
+                    comp_samples,
+                    torch.tensor([t_enc - 1]).to(get_device()),
+                    schedule=schedule,
+                    noise=noise,
+                )
+
+                log_latent(comp_samples, "comp_samples")
+
         with lc.timing("sampling"):
             samples = sampler.sample(
                 num_steps=prompt.steps,
@@ -575,8 +580,7 @@ def _generate_composition_latent(
 
     from torch.nn import functional as F
 
-    new_kwargs = deepcopy(sampler_kwargs)
-    b, c, h, w = orig_shape = new_kwargs["shape"]
+    b, c, h, w = orig_shape = sampler_kwargs["shape"]
     max_compose_gen_size = 768
     shrink_scale = calc_scale_to_fit_within(
         height=h,
@@ -585,6 +589,8 @@ def _generate_composition_latent(
     )
     if shrink_scale >= 1:
         return None
+
+    new_kwargs = deepcopy(sampler_kwargs)
 
     # shrink everything
     new_shape = b, c, int(round(h * shrink_scale)), int(round(w * shrink_scale))
@@ -622,7 +628,7 @@ def _generate_composition_latent(
         }
     )
     samples = sampler.sample(**new_kwargs)
-    # samples = upscale_latent(samples)
+    samples = upscale_latent(samples)
     samples = F.interpolate(samples, size=orig_shape[2:], mode="bilinear")
     return samples
 

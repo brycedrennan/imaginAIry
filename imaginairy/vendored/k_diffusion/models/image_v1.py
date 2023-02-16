@@ -142,6 +142,10 @@ class UBlock(layers.ConditionedSequential):
 
     def forward(self, input, cond, skip=None):
         if skip is not None:
+            if input.shape[-2:] != skip.shape[-2:]:
+                input = nn.functional.interpolate(
+                    input, size=skip.shape[-2:], mode="bilinear"
+                )
             input = torch.cat([input, skip], dim=1)
         return super().forward(input, cond)
 

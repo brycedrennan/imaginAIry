@@ -300,7 +300,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
-- perf: tiled encoding of images (removes memory bottleneck)
+- feature: 🎉🎉 Make large images while retaining composition. Try `imagine "a flower" -w 1920 -h 1080 --upscale`
+- perf: sliced encoding of images to latents (removes memory bottleneck)
 - perf: use Silu for performance improvement over nonlinearity
 - perf: `xformers` added as a dependency for linux and windows.  Gives a nice speed boost.
 - perf: sliced attention now runs on MacOS. A typo prevented that from happening previously.
@@ -555,6 +556,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
    - https://github.com/huggingface/diffusers/pull/532/files
    - https://github.com/HazyResearch/flash-attention
    - https://github.com/chavinlo/sda-node
+   - https://github.com/AminRezaei0x443/memory-efficient-attention/issues/7
    
  - Development Environment
    - ✅ add tests

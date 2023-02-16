@@ -110,6 +110,7 @@ class ImaginePrompt:
         sampler_type=config.DEFAULT_SAMPLER,
         conditioning=None,
         tile_mode="",
+        allow_compose_phase=True,
         model=config.DEFAULT_MODEL,
         model_config_path=None,
         is_intermediate=False,
@@ -136,8 +137,10 @@ class ImaginePrompt:
         self.mask_modify_original = mask_modify_original
         self.outpaint = outpaint
         self.tile_mode = tile_mode
+        self.allow_compose_phase = allow_compose_phase
         self.model = model
         self.model_config_path = model_config_path
+
         # we don't want to save intermediate images
         self.is_intermediate = is_intermediate
         self.collect_progress_latents = collect_progress_latents
@@ -284,7 +287,10 @@ class ImagineResult:
     ):
         import torch
 
-        from imaginairy.img_utils import torch_img_to_pillow_img
+        from imaginairy.img_utils import (
+            model_latent_to_pillow_img,
+            torch_img_to_pillow_img,
+        )
         from imaginairy.utils import get_device, get_hardware_description
 
         self.prompt = prompt
@@ -305,7 +311,10 @@ class ImagineResult:
 
         for img_type, r_img in result_images.items():
             if isinstance(r_img, torch.Tensor):
-                r_img = torch_img_to_pillow_img(r_img)
+                if r_img.shape[1] == 4:
+                    r_img = model_latent_to_pillow_img(r_img)
+                else:
+                    r_img = torch_img_to_pillow_img(r_img)
             self.images[img_type] = r_img
 
         self.timings = timings
