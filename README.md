@@ -300,6 +300,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- perf: tiled encoding of images (removes memory bottleneck)
 - perf: use Silu for performance improvement over nonlinearity
 - perf: `xformers` added as a dependency for linux and windows.  Gives a nice speed boost.
 - perf: sliced attention now runs on MacOS. A typo prevented that from happening previously.
