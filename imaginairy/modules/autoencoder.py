@@ -88,10 +88,40 @@ class AutoencoderKL(pl.LightningModule):
             self.model_ema(self)
 
     def encode(self, x):
-        h = self.encoder(x)
-        moments = self.quant_conv(h)
-        posterior = DiagonalGaussianDistribution(moments)
-        return posterior
+        return self.encode_sliced(x)
+        # h = self.encoder(x)
+        # moments = self.quant_conv(h)
+        # posterior = DiagonalGaussianDistribution(moments)
+        # return posterior.sample()
+
+    def encode_sliced(self, x, chunk_size=128 * 8):
+        """
+        encodes the image in slices.
+        """
+        b, c, h, w = x.size()
+        final_tensor = torch.zeros(
+            [1, 4, math.ceil(h / 8), math.ceil(w / 8)], device=x.device
+        )
+        for x_img in x.split(1):
+            encoded_chunks = []
+            overlap_pct = 0.5
+            chunks = tile_image(
+                x_img, tile_size=chunk_size, overlap_percent=overlap_pct
+            )
+
+            for img_chunk in chunks:
+                h = self.encoder(img_chunk)
+                moments = self.quant_conv(h)
+                posterior = DiagonalGaussianDistribution(moments)
+                encoded_chunks.append(posterior.sample())
+            final_tensor = rebuild_image(
+                encoded_chunks,
+                base_img=final_tensor,
+                tile_size=chunk_size // 8,
+                overlap_percent=overlap_pct,
+            )
+
+        return final_tensor
 
     def decode(self, z):
         try:
