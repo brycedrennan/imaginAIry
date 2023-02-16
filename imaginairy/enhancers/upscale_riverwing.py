@@ -23,7 +23,13 @@ class NoiseLevelAndTextConditionedUpscaler(nn.Module):
 
     def forward(self, inp, sigma, low_res, low_res_sigma, c, **kwargs):
         cross_cond, cross_cond_padding, pooler = c
-        c_in = 1 / (low_res_sigma**2 + self.sigma_data**2) ** 0.5
+        sigma_data = self.sigma_data
+        # 'MPS does not support power op with int64 input'
+        if isinstance(low_res_sigma, torch.Tensor):
+            low_res_sigma = low_res_sigma.to(torch.float32)
+        if isinstance(sigma_data, torch.Tensor):
+            sigma_data = sigma_data.to(torch.float32)
+        c_in = 1 / (low_res_sigma**2 + sigma_data**2) ** 0.5
         c_noise = low_res_sigma.log1p()[:, None]
         c_in = append_dims(c_in, low_res.ndim)
         low_res_noise_embed = self.low_res_noise_embed(c_noise)
@@ -200,7 +206,7 @@ def upscale_latent(
     low_res_latent,
     upscale_prompt="",
     seed=0,
-    steps=30,
+    steps=15,
     guidance_scale=1.0,
     batch_size=1,
     num_samples=1,

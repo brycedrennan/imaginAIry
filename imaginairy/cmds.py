@@ -137,6 +137,11 @@ common_options = [
         help="Any images rendered will be tileable in the Y direction.",
     ),
     click.option(
+        "--allow-compose-phase/--no-compose-phase",
+        default=True,
+        help="Allow the image to be composed at a lower resolution.",
+    ),
+    click.option(
         "--mask-image",
         metavar="PATH|URL",
         help="A mask to use for inpainting. White gets painted, Black is left alone.",
@@ -342,6 +347,7 @@ def imagine_cmd(
     tile,
     tile_x,
     tile_y,
+    allow_compose_phase,
     mask_image,
     mask_prompt,
     mask_mode,
@@ -387,6 +393,7 @@ def imagine_cmd(
         tile,
         tile_x,
         tile_y,
+        allow_compose_phase,
         mask_image,
         mask_prompt,
         mask_mode,
@@ -591,6 +598,7 @@ def _imagine_cmd(
     tile,
     tile_x,
     tile_y,
+    allow_compose_phase,
     mask_image,
     mask_prompt,
     mask_mode,
@@ -705,6 +713,7 @@ def _imagine_cmd(
                     fix_faces=fix_faces,
                     fix_faces_fidelity=fix_faces_fidelity,
                     tile_mode=_tile_mode,
+                    allow_compose_phase=allow_compose_phase,
                     model=model_weights_path,
                     model_config_path=model_config_path,
                 )
