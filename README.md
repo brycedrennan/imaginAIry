@@ -300,7 +300,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
-- feature: 🎉🎉 Make large images while retaining composition. Try `imagine "a flower" -w 1920 -h 1080 --upscale`
+**10.0.0**
+
+- feature: 🎉🎉 Make large images while retaining composition. Try `imagine "a flower" -w 1920 -h 1080`
+- fix: create compilations directory automatically
 - perf: sliced encoding of images to latents (removes memory bottleneck)
 - perf: use Silu for performance improvement over nonlinearity
 - perf: `xformers` added as a dependency for linux and windows.  Gives a nice speed boost.
