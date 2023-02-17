@@ -56,6 +56,21 @@ class AutoencoderKL(pl.LightningModule):
         if ckpt_path is not None:
             self.init_from_ckpt(ckpt_path, ignore_keys=ignore_keys)
 
+        ks = 128
+        stride = 64
+        vqf = 8
+        self.split_input_params = {
+            "ks": (ks, ks),
+            "stride": (stride, stride),
+            "vqf": vqf,
+            "patch_distributed_vq": True,
+            "tie_braker": False,
+            "clip_max_weight": 0.5,
+            "clip_min_weight": 0.01,
+            "clip_max_tie_weight": 0.5,
+            "clip_min_tie_weight": 0.01,
+        }
+
     def init_from_ckpt(self, path, ignore_keys=None):
         sd = torch.load(path, map_location="cpu")["state_dict"]
         keys = list(sd.keys())
@@ -89,10 +104,12 @@ class AutoencoderKL(pl.LightningModule):
 
     def encode(self, x):
         return self.encode_sliced(x)
-        # h = self.encoder(x)
-        # moments = self.quant_conv(h)
-        # posterior = DiagonalGaussianDistribution(moments)
-        # return posterior.sample()
+
+    def encode_all_at_once(self, x):
+        h = self.encoder(x)
+        moments = self.quant_conv(h)
+        posterior = DiagonalGaussianDistribution(moments)
+        return posterior.mode()
 
     def encode_sliced(self, x, chunk_size=128 * 8):
         """
@@ -122,6 +139,60 @@ class AutoencoderKL(pl.LightningModule):
             )
 
         return final_tensor
+
+    def encode_with_folds(self, x):
+        bs, nc, h, w = x.shape
+        ks = self.split_input_params["ks"]  # eg. (128, 128)
+        stride = self.split_input_params["stride"]  # eg. (64, 64)
+        df = self.split_input_params["vqf"]
+
+        if h > ks[0] * df or w > ks[1] * df:
+            self.split_input_params["original_image_size"] = x.shape[-2:]
+            orig_shape = x.shape
+
+            if ks[0] > h // df or ks[1] > w // df:
+                ks = (min(ks[0], h // df), min(ks[1], w // df))
+                logger.debug(f"reducing Kernel to {ks}")
+
+            if stride[0] > h // df or stride[1] > w // df:
+                stride = (min(stride[0], h // df), min(stride[1], w // df))
+                logger.debug("reducing stride")
+            bottom_pad = math.ceil(h / (ks[0] * df)) * (ks[0] * df) - h
+            right_pad = math.ceil(w / (ks[1] * df)) * (ks[1] * df) - w
+
+            padded_x = torch.zeros(
+                (bs, nc, h + bottom_pad, w + right_pad), device=x.device
+            )
+            padded_x[:, :, :h, :w] = x
+            x = padded_x
+
+            fold, unfold, normalization, weighting = self.get_fold_unfold(
+                x, ks, stride, df=df
+            )
+            z = unfold(x)  # (bn, nc * prod(**ks), L)
+            # Reshape to img shape
+            z = z.view(
+                (z.shape[0], -1, ks[0] * df, ks[1] * df, z.shape[-1])
+            )  # (bn, nc, ks[0], ks[1], L )
+
+            output_list = [
+                self.encode_all_at_once(z[:, :, :, :, i]) for i in range(z.shape[-1])
+            ]
+
+            o = torch.stack(output_list, axis=-1)
+            o = o * weighting
+
+            # Reverse reshape to img shape
+            o = o.view((o.shape[0], -1, o.shape[-1]))  # (bn, nc * ks[0] * ks[1], L)
+            # stitch crops together
+            encoded = fold(o)
+            encoded = encoded / normalization
+            # trim off padding
+            encoded = encoded[:, :, : orig_shape[2] // df, : orig_shape[3] // df]
+
+            return encoded
+
+        return self.encode_all_at_once(x)
 
     def decode(self, z):
         try:
@@ -166,6 +237,56 @@ class AutoencoderKL(pl.LightningModule):
             )
 
             return final_tensor
+
+    def decode_with_folds(self, z):
+        ks = self.split_input_params["ks"]  # eg. (128, 128)
+        stride = self.split_input_params["stride"]  # eg. (64, 64)
+        uf = self.split_input_params["vqf"]
+        orig_shape = z.shape
+        bs, nc, h, w = z.shape
+        bottom_pad = math.ceil(h / ks[0]) * ks[0] - h
+        right_pad = math.ceil(w / ks[1]) * ks[1] - w
+
+        # pad the latent such that the unfolding will cover the whole image
+        padded_z = torch.zeros((bs, nc, h + bottom_pad, w + right_pad), device=z.device)
+        padded_z[:, :, :h, :w] = z
+        z = padded_z
+
+        bs, nc, h, w = z.shape
+        if ks[0] > h or ks[1] > w:
+            ks = (min(ks[0], h), min(ks[1], w))
+            logger.debug("reducing Kernel")
+
+        if stride[0] > h or stride[1] > w:
+            stride = (min(stride[0], h), min(stride[1], w))
+            logger.debug("reducing stride")
+
+        fold, unfold, normalization, weighting = self.get_fold_unfold(
+            z, ks, stride, uf=uf
+        )
+
+        z = unfold(z)  # (bn, nc * prod(**ks), L)
+        # 1. Reshape to img shape
+        z = z.view(
+            (z.shape[0], -1, ks[0], ks[1], z.shape[-1])
+        )  # (bn, nc, ks[0], ks[1], L )
+
+        # 2. apply model loop over last dim
+
+        output_list = [
+            self.decode_all_at_once(z[:, :, :, :, i]) for i in range(z.shape[-1])
+        ]
+
+        o = torch.stack(output_list, axis=-1)  # # (bn, nc, ks[0], ks[1], L)
+        o = o * weighting
+        # Reverse 1. reshape to img shape
+        o = o.view((o.shape[0], -1, o.shape[-1]))  # (bn, nc * ks[0] * ks[1], L)
+        # stitch crops together
+        decoded = fold(o)
+        decoded = decoded / normalization  # norm is shape (1, 1, h, w)
+        # trim off padding
+        decoded = decoded[:, :, : orig_shape[2] * 8, : orig_shape[3] * 8]
+        return decoded
 
     def forward(self, input, sample_posterior=True):  # noqa
         posterior = self.encode(input)
@@ -320,6 +441,143 @@ class AutoencoderKL(pl.LightningModule):
                     log["reconstructions_ema"] = xrec_ema
         log["inputs"] = x
         return log
+
+    def delta_border(self, h, w):
+        """
+        :param h: height
+        :param w: width
+        :return: normalized distance to image border,
+         wtith min distance = 0 at border and max dist = 0.5 at image center
+        """
+        lower_right_corner = torch.tensor([h - 1, w - 1]).view(1, 1, 2)
+        arr = self.meshgrid(h, w) / lower_right_corner
+        dist_left_up = torch.min(arr, dim=-1, keepdims=True)[0]
+        dist_right_down = torch.min(1 - arr, dim=-1, keepdims=True)[0]
+        edge_dist = torch.min(
+            torch.cat([dist_left_up, dist_right_down], dim=-1), dim=-1
+        )[0]
+        return edge_dist
+
+    def get_weighting(self, h, w, Ly, Lx, device):
+        weighting = self.delta_border(h, w)
+        weighting = torch.clip(
+            weighting,
+            self.split_input_params["clip_min_weight"],
+            self.split_input_params["clip_max_weight"],
+        )
+        weighting = weighting.view(1, h * w, 1).repeat(1, 1, Ly * Lx).to(device)
+
+        if self.split_input_params["tie_braker"]:
+            L_weighting = self.delta_border(Ly, Lx)
+            L_weighting = torch.clip(
+                L_weighting,
+                self.split_input_params["clip_min_tie_weight"],
+                self.split_input_params["clip_max_tie_weight"],
+            )
+
+            L_weighting = L_weighting.view(1, 1, Ly * Lx).to(device)
+            weighting = weighting * L_weighting
+        return weighting
+
+    def get_fold_unfold(self, x, kernel_size, stride, uf=1, df=1):
+        """
+        :param x: img of size (bs, c, h, w)
+        :return: n img crops of size (n, bs, c, kernel_size[0], kernel_size[1])
+        """
+        bs, nc, h, w = x.shape  # noqa
+
+        # number of crops in image
+        Ly = (h - kernel_size[0]) // stride[0] + 1
+        Lx = (w - kernel_size[1]) // stride[1] + 1
+
+        if uf == 1 and df == 1:
+            fold_params = {
+                "kernel_size": kernel_size,
+                "dilation": 1,
+                "padding": 0,
+                "stride": stride,
+            }
+            unfold = torch.nn.Unfold(**fold_params)
+
+            fold = torch.nn.Fold(output_size=x.shape[2:], **fold_params)
+
+            weighting = self.get_weighting(
+                kernel_size[0], kernel_size[1], Ly, Lx, x.device
+            ).to(x.dtype)
+            normalization = fold(weighting).view(1, 1, h, w)  # normalizes the overlap
+            weighting = weighting.view((1, 1, kernel_size[0], kernel_size[1], Ly * Lx))
+
+        elif uf > 1 and df == 1:
+            fold_params = {
+                "kernel_size": kernel_size,
+                "dilation": 1,
+                "padding": 0,
+                "stride": stride,
+            }
+            unfold = torch.nn.Unfold(**fold_params)
+
+            fold_params2 = {
+                "kernel_size": (kernel_size[0] * uf, kernel_size[0] * uf),
+                "dilation": 1,
+                "padding": 0,
+                "stride": (stride[0] * uf, stride[1] * uf),
+            }
+            fold = torch.nn.Fold(
+                output_size=(x.shape[2] * uf, x.shape[3] * uf), **fold_params2
+            )
+
+            weighting = self.get_weighting(
+                kernel_size[0] * uf, kernel_size[1] * uf, Ly, Lx, x.device
+            ).to(x.dtype)
+            normalization = fold(weighting).view(
+                1, 1, h * uf, w * uf
+            )  # normalizes the overlap
+            weighting = weighting.view(
+                (1, 1, kernel_size[0] * uf, kernel_size[1] * uf, Ly * Lx)
+            )
+
+        elif df > 1 and uf == 1:
+            Ly = (h - (kernel_size[0] * df)) // (stride[0] * df) + 1
+            Lx = (w - (kernel_size[1] * df)) // (stride[1] * df) + 1
+
+            unfold_params = {
+                "kernel_size": (kernel_size[0] * df, kernel_size[1] * df),
+                "dilation": 1,
+                "padding": 0,
+                "stride": (stride[0] * df, stride[1] * df),
+            }
+
+            unfold = torch.nn.Unfold(**unfold_params)
+
+            fold_params = {
+                "kernel_size": kernel_size,
+                "dilation": 1,
+                "padding": 0,
+                "stride": stride,
+            }
+            fold = torch.nn.Fold(
+                output_size=(x.shape[2] // df, x.shape[3] // df), **fold_params
+            )
+
+            weighting = self.get_weighting(
+                kernel_size[0], kernel_size[1], Ly, Lx, x.device
+            ).to(x.dtype)
+            normalization = fold(weighting).view(
+                1, 1, h // df, w // df
+            )  # normalizes the overlap
+            weighting = weighting.view((1, 1, kernel_size[0], kernel_size[1], Ly * Lx))
+
+        else:
+            raise NotImplementedError
+
+        return fold, unfold, normalization, weighting
+
+    def meshgrid(self, h, w):
+        y = torch.arange(0, h).view(h, 1, 1).repeat(1, w, 1)
+        x = torch.arange(0, w).view(1, w, 1).repeat(h, 1, 1)
+
+        arr = torch.cat([y, x], dim=-1)
+        return arr
 
     # def to_rgb(self, x):
     #     assert self.image_key == "segmentation"
