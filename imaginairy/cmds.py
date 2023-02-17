@@ -745,6 +745,7 @@ def _imagine_cmd(
         ext = make_compilation_animation
 
         compilation_outdir = os.path.join(outdir, "compilations")
+        os.makedirs(compilation_outdir, exist_ok=True)
         base_count = len(os.listdir(compilation_outdir))
         new_filename = os.path.join(
             compilation_outdir, f"{base_count:04d}_compilation.{ext}"
