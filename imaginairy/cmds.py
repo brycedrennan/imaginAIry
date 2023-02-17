@@ -533,6 +533,7 @@ def edit_image(  # noqa
     Same as calling `aimg imagine --model edit --init-image my-dog.jpg --init-image-strength 1` except this command
     can batch edit images.
     """
+    allow_compose_phase = False
     return _imagine_cmd(
         ctx,
         prompt,
@@ -557,6 +558,7 @@ def edit_image(  # noqa
         tile,
         tile_x,
         tile_y,
+        allow_compose_phase,
         mask_image,
         mask_prompt,
         mask_mode,

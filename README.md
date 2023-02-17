@@ -56,7 +56,7 @@ with prompt-based masking.
 # enter imaginairy shell
 >> aimg
 🤖🧠> edit scenic_landscape.jpg -p "make it winter" --prompt-strength 20
-🤖🧠> edit scenic_landscape.jpg -p "make it winter" --steps 30 --arg-schedule "prompt_strength[2:25:0.5]" --compilation-anim
+🤖🧠> edit scenic_landscape.jpg -p "make it winter" --steps 30 --arg-schedule "prompt_strength[2:25:0.5]" --compilation-anim gif
 🤖🧠> edit dog.jpg -p "make the dog red" --prompt-strength 5
 🤖🧠> edit bowl_of_fruit.jpg -p "replace the fruit with strawberries"
 🤖🧠> edit freckled_woman.jpg -p "make her a cyborg" --prompt-strength 13

@@ -408,7 +408,7 @@ def _generate_single_image(
 
             elif model.cond_stage_key == "edit":
                 # pix2pix model
-                c_cat = [model.encode_first_stage(init_image_t).mode()]
+                c_cat = [model.encode_first_stage(init_image_t)]
                 c_cat_neutral = [torch.zeros_like(init_latent)]
                 denoiser_cls = CFGEditingDenoiser
             if c_cat:
