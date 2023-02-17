@@ -300,6 +300,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**10.0.1**
+- fix: `edit` was broken
+
 **10.0.0**
 
 - feature: 🎉🎉 Make large images while retaining composition. Try `imagine "a flower" -w 1920 -h 1080`
