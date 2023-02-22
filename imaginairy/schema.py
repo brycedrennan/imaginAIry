@@ -118,6 +118,7 @@ class ImaginePrompt:
         model_config_path=None,
         is_intermediate=False,
         collect_progress_latents=False,
+        caption_text="",
     ):
         self.prompts = prompt
         self.negative_prompt = negative_prompt
@@ -146,6 +147,7 @@ class ImaginePrompt:
         self.allow_compose_phase = allow_compose_phase
         self.model = model
         self.model_config_path = model_config_path
+        self.caption_text = caption_text
 
         # we don't want to save intermediate images
         self.is_intermediate = is_intermediate
@@ -227,7 +229,7 @@ class ImaginePrompt:
             self.steps = self.steps or SamplerCls.default_steps
             self.width = self.width or get_model_default_image_size(self.model)
             self.height = self.height or get_model_default_image_size(self.model)
-
+        self.steps = int(self.steps)
         if self.negative_prompt is None:
             model_config = config.MODEL_CONFIG_SHORTCUTS.get(self.model, None)
             if model_config:

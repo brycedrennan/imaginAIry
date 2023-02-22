@@ -3,6 +3,7 @@ import math
 import os
 import re
 
+from imaginairy.img_utils import add_caption_to_image
 from imaginairy.schema import SafetyMode
 
 logger = logging.getLogger(__name__)
@@ -570,6 +571,9 @@ def _generate_single_image(
                     generated_img=img_to_add_back_to_original,
                     mask_img=mask_image_orig,
                 )
+
+            if prompt.caption_text:
+                add_caption_to_image(gen_img, prompt.caption_text)
 
         result = ImagineResult(
             img=gen_img,

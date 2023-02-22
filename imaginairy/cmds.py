@@ -247,6 +247,13 @@ common_options = [
         type=click.Choice(["gif", "mp4"]),
         help="Generate an animation composed of all the images generated in this run.  Defaults to gif but `--compilation-anim mp4` will generate an mp4 instead.",
     ),
+    click.option(
+        "--caption-text",
+        "caption_text",
+        default=None,
+        help="Specify the text to write onto the image",
+        type=str,
+    ),
 ]
 
 
@@ -391,6 +398,7 @@ def imagine_cmd(
     make_compare_gif,
     arg_schedules,
     make_compilation_animation,
+    caption_text,
     control_image,
     control_image_raw,
     control_mode,
@@ -440,6 +448,7 @@ def imagine_cmd(
         make_compare_gif,
         arg_schedules,
         make_compilation_animation,
+        caption_text,
         control_image,
         control_image_raw,
         control_mode,
@@ -559,6 +568,7 @@ def edit_image(  # noqa
     make_compare_gif,
     arg_schedules,
     make_compilation_animation,
+    caption_text,
 ):
     """
     Edit an image via AI.
@@ -611,6 +621,7 @@ def edit_image(  # noqa
         make_compare_gif,
         arg_schedules,
         make_compilation_animation,
+        caption_text,
     )
 
 
@@ -654,6 +665,7 @@ def _imagine_cmd(
     make_compare_gif=False,
     arg_schedules=None,
     make_compilation_animation=False,
+    caption_text="",
     control_image=None,
     control_image_raw=None,
     control_mode="",
@@ -762,6 +774,7 @@ def _imagine_cmd(
                     allow_compose_phase=allow_compose_phase,
                     model=model_weights_path,
                     model_config_path=model_config_path,
+                    caption_text=caption_text,
                 )
                 from imaginairy.prompt_schedules import (
                     parse_schedule_strs,
