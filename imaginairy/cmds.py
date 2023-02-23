@@ -499,6 +499,8 @@ remove_option(edit_options, "init_image")
 remove_option(edit_options, "init_image_strength")
 remove_option(edit_options, "negative_prompt")
 remove_option(edit_options, "allow_compose_phase")
+
+
 # remove_option(edit_options, "control_mode")
 # remove_option(edit_options, "control_image")
 # remove_option(edit_options, "control_image_raw")
@@ -870,17 +872,74 @@ def upscale_cmd(image_filepaths, outdir):
 
 
 @click.argument("image_filepaths", nargs=-1)
+@click.option(
+    "--outdir",
+    default="./outputs/colorized",
+    show_default=True,
+    type=click.Path(),
+    help="Where to write results to.",
+)
+@click.option(
+    "-r",
+    "--repeats",
+    default=1,
+    show_default=True,
+    type=int,
+    help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated.",
+)
+@aimg.command("colorize")
+def colorize_cmd(image_filepaths, outdir, repeats):
+    """
+    Colorize images using AI. Doesn't work very well yet.
+    """
+    import os.path
+
+    from tqdm import tqdm
+
+    from imaginairy import LazyLoadingImage
+    from imaginairy.colorize import colorize_img
+    from imaginairy.log_utils import configure_logging
+
+    configure_logging()
+
+    os.makedirs(outdir, exist_ok=True)
+    base_count = len(os.listdir(outdir))
+    for _ in range(repeats):
+        for p in tqdm(image_filepaths):
+            base_count += 1
+            filename = f"{base_count:06d}_{os.path.basename(p)}".lower()
+            savepath = os.path.join(outdir, filename)
+            if p.startswith("http"):
+                img = LazyLoadingImage(url=p)
+            elif os.path.isdir(p):
+                print(f"Skipping directory: {p}")
+                continue
+            else:
+                img = LazyLoadingImage(filepath=p)
+            logger.info(f"Colorizing {p} and saving it to {savepath}")
+
+            img = colorize_img(img)
+
+            img.save(savepath)
+
+
+@click.argument("image_filepaths", nargs=-1)
 @aimg.command()
 def describe(image_filepaths):
     """Generate text descriptions of images."""
+    import os
 
     from imaginairy import LazyLoadingImage
     from imaginairy.enhancers.describe_image_blip import generate_caption
 
     imgs = []
     for p in image_filepaths:
+
         if p.startswith("http"):
             img = LazyLoadingImage(url=p)
+        elif os.path.isdir(p):
+            print(f"Skipping directory: {p}")
+            continue
         else:
             img = LazyLoadingImage(filepath=p)
         imgs.append(img)
@@ -1118,6 +1177,19 @@ def prepare_images(images_dir, is_person, target_size):
         aimg prep-images ./images/toy-train
     """
 
+    from imaginairy.training_tools.image_prep import prep_images
+
+    prep_images(images_dir=images_dir, is_person=is_person, target_size=target_size)
+
+
+@click.option(
+    "--target-size",
+    default=512,
+    type=int,
+    show_default=True,
+)
+@aimg.command("prep-images")
+def colorize_image_cmd(images_dir, is_person, target_size):
     from imaginairy.training_tools.image_prep import prep_images
 
     prep_images(images_dir=images_dir, is_person=is_person, target_size=target_size)
