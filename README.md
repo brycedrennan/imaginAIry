@@ -26,19 +26,6 @@ AI imagined images. Pythonic generation of stable diffusion images.
 <img src="assets/009719_942389026_kdpmpp2m15_PS7.5_a_flower.gif" height="256">
 </p>
 
-
-## Features
- - Instruction based image edits (InstructPix2Pix)
- - Control image generation structure (ControlNet)
- - Seamless tiled images
- - Text-based masking (clipseg)
- - Face enhancement (CodeFormer)
- - Upscaling 
- - Outpainting
- - Prompt expansion
- - Image captioning
- - Different generation models
-
 ### Image Structure Control [by ControlNet](https://github.com/lllyasviel/ControlNet)
 Generate images guided by body poses, depth maps, canny edges, hed boundaries, or normal maps.
 
@@ -392,6 +379,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 
 ## ChangeLog
+
+- feature: 🎉 ControlNet integration!  Control the structure of generated images.
 
 **10.0.1**
 - fix: `edit` was broken
