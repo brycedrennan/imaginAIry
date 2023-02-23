@@ -1,4 +1,6 @@
+import subprocess
 import sys
+from functools import lru_cache
 
 from setuptools import find_packages, setup
 
@@ -17,8 +19,19 @@ else:
     entry_points = None
 
 
+@lru_cache()
+def get_git_revision_hash() -> str:
+    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+
+
+revision_hash = get_git_revision_hash()
+
 with open("README.md", encoding="utf-8") as f:
     readme = f.read()
+    readme = readme.replace(
+        '<img src="',
+        f'<img src="https://raw.githubusercontent.com/brycedrennan/imaginAIry/{revision_hash}/',
+    )
 
 setup(
     name="imaginAIry",
