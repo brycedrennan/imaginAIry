@@ -381,6 +381,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 ## ChangeLog
 
 - feature: 🎉 ControlNet integration!  Control the structure of generated images.
+- feature: `aimg colorize` attempts to use controlnet to colorize images
 
 **10.0.1**
 - fix: `edit` was broken
