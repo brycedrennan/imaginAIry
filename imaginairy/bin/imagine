@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+import imaginairy.cli.imagine
 
 if __name__ == "__main__":
-    from imaginairy import cmds
-    cmds.imagine_cmd()
+    import imaginairy.cli.main
+    imaginairy.cli.imagine.imagine_cmd()

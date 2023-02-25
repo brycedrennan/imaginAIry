@@ -10,8 +10,8 @@ if is_for_windows:
     scripts = None
     entry_points = {
         "console_scripts": [
-            "imagine=imaginairy.cmds:imagine_cmd",
-            "aimg=imaginairy.cmds:aimg",
+            "imagine=imaginairy.cli.main:imagine_cmd",
+            "aimg=imaginairy.cli.main:aimg",
         ],
     }
 else:
