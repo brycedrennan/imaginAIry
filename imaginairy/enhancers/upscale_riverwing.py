@@ -3,9 +3,9 @@ from functools import lru_cache
 import numpy as np
 import torch
 import torch.nn.functional as F
-from pytorch_lightning import seed_everything
 from torch import nn
 
+from imaginairy.log_utils import log_latent
 from imaginairy.model_manager import hf_hub_download
 from imaginairy.utils import get_device, platform_appropriate_autocast
 from imaginairy.vendored import k_diffusion as K
@@ -211,19 +211,19 @@ def upscale_latent(
     batch_size=1,
     num_samples=1,
     # Amount of noise to add per step (0.0=deterministic). Used in all samplers except `k_euler`.
-    eta=1.0,
+    eta=0.1,
     device=get_device(),
 ):
     # Add noise to the latent vectors before upscaling. This theoretically can make the model work better on out-of-distribution inputs, but mostly just seems to make it match the input less, so it's turned off by default.
     noise_aug_level = 0  # @param {type: 'slider', min: 0.0, max: 0.6, step:0.025}
-    noise_aug_type = "gaussian"  # @param ["gaussian", "fake"]
+    noise_aug_type = "fake"  # @param ["gaussian", "fake"]
 
     # @markdown Sampler settings. `k_dpm_adaptive` uses an adaptive solver with error tolerance `tol_scale`, all other use a fixed number of steps.
     sampler = "k_dpm_2_ancestral"  # @param ["k_euler", "k_euler_ancestral", "k_dpm_2_ancestral", "k_dpm_fast", "k_dpm_adaptive"]
 
     tol_scale = 0.25  # @param {type: 'number'}
 
-    seed_everything(seed)
+    # seed_everything(seed)
 
     # uc = condition_up(batch_size * ["blurry, low resolution, 720p, grainy"])
     uc = condition_up(batch_size * [""])
@@ -302,4 +302,5 @@ def upscale_latent(
         extra_args = {"low_res": latent_noised, "low_res_sigma": low_res_sigma, "c": c}
         noise = torch.randn(x_shape, device=device)
         up_latents = do_sample(noise, extra_args)
+        log_latent(low_res_latent, "low_res_latent")
         return up_latents

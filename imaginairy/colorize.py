@@ -30,7 +30,7 @@ def colorize_img(img):
         negative_prompt="black and white",
         width=min(img.width, 1024),
         height=min(img.height, 1024),
-        steps=30
+        steps=30,
     )
     result = list(imagine(prompt))[0]
     colorized_img = replace_color(img, result.images["generated"])

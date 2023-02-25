@@ -6,6 +6,8 @@ from torch import nn
 from torchdiffeq import odeint
 from tqdm.auto import tqdm, trange
 
+from imaginairy.log_utils import log_latent
+
 
 def append_zero(x):
     return torch.cat([x, x.new_zeros([1])])
@@ -945,4 +947,5 @@ def sample_dpmpp_2m(model, x, sigmas, extra_args=None, callback=None, disable=No
             denoised_d = (1 + 1 / (2 * r)) * denoised - (1 / (2 * r)) * old_denoised
             x = (sigma_fn(t_next) / sigma_fn(t)) * x - (-h).expm1() * denoised_d
         old_denoised = denoised
+    log_latent(x, "K_dpmpp_2m_x")
     return x

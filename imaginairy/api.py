@@ -3,7 +3,6 @@ import math
 import os
 import re
 
-from imaginairy.img_utils import add_caption_to_image
 from imaginairy.schema import SafetyMode
 
 logger = logging.getLogger(__name__)
@@ -208,6 +207,7 @@ def _generate_single_image(
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
     from imaginairy.img_utils import (
+        add_caption_to_image,
         pillow_fit_image_within,
         pillow_img_to_torch_image,
         pillow_mask_to_latent_mask,
@@ -626,6 +626,7 @@ def _generate_composition_latent(
     from torch.nn import functional as F
 
     from imaginairy.enhancers.upscale_riverwing import upscale_latent
+    from imaginairy.log_utils import log_img, log_latent
 
     b, c, h, w = orig_shape = sampler_kwargs["shape"]
     max_compose_gen_size = 768
@@ -677,7 +678,16 @@ def _generate_composition_latent(
     samples = sampler.sample(**new_kwargs)
 
     samples = upscale_latent(samples)
-    samples = F.interpolate(samples, size=orig_shape[2:], mode="bilinear")
+    log_latent(samples, "upscaled")
+    img_t = sampler.model.decode_first_stage(samples)
+
+    img_t = F.interpolate(img_t, size=(h * 8, w * 8), mode="bicubic")
+    log_img(img_t, "upscaled interpolated")
+    samples = sampler.model.get_first_stage_encoding(
+        sampler.model.encode_first_stage(img_t)
+    )
+    log_latent(samples, "upscaled interpolated latent")
+
     return samples
 
 
