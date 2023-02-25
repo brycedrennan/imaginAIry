@@ -380,8 +380,20 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**10.2.0**
+ - feature: input raw control images (a pose, canny map, depth map, etc) directly using `--control-image-raw`
+   This is opposed to current behavior of extracting the control signal from an input image via `--control-image`
+ - feature: `aimg model-list` command lists included models
+ - feature: system memory added to `aimg system-info` command
+ - fix: add missing metadata attributes to generated images
+ - fix: image composition step was producing unnecessarily blurry images 
+ - refactor: split `aimg` cli code into multiple files
+ - docs: pypi docs now link properly to github automatically
+
+**10.1.0**
 - feature: 🎉 ControlNet integration!  Control the structure of generated images.
 - feature: `aimg colorize` attempts to use controlnet to colorize images
+- feature: `--caption-text` command adds text at the bottom left of an image
 
 **10.0.1**
 - fix: `edit` was broken
