@@ -385,6 +385,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
    This is opposed to current behavior of extracting the control signal from an input image via `--control-image`
  - feature: `aimg model-list` command lists included models
  - feature: system memory added to `aimg system-info` command
+ - feature: add `--fix-faces` options to `aimg upscale` command
  - fix: add missing metadata attributes to generated images
  - fix: image composition step was producing unnecessarily blurry images 
  - refactor: split `aimg` cli code into multiple files
