@@ -676,6 +676,7 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
      - some syntax to allow it in a text string
    - [paint with words](https://www.reddit.com/r/StableDiffusion/comments/10lzgze/i_figured_out_a_way_to_apply_different_prompts_to/)
      - https://github.com/cloneofsimo/paint-with-words-sd 
+   - https://multidiffusion.github.io/
    - images as actual prompts instead of just init images. 
      - not directly possible due to model architecture.
      - can it just be integrated into sampler? 
@@ -788,6 +789,11 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
 
 ## Online Stable Diffusion Services
  - https://stablecog.com/ 
+
+## Image Generation Algorithms
+ - 2023-02-22 - Composer (alibaba) [site](https://damo-vilab.github.io/composer-page/) [paper](https://arxiv.org/pdf/2302.09778.pdf) [code](https://github.com/damo-vilab/composer)
+ - Dalle (openai)
+ - Latent Diffusion
 
 ## Further Reading
  - https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md
