@@ -86,6 +86,7 @@ MODEL_CONFIGS = [
         weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt",
         default_image_size=768,
         forced_attn_precision="fp32",
+        alias="sd21v",
     ),
     ModelConfig(
         short_name="SD-2.0-v",
