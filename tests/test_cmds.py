@@ -1,7 +1,11 @@
 from click.testing import CliRunner
 
 from imaginairy import ImaginePrompt, LazyLoadingImage, surprise_me
-from imaginairy.cmds import aimg, edit_demo, edit_image, imagine_cmd, upscale_cmd
+from imaginairy.cli.edit import edit_cmd
+from imaginairy.cli.edit_demo import edit_demo_cmd
+from imaginairy.cli.imagine import imagine_cmd
+from imaginairy.cli.main import aimg
+from imaginairy.cli.upscale import upscale_cmd
 from tests import TESTS_FOLDER
 
 
@@ -29,7 +33,7 @@ def test_imagine_cmd():
 def test_edit_cmd():
     runner = CliRunner()
     result = runner.invoke(
-        edit_image,
+        edit_cmd,
         [
             f"{TESTS_FOLDER}/data/dog.jpg",
             "--steps",
@@ -72,7 +76,7 @@ def test_edit_demo(monkeypatch):
     monkeypatch.setattr(surprise_me, "surprise_me_prompts", mock_surprise_me_prompts)
     surprise_me.generic_prompts = []
     result = runner.invoke(
-        edit_demo,
+        edit_demo_cmd,
         [
             f"{TESTS_FOLDER}/data/dog.jpg",
             "--outdir",

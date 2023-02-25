@@ -2,5 +2,5 @@
 # -*- coding: utf-8 -*-
 
 if __name__ == "__main__":
-    from imaginairy import cmds
-    cmds.aimg()
+    import imaginairy.cli.main
+    imaginairy.cli.main.aimg()
