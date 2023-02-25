@@ -266,7 +266,7 @@ class ImaginePrompt:
         return (
             f'"{self.prompt_text}" {self.width}x{self.height}px '
             f'negative-prompt:"{self.negative_prompt_text}" '
-            f"seed:{self.seed} prompt-strength:{self.prompt_strength} steps:{self.steps} sampler-type:{self.sampler_type}"
+            f"seed:{self.seed} prompt-strength:{self.prompt_strength} steps:{self.steps} sampler-type:{self.sampler_type} init-image-strength:{self.init_image_strength} model:{self.model}"
         )
 
     def as_dict(self):
