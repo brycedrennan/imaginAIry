@@ -195,7 +195,7 @@ class ImaginePrompt:
         ):
             self.control_image = self.init_image
 
-        if self.control_mode and not self.control_image:
+        if self.control_mode and not (self.control_image or self.control_image_raw):
             raise ValueError("You must set `control_image` when using `control_mode`")
 
         if self.mask_image is not None and self.mask_prompt is not None:
