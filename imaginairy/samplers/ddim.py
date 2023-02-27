@@ -65,9 +65,10 @@ class DDIMSampler(ImageSampler):
         time_range = np.flip(timesteps)
         total_steps = timesteps.shape[0]
 
-        if orig_latent is not None:
+        # t_start is none if init image strength set to 0
+        if orig_latent is not None and t_start is not None:
             noisy_latent = self.noise_an_image(
-                init_latent=orig_latent, t=t_start, schedule=schedule, noise=noise
+                init_latent=orig_latent, t=t_start - 1, schedule=schedule, noise=noise
             )
         else:
             noisy_latent = noise
