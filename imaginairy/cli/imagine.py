@@ -8,7 +8,7 @@ from imaginairy.cli.shared import (
 )
 
 
-@click.command(context_settings={"max_content_width": 140}, cls=ImagineColorsCommand)
+@click.command(context_settings={"max_content_width": 140}, cls=ImagineColorsCommand, name="imagine")
 @click.argument("prompt_texts", nargs=-1)
 @add_options(common_options)
 @click.option(
