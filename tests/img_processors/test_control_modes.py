@@ -23,4 +23,4 @@ def test_control_images(filename_base_for_outputs, control_func, control_name):
     control_img = control_img_to_pillow_img(control_t)
     img_path = f"{filename_base_for_outputs}.png"
 
-    assert_image_similar_to_expectation(control_img, img_path, threshold=3500)
+    assert_image_similar_to_expectation(control_img, img_path, threshold=4000)

@@ -25,10 +25,14 @@ strat_combos = [
 ]
 
 
-@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
+@pytest.mark.skipif(True, reason="Run manually as needed. Uses too much memory.")
 @pytest.mark.parametrize("encode_strat,decode_strat", strat_combos)
 def test_encode_decode(filename_base_for_outputs, encode_strat, decode_strat):
-    """Test that encoding and decoding works."""
+    """
+    Test that encoding and decoding works.
+
+    Outputs comparison with original image.
+    """
     model = get_diffusion_model()
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/beach_at_sainte_adresse.jpg")
     img = pillow_fit_image_within(img, max_height=img.height, max_width=img.width)
