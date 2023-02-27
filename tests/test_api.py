@@ -129,6 +129,40 @@ def test_img_to_img_from_url_cats(
     assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=17000)
 
 
+def test_img2img_low_noise(
+    filename_base_for_outputs,
+    sampler_type,
+):
+    fruit_path = os.path.join(TESTS_FOLDER, "data", "bowl_of_fruit.jpg")
+    img = LazyLoadingImage(filepath=fruit_path)
+
+    prompt = ImaginePrompt(
+        "a white bowl filled with gold coins",
+        prompt_strength=12,
+        init_image=img,
+        init_image_strength=0.5,
+        mask_prompt="(fruit{*2} OR stem{*10} OR fruit stem{*3})",
+        mask_mode="replace",
+        # steps=40,
+        seed=1,
+        sampler_type=sampler_type,
+    )
+
+    result = next(imagine(prompt))
+
+    threshold_lookup = {
+        "k_dpm_2_a": 26000,
+        "k_euler_a": 18000,
+        "k_dpm_adaptive": 13000,
+    }
+    threshold = threshold_lookup.get(sampler_type, 14000)
+
+    img_path = f"{filename_base_for_outputs}.png"
+    assert_image_similar_to_expectation(
+        result.img, img_path=img_path, threshold=threshold
+    )
+
+
 @pytest.mark.parametrize("init_strength", [0, 0.05, 0.2, 1])
 def test_img_to_img_fruit_2_gold(
     filename_base_for_outputs,

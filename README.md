@@ -380,6 +380,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- fix: img2img was broken for all samplers except plms and ddim when init image strength was >~0.25
+
 **10.2.0**
  - feature: input raw control images (a pose, canny map, depth map, etc) directly using `--control-image-raw`
    This is opposed to current behavior of extracting the control signal from an input image via `--control-image`

@@ -224,7 +224,6 @@ def _generate_single_image(
     from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
     from imaginairy.safety import create_safety_score
     from imaginairy.samplers import SAMPLER_LOOKUP
-    from imaginairy.samplers.base import NoiseSchedule, noise_an_image
     from imaginairy.samplers.editing import CFGEditingDenoiser
     from imaginairy.schema import ImaginePrompt, ImagineResult
     from imaginairy.utils import get_device, randn_seeded
@@ -290,7 +289,7 @@ def _generate_single_image(
         SamplerCls = SAMPLER_LOOKUP[prompt.sampler_type.lower()]
         sampler = SamplerCls(model)
         mask_latent = mask_image = mask_image_orig = mask_grayscale = None
-        t_enc = init_latent = init_latent_noised = control_image = None
+        t_enc = init_latent = control_image = None
         starting_image = None
         denoiser_cls = None
 
@@ -303,8 +302,9 @@ def _generate_single_image(
         if prompt.init_image:
             starting_image = prompt.init_image
             generation_strength = 1 - prompt.init_image_strength
-            if model.cond_stage_key == "edit":
-                t_enc = prompt.steps
+
+            if model.cond_stage_key == "edit" or generation_strength >= 1:
+                t_enc = None
             else:
                 t_enc = int(prompt.steps * generation_strength)
 
@@ -359,24 +359,24 @@ def _generate_single_image(
             )
             # noise = noise[:, :, : init_latent.shape[2], : init_latent.shape[3]]
 
-            schedule = NoiseSchedule(
-                model_num_timesteps=model.num_timesteps,
-                ddim_num_steps=prompt.steps,
-                model_alphas_cumprod=model.alphas_cumprod,
-                ddim_discretize="uniform",
-            )
-            if generation_strength >= 1:
-                # prompt strength gets converted to time encodings,
-                # which means you can't get to true 0 without this hack
-                # (or setting steps=1000)
-                init_latent_noised = noise
-            else:
-                init_latent_noised = noise_an_image(
-                    init_latent,
-                    torch.tensor([t_enc - 1]).to(get_device()),
-                    schedule=schedule,
-                    noise=noise,
-                )
+            # schedule = NoiseSchedule(
+            #     model_num_timesteps=model.num_timesteps,
+            #     ddim_num_steps=prompt.steps,
+            #     model_alphas_cumprod=model.alphas_cumprod,
+            #     ddim_discretize="uniform",
+            # )
+            # if generation_strength >= 1:
+            #     # prompt strength gets converted to time encodings,
+            #     # which means you can't get to true 0 without this hack
+            #     # (or setting steps=1000)
+            #     init_latent_noised = noise
+            # else:
+            #     init_latent_noised = noise_an_image(
+            #         init_latent,
+            #         torch.tensor([t_enc - 1]).to(get_device()),
+            #         schedule=schedule,
+            #         noise=noise,
+            #     )
 
         if hasattr(model, "depth_stage_key"):
             # depth model
@@ -472,7 +472,6 @@ def _generate_single_image(
             "c_concat": c_cat_neutral,
             "c_crossattn": [neutral_conditioning],
         }
-        log_latent(init_latent_noised, "init_latent_noised")
 
         if (
             prompt.allow_compose_phase
@@ -483,7 +482,7 @@ def _generate_single_image(
                 sampler=sampler,
                 sampler_kwargs={
                     "num_steps": prompt.steps,
-                    "initial_latent": init_latent_noised,
+                    "noise": noise,
                     "positive_conditioning": positive_conditioning,
                     "neutral_conditioning": neutral_conditioning,
                     "guidance_scale": prompt.prompt_strength,
@@ -498,26 +497,12 @@ def _generate_single_image(
             if comp_samples is not None:
                 result_images["composition"] = comp_samples
                 noise = noise[:, :, : comp_samples.shape[2], : comp_samples.shape[3]]
-
-                schedule = NoiseSchedule(
-                    model_num_timesteps=model.num_timesteps,
-                    ddim_num_steps=prompt.steps,
-                    model_alphas_cumprod=model.alphas_cumprod,
-                    ddim_discretize="uniform",
-                )
                 t_enc = int(prompt.steps * 0.75)
-                init_latent_noised = noise_an_image(
-                    comp_samples,
-                    torch.tensor([t_enc - 1]).to(get_device()),
-                    schedule=schedule,
-                    noise=noise,
-                )
-
                 log_latent(comp_samples, "comp_samples")
+                init_latent = comp_samples
         with lc.timing("sampling"):
             samples = sampler.sample(
                 num_steps=prompt.steps,
-                initial_latent=init_latent_noised,
                 positive_conditioning=positive_conditioning,
                 neutral_conditioning=neutral_conditioning,
                 guidance_scale=prompt.prompt_strength,
@@ -527,6 +512,7 @@ def _generate_single_image(
                 shape=shape,
                 batch_size=1,
                 denoiser_cls=denoiser_cls,
+                noise=noise,
             )
         if return_latent:
             return samples
@@ -636,7 +622,7 @@ def _generate_composition_latent(
     from imaginairy.enhancers.upscale_riverwing import upscale_latent
     from imaginairy.log_utils import log_img, log_latent
 
-    b, c, h, w = orig_shape = sampler_kwargs["shape"]
+    b, c, h, w = sampler_kwargs["shape"]
     max_compose_gen_size = 768
     shrink_scale = calc_scale_to_fit_within(
         height=h,
@@ -650,9 +636,9 @@ def _generate_composition_latent(
 
     # shrink everything
     new_shape = b, c, int(round(h * shrink_scale)), int(round(w * shrink_scale))
-    initial_latent = new_kwargs["initial_latent"]
-    if initial_latent is not None:
-        initial_latent = F.interpolate(initial_latent, size=new_shape[2:], mode="area")
+    noise = new_kwargs["noise"]
+    if noise is not None:
+        noise = F.interpolate(noise, size=new_shape[2:], mode="nearest-exact")
 
     for cond in [
         new_kwargs["positive_conditioning"],
@@ -676,7 +662,7 @@ def _generate_composition_latent(
     new_kwargs.update(
         {
             "num_steps": 15,
-            "initial_latent": initial_latent,
+            "noise": noise,
             "t_start": t_start,
             "mask": mask_latent,
             "orig_latent": orig_latent,
@@ -685,6 +671,8 @@ def _generate_composition_latent(
     )
     samples = sampler.sample(**new_kwargs)
 
+    # while samples.shape[2] < h:
+    logger.info("Upscaling latent...")
     samples = upscale_latent(samples)
     log_latent(samples, "upscaled")
     img_t = sampler.model.decode_first_stage(samples)

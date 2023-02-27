@@ -43,18 +43,11 @@ class DDIMSampler(ImageSampler):
         orig_latent=None,
         temperature=1.0,
         noise_dropout=0.0,
-        initial_latent=None,
+        noise=None,
         t_start=None,
         quantize_x0=False,
         **kwargs,
     ):
-        # print("Sampling with DDIM")
-        # print("num_steps", num_steps)
-        # print("shape", shape)
-        # print("neutral_conditioning", neutral_conditioning)
-        # print("positive_conditioning", positive_conditioning)
-        # print("guidance_scale", guidance_scale)
-        # print("batch_size", batch_size)
         schedule = NoiseSchedule(
             model_num_timesteps=self.model.num_timesteps,
             model_alphas_cumprod=self.model.alphas_cumprod,
@@ -62,16 +55,22 @@ class DDIMSampler(ImageSampler):
             ddim_discretize="uniform",
         )
 
-        if initial_latent is None:
-            initial_latent = torch.randn(shape, device="cpu").to(self.device)
+        if noise is None:
+            noise = torch.randn(shape, device="cpu").to(self.device)
 
-        log_latent(initial_latent, "initial latent")
+        log_latent(noise, "initial noise")
 
         timesteps = schedule.ddim_timesteps[:t_start]
 
         time_range = np.flip(timesteps)
         total_steps = timesteps.shape[0]
-        noisy_latent = initial_latent
+
+        if orig_latent is not None:
+            noisy_latent = self.noise_an_image(
+                init_latent=orig_latent, t=t_start, schedule=schedule, noise=noise
+            )
+        else:
+            noisy_latent = noise
 
         mask_noise = None
         if mask is not None:
@@ -219,7 +218,8 @@ class DDIMSampler(ImageSampler):
 
     @torch.no_grad()
     def noise_an_image(self, init_latent, t, schedule, noise=None):
-        # t serves as an index to gather the correct alphas
+        if isinstance(t, int):
+            t = torch.tensor([t], device=get_device())
         t = t.clamp(0, 1000)
         sqrt_alphas_cumprod = torch.sqrt(schedule.ddim_alphas)
         sqrt_one_minus_alphas_cumprod = schedule.ddim_sqrt_one_minus_alphas

@@ -87,3 +87,7 @@ def model_list_cmd():
         print(
             f"{control_mode.alias: <10} {control_mode.short_name: <18} {control_mode.control_type}"
         )
+
+
+if __name__ == "__main__":
+    aimg()  # noqa
