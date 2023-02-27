@@ -14,7 +14,6 @@ from imaginairy.samplers.base import (
 from imaginairy.utils import get_device
 from imaginairy.vendored.k_diffusion import sampling as k_sampling
 from imaginairy.vendored.k_diffusion.external import CompVisDenoiser, CompVisVDenoiser
-from imaginairy.vendored.k_diffusion.sampling import get_sigmas_karras
 
 
 class StandardCompVisDenoiser(CompVisDenoiser):
