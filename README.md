@@ -1,4 +1,6 @@
 # ImaginAIry 🤖🧠
+
+[![Downloads](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1rOvQNs0Cmn_yU1bKWjCOHzGVDgZkaTtO?usp=sharing)
 [![Downloads](https://pepy.tech/badge/imaginairy)](https://pepy.tech/project/imaginairy)
 [![image](https://img.shields.io/pypi/v/imaginairy.svg)](https://pypi.org/project/imaginairy/)
 [![image](https://img.shields.io/badge/license-MIT-green)](https://github.com/brycedrennan/imaginAIry/blob/master/LICENSE/)
@@ -379,7 +381,11 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 
 ## ChangeLog
-
+**11.0.0**
+- all these changes together mean same seed/sampler will not be guaranteed to produce same image (thus the version bump)
+- fix: image composition didn't work very well. Works well now but probably very slow on non-cuda platforms
+- fix: remove upscaler tiling message
+- fix: improve k-diffusion sampler schedule. significantly improves image quality of default sampler
 - fix: img2img was broken for all samplers except plms and ddim when init image strength was >~0.25
 
 **10.2.0**
