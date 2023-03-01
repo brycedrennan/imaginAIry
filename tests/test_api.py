@@ -333,3 +333,19 @@ def test_controlnet(filename_base_for_outputs, control_mode):
 
     img_path = f"{filename_base_for_outputs}.png"
     assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=24000)
+
+
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
+def test_large_image(filename_base_for_outputs):
+    prompt_text = "a stormy ocean. oil painting"
+    prompt = ImaginePrompt(
+        prompt_text,
+        width=1920,
+        height=1080,
+        steps=15,
+        seed=0,
+    )
+    result = next(imagine(prompt))
+
+    img_path = f"{filename_base_for_outputs}.png"
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=24000)
