@@ -478,28 +478,28 @@ def _generate_single_image(
             and not is_controlnet_model
             and not model.cond_stage_key == "edit"
         ):
-            comp_samples = _generate_composition_latent(
-                sampler=sampler,
-                sampler_kwargs={
-                    "num_steps": prompt.steps,
-                    "noise": noise,
-                    "positive_conditioning": positive_conditioning,
-                    "neutral_conditioning": neutral_conditioning,
-                    "guidance_scale": prompt.prompt_strength,
-                    "t_start": t_enc,
-                    "mask": mask_latent,
-                    "orig_latent": init_latent,
-                    "shape": shape,
-                    "batch_size": 1,
-                    "denoiser_cls": denoiser_cls,
-                },
-            )
-            if comp_samples is not None:
-                result_images["composition"] = comp_samples
-                noise = noise[:, :, : comp_samples.shape[2], : comp_samples.shape[3]]
-                t_enc = int(prompt.steps * 0.75)
-                log_latent(comp_samples, "comp_samples")
-                init_latent = comp_samples
+            if prompt.init_image:
+                comp_image = _generate_composition_image(
+                    prompt=prompt,
+                    target_height=init_image.height,
+                    target_width=init_image.width,
+                )
+            else:
+                comp_image = _generate_composition_image(
+                    prompt=prompt,
+                    target_height=prompt.height,
+                    target_width=prompt.width,
+                )
+            if comp_image is not None:
+                result_images["composition"] = comp_image
+                # noise = noise[:, :, : comp_image.height, : comp_image.shape[3]]
+                t_enc = int(prompt.steps * 0.65)
+                log_img(comp_image, "comp_image")
+                comp_image_t = pillow_img_to_torch_image(comp_image)
+                comp_image_t = comp_image_t.to(get_device())
+                init_latent = model.get_first_stage_encoding(
+                    model.encode_first_stage(comp_image_t)
+                )
         with lc.timing("sampling"):
             samples = sampler.sample(
                 num_steps=prompt.steps,
@@ -611,7 +611,68 @@ def calc_scale_to_fit_within(
     return max_size / height
 
 
-def _generate_composition_latent(
+def _scale_latent(
+    latent,
+    model,
+    h,
+    w,
+):
+    from torch.nn import functional as F
+
+    # convert to non-latent-space first
+    img = model.decode_first_stage(latent)
+    img = F.interpolate(img, size=(h, w), mode="bicubic", align_corners=False)
+    latent = model.get_first_stage_encoding(model.encode_first_stage(img))
+    return latent
+
+
+def _generate_composition_image(prompt, target_height, target_width):
+    from copy import copy
+
+    from PIL import Image
+
+    cutoff = 512
+    if prompt.width <= cutoff and prompt.height <= cutoff:
+        return None
+
+    composition_prompt = copy(prompt)
+    shrink_scale = calc_scale_to_fit_within(
+        height=prompt.height,
+        width=prompt.width,
+        max_size=cutoff,
+    )
+    composition_prompt.width = int(prompt.width * shrink_scale)
+    composition_prompt.height = int(prompt.height * shrink_scale)
+
+    composition_prompt.steps = None
+    composition_prompt.upscaled = False
+    composition_prompt.fix_faces = False
+    composition_prompt.mask_modify_original = False
+
+    composition_prompt.validate()
+
+    result = _generate_single_image(composition_prompt)
+    img = result.images["generated"]
+    while img.width < target_width:
+        from imaginairy.enhancers.upscale_realesrgan import upscale_image
+
+        img = upscale_image(img)
+
+    # samples = _generate_single_image(composition_prompt, return_latent=True)
+    # while samples.shape[-1] * 8 < target_width:
+    #     samples = upscale_latent(samples)
+    #
+    # img = model_latent_to_pillow_img(samples)
+
+    img = img.resize(
+        (target_width, target_height),
+        resample=Image.Resampling.LANCZOS,
+    )
+
+    return img
+
+
+def _generate_composition_latentz(
     sampler,
     sampler_kwargs,
 ):
@@ -644,9 +705,16 @@ def _generate_composition_latent(
         new_kwargs["positive_conditioning"],
         new_kwargs["neutral_conditioning"],
     ]:
+        print(cond["c_concat"])
+        for c in cond["c_concat"]:
+            print(f"downscaling {c.shape} ")
         cond["c_concat"] = [
-            F.interpolate(c, size=new_shape[2:], mode="area") for c in cond["c_concat"]
+            _scale_latent(
+                latent=c, model=sampler.model, h=new_shape[2] * 8, w=new_shape[3] * 8
+            )
+            for c in cond["c_concat"]
         ]
+        print(cond["c_concat"])
 
     mask_latent = new_kwargs["mask"]
     if mask_latent is not None:
@@ -654,7 +722,13 @@ def _generate_composition_latent(
 
     orig_latent = new_kwargs["orig_latent"]
     if orig_latent is not None:
-        orig_latent = F.interpolate(orig_latent, size=new_shape[2:], mode="area")
+        orig_latent = _scale_latent(
+            latent=orig_latent,
+            model=sampler.model,
+            h=new_shape[2] * 8,
+            w=new_shape[3] * 8,
+        )
+
     t_start = new_kwargs["t_start"]
     if t_start is not None:
         gen_strength = new_kwargs["t_start"] / new_kwargs["num_steps"]

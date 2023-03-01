@@ -97,7 +97,11 @@ class KDiffusionSampler(ImageSampler, ABC):
         sigmas = self.cv_denoiser.get_sigmas(num_steps)[t_start:]
 
         # see https://github.com/crowsonkb/k-diffusion/issues/43#issuecomment-1305195666
-        if self.short_name in (SamplerName.K_DPM_2, SamplerName.K_DPMPP_2M, SamplerName.K_DPM_2_ANCESTRAL):
+        if self.short_name in (
+            SamplerName.K_DPM_2,
+            SamplerName.K_DPMPP_2M,
+            SamplerName.K_DPM_2_ANCESTRAL,
+        ):
             sigmas = torch.cat([sigmas[:-2], sigmas[-1:]])
 
         # if our number of steps is zero, just return the initial latent
