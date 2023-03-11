@@ -200,3 +200,12 @@ def shrink_list(items, max_size):
     for i, item in enumerate(items):
         new_items[int(i / removal_ratio)] = item
     return [items[0]] + list(new_items.values())
+
+
+def glob_expand_paths(paths):
+    import glob
+
+    expanded_paths = []
+    for p in paths:
+        expanded_paths.extend(glob.glob(p))
+    return expanded_paths

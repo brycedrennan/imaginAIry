@@ -86,6 +86,11 @@ def _imagine_cmd(
         init_images = [init_image]
     else:
         init_images = init_image
+
+    from imaginairy.utils import glob_expand_paths
+
+    init_images = glob_expand_paths(init_images)
+
     total_image_count = len(prompt_texts) * max(len(init_images), 1) * repeats
     logger.info(
         f"Received {len(prompt_texts)} prompt(s) and {len(init_images)} input image(s). Will repeat the generations {repeats} times to create {total_image_count} images."
@@ -197,13 +202,12 @@ def _imagine_cmd(
         comp_imgs = [LazyLoadingImage(filepath=f) for f in filenames]
         comp_imgs.reverse()
 
-        from imaginairy.animations import make_bounce_animation
+        from imaginairy.animations import make_slideshow_animation
 
-        make_bounce_animation(
+        make_slideshow_animation(
             outpath=new_filename,
             imgs=comp_imgs,
-            start_pause_duration_ms=1500,
-            end_pause_duration_ms=1000,
+            image_pause_ms=1000,
         )
 
         logger.info(f"[compilation] saved to: {new_filename}")
