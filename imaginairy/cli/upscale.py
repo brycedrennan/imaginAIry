@@ -32,9 +32,10 @@ def upscale_cmd(image_filepaths, outdir, fix_faces, fix_faces_fidelity):
     from imaginairy import LazyLoadingImage
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
+    from imaginairy.utils import glob_expand_paths
 
     os.makedirs(outdir, exist_ok=True)
-
+    image_filepaths = glob_expand_paths(image_filepaths)
     for p in tqdm(image_filepaths):
         savepath = os.path.join(outdir, os.path.basename(p))
         if p.startswith("http"):

@@ -53,6 +53,23 @@ def make_bounce_animation(
     make_animation(imgs=frames, outpath=outpath, frame_duration_ms=durations)
 
 
+def make_slideshow_animation(
+    imgs,
+    outpath,
+    image_pause_ms=1000,
+):
+    # convert from latents
+    converted_frames = []
+    for frame in imgs:
+        if isinstance(frame, torch.Tensor):
+            frame = model_latents_to_pillow_imgs(frame)[0]
+        converted_frames.append(frame)
+
+    durations = [image_pause_ms] * len(converted_frames)
+
+    make_animation(imgs=converted_frames, outpath=outpath, frame_duration_ms=durations)
+
+
 def make_animation(imgs, outpath, frame_duration_ms=100, captions=None):
     imgs = imgpaths_to_imgs(imgs)
     ext = os.path.splitext(outpath)[1].lower().strip(".")

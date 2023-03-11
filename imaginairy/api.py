@@ -571,7 +571,8 @@ def _generate_single_image(
                 )
 
             if prompt.caption_text:
-                add_caption_to_image(gen_img, prompt.caption_text)
+                caption_text = prompt.caption_text.format(prompt=prompt.prompt_text)
+                add_caption_to_image(gen_img, caption_text)
 
         result = ImagineResult(
             img=gen_img,
