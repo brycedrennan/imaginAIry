@@ -7,7 +7,6 @@ from torch.nn import functional as nnf
 
 
 def precompute_clip_vectors():
-
     from trails.initialization import init_dataset
 
     lvis = init_dataset(
@@ -104,7 +103,6 @@ def forward_multihead_attention(x, b, with_aff=False, attn_mask=None):
         q, k.transpose(1, 2)
     )  #  n_heads * batch_size, tokens^2, tokens^2
     if attn_mask is not None:
-
         attn_mask_type, attn_mask = attn_mask
         n_heads = attn_output_weights.size(0) // attn_mask.size(0)
         attn_mask = attn_mask.repeat(n_heads, 1)
@@ -196,9 +194,7 @@ class CLIPDenseBase(nn.Module):
         return torch.cat([self.model.positional_embedding[:1], b])
 
     def visual_forward(self, x_inp, extract_layers=(), skip=False, mask=None):
-
         with torch.no_grad():
-
             x_inp.shape[2:]
 
             if self.n_tokens is not None:
@@ -252,7 +248,6 @@ class CLIPDenseBase(nn.Module):
 
             activations, affinities = [], []
             for i, res_block in enumerate(self.model.transformer.resblocks):
-
                 if mask is not None:
                     mask_layer, mask_type, mask_tensor = mask
                     if mask_layer == i or mask_layer == "all":
@@ -296,7 +291,6 @@ class CLIPDenseBase(nn.Module):
             return x, activations, affinities
 
     def sample_prompts(self, words, prompt_list=None):
-
         prompt_list = prompt_list if prompt_list is not None else self.prompt_list
 
         prompt_indices = torch.multinomial(
@@ -420,7 +414,6 @@ class CLIPDensePredT(CLIPDenseBase):
         n_tokens=None,
         complex_trans_conv=False,
     ):
-
         super().__init__(version, reduce_cond, reduce_dim, prompt, n_tokens)
         # device = 'cpu'
 
@@ -515,7 +508,6 @@ class CLIPDensePredT(CLIPDenseBase):
         self.prompt_list = get_prompt_list(prompt)
 
     def forward(self, inp_image, conditional=None, return_features=False, mask=None):
-
         assert type(return_features) == bool
 
         inp_image = inp_image.to(self.model.positional_embedding.device)
@@ -543,7 +535,6 @@ class CLIPDensePredT(CLIPDenseBase):
         for i, (activation, block, reduce) in enumerate(
             zip(_activations, self.blocks, self.reduces)
         ):
-
             if a is not None:
                 a = reduce(activation) + a
             else:
@@ -600,7 +591,6 @@ class CLIPDensePredTMasked(CLIPDensePredT):
         add_calibration=False,
         n_tokens=None,
     ):
-
         super().__init__(
             version=version,
             extract_layers=extract_layers,
@@ -622,7 +612,6 @@ class CLIPDensePredTMasked(CLIPDensePredT):
         return super().visual_forward(img_s, mask=("all", "cls_token", seg_s))
 
     def forward(self, img_q, cond_or_img_s, seg_s=None, return_features=False):
-
         if seg_s is None:
             cond = cond_or_img_s
         else:
@@ -647,7 +636,6 @@ class CLIPDenseBaseline(CLIPDenseBase):
         limit_to_clip_only=False,
         n_tokens=None,
     ):
-
         super().__init__(version, reduce_cond, reduce_dim, prompt, n_tokens)
 
         # self.cond_layer = cond_layer
@@ -671,7 +659,6 @@ class CLIPDenseBaseline(CLIPDenseBase):
         )
 
     def forward(self, inp_image, conditional=None, return_features=False):
-
         inp_image = inp_image.to(self.model.positional_embedding.device)
 
         # x_inp = normalize(inp_image)
@@ -723,12 +710,10 @@ class CLIPSegMultiLabel(nn.Module):
         self.clipseg.eval()
 
     def forward(self, x):
-
         bs = x.shape[0]
         out = torch.ones(21, bs, 352, 352).to(x.device) * -10
 
         for class_id, class_name in enumerate(self.pascal_classes):
-
             fac = 3 if class_name == "background" else 1
 
             with torch.no_grad():

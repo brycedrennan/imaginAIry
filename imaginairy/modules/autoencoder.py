@@ -652,7 +652,6 @@ def merge_tensors(tensor_list, num_rows, num_cols):
     print(f"final size {final_tensor.size()}")
     for row_idx in range(num_rows):
         for col_idx in range(num_cols):
-
             list_idx = row_idx * num_cols + col_idx
             chunk = tensor_list[list_idx]
             print(f"chunk size: {chunk.size()}")

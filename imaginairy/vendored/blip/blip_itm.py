@@ -39,7 +39,6 @@ class BLIP_ITM(nn.Module):
         self.itm_head = nn.Linear(text_width, 2)
 
     def forward(self, image, caption, match_head="itm"):
-
         image_embeds = self.visual_encoder(image)
         image_atts = torch.ones(image_embeds.size()[:-1], dtype=torch.long).to(
             image.device

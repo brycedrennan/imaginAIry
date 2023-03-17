@@ -46,7 +46,6 @@ class BLIP_VQA(nn.Module):
         inference="rank",
         k_test=128,
     ):
-
         image_embeds = self.visual_encoder(image)
         image_atts = torch.ones(image_embeds.size()[:-1], dtype=torch.long).to(
             image.device
@@ -160,7 +159,6 @@ class BLIP_VQA(nn.Module):
                 return max_ids
 
     def rank_answer(self, question_states, question_atts, answer_ids, answer_atts, k):
-
         num_ques = question_states.size(0)
         start_ids = answer_ids[0, 0].repeat(num_ques, 1)  # bos token
 

@@ -12,7 +12,6 @@ def describe_cmd(image_filepaths):
 
     imgs = []
     for p in image_filepaths:
-
         if p.startswith("http"):
             img = LazyLoadingImage(url=p)
         elif os.path.isdir(p):

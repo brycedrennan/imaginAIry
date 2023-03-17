@@ -90,7 +90,6 @@ def filename_base_for_orig_outputs(request):
 
 @pytest.fixture(params=SAMPLERS_FOR_TESTING)
 def sampler_type(request):
-
     return request.param
 
 

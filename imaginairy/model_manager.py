@@ -8,11 +8,11 @@ from functools import wraps
 
 import requests
 import torch
+from huggingface_hub import HfFolder
 from huggingface_hub import hf_hub_download as _hf_hub_download
 from huggingface_hub import try_to_load_from_cache
 from omegaconf import OmegaConf
 from safetensors.torch import load_file
-from transformers.utils.hub import HfFolder
 
 from imaginairy import config as iconfig
 from imaginairy.config import MODEL_SHORT_NAMES

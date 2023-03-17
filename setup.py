@@ -69,14 +69,16 @@ setup(
         "facexlib",
         "fairscale>=0.4.4",  # for vendored blip
         "ftfy",  # for vendored clip
-        "torch>=1.13.1",
+        # 2.0.0 produced garbage images on MacOS
+        "torch>=1.13.1,<2.0.0",
         "numpy",
         "tqdm",
         "diffusers",
         "imageio>=2.9.0",
         "Pillow>=8.0.0",
         "psutil",
-        "pytorch-lightning>=1.4.2",
+        # 2.0.0 need to fix `ImportError: cannot import name 'rank_zero_only' from 'pytorch_lightning.utilities.distributed' `
+        "pytorch-lightning>=1.4.2,<2.0.0",
         "omegaconf>=2.1.1",
         "open-clip-torch",
         "opencv-python",

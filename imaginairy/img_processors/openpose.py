@@ -386,7 +386,6 @@ class bodypose_model(nn.Module):
         self.model6_2 = blocks["block6_2"]
 
     def forward(self, x):
-
         out1 = self.model0(x)
 
         out1_1 = self.model1_1(out1)

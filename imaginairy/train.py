@@ -524,7 +524,6 @@ def train_diffusion_model(
 
     signal.signal(signal.SIGUSR1, melk)
     try:
-
         try:
             trainer.fit(model, data)
         except Exception:

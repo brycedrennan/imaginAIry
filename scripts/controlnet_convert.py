@@ -92,7 +92,6 @@ def extract_controlnet_essence(control_type, controlnet_url, dest_folder):
     final_state_dict = {}
     skip_prefixes = ("first_stage_model", "cond_stage_model")
     for key in controlnet_state_dict:
-
         if key.startswith(skip_prefixes):
             continue
 
