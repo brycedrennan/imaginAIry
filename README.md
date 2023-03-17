@@ -399,10 +399,13 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**11.1.0**
+
 - docs: add some example use cases
 - feature: add art-scene, desktop-background, interior-style, painting-style phraselists
 - fix: compilation animations create normal slideshows instead of "bounces"
 - fix: file globbing works in the interactive shell
+- fix: fix model downloads that were broken by [library change in transformers 4.27.0](https://github.com/huggingface/transformers/commit/8f3b4a1d5bd97045541c43179efe8cd9c58adb76)
 
 **11.0.0**
 - all these changes together mean same seed/sampler will not be guaranteed to produce same image (thus the version bump)

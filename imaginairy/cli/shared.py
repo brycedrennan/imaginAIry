@@ -224,7 +224,6 @@ def add_options(options):
 
 def replace_option(options, option_name, new_option):
     for i, option in enumerate(options):
-
         if option.name == option_name:
             options[i] = new_option
             return

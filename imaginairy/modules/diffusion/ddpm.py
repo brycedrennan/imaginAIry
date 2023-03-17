@@ -1150,7 +1150,6 @@ class LatentDiffusion(DDPM):
         return self.p_losses(x, c, t, *args, **kwargs)
 
     def apply_model(self, x_noisy, t, cond, return_ids=False):
-
         if isinstance(cond, dict):
             # hybrid case, cond is expected to be a dict
             pass

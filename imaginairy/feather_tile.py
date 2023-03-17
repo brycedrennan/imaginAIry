@@ -115,7 +115,10 @@ def add_tiles(tiles, base_img, tile_coords, tile_size, overlap):
         f_ovlp[1] = 0
 
     t = 0
-    column, row, = (
+    (
+        column,
+        row,
+    ) = (
         0,
         0,
     )

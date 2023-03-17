@@ -207,5 +207,8 @@ def glob_expand_paths(paths):
 
     expanded_paths = []
     for p in paths:
-        expanded_paths.extend(glob.glob(p))
+        if p.startswith("http"):
+            expanded_paths.append(p)
+        else:
+            expanded_paths.extend(glob.glob(p))
     return expanded_paths

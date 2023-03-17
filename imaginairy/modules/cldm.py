@@ -144,9 +144,9 @@ class ControlNet(nn.Module):
         if num_attention_blocks is not None:
             assert len(num_attention_blocks) == len(self.num_res_blocks)
             assert all(
-                map(
-                    lambda i: self.num_res_blocks[i] >= num_attention_blocks[i],
-                    range(len(num_attention_blocks)),
+                (
+                    self.num_res_blocks[i] >= num_attention_blocks[i]
+                    for i in range(len(num_attention_blocks))
                 )
             )
             print(

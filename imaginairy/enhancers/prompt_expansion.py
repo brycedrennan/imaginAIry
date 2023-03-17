@@ -113,7 +113,6 @@ def expand_prompts(prompt_text, n=1, prompt_library_paths=None):
         field_count = 0
         output_prompt = ""
         for literal_text, field_name, format_spec, conversion in prompt_parts:
-
             output_prompt += literal_text
             if field_name:
                 output_prompt += values[field_count]
