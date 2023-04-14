@@ -204,11 +204,12 @@ def shrink_list(items, max_size):
 
 def glob_expand_paths(paths):
     import glob
+    import os.path
 
     expanded_paths = []
     for p in paths:
         if p.startswith("http"):
             expanded_paths.append(p)
         else:
-            expanded_paths.extend(glob.glob(p))
+            expanded_paths.extend(glob.glob(os.path.expanduser(p)))
     return expanded_paths

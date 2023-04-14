@@ -11,6 +11,7 @@ from imaginairy.utils import (
     get_device,
     get_hardware_description,
     get_obj_from_str,
+    glob_expand_paths,
     instantiate_from_config,
 )
 
@@ -80,7 +81,50 @@ def test_instantiate_from_config():
         instantiate_from_config(config)
 
 
-#
-# def test_platform_appropriate_autocast():
-#     with platform_appropriate_autocast("autocast"):
-#         pass
+class TestGlobExpandPaths:
+    def test_valid_file_paths(self, tmp_path):
+        # create temporary file
+        file_path = tmp_path / "test.txt"
+        file_path.touch()
+
+        # test function with valid file path
+        result = glob_expand_paths([str(file_path)])
+        assert result == [str(file_path)]
+
+    def test_valid_http_urls(self):
+        # test function with valid http url
+        result = glob_expand_paths(["http://www.example.com"])
+        assert result == ["http://www.example.com"]
+
+    def test_file_paths_with_wildcards(self, tmp_path):
+        # create temporary files
+        file1 = tmp_path / "test1.txt"
+        file1.touch()
+        file2 = tmp_path / "test2.txt"
+        file2.touch()
+
+        # test function with file path containing wildcard
+        result = glob_expand_paths([str(tmp_path / "*.txt")])
+        result.sort()
+        assert result == [str(file1), str(file2)]
+
+    def test_empty_input(self):
+        # test function with empty input list
+        result = glob_expand_paths([])
+        assert not result
+
+    def test_nonexistent_file_paths(self):
+        # test function with non-existent file path
+        result = glob_expand_paths(["/nonexistent/path"])
+        assert not result
+
+    def test_user_expansion(self, monkeypatch, tmp_path):
+        file1 = tmp_path / "test1.txt"
+        file1.touch()
+
+        # monkeypatch os.path.expanduser to return a known path
+        monkeypatch.setattr("os.path.expanduser", lambda x: str(tmp_path / "test1.txt"))
+
+        # test function with user expansion
+        paths = ["~/file.txt"]
+        assert glob_expand_paths(paths) == [str(tmp_path / "test1.txt")]
