@@ -89,7 +89,13 @@ def _imagine_cmd(
 
     from imaginairy.utils import glob_expand_paths
 
+    num_prexpaned_init_images = len(init_images)
     init_images = glob_expand_paths(init_images)
+
+    if len(init_images) < num_prexpaned_init_images:
+        raise ValueError(
+            f"Could not find any images matching the glob pattern(s) {init_image}. Are you sure the file(s) exists?"
+        )
 
     total_image_count = len(prompt_texts) * max(len(init_images), 1) * repeats
     logger.info(
