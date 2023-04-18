@@ -57,6 +57,6 @@ def generate_caption(image, min_length=30):
 
     with torch.no_grad():
         caption = blip_model().generate(
-            gpu_image, sample=False, num_beams=3, max_length=80, min_length=min_length
+            gpu_image, sample=True, num_beams=3, max_length=80, min_length=min_length
         )
     return caption[0]
