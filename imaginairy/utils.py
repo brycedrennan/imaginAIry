@@ -213,3 +213,21 @@ def glob_expand_paths(paths):
         else:
             expanded_paths.extend(glob.glob(os.path.expanduser(p)))
     return expanded_paths
+
+
+def get_next_filenumber(path):
+    """Get the next file number in a directory."""
+    import os
+
+    filenames = os.listdir(path)
+    if not filenames:
+        return 0
+    file_count = len(filenames)
+    filenames.sort()
+    try:
+        last_file_name = filenames[-1]
+        last_file_num = int(last_file_name.split("_")[0])
+    except (ValueError, IndexError):
+        last_file_num = 0
+
+    return max(file_count, last_file_num + 1)
