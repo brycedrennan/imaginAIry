@@ -399,6 +399,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- fix: filenames start numbers after latest image, even if some previous images were deleted
+
 **11.1.1**
 - fix: fix globbing bug with input image path handling
 - fix: changed sample to True to generate caption using blip model

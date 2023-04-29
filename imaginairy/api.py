@@ -34,11 +34,12 @@ def imagine_image_files(
 
     from imaginairy.animations import make_bounce_animation
     from imaginairy.img_utils import pillow_fit_image_within
+    from imaginairy.utils import get_next_filenumber
 
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
 
-    base_count = len(os.listdir(generated_imgs_path))
+    base_count = get_next_filenumber(generated_imgs_path)
     output_file_extension = output_file_extension.lower()
     if output_file_extension not in {"jpg", "png"}:
         raise ValueError("Must output a png or jpg")
