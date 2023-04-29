@@ -172,6 +172,12 @@ class ImaginePrompt:
             if not self.control_image.startswith("*prev."):
                 self.control_image = LazyLoadingImage(filepath=self.control_image)
 
+        if isinstance(self.control_image_raw, str):
+            if not self.control_image_raw.startswith("*prev."):
+                self.control_image_raw = LazyLoadingImage(
+                    filepath=self.control_image_raw
+                )
+
         if isinstance(self.init_image, str):
             if not self.init_image.startswith("*prev."):
                 self.init_image = LazyLoadingImage(filepath=self.init_image)

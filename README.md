@@ -399,6 +399,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- fix: raw control images are now properly loaded. fixes #296
 - fix: filenames start numbers after latest image, even if some previous images were deleted
 
 **11.1.1**
