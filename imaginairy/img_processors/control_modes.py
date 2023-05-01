@@ -83,7 +83,7 @@ def _create_depth_map_raw(img):
     return depth_pt
 
 
-def create_normal_map(img):
+def create_normal_map_old(img):
     import cv2
     import numpy as np
     import torch
@@ -109,8 +109,24 @@ def create_normal_map(img):
     normal_image = (normal * 127.5 + 127.5).clip(0, 255).astype(np.uint8)
 
     normal_image = torch.from_numpy(normal_image[:, :, ::-1].copy()).float() / 255.0
-    normal_image = normal_image.permute(2, 0, 1).unsqueeze(0)
+    normal_image = normal_image.permute(2, 0, 1)
+    normal_image = normal_image.unsqueeze(0)
+    # for use with Controlnet 1.1?
+    # normal_image = normal_image[:, [1, 0, 2], :, :]
+
     return normal_image
+
+
+def create_normal_map(img):
+    import torch
+    from imaginairy_normal_map.model import create_normal_map_torch_img
+
+    normal_img_t = create_normal_map_torch_img(img)
+    # normal_img_t = normal_img_t[:, [1, 2, 0], :, :]
+    normal_img_t -= torch.min(normal_img_t)
+    normal_img_t /= torch.max(normal_img_t)
+
+    return normal_img_t
 
 
 def create_hed_edges(img_t):

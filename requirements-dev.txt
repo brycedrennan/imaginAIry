@@ -10,11 +10,11 @@ aiosignal==1.3.1
     # via aiohttp
 antlr4-python3-runtime==4.9.3
     # via omegaconf
-astroid==2.15.2
+astroid==2.15.4
     # via pylint
 async-timeout==4.0.2
     # via aiohttp
-attrs==22.2.0
+attrs==23.1.0
     # via aiohttp
 black==23.3.0
     # via -r requirements-dev.in
@@ -37,23 +37,23 @@ click-shell==2.1
     # via imaginAIry (setup.py)
 contourpy==1.0.7
     # via matplotlib
-coverage==7.2.3
+coverage==7.2.5
     # via -r requirements-dev.in
 cycler==0.11.0
     # via matplotlib
-diffusers==0.15.0
+diffusers==0.16.1
     # via imaginAIry (setup.py)
 dill==0.3.6
     # via pylint
-einops==0.6.0
+einops==0.6.1
     # via imaginAIry (setup.py)
 exceptiongroup==1.1.1
     # via pytest
-facexlib==0.2.5
+facexlib==0.3.0
     # via imaginAIry (setup.py)
 fairscale==0.4.13
     # via imaginAIry (setup.py)
-filelock==3.11.0
+filelock==3.12.0
     # via
     #   diffusers
     #   huggingface-hub
@@ -67,14 +67,17 @@ frozenlist==1.3.3
     #   aiohttp
     #   aiosignal
 fsspec[http]==2023.4.0
-    # via pytorch-lightning
+    # via
+    #   huggingface-hub
+    #   pytorch-lightning
 ftfy==6.1.1
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
-huggingface-hub==0.13.4
+huggingface-hub==0.14.1
     # via
     #   diffusers
+    #   imaginairy-normal-map
     #   open-clip-torch
     #   timm
     #   transformers
@@ -82,9 +85,11 @@ idna==3.4
     # via
     #   requests
     #   yarl
-imageio==2.27.0
+imageio==2.28.1
     # via imaginAIry (setup.py)
-importlib-metadata==6.3.0
+imaginairy-normal-map==0.0.3
+    # via imaginAIry (setup.py)
+importlib-metadata==6.6.0
     # via diffusers
 iniconfig==2.0.0
     # via pytest
@@ -94,7 +99,7 @@ isort==5.12.0
     #   pylint
 kiwisolver==1.4.4
     # via matplotlib
-kornia==0.6.11
+kornia==0.6.12
     # via imaginAIry (setup.py)
 lazy-object-proxy==1.9.0
     # via astroid
@@ -102,7 +107,7 @@ libcst==0.4.9
     # via pycln
 lightning-utilities==0.8.0
     # via pytorch-lightning
-llvmlite==0.39.1
+llvmlite==0.40.0
     # via numba
 matplotlib==3.7.1
     # via filterpy
@@ -118,9 +123,9 @@ mypy-extensions==1.0.0
     # via
     #   black
     #   typing-inspect
-numba==0.56.4
+numba==0.57.0
     # via facexlib
-numpy==1.23.5
+numpy==1.24.3
     # via
     #   contourpy
     #   diffusers
@@ -139,7 +144,7 @@ numpy==1.23.5
     #   transformers
 omegaconf==2.3.0
     # via imaginAIry (setup.py)
-open-clip-torch==2.16.0
+open-clip-torch==2.19.0
     # via imaginAIry (setup.py)
 opencv-python==4.7.0.72
     # via
@@ -169,7 +174,7 @@ pillow==9.5.0
     #   imaginAIry (setup.py)
     #   matplotlib
     #   torchvision
-platformdirs==3.2.0
+platformdirs==3.5.0
     # via
     #   black
     #   pylint
@@ -179,7 +184,7 @@ protobuf==3.20.3
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
-psutil==5.9.4
+psutil==5.9.5
     # via imaginAIry (setup.py)
 pycln==2.1.3
     # via -r requirements-dev.in
@@ -191,11 +196,11 @@ pyflakes==3.0.1
     # via pylama
 pylama==8.4.1
     # via -r requirements-dev.in
-pylint==2.17.2
+pylint==2.17.3
     # via -r requirements-dev.in
 pyparsing==3.0.9
     # via matplotlib
-pytest==7.3.0
+pytest==7.3.1
     # via
     #   -r requirements-dev.in
     #   pytest-randomly
@@ -218,12 +223,12 @@ pyyaml==6.0
     #   responses
     #   timm
     #   transformers
-regex==2023.3.23
+regex==2023.5.5
     # via
     #   diffusers
     #   open-clip-torch
     #   transformers
-requests==2.28.2
+requests==2.30.0
     # via
     #   diffusers
     #   fsspec
@@ -234,26 +239,27 @@ requests==2.28.2
     #   transformers
 responses==0.23.1
     # via -r requirements-dev.in
-ruff==0.0.261
+ruff==0.0.264
     # via -r requirements-dev.in
-safetensors==0.3.0
+safetensors==0.3.1
     # via imaginAIry (setup.py)
 scipy==1.10.1
     # via
     #   facexlib
     #   filterpy
     #   torchdiffeq
-sentencepiece==0.1.98
+sentencepiece==0.1.99
     # via open-clip-torch
 six==1.16.0
     # via python-dateutil
 snowballstemmer==2.2.0
     # via pydocstyle
-termcolor==2.2.0
+termcolor==2.3.0
     # via pytest-sugar
 timm==0.6.13
     # via
     #   imaginAIry (setup.py)
+    #   imaginairy-normal-map
     #   open-clip-torch
 tokenizers==0.13.3
     # via transformers
@@ -262,7 +268,7 @@ tomli==2.0.1
     #   black
     #   pylint
     #   pytest
-tomlkit==0.11.7
+tomlkit==0.11.8
     # via
     #   pycln
     #   pylint
@@ -271,6 +277,7 @@ torch==1.13.1
     #   facexlib
     #   fairscale
     #   imaginAIry (setup.py)
+    #   imaginairy-normal-map
     #   kornia
     #   open-clip-torch
     #   pytorch-lightning
@@ -288,6 +295,7 @@ torchvision==0.14.1
     # via
     #   facexlib
     #   imaginAIry (setup.py)
+    #   imaginairy-normal-map
     #   open-clip-torch
     #   timm
 tqdm==4.65.0
@@ -298,7 +306,7 @@ tqdm==4.65.0
     #   open-clip-torch
     #   pytorch-lightning
     #   transformers
-transformers==4.28.0
+transformers==4.28.1
     # via imaginAIry (setup.py)
 typer==0.7.0
     # via pycln
@@ -316,7 +324,7 @@ typing-extensions==4.5.0
     #   typing-inspect
 typing-inspect==0.8.0
     # via libcst
-urllib3==1.26.15
+urllib3==2.0.2
     # via
     #   requests
     #   responses
@@ -326,10 +334,7 @@ wheel==0.40.0
     # via -r requirements-dev.in
 wrapt==1.15.0
     # via astroid
-yarl==1.8.2
+yarl==1.9.2
     # via aiohttp
 zipp==3.15.0
     # via importlib-metadata
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools

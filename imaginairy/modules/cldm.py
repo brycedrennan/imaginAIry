@@ -44,14 +44,14 @@ class ControlledUnetModel(UNetModel):
                 h = module(h, emb, context)
                 hs.append(h)
             h = self.middle_block(h, emb, context)
-        ctrl = control.pop()
-        h += ctrl
+        if control is not None:
+            h += control.pop()
 
         for i, module in enumerate(self.output_blocks):
             # allows us to work with multiples of 8 instead of just 32
             if h.shape[-2:] != hs[-1].shape[-2:]:
                 h = nn.functional.interpolate(h, hs[-1].shape[-2:], mode="nearest")
-            if only_mid_control:
+            if only_mid_control or control is None:
                 h = torch.cat([h, hs.pop()], dim=1)
             else:
                 ctrl = control.pop()
@@ -60,6 +60,7 @@ class ControlledUnetModel(UNetModel):
                         ctrl, hs[-1].shape[-2:], mode="nearest"
                     )
                 h = torch.cat([h, hs.pop() + ctrl], dim=1)
+                del ctrl
             h = module(h, emb, context)
 
         h = h.type(x.dtype)
@@ -372,12 +373,20 @@ class ControlNet(nn.Module):
 
 class ControlLDM(LatentDiffusion):
     def __init__(
-        self, control_stage_config, control_key, only_mid_control, *args, **kwargs
+        self,
+        control_stage_config,
+        control_key,
+        only_mid_control,
+        *args,
+        global_average_pooling=False,
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.control_model = instantiate_from_config(control_stage_config)
         self.control_key = control_key
         self.only_mid_control = only_mid_control
+        self.control_scales = [1.0] * 13
+        self.global_average_pooling = global_average_pooling
 
     @torch.no_grad()
     def get_input(self, batch, k, bs=None, *args, **kwargs):  # noqa
@@ -393,12 +402,19 @@ class ControlLDM(LatentDiffusion):
     def apply_model(self, x_noisy, t, cond, *args, **kwargs):
         assert isinstance(cond, dict)
         diffusion_model = self.model.diffusion_model
+
         cond_txt = torch.cat(cond["c_crossattn"], 1)
         cond_hint = torch.cat(cond["c_concat"], 1)
+        control = None
 
-        control = self.control_model(
-            x=x_noisy, hint=cond_hint, timesteps=t, context=cond_txt
-        )
+        if cond["c_concat"] is not None:
+            control = self.control_model(
+                x=x_noisy, hint=cond_hint, timesteps=t, context=cond_txt
+            )
+            control = [c * scale for c, scale in zip(control, self.control_scales)]
+            if self.global_average_pooling:
+                control = [torch.mean(c, dim=(2, 3), keepdim=True) for c in control]
+
         eps = diffusion_model(
             x=x_noisy,
             timesteps=t,

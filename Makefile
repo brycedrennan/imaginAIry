@@ -147,6 +147,37 @@ vendorize_noodle_soup:
 	python scripts/prep_vocab_lists.py
 	make af
 
+vendorize_controlnet_annotators:
+	make download_repo REPO=git@github.com:lllyasviel/ControlNet-v1-1-nightly.git PKG=controlnet11 COMMIT=b9ae087ef56ca786d9a3ee1008f814bb171bb913
+	mkdir -p ./imaginairy/vendored/controlnet_annotators
+	rm -rf ./imaginairy/vendored/controlnet_annotators/*
+	cp -R ./downloads/controlnet11/annotator/* ./imaginairy/vendored/controlnet_annotators/
+	rm -rf ./imaginairy/vendored/controlnet_annotators/canny
+	rm -rf ./imaginairy/vendored/controlnet_annotators/ckpts
+	#black imaginairy/vendored/controlnet_annotators
+	sed -i '' -e 's#from annotator.uniformer.mmseg#from .mmseg#g' imaginairy/vendored/controlnet_annotators/uniformer/__init__.py
+	find imaginairy/vendored/controlnet_annotators -type f -name "__init__.py" -exec sed -i '' -e 's#checkpoint_file#remote_model_path#g' {} \;
+	find imaginairy/vendored/controlnet_annotators -type f -name "__init__.py" -exec sed -i '' -e 's#modelpath#model_path#g' {} \;
+	find imaginairy/vendored/controlnet_annotators -type f -name "__init__.py" -exec sed -i '' -e '/^ *model_path = os.path.join(annotator_ckpts_path, [^)]*/,/^ *load_file_from_url(remote_model_path, model_dir=annotator_ckpts_path)/c\'$$'\n''        model_path = get_cached_url_path(remote_model_path)' {} \;
+	find imaginairy/vendored/controlnet_annotators -type f -name "__init__.py" -exec sed -i '' -e 's|^ *from annotator.util import annotator_ckpts_path|from imaginairy.model_manager import get_cached_url_path|' {} \;
+	find imaginairy/vendored/controlnet_annotators -type f -name "__init__.py" -exec sed -i '' -e 's|^ *from annotator.util import|from imaginairy.vendored.controlnet_annotators.util import|' {} \;
+	find imaginairy/vendored/controlnet_annotators -type f -name "*.py" -exec sed -i '' -e 's|^ *from annotator.|from imaginairy.vendored.controlnet_annotators.|' {} \;
+	touch imaginairy/vendored/controlnet_annotators/__init__.py
+	sed -i '' -e 's#from annotator.uniformer.mmseg#from .mmseg#g' imaginairy/vendored/controlnet_annotators/uniformer/__init__.py
+	sed -i '' '11i\'$$'\n''annotator_ckpts_path = os.path.dirname(os.path.dirname(__file__))' imaginairy/vendored/controlnet_annotators/uniformer/__init__.py
+	rm ./imaginairy/vendored/controlnet_annotators/oneformer/oneformer/data/bpe_simple_voc*
+	rm -rf ./imaginairy/vendored/controlnet_annotators/zoe/zoedepth/models/base_models/midas_repo/mobile
+	make af
+
+
+
+vendorize_surface_normal_uncertainty:
+	make download_repo REPO=git@github.com:baegwangbin/surface_normal_uncertainty.git PKG=surface_normal_uncertainty COMMIT=fe2b9f1e8a4cac1c73475b023f6454bd23827a48
+	mkdir -p ./imaginairy/vendored/surface_normal_uncertainty
+	rm -rf ./imaginairy/vendored/surface_normal_uncertainty/*
+	cp -R ./downloads/surface_normal_uncertainty/* ./imaginairy/vendored/surface_normal_uncertainty/
+
+
 
 vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
 	mkdir -p ./downloads

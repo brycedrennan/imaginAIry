@@ -75,6 +75,7 @@ setup(
         "tqdm",
         "diffusers",
         "imageio>=2.9.0",
+        "imaginairy-normal-map",
         "Pillow>=8.0.0",
         "psutil",
         # 2.0.0 need to fix `ImportError: cannot import name 'rank_zero_only' from 'pytorch_lightning.utilities.distributed' `
