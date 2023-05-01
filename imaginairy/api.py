@@ -418,7 +418,7 @@ def _generate_single_image(
                 control_image_t = (control_image_input_t + 1) / 2
 
             control_image_disp = control_image_t * 2 - 1
-            result_images["control"] = control_image_disp[:, [2, 0, 1], :, :]
+            result_images["control"] = control_image_disp
             log_img(control_image_disp, "control_image")
 
             if len(control_image_t.shape) == 3:

@@ -169,18 +169,7 @@ def load_model_from_config(
 def add_controlnet(base_state_dict, controlnet_state_dict):
     """Merges a base sd15 model with a controlnet model."""
     for key in controlnet_state_dict:
-        if key.startswith("control_"):
-            sd15_key_name = "model.diffusion_" + key[len("control_") :]
-        else:
-            sd15_key_name = key
-
-        if sd15_key_name in base_state_dict:
-            b = base_state_dict[sd15_key_name]
-            c_diff = controlnet_state_dict[key]
-            new_c = b + c_diff
-            base_state_dict[key] = new_c
-        else:
-            base_state_dict[key] = controlnet_state_dict[key]
+        base_state_dict[key] = controlnet_state_dict[key]
     return base_state_dict
 
 
