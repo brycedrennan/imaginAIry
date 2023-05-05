@@ -198,6 +198,13 @@ CONTROLNET_CONFIGS = [
         weights_url="https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_openpose.pth",
         alias="openpose",
     ),
+    ControlNetConfig(
+        short_name="shuffle15",
+        control_type="shuffle",
+        config_path="configs/control-net-v15-pool.yaml",
+        weights_url="https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11e_sd15_shuffle.pth",
+        alias="shuffle",
+    ),
 ]
 
 CONTROLNET_CONFIG_SHORTCUTS = {m.short_name: m for m in CONTROLNET_CONFIGS}

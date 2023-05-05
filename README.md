@@ -91,6 +91,19 @@ imagine --control-image bird.jpg  --control-mode normal  "a bird"
     <img src="assets/bird-normal-generated.jpg" height="256">
 </p>
 
+**Image Shuffle Control**
+
+Generates the image based on elements of the control image. Kind of similar to style transfer.
+```bash
+imagine --control-image pearl-girl.jpg  --control-mode shuffle  "a clown"
+```
+The middle image is the "shuffled" input image
+<p float="left">
+    <img src="assets/girl_with_a_pearl_earring.jpg" height="256">
+    <img src="assets/pearl_shuffle_019331_1_kdpmpp2m15_PS7.5_img2img-0.0_a_clown.jpg" height="256">
+    <img src="assets/pearl_shuffle_clown_019331_1_kdpmpp2m15_PS7.5_img2img-0.0_a_clown.jpg" height="256">
+</p>
+
 
 ###  Instruction based image edits [by InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix)
 Just tell imaginairy how to edit the image and it will do it for you!
@@ -399,8 +412,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
-- feature: upgrade to [controlnet 1.1](https://github.com/lllyasviel/ControlNet-v1-1-nightly)
-- fix: controlnet now works with all sd1.5 based models
+- 🎉 feature: add "shuffle" control mode. Image is generated from elements of control image. similar to style transfer
+- 🎉 feature: upgrade to [controlnet 1.1](https://github.com/lllyasviel/ControlNet-v1-1-nightly)
+- 🎉 fix: controlnet now works with all SD 1.5 based models
 - fix: raw control images are now properly loaded. fixes #296
 - fix: filenames start numbers after latest image, even if some previous images were deleted
 

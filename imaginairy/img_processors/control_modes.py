@@ -127,6 +127,67 @@ def create_pose_map(img_t):
     return pose_t
 
 
+def make_noise_disk(H, W, C, F):
+    import cv2
+    import numpy as np
+
+    noise = np.random.uniform(low=0, high=1, size=((H // F) + 2, (W // F) + 2, C))
+    noise = cv2.resize(noise, (W + 2 * F, H + 2 * F), interpolation=cv2.INTER_CUBIC)
+    noise = noise[F : F + H, F : F + W]
+    noise -= np.min(noise)
+    noise /= np.max(noise)
+    if C == 1:
+        noise = noise[:, :, None]
+    return noise
+
+
+def shuffle_map_np(img, h=None, w=None, f=256):
+    import cv2
+    import numpy as np
+
+    H, W, C = img.shape
+    if h is None:
+        h = H
+    if w is None:
+        w = W
+
+    x = make_noise_disk(h, w, 1, f) * float(W - 1)
+    y = make_noise_disk(h, w, 1, f) * float(H - 1)
+    flow = np.concatenate([x, y], axis=2).astype(np.float32)
+    return cv2.remap(img, flow, None, cv2.INTER_LINEAR)
+
+
+def shuffle_map_torch(tensor, h=None, w=None, f=256):
+    import torch
+
+    # Assuming the input tensor is in shape (B, C, H, W)
+    B, C, H, W = tensor.shape
+    device = tensor.device
+    tensor = tensor.cpu()
+
+    # Create an empty tensor with the same shape as input tensor to store the shuffled images
+    shuffled_tensor = torch.empty_like(tensor)
+
+    # Iterate over the batch and apply the shuffle_map function to each image
+    for b in range(B):
+        # Convert the input torch tensor to a numpy array
+        img_np = tensor[b].numpy().transpose(1, 2, 0)  # Shape (H, W, C)
+
+        # Call the shuffle_map function with the numpy array as input
+        shuffled_np = shuffle_map_np(img_np, h, w, f)
+
+        # Convert the shuffled numpy array back to a torch tensor and store it in the shuffled_tensor
+        shuffled_tensor[b] = torch.from_numpy(
+            shuffled_np.transpose(2, 0, 1)
+        )  # Shape (C, H, W)
+    shuffled_tensor = (shuffled_tensor + 1.0) / 2.0
+    return shuffled_tensor.to(device)
+
+
+def noop(img):
+    return img
+
+
 CONTROL_MODES = {
     "canny": create_canny_edges,
     "depth": create_depth_map,
@@ -135,4 +196,5 @@ CONTROL_MODES = {
     # "mlsd": create_mlsd_edges,
     "openpose": create_pose_map,
     # "scribble": None,
+    "shuffle": shuffle_map_torch,
 }
