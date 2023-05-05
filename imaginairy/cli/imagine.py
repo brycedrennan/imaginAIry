@@ -40,7 +40,9 @@ from imaginairy.cli.shared import (
     "--control-mode",
     default=None,
     show_default=False,
-    type=click.Choice(["", "canny", "depth", "normal", "hed", "openpose", "shuffle"]),
+    type=click.Choice(
+        ["", "canny", "depth", "normal", "hed", "openpose", "shuffle", "edit"]
+    ),
     help="how the control image is used as signal",
 )
 @click.pass_context

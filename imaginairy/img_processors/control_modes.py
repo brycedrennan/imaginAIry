@@ -185,7 +185,7 @@ def shuffle_map_torch(tensor, h=None, w=None, f=256):
 
 
 def noop(img):
-    return img
+    return (img + 1.0) / 2.0
 
 
 CONTROL_MODES = {
@@ -197,4 +197,5 @@ CONTROL_MODES = {
     "openpose": create_pose_map,
     # "scribble": None,
     "shuffle": shuffle_map_torch,
+    "edit": noop,
 }
