@@ -436,11 +436,14 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 
 ## ChangeLog
+**12.0.0**
+
 - 🎉 feature: add "detail" control mode.  Add details to an image. Great for upscaling an image.
 - 🎉 feature: add "edit" control mode.  Edit images using text instructions with any SD 1.5 based model. Similar to instructPix2Pix.
 - 🎉 feature: add "shuffle" control mode. Image is generated from elements of control image. Similar to style transfer.
 - 🎉 feature: upgrade to [controlnet 1.1](https://github.com/lllyasviel/ControlNet-v1-1-nightly)
 - 🎉 fix: controlnet now works with all SD 1.5 based models
+- feature: add openjourney-v4
 - fix: raw control images are now properly loaded. fixes #296
 - fix: filenames start numbers after latest image, even if some previous images were deleted
 
