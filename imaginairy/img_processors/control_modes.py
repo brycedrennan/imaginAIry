@@ -83,46 +83,11 @@ def _create_depth_map_raw(img):
     return depth_pt
 
 
-def create_normal_map_old(img):
-    import cv2
-    import numpy as np
-    import torch
-
-    depth = _create_depth_map_raw(img)
-    depth = depth[0]
-
-    depth_pt = depth.clone()
-    depth_pt -= torch.min(depth_pt)
-    depth_pt /= torch.max(depth_pt)
-    depth_pt = depth_pt.cpu().numpy()
-
-    bg_th = 0.1
-    a = np.pi * 2.0
-    depth_np = depth.cpu().float().numpy()
-    x = cv2.Sobel(depth_np, cv2.CV_32F, 1, 0, ksize=3)
-    y = cv2.Sobel(depth_np, cv2.CV_32F, 0, 1, ksize=3)
-    z = np.ones_like(x) * a
-    x[depth_pt < bg_th] = 0
-    y[depth_pt < bg_th] = 0
-    normal = np.stack([x, y, z], axis=2)
-    normal /= np.sum(normal**2.0, axis=2, keepdims=True) ** 0.5
-    normal_image = (normal * 127.5 + 127.5).clip(0, 255).astype(np.uint8)
-
-    normal_image = torch.from_numpy(normal_image[:, :, ::-1].copy()).float() / 255.0
-    normal_image = normal_image.permute(2, 0, 1)
-    normal_image = normal_image.unsqueeze(0)
-    # for use with Controlnet 1.1?
-    # normal_image = normal_image[:, [1, 0, 2], :, :]
-
-    return normal_image
-
-
 def create_normal_map(img):
     import torch
     from imaginairy_normal_map.model import create_normal_map_torch_img
 
     normal_img_t = create_normal_map_torch_img(img)
-    # normal_img_t = normal_img_t[:, [1, 2, 0], :, :]
     normal_img_t -= torch.min(normal_img_t)
     normal_img_t /= torch.max(normal_img_t)
 
