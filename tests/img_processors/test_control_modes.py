@@ -1,4 +1,5 @@
 import pytest
+from lightning_fabric import seed_everything
 
 from imaginairy import LazyLoadingImage
 from imaginairy.img_processors.control_modes import CONTROL_MODES
@@ -16,6 +17,7 @@ control_mode_params = list(CONTROL_MODES.items())
 
 @pytest.mark.parametrize("control_name,control_func", control_mode_params)
 def test_control_images(filename_base_for_outputs, control_func, control_name):
+    seed_everything(42)
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png")
     img_t = pillow_img_to_torch_image(img)
 
