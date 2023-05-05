@@ -140,6 +140,15 @@ MODEL_CONFIGS = [
         default_negative_prompt="",
         alias="oj2",
     ),
+    ModelConfig(
+        description="OpenJourney V4",
+        short_name="openjourney-v4",
+        config_path="configs/stable-diffusion-v1.yaml",
+        weights_url="https://huggingface.co/prompthero/openjourney/resolve/e291118e93d5423dc88ac1ed93c02362b17d698f/mdjrny-v4.safetensors",
+        default_image_size=512,
+        default_negative_prompt="",
+        alias="oj4",
+    ),
 ]
 
 MODEL_CONFIG_SHORTCUTS = {m.short_name: m for m in MODEL_CONFIGS}
