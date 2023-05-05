@@ -198,4 +198,5 @@ CONTROL_MODES = {
     # "scribble": None,
     "shuffle": shuffle_map_torch,
     "edit": noop,
+    "inpaint": noop,
 }

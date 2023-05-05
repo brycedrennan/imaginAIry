@@ -213,6 +213,13 @@ CONTROLNET_CONFIGS = [
         weights_url="https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11e_sd15_ip2p.pth",
         alias="edit",
     ),
+    ControlNetConfig(
+        short_name="inpaint15",
+        control_type="inpaint",
+        config_path="configs/control-net-v15.yaml",
+        weights_url="https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_inpaint.pth",
+        alias="inpaint",
+    ),
 ]
 
 CONTROLNET_CONFIG_SHORTCUTS = {m.short_name: m for m in CONTROLNET_CONFIGS}
