@@ -51,7 +51,7 @@ from imaginairy.cli.shared import (
             "shuffle",
             "edit",
             "inpaint",
-            "tile",
+            "details",
         ]
     ),
     help="how the control image is used as signal",
