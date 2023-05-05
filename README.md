@@ -104,6 +104,19 @@ The middle image is the "shuffled" input image
     <img src="assets/pearl_shuffle_clown_019331_1_kdpmpp2m15_PS7.5_img2img-0.0_a_clown.jpg" height="256">
 </p>
 
+**Edit Instructions Control**
+
+Similar to instructPix2Pix (below) but works with any SD 1.5 based model.
+```bash
+imagine --control-image pearl-girl.jpg  --control-mode edit --init-image-strength 0.01 --steps 30  --negative-prompt "" --model openjourney-v2 "make it anime" "make it at the beach" 
+```
+
+<p float="left">
+    <img src="assets/girl_with_a_pearl_earring.jpg" height="256">
+    <img src="assets/pearl_anime_019537_521829407_kdpmpp2m30_PS9.0_img2img-0.01_make_it_anime.jpg" height="256">
+    <img src="assets/pearl_beach_019561_862735879_kdpmpp2m30_PS7.0_img2img-0.01_make_it_at_the_beach.jpg" height="256">
+</p>
+
 
 ###  Instruction based image edits [by InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix)
 Just tell imaginairy how to edit the image and it will do it for you!
@@ -411,8 +424,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 
 ## ChangeLog
-
-- 🎉 feature: add "shuffle" control mode. Image is generated from elements of control image. similar to style transfer
+- 🎉 feature: add "edit" control mode.  Edit images using text instructions with any SD 1.5 based model. Similar to instructPix2Pix.
+- 🎉 feature: add "shuffle" control mode. Image is generated from elements of control image. Similar to style transfer.
 - 🎉 feature: upgrade to [controlnet 1.1](https://github.com/lllyasviel/ControlNet-v1-1-nightly)
 - 🎉 fix: controlnet now works with all SD 1.5 based models
 - fix: raw control images are now properly loaded. fixes #296
