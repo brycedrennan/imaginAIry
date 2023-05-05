@@ -436,6 +436,10 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 
 ## ChangeLog
+
+**12.0.1**
+- fix: use correct device for depth images on mps. Fixes #300
+
 **12.0.0**
 
 - 🎉 feature: add "detail" control mode.  Add details to an image. Great for upscaling an image.
