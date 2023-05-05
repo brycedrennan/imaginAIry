@@ -399,6 +399,8 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+- feature: upgrade to [controlnet 1.1](https://github.com/lllyasviel/ControlNet-v1-1-nightly)
+- fix: controlnet now works with all sd1.5 based models
 - fix: raw control images are now properly loaded. fixes #296
 - fix: filenames start numbers after latest image, even if some previous images were deleted
 
