@@ -125,8 +125,8 @@ imagine --control-image "assets/wishbone.jpg" --control-mode tile "sharp focus, 
 ```
 
 <p float="left">
-    <img src="assets/wishbone.jpg" height="512">
-    <img src="assets/wishbone_big.jpg" height="512">
+    <img src="assets/wishbone_headshot_badscale.jpg" height="256">
+    <img src="assets/wishbone_headshot_details.jpg" height="256">
 </p>
 
 
