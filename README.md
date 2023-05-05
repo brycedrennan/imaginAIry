@@ -117,6 +117,18 @@ imagine --control-image pearl-girl.jpg  --control-mode edit --init-image-strengt
     <img src="assets/pearl_beach_019561_862735879_kdpmpp2m30_PS7.0_img2img-0.01_make_it_at_the_beach.jpg" height="256">
 </p>
 
+**Add Details Control (upscaling/super-resolution)**
+
+Replaces existing details in an image. Good to use with --init-image-strength 0.2
+```bash
+imagine --control-image "assets/wishbone.jpg" --control-mode tile "sharp focus, high-resolution" --init-image-strength 0.2 --steps 30 -w 2048 -h 2048 
+```
+
+<p float="left">
+    <img src="assets/wishbone.jpg" height="512">
+    <img src="assets/wishbone_big.jpg" height="512">
+</p>
+
 
 ###  Instruction based image edits [by InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix)
 Just tell imaginairy how to edit the image and it will do it for you!
@@ -424,6 +436,7 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 
 ## ChangeLog
+- 🎉 feature: add "detail" control mode.  Add details to an image. Great for upscaling an image.
 - 🎉 feature: add "edit" control mode.  Edit images using text instructions with any SD 1.5 based model. Similar to instructPix2Pix.
 - 🎉 feature: add "shuffle" control mode. Image is generated from elements of control image. Similar to style transfer.
 - 🎉 feature: upgrade to [controlnet 1.1](https://github.com/lllyasviel/ControlNet-v1-1-nightly)

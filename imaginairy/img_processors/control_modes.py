@@ -199,4 +199,5 @@ CONTROL_MODES = {
     "shuffle": shuffle_map_torch,
     "edit": noop,
     "inpaint": noop,
+    "details": noop,
 }

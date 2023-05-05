@@ -220,6 +220,13 @@ CONTROLNET_CONFIGS = [
         weights_url="https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_inpaint.pth",
         alias="inpaint",
     ),
+    ControlNetConfig(
+        short_name="details15",
+        control_type="details",
+        config_path="configs/control-net-v15.yaml",
+        weights_url="https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11f1e_sd15_tile.pth",
+        alias="details",
+    ),
 ]
 
 CONTROLNET_CONFIG_SHORTCUTS = {m.short_name: m for m in CONTROLNET_CONFIGS}

@@ -41,7 +41,18 @@ from imaginairy.cli.shared import (
     default=None,
     show_default=False,
     type=click.Choice(
-        ["", "canny", "depth", "normal", "hed", "openpose", "shuffle", "edit"]
+        [
+            "",
+            "canny",
+            "depth",
+            "normal",
+            "hed",
+            "openpose",
+            "shuffle",
+            "edit",
+            "inpaint",
+            "tile",
+        ]
     ),
     help="how the control image is used as signal",
 )
