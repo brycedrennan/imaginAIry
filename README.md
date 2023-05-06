@@ -343,6 +343,18 @@ You can use `{}` to randomly pull values from lists.  A list of values separated
     
    `imagine "a {_spaceship_|_fruit_|hot air balloon}. low-poly" -r 4 --seed 0` will generate images of spaceships or fruits or a hot air balloon
 
+<details>
+<summary>Python example</summary>
+
+```python
+from imaginairy.enhancers.prompt_expansion import expand_prompts
+
+my_prompt = "a giant {_animal_}"
+
+expanded_prompts = expand_prompts(n=10, prompt_text=my_prompt, prompt_library_paths=["./prompts"])
+```
+</details>
+
    Credit to [noodle-soup-prompts](https://github.com/WASasquatch/noodle-soup-prompts/) where most, but not all, of the wordlists originate.
 
 ### Generate image captions (via [BLIP](https://github.com/salesforce/BLIP))
