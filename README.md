@@ -244,6 +244,17 @@ When writing strength modifiers keep in mind that pixel values are between 0 and
 # upscale an existing image
 >> aimg upscale my-image.jpg
 ```
+<details>
+<summary>Python Example</summary>
+
+```python
+from imaginairy.enhancers.upscale_realesrgan import upscale_image
+from PIL import Image
+img = Image.open("my-image.jpg")
+big_img = upscale_image(i)
+```
+
+</details>
 <img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" height="128"> ➡️ 
 <img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" height="256"> 
 
