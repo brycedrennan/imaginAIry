@@ -437,6 +437,9 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## ChangeLog
 
+**12.0.2**
+- fix: move normal map preprocessor for conda compatibility
+
 **12.0.1**
 - fix: use correct device for depth images on mps. Fixes #300
 
