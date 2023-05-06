@@ -441,9 +441,17 @@ docker run -it --gpus all -v $HOME/.cache/huggingface:/root/.cache/huggingface -
 
 ## Q&A
 
-**Q**: How do I change the cache directory for where models are stored?
+#### Q: How do I change the cache directory for where models are stored?
 
-**A**: Set the `HUGGINGFACE_HUB_CACHE` environment variable. 
+A: Set the `HUGGINGFACE_HUB_CACHE` environment variable. 
+
+#### Q: How do I free up disk space?
+
+A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To delete the cache remove the following folders:
+ - ~/.cache/imaginairy
+ - ~/.cache/clip
+ - ~/.cache/torch
+ - ~/.cache/huggingface
 
 
 ## ChangeLog
