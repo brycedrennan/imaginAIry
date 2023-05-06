@@ -85,7 +85,10 @@ def _create_depth_map_raw(img):
 
 def create_normal_map(img):
     import torch
-    from imaginairy_normal_map.model import create_normal_map_torch_img
+
+    from imaginairy.vendored.imaginairy_normal_map.model import (
+        create_normal_map_torch_img,
+    )
 
     normal_img_t = create_normal_map_torch_img(img)
     normal_img_t -= torch.min(normal_img_t)

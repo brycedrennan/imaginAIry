@@ -77,7 +77,6 @@ ftfy==6.1.1
 huggingface-hub==0.14.1
     # via
     #   diffusers
-    #   imaginairy-normal-map
     #   open-clip-torch
     #   timm
     #   transformers
@@ -86,8 +85,6 @@ idna==3.4
     #   requests
     #   yarl
 imageio==2.28.1
-    # via imaginAIry (setup.py)
-imaginairy-normal-map==0.0.3
     # via imaginAIry (setup.py)
 importlib-metadata==6.6.0
     # via diffusers
@@ -196,7 +193,7 @@ pyflakes==3.0.1
     # via pylama
 pylama==8.4.1
     # via -r requirements-dev.in
-pylint==2.17.3
+pylint==2.17.4
     # via -r requirements-dev.in
 pyparsing==3.0.9
     # via matplotlib
@@ -239,7 +236,7 @@ requests==2.30.0
     #   transformers
 responses==0.23.1
     # via -r requirements-dev.in
-ruff==0.0.264
+ruff==0.0.265
     # via -r requirements-dev.in
 safetensors==0.3.1
     # via imaginAIry (setup.py)
@@ -259,7 +256,6 @@ termcolor==2.3.0
 timm==0.6.13
     # via
     #   imaginAIry (setup.py)
-    #   imaginairy-normal-map
     #   open-clip-torch
 tokenizers==0.13.3
     # via transformers
@@ -277,7 +273,6 @@ torch==1.13.1
     #   facexlib
     #   fairscale
     #   imaginAIry (setup.py)
-    #   imaginairy-normal-map
     #   kornia
     #   open-clip-torch
     #   pytorch-lightning
@@ -295,7 +290,6 @@ torchvision==0.14.1
     # via
     #   facexlib
     #   imaginAIry (setup.py)
-    #   imaginairy-normal-map
     #   open-clip-torch
     #   timm
 tqdm==4.65.0

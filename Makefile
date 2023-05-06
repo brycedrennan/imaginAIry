@@ -171,11 +171,12 @@ vendorize_controlnet_annotators:
 
 
 
-vendorize_surface_normal_uncertainty:
-	make download_repo REPO=git@github.com:baegwangbin/surface_normal_uncertainty.git PKG=surface_normal_uncertainty COMMIT=fe2b9f1e8a4cac1c73475b023f6454bd23827a48
-	mkdir -p ./imaginairy/vendored/surface_normal_uncertainty
-	rm -rf ./imaginairy/vendored/surface_normal_uncertainty/*
-	cp -R ./downloads/surface_normal_uncertainty/* ./imaginairy/vendored/surface_normal_uncertainty/
+vendorize_normal_map:
+	make download_repo REPO=git@github.com:brycedrennan/imaginairy-normal-map.git PKG=imaginairy_normal_map COMMIT=6b3b1692cbdc21d55c84a01e0b7875df030b6d79
+	mkdir -p ./imaginairy/vendored/imaginairy_normal_map
+	rm -rf ./imaginairy/vendored/imaginairy_normal_map/*
+	cp -R ./downloads/imaginairy_normal_map/imaginairy_normal_map/* ./imaginairy/vendored/imaginairy_normal_map/
+	make af
 
 
 
