@@ -1,4 +1,3 @@
-import gc
 import logging
 import os
 import re
@@ -19,92 +18,15 @@ from imaginairy.config import MODEL_SHORT_NAMES
 from imaginairy.modules import attention
 from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
+from imaginairy.utils.model_cache import memory_managed_model
 
 logger = logging.getLogger(__name__)
 
-
-LOADED_MODELS = {}
 MOST_RECENTLY_LOADED_MODEL = None
 
 
 class HuggingFaceAuthorizationError(RuntimeError):
     pass
-
-
-class MemoryAwareModel:
-    """Wraps a model to allow dynamic loading/unloading as needed."""
-
-    def __init__(
-        self,
-        config_path,
-        weights_path,
-        control_weights_path=None,
-        half_mode=None,
-        for_training=False,
-    ):
-        self._config_path = config_path
-        self._weights_path = weights_path
-        self._control_weights_path = control_weights_path
-        self._half_mode = half_mode
-        self._model = None
-        self._for_training = for_training
-
-        LOADED_MODELS[
-            (self._config_path, self._weights_path, self._control_weights_path)
-        ] = self
-
-    def __getattr__(self, key):
-        if key == "_model":
-            #  http://nedbatchelder.com/blog/201010/surprising_getattr_recursion.html
-            raise AttributeError()
-
-        if self._model is None:
-            # unload all models in LOADED_MODELS
-            for model in LOADED_MODELS.values():
-                model.unload_model()
-            model_config = OmegaConf.load(f"{PKG_ROOT}/{self._config_path}")
-            if self._for_training:
-                model_config.use_ema = True
-                # model_config.use_scheduler = True
-
-            # only run half-mode on cuda. run it by default
-            half_mode = self._half_mode is None and get_device() == "cuda"
-
-            model = load_model_from_config(
-                config=model_config,
-                weights_location=self._weights_path,
-                control_weights_location=self._control_weights_path,
-                half_mode=half_mode,
-            )
-            ks = 128
-            stride = 64
-            vqf = 8
-            model.split_input_params = {
-                "ks": (ks, ks),
-                "stride": (stride, stride),
-                "vqf": vqf,
-                "patch_distributed_vq": True,
-                "tie_braker": False,
-                "clip_max_weight": 0.5,
-                "clip_min_weight": 0.01,
-                "clip_max_tie_weight": 0.5,
-                "clip_min_tie_weight": 0.01,
-            }
-
-            self._model = model
-
-        return getattr(self._model, key)
-
-    def unload_model(self):
-        if self._model is not None:
-            del self._model.cond_stage_model
-            del self._model.first_stage_model
-            del self._model.model
-            del self._model
-            self._model = None
-        if get_device() == "cuda":
-            torch.cuda.empty_cache()
-        gc.collect()
 
 
 def load_tensors(tensorfile, map_location=None):
@@ -118,13 +40,20 @@ def load_tensors(tensorfile, map_location=None):
     raise ValueError(f"Unknown tensorfile type: {tensorfile}")
 
 
-def load_state_dict(weights_location):
+def load_state_dict(weights_location, half_mode=False, device=None):
+    if device is None:
+        device = get_device()
+
     if weights_location.startswith("http"):
         ckpt_path = get_cached_url_path(weights_location, category="weights")
     else:
         ckpt_path = weights_location
     logger.info(f"Loading model {ckpt_path} onto {get_device()} backend...")
     state_dict = None
+    # weights_cache_key = (ckpt_path, half_mode)
+    # if weights_cache_key in GLOBAL_WEIGHTS_CACHE:
+    #     return GLOBAL_WEIGHTS_CACHE.get(weights_cache_key)
+
     try:
         state_dict = load_tensors(ckpt_path, map_location="cpu")
     except FileNotFoundError as e:
@@ -145,24 +74,60 @@ def load_state_dict(weights_location):
             raise e
 
     state_dict = state_dict.get("state_dict", state_dict)
+
+    if half_mode:
+        state_dict = {k: v.half() for k, v in state_dict.items()}
+
+    # change device
+    state_dict = {k: v.to(device) for k, v in state_dict.items()}
+
+    # GLOBAL_WEIGHTS_CACHE.set(weights_cache_key, state_dict)
+
     return state_dict
 
 
-def load_model_from_config(
-    config, weights_location, control_weights_location=None, half_mode=False
-):
-    state_dict = load_state_dict(weights_location)
-    if control_weights_location:
-        controlnet_state_dict = load_state_dict(control_weights_location)
-        state_dict = add_controlnet(state_dict, controlnet_state_dict)
-
+def load_model_from_config(config, weights_location, half_mode=False):
     model = instantiate_from_config(config.model)
-    model.init_from_state_dict(state_dict)
+    base_model_dict = load_state_dict(weights_location, half_mode=half_mode)
+    model.init_from_state_dict(base_model_dict)
     if half_mode:
         model = model.half()
-
     model.to(get_device())
     model.eval()
+    return model
+
+
+def load_model_from_config_old(
+    config, weights_location, control_weights_locations=None, half_mode=False
+):
+    model = instantiate_from_config(config.model)
+    print("instantiated")
+    base_model_dict = load_state_dict(weights_location, half_mode=half_mode)
+    model.init_from_state_dict(base_model_dict)
+
+    control_weights_locations = control_weights_locations or []
+    controlnets = []
+    for control_weights_location in control_weights_locations:
+        controlnet_state_dict = load_state_dict(
+            control_weights_location, half_mode=half_mode
+        )
+        controlnet_state_dict = {
+            k.replace("control_model.", ""): v for k, v in controlnet_state_dict.items()
+        }
+        controlnet = instantiate_from_config(model.control_stage_config)
+        controlnet.load_state_dict(controlnet_state_dict)
+        controlnet.to(get_device())
+        controlnets.append(controlnet)
+        model.set_control_models(controlnets)
+
+    if half_mode:
+        model = model.half()
+    print("halved")
+
+    model.to(get_device())
+    print("moved to device")
+    model.eval()
+    print("set to eval mode")
     return model
 
 
@@ -176,7 +141,7 @@ def add_controlnet(base_state_dict, controlnet_state_dict):
 def get_diffusion_model(
     weights_location=iconfig.DEFAULT_MODEL,
     config_path="configs/stable-diffusion-v1.yaml",
-    control_weights_location=None,
+    control_weights_locations=None,
     half_mode=None,
     for_inpainting=False,
     for_training=False,
@@ -192,7 +157,7 @@ def get_diffusion_model(
             config_path,
             half_mode,
             for_inpainting,
-            control_weights_location=control_weights_location,
+            control_weights_locations=control_weights_locations,
             for_training=for_training,
         )
     except HuggingFaceAuthorizationError as e:
@@ -206,7 +171,7 @@ def get_diffusion_model(
                 half_mode,
                 for_inpainting=False,
                 for_training=for_training,
-                control_weights_location=control_weights_location,
+                control_weights_locations=control_weights_locations,
             )
         raise e
 
@@ -217,23 +182,22 @@ def _get_diffusion_model(
     half_mode=None,
     for_inpainting=False,
     for_training=False,
-    control_weights_location=None,
+    control_weights_locations=None,
 ):
     """
     Load a diffusion model.
 
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
-    global MOST_RECENTLY_LOADED_MODEL  # noqa
     (
         model_config,
         weights_location,
         config_path,
-        control_weights_location,
+        control_weights_locations,
     ) = resolve_model_paths(
         weights_path=weights_location,
         config_path=config_path,
-        control_weights_path=control_weights_location,
+        control_weights_paths=control_weights_locations,
         for_inpainting=for_inpainting,
         for_training=for_training,
     )
@@ -242,39 +206,74 @@ def _get_diffusion_model(
         attention.ATTENTION_PRECISION_OVERRIDE = model_config.forced_attn_precision
     else:
         attention.ATTENTION_PRECISION_OVERRIDE = "default"
+    diffusion_model = _load_diffusion_model(
+        config_path=config_path,
+        weights_location=weights_location,
+        half_mode=half_mode,
+        for_training=for_training,
+    )
+    if control_weights_locations:
+        controlnets = []
+        for control_weights_location in control_weights_locations:
+            controlnets.append(load_controlnet(control_weights_location, half_mode))
+        diffusion_model.set_control_models(controlnets)
 
-    key = (config_path, weights_location, control_weights_location)
-    if key not in LOADED_MODELS:
-        MemoryAwareModel(
-            config_path=config_path,
-            weights_path=weights_location,
-            control_weights_path=control_weights_location,
-            half_mode=half_mode,
-            for_training=for_training,
-        )
+    return diffusion_model
 
-    model = LOADED_MODELS[key]
-    # calling model attribute forces it to load
-    model.num_timesteps_cond  # noqa
-    MOST_RECENTLY_LOADED_MODEL = model
+
+@memory_managed_model("stable-diffusion", memory_usage_mb=1951)
+def _load_diffusion_model(config_path, weights_location, half_mode, for_training):
+    model_config = OmegaConf.load(f"{PKG_ROOT}/{config_path}")
+    if for_training:
+        model_config.use_ema = True
+        # model_config.use_scheduler = True
+
+    # only run half-mode on cuda. run it by default
+    half_mode = half_mode is None and get_device() == "cuda"
+
+    model = load_model_from_config(
+        config=model_config,
+        weights_location=weights_location,
+        half_mode=half_mode,
+    )
     return model
+
+
+@memory_managed_model("controlnet")
+def load_controlnet(control_weights_location, half_mode):
+    controlnet_state_dict = load_state_dict(
+        control_weights_location, half_mode=half_mode
+    )
+    controlnet_state_dict = {
+        k.replace("control_model.", ""): v for k, v in controlnet_state_dict.items()
+    }
+    control_stage_config = OmegaConf.load(f"{PKG_ROOT}/configs/control-net-v15.yaml")[
+        "model"
+    ]["params"]["control_stage_config"]
+    controlnet = instantiate_from_config(control_stage_config)
+    controlnet.load_state_dict(controlnet_state_dict)
+    controlnet.to(get_device())
+    return controlnet
 
 
 def resolve_model_paths(
     weights_path=iconfig.DEFAULT_MODEL,
     config_path=None,
-    control_weights_path=None,
+    control_weights_paths=None,
     for_inpainting=False,
     for_training=False,
 ):
     """Resolve weight and config path if they happen to be shortcuts."""
     model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(weights_path, None)
     model_metadata_c = iconfig.MODEL_CONFIG_SHORTCUTS.get(config_path, None)
-    control_net_metadata = iconfig.CONTROLNET_CONFIG_SHORTCUTS.get(
-        control_weights_path, None
-    )
 
-    if not control_net_metadata and for_inpainting:
+    control_weights_paths = control_weights_paths or []
+    control_net_metadatas = [
+        iconfig.CONTROLNET_CONFIG_SHORTCUTS.get(control_weights_path, None)
+        for control_weights_path in control_weights_paths
+    ]
+
+    if not control_net_metadatas and for_inpainting:
         model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(
             f"{weights_path}-inpaint", model_metadata_w
         )
@@ -299,17 +298,17 @@ def resolve_model_paths(
 
     if config_path is None:
         config_path = iconfig.MODEL_CONFIG_SHORTCUTS[iconfig.DEFAULT_MODEL].config_path
-    if control_net_metadata:
+    if control_net_metadatas:
         if "stable-diffusion-v1" not in config_path:
             raise ValueError(
                 "Control net is only supported for stable diffusion v1. Please use a different model."
             )
-        control_weights_path = control_net_metadata.weights_url
-        config_path = control_net_metadata.config_path
+        control_weights_paths = [cnm.weights_url for cnm in control_net_metadatas]
+        config_path = control_net_metadatas[0].config_path
     model_metadata = model_metadata_w or model_metadata_c
     logger.debug(f"Loading model weights from: {weights_path}")
     logger.debug(f"Loading model config from:  {config_path}")
-    return model_metadata, weights_path, config_path, control_weights_path
+    return model_metadata, weights_path, config_path, control_weights_paths
 
 
 def get_model_default_image_size(weights_location):

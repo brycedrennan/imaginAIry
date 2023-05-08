@@ -1,16 +1,15 @@
-from functools import lru_cache
-
 import numpy as np
 import torch
 from PIL import Image
 
 from imaginairy.model_manager import get_cached_url_path
 from imaginairy.utils import get_device
+from imaginairy.utils.model_cache import memory_managed_model
 from imaginairy.vendored.basicsr.rrdbnet_arch import RRDBNet
 from imaginairy.vendored.realesrgan import RealESRGANer
 
 
-@lru_cache()
+@memory_managed_model("realesrgan_upsampler")
 def realesrgan_upsampler():
     model = RRDBNet(
         num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4
