@@ -165,7 +165,7 @@ def imagine(
     ), fix_torch_nn_layer_norm(), fix_torch_group_norm():
         for i, prompt in enumerate(prompts):
             logger.info(
-                f"Generating 🖼  {i + 1}/{num_prompts}: {prompt.prompt_description()}"
+                f"🖼  Generating  {i + 1}/{num_prompts}: {prompt.prompt_description()}"
             )
             for attempt in range(0, unsafe_retry_count + 1):
                 if attempt > 0:
@@ -246,7 +246,9 @@ def _generate_single_image(
     model = get_diffusion_model(
         weights_location=prompt.model,
         config_path=prompt.model_config_path,
-        control_weights_location=prompt.control_mode,
+        control_weights_locations=[prompt.control_mode]
+        if prompt.control_mode
+        else None,
         half_mode=half_mode,
         for_inpainting=(prompt.mask_image or prompt.mask_prompt or prompt.outpaint)
         and not suppress_inpaint,
@@ -462,7 +464,7 @@ def _generate_single_image(
             c_cat_neutral = [torch.zeros_like(init_latent)]
             denoiser_cls = CFGEditingDenoiser
         if c_cat:
-            c_cat = [torch.cat(c_cat, dim=1)]
+            c_cat = [torch.cat([c], dim=1) for c in c_cat]
 
         if c_cat_neutral is None:
             c_cat_neutral = c_cat

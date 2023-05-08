@@ -2,8 +2,6 @@ import logging
 import math
 
 import click
-from click_help_colors import HelpColorsCommand, HelpColorsMixin
-from click_shell import Shell
 
 from imaginairy import config
 
@@ -497,14 +495,3 @@ common_options = [
         type=str,
     ),
 ]
-
-
-class ColorShell(HelpColorsMixin, Shell):
-    pass
-
-
-class ImagineColorsCommand(HelpColorsCommand):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.help_headers_color = "yellow"
-        self.help_options_color = "green"

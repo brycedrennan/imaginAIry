@@ -2,12 +2,12 @@ import logging
 
 import click
 
+from imaginairy.cli.clickshell_mod import ColorShell, ImagineColorsCommand
 from imaginairy.cli.colorize import colorize_cmd
 from imaginairy.cli.describe import describe_cmd
 from imaginairy.cli.edit import edit_cmd
 from imaginairy.cli.edit_demo import edit_demo_cmd
 from imaginairy.cli.imagine import imagine_cmd
-from imaginairy.cli.shared import ColorShell, ImagineColorsCommand
 from imaginairy.cli.train import prep_images_cmd, prune_ckpt_cmd, train_concept_cmd
 from imaginairy.cli.upscale import upscale_cmd
 

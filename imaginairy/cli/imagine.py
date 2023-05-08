@@ -1,11 +1,7 @@
 import click
 
-from imaginairy.cli.shared import (
-    ImagineColorsCommand,
-    _imagine_cmd,
-    add_options,
-    common_options,
-)
+from imaginairy.cli.clickshell_mod import ImagineColorsCommand
+from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
 
 
 @click.command(

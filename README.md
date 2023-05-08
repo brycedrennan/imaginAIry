@@ -468,6 +468,11 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+- feature: multi-controlnet support
+- feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM. 
+- fix: hide the "triton" error messages
+- feature: show full stack trace on error in cli
+
 **12.0.3**
 - fix: exclude broken versions of timm as dependencies
 

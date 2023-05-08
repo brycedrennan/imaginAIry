@@ -1,6 +1,7 @@
 import importlib
 import logging
 import platform
+import time
 from contextlib import contextmanager, nullcontext
 from functools import lru_cache
 from typing import Any, List, Optional, Union
@@ -59,7 +60,11 @@ def instantiate_from_config(config: Union[dict, str]) -> Any:
         raise KeyError("Expected key `target` to instantiate.")
     params = config.get("params", {})
     _cls = get_obj_from_str(config["target"])
-    return _cls(**params)
+    start = time.perf_counter()
+    c = _cls(**params)
+    end = time.perf_counter()
+    logger.debug(f"Instantiation of {_cls} took {end-start} seconds")
+    return c
 
 
 @contextmanager
