@@ -468,6 +468,9 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+**12.0.3**
+- fix: exclude broken versions of timm as dependencies
+
 **12.0.2**
 - fix: move normal map preprocessor for conda compatibility
 

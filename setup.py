@@ -37,7 +37,7 @@ setup(
     name="imaginAIry",
     author="Bryce Drennan",
     # author_email="b r y p y d o t io",
-    version="12.0.2",
+    version="12.0.3",
     description="AI imagined images. Pythonic generation of images.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -85,7 +85,7 @@ setup(
         "requests",
         "einops>=0.3.0",
         "safetensors",
-        "timm>=0.4.12",  # for vendored blip
+        "timm>=0.4.12,!=0.9.0,!=0.9.1",  # for vendored blip
         "torchdiffeq",
         "transformers>=4.19.2",
         "torchmetrics>=0.6.0",
