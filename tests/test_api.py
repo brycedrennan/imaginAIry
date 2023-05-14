@@ -173,7 +173,11 @@ def test_img_to_img_fruit_2_gold(
     img = LazyLoadingImage(
         filepath=os.path.join(TESTS_FOLDER, "data", "bowl_of_fruit.jpg")
     )
-
+    target_steps = 25
+    if init_strength >= 1:
+        needed_steps = 25
+    else:
+        needed_steps = int(target_steps / (1 - init_strength))
     prompt = ImaginePrompt(
         "a white bowl filled with gold coins",
         prompt_strength=12,
@@ -181,7 +185,7 @@ def test_img_to_img_fruit_2_gold(
         init_image_strength=init_strength,
         mask_prompt="(fruit{*2} OR stem{*10} OR fruit stem{*3})",
         mask_mode="replace",
-        steps=80,
+        steps=needed_steps,
         seed=1,
         sampler_type=sampler_type,
     )
