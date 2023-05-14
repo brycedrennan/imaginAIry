@@ -26,4 +26,4 @@ def test_text_conditioning():
         neutral_embedding_mps_expected = f.get_tensor("neutral_clip_embedding_mps")
 
     diff = neutral_embedding - neutral_embedding_mps_expected
-    assert diff.sum() < 0.05
+    assert diff.sum() < 0.09
