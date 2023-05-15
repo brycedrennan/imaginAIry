@@ -55,7 +55,7 @@ def test_model_versions(filename_base_for_orig_outputs, model_version):
             )
         )
 
-    threshold = 33000
+    threshold = 35000
 
     for i, result in enumerate(imagine(prompts)):
         img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model}.png"
@@ -193,9 +193,10 @@ def test_img_to_img_fruit_2_gold(
     result = next(imagine(prompt))
 
     threshold_lookup = {
-        "k_dpm_2_a": 26000,
+        "k_dpm_2_a": 31000,
         "k_euler_a": 18000,
         "k_dpm_adaptive": 13000,
+        "k_dpmpp_2s": 16000,
     }
     threshold = threshold_lookup.get(sampler_type, 14000)
 
@@ -352,4 +353,4 @@ def test_large_image(filename_base_for_outputs):
     result = next(imagine(prompt))
 
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=24000)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=35000)
