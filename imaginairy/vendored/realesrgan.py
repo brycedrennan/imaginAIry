@@ -172,11 +172,8 @@ class RealESRGANer:
                 ]
 
                 # upscale tile
-                try:
-                    with torch.no_grad():
-                        output_tile = self.model(input_tile)
-                except RuntimeError as error:
-                    print("Error", error)
+                with torch.no_grad():
+                    output_tile = self.model(input_tile)
 
                 # output tile area on total image
                 output_start_x = input_start_x * self.scale
