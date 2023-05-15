@@ -1,5 +1,4 @@
 import pytest
-import torch
 from torch import nn
 
 from imaginairy import ImaginePrompt, imagine
@@ -18,7 +17,8 @@ class DummyMemoryModule(nn.Module):
 
 def create_model_of_n_bytes(n):
     import math
-    n = int(math.floor(n/4))
+
+    n = int(math.floor(n / 4))
     return DummyMemoryModule(n)
 
 

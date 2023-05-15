@@ -180,7 +180,6 @@ class GPUModelCache:
 
         gc.collect()
 
-
     @cached_property
     def max_cpu_memory(self):
         _ = self.device
@@ -236,8 +235,8 @@ class GPUModelCache:
         self.gpu_cache.set(key, value=model, memory_usage=model_size)
 
     def _move_to_cpu(self, key):
-        import torch
         import psutil
+        import torch
 
         memory_usage = self.gpu_cache._item_memory_usage[key]
         model = self.gpu_cache.pop(key)
