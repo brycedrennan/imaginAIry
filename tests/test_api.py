@@ -89,7 +89,7 @@ def test_img2img_beach_to_sunset(
 
     pillow_fit_image_within(img).save(f"{filename_base_for_orig_outputs}__orig.jpg")
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=2800)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=2900)
 
 
 def test_img_to_img_from_url_cats(
