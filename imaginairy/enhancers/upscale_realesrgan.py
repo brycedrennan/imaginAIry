@@ -18,7 +18,9 @@ def realesrgan_upsampler():
     model_path = get_cached_url_path(url)
     device = get_device()
 
-    upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=512, device=device)
+    upsampler = RealESRGANer(
+        scale=4, model_path=model_path, model=model, tile=512, device=device
+    )
 
     upsampler.device = torch.device(device)
     upsampler.model.to(device)
