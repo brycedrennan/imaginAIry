@@ -189,6 +189,8 @@ def _get_diffusion_model(
 
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
+    global MOST_RECENTLY_LOADED_MODEL  # noqa
+
     (
         model_config,
         weights_location,
@@ -212,6 +214,7 @@ def _get_diffusion_model(
         half_mode=half_mode,
         for_training=for_training,
     )
+    MOST_RECENTLY_LOADED_MODEL = diffusion_model
     if control_weights_locations:
         controlnets = []
         for control_weights_location in control_weights_locations:

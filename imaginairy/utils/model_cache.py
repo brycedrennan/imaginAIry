@@ -163,6 +163,7 @@ class GPUModelCache:
 
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
+
         gc.collect()
 
         if (
@@ -170,7 +171,8 @@ class GPUModelCache:
             or self.gpu_cache.memory_usage + bytes_to_free
             > get_mem_free_total(self.device)
         ):
-            raise RuntimeError("Unable to make space on GPU")
+            msg = f"Unable to make {bytes_to_free} space on GPU. \n{self.stats_msg()}"
+            raise RuntimeError(msg)
 
     def make_cpu_space(self, bytes_to_free):
         import gc
