@@ -334,6 +334,13 @@ def test_controlnet(filename_base_for_outputs, control_mode):
         control_mode=control_mode,
         fix_faces=True,
     )
+    prompt.steps = 1
+    prompt.width = 256
+    prompt.height = 256
+    result = next(imagine(prompt))
+    prompt.steps = 15
+    prompt.width = 512
+    prompt.height = 512
     result = next(imagine(prompt))
 
     img_path = f"{filename_base_for_outputs}.png"
