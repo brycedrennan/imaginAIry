@@ -49,9 +49,7 @@ def _imagine_cmd(
     arg_schedules=None,
     make_compilation_animation=False,
     caption_text="",
-    control_image=None,
-    control_image_raw=None,
-    control_mode="",
+    control_inputs=None,
 ):
     """Have the AI generate images. alias:imagine."""
 
@@ -102,12 +100,6 @@ def _imagine_cmd(
 
     from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
 
-    if control_image and control_image.startswith("http"):
-        control_image = LazyLoadingImage(url=control_image)
-
-    if control_image_raw and control_image_raw.startswith("http"):
-        control_image_raw = LazyLoadingImage(url=control_image_raw)
-
     new_init_images = []
     for _init_image in init_images:
         if _init_image and _init_image.startswith("http"):
@@ -141,6 +133,7 @@ def _imagine_cmd(
                 _tile_mode = "y"
             else:
                 _tile_mode = ""
+
             for _init_image in init_images:
                 prompt = ImaginePrompt(
                     next(prompt_iterator),
@@ -148,9 +141,7 @@ def _imagine_cmd(
                     prompt_strength=prompt_strength,
                     init_image=_init_image,
                     init_image_strength=init_image_strength,
-                    control_image=control_image,
-                    control_image_raw=control_image_raw,
-                    control_mode=control_mode,
+                    control_inputs=control_inputs,
                     seed=seed,
                     sampler_type=sampler_type,
                     steps=steps,

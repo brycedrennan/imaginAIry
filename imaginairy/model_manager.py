@@ -37,7 +37,10 @@ def load_tensors(tensorfile, map_location=None):
         return torch.load(tensorfile, map_location=map_location)
     if tensorfile.endswith(".safetensors"):
         return load_file(tensorfile, device=map_location)
-    raise ValueError(f"Unknown tensorfile type: {tensorfile}")
+
+    return load_file(tensorfile, device=map_location)
+
+    # raise ValueError(f"Unknown tensorfile type: {tensorfile}")
 
 
 def load_state_dict(weights_location, half_mode=False, device=None):

@@ -72,6 +72,31 @@ class LazyLoadingImage:
         return self._lazy_filepath or self._lazy_url
 
 
+class ControlNetInput:
+    def __init__(self, *, mode, image=None, image_raw=None):
+        self.mode = mode
+        self.image = image
+        self.image_raw = image_raw
+
+    def validate(self, default_image=None):
+        if isinstance(self.image, str):
+            if not self.image.startswith("*prev."):
+                self.image = LazyLoadingImage(filepath=self.image)
+
+        if isinstance(self.image_raw, str):
+            if not self.image_raw.startswith("*prev."):
+                self.image_raw = LazyLoadingImage(filepath=self.image_raw)
+
+        if self.image is None and self.image_raw is None and default_image is not None:
+            self.image = default_image
+
+        if self.image is None and self.image_raw is None:
+            raise ValueError("You must specify either image or image_raw")
+
+        if self.image is not None and self.image_raw is not None:
+            raise ValueError("You cannot specify both image and image_raw")
+
+
 class WeightedPrompt:
     def __init__(self, text, weight=1):
         self.text = text
@@ -95,9 +120,7 @@ class ImaginePrompt:
         prompt_strength=7.5,
         init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
         init_image_strength=None,
-        control_image=None,
-        control_image_raw=None,
-        control_mode=None,
+        control_inputs=None,
         mask_prompt=None,
         mask_image=None,
         mask_mode=MaskMode.REPLACE,
@@ -125,9 +148,7 @@ class ImaginePrompt:
         self.prompt_strength = prompt_strength
         self.init_image = init_image
         self.init_image_strength = init_image_strength
-        self.control_image = control_image
-        self.control_image_raw = control_image_raw
-        self.control_mode = control_mode
+        self.control_inputs = control_inputs
         self._orig_seed = seed
         self.seed = seed
         self.steps = steps
@@ -168,16 +189,6 @@ class ImaginePrompt:
             self.tile_mode = self.tile_mode.lower()
             assert self.tile_mode in ("", "x", "y", "xy")
 
-        if isinstance(self.control_image, str):
-            if not self.control_image.startswith("*prev."):
-                self.control_image = LazyLoadingImage(filepath=self.control_image)
-
-        if isinstance(self.control_image_raw, str):
-            if not self.control_image_raw.startswith("*prev."):
-                self.control_image_raw = LazyLoadingImage(
-                    filepath=self.control_image_raw
-                )
-
         if isinstance(self.init_image, str):
             if not self.init_image.startswith("*prev."):
                 self.init_image = LazyLoadingImage(filepath=self.init_image)
@@ -186,23 +197,13 @@ class ImaginePrompt:
             if not self.mask_image.startswith("*prev."):
                 self.mask_image = LazyLoadingImage(filepath=self.mask_image)
 
-        if self.control_image is not None and self.control_image_raw is not None:
-            raise ValueError(
-                "You can only set one of `control_image` and `control_image_raw`"
-            )
+        if self.control_inputs:
+            for control_input in self.control_inputs:
+                control_input.validate(default_image=self.init_image)
 
-        if self.control_image is not None and self.init_image is None:
-            self.init_image = self.control_image
-
-        if (
-            self.control_mode
-            and self.control_image is None
-            and self.init_image is not None
-        ):
-            self.control_image = self.init_image
-
-        if self.control_mode and not (self.control_image or self.control_image_raw):
-            raise ValueError("You must set `control_image` when using `control_mode`")
+            if self.init_image is None:
+                if self.control_inputs[0].image:
+                    self.init_image = self.control_inputs[0].image
 
         if self.mask_image is not None and self.mask_prompt is not None:
             raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
@@ -211,7 +212,7 @@ class ImaginePrompt:
             self.model = config.DEFAULT_MODEL
 
         if self.init_image_strength is None:
-            if self.control_mode is not None:
+            if self.control_inputs:
                 self.init_image_strength = 0.0
             elif self.outpaint or self.mask_image or self.mask_prompt:
                 self.init_image_strength = 0.0

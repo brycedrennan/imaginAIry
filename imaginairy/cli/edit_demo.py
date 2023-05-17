@@ -35,5 +35,5 @@ def edit_demo_cmd(image_paths, outdir, height, width):
     configure_logging()
     for image_path in image_paths:
         create_surprise_me_images(
-            image_path, outdir=outdir, make_gif=True, width=width, height=height
+            image_path, outdir=outdir, make_gif=True, width=width, height=height, seed=1
         )

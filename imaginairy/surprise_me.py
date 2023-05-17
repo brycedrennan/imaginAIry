@@ -10,6 +10,7 @@ from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
 from imaginairy.animations import make_gif_animation
 from imaginairy.enhancers.facecrop import detect_faces
 from imaginairy.img_utils import add_caption_to_image, pillow_fit_image_within
+from imaginairy.schema import ControlNetInput
 
 preserve_head_kwargs = {
     "mask_prompt": "head|face",
@@ -17,7 +18,7 @@ preserve_head_kwargs = {
 }
 
 generic_prompts = [
-    ("add confetti", 7.5, {}),
+    ("add confetti", 6, {}),
     # ("add sparkles", 14, {}),
     ("make it christmas", 15, preserve_head_kwargs),
     ("make it halloween", 15, {}),
@@ -125,7 +126,9 @@ person_prompt_configs = [
 ]
 
 
-def surprise_me_prompts(img, person=None, width=None, height=None, steps=30):
+def surprise_me_prompts(
+    img, person=None, width=None, height=None, steps=30, seed=None, use_controlnet=False
+):
     if isinstance(img, str):
         if img.startswith("http"):
             img = LazyLoadingImage(url=img)
@@ -137,18 +140,36 @@ def surprise_me_prompts(img, person=None, width=None, height=None, steps=30):
     prompts = []
 
     for prompt_text, strength, kwargs in generic_prompts:
-        prompts.append(
-            ImaginePrompt(
-                prompt_text,
-                init_image=img,
-                prompt_strength=strength,
-                model="edit",
-                steps=steps,
-                width=width,
-                height=height,
-                **kwargs,
+        if use_controlnet:
+            control_input = ControlNetInput(
+                mode="edit",
             )
-        )
+            prompts.append(
+                ImaginePrompt(
+                    prompt_text,
+                    init_image=img,
+                    init_image_strength=0.05,
+                    prompt_strength=strength,
+                    control_inputs=[control_input],
+                    steps=steps,
+                    width=width,
+                    height=height,
+                    **kwargs,
+                )
+            )
+        else:
+            prompts.append(
+                ImaginePrompt(
+                    prompt_text,
+                    init_image=img,
+                    prompt_strength=strength,
+                    model="edit",
+                    steps=steps,
+                    width=width,
+                    height=height,
+                    **kwargs,
+                )
+            )
 
     if person:
         for prompt_subconfigs in person_prompt_configs:
@@ -156,24 +177,44 @@ def surprise_me_prompts(img, person=None, width=None, height=None, steps=30):
                 prompt_subconfigs = [prompt_subconfigs]
             for prompt_subconfig in prompt_subconfigs:
                 prompt_text, strength, kwargs = prompt_subconfig
-                prompts.append(
-                    ImaginePrompt(
-                        prompt_text,
-                        init_image=img,
-                        prompt_strength=strength,
-                        model="edit",
-                        steps=steps,
-                        width=width,
-                        height=height,
-                        **kwargs,  # noqa
+                if use_controlnet:
+                    control_input = ControlNetInput(
+                        mode="edit",
                     )
-                )
+                    prompts.append(
+                        ImaginePrompt(
+                            prompt_text,
+                            init_image=img,
+                            init_image_strength=0.05,
+                            prompt_strength=strength,
+                            control_inputs=[control_input],
+                            steps=steps,
+                            width=width,
+                            height=height,
+                            seed=seed,
+                            **kwargs,  # noqa
+                        )
+                    )
+                else:
+                    prompts.append(
+                        ImaginePrompt(
+                            prompt_text,
+                            init_image=img,
+                            prompt_strength=strength,
+                            model="edit",
+                            steps=steps,
+                            width=width,
+                            height=height,
+                            seed=seed,
+                            **kwargs,  # noqa
+                        )
+                    )
 
     return prompts
 
 
 def create_surprise_me_images(
-    img, outdir, person=None, make_gif=True, width=None, height=None
+    img, outdir, person=None, make_gif=True, width=None, height=None, seed=None
 ):
     if isinstance(img, str):
         if img.startswith("http"):
@@ -181,7 +222,9 @@ def create_surprise_me_images(
         else:
             img = LazyLoadingImage(filepath=img)
 
-    prompts = surprise_me_prompts(img, person=person, width=width, height=height)
+    prompts = surprise_me_prompts(
+        img, person=person, width=width, height=height, seed=seed
+    )
 
     generated_filenames = imagine_image_files(
         prompts,

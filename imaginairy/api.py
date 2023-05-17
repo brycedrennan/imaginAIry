@@ -242,13 +242,13 @@ def _generate_single_image(
     if isinstance(prompt.mask_image, str) and prompt.mask_image.startswith("*prev"):
         _, img_type = prompt.mask_image.strip("*").split(".")
         prompt.mask_image = _most_recent_result.images[img_type]
-
+    control_modes = []
+    if prompt.control_inputs:
+        control_modes = [c.mode for c in prompt.control_inputs]
     model = get_diffusion_model(
         weights_location=prompt.model,
         config_path=prompt.model_config_path,
-        control_weights_locations=[prompt.control_mode]
-        if prompt.control_mode
-        else None,
+        control_weights_locations=control_modes,
         half_mode=half_mode,
         for_inpainting=(prompt.mask_image or prompt.mask_prompt or prompt.outpaint)
         and not suppress_inpaint,
@@ -398,46 +398,49 @@ def _generate_single_image(
         elif is_controlnet_model:
             from imaginairy.img_processors.control_modes import CONTROL_MODES
 
-            if prompt.control_image_raw is not None:
-                control_image = prompt.control_image_raw
-            elif prompt.control_image is not None:
-                control_image = prompt.control_image
-            control_image = control_image.convert("RGB")
-            log_img(control_image, "control_image_input")
-            control_image_input = pillow_fit_image_within(
-                control_image,
-                max_height=prompt.height,
-                max_width=prompt.width,
-            )
-            control_image_input_t = pillow_img_to_torch_image(control_image_input)
-            control_image_input_t = control_image_input_t.to(get_device())
-
-            if prompt.control_image_raw is None:
-                control_image_t = CONTROL_MODES[prompt.control_mode](
-                    control_image_input_t
+            for control_input in prompt.control_inputs:
+                if control_input.image_raw is not None:
+                    control_image = control_input.image_raw
+                elif control_input.image is not None:
+                    control_image = control_input.image
+                control_image = control_image.convert("RGB")
+                log_img(control_image, "control_image_input")
+                control_image_input = pillow_fit_image_within(
+                    control_image,
+                    max_height=prompt.height,
+                    max_width=prompt.width,
                 )
-            else:
-                control_image_t = (control_image_input_t + 1) / 2
+                control_image_input_t = pillow_img_to_torch_image(control_image_input)
+                control_image_input_t = control_image_input_t.to(get_device())
 
-            control_image_disp = control_image_t * 2 - 1
-            result_images["control"] = control_image_disp
-            log_img(control_image_disp, "control_image")
+                if control_input.image_raw is None:
+                    control_image_t = CONTROL_MODES[control_input.mode](
+                        control_image_input_t
+                    )
+                else:
+                    control_image_t = (control_image_input_t + 1) / 2
 
-            if len(control_image_t.shape) == 3:
-                raise RuntimeError("Control image must be 4D")
+                control_image_disp = control_image_t * 2 - 1
+                result_images[f"control-{control_input.mode}"] = control_image_disp
+                log_img(control_image_disp, "control_image")
 
-            if control_image_t.shape[1] != 3:
-                raise RuntimeError("Control image must have 3 channels")
+                if len(control_image_t.shape) == 3:
+                    raise RuntimeError("Control image must be 4D")
 
-            if control_image_t.min() < 0 or control_image_t.max() > 1:
-                raise RuntimeError(
-                    f"Control image must be in [0, 1] but we received {control_image_t.min()} and {control_image_t.max()}"
-                )
+                if control_image_t.shape[1] != 3:
+                    raise RuntimeError("Control image must have 3 channels")
 
-            if control_image_t.max() == control_image_t.min():
-                raise RuntimeError("No control signal found in control image.")
+                if control_image_t.min() < 0 or control_image_t.max() > 1:
+                    raise RuntimeError(
+                        f"Control image must be in [0, 1] but we received {control_image_t.min()} and {control_image_t.max()}"
+                    )
 
-            c_cat.append(control_image_t)
+                if control_image_t.max() == control_image_t.min():
+                    raise RuntimeError(
+                        f"No control signal found in control image {control_input.mode}."
+                    )
+
+                c_cat.append(control_image_t)
 
         elif hasattr(model, "masked_image_key"):
             # inpainting model

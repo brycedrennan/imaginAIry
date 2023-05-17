@@ -85,7 +85,23 @@ class ColorShell(HelpColorsMixin, ModShell):
 
 
 class ImagineColorsCommand(HelpColorsCommand):
+    _option_order = []
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.help_headers_color = "yellow"
         self.help_options_color = "green"
+
+    def parse_args(self, ctx, args):
+        # run the parser for ourselves to preserve the passed order
+        parser = self.make_parser(ctx)
+        opts, _, param_order = parser.parse_args(args=list(args))
+        type(self)._option_order = []
+        for param in param_order:
+            # Type check
+            option = opts[param.name]
+            if isinstance(option, list):
+                type(self)._option_order.append((param, option.pop(0)))
+
+        # return "normal" parse results
+        return super().parse_args(ctx, args)
