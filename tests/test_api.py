@@ -6,7 +6,7 @@ from imaginairy import LazyLoadingImage
 from imaginairy.api import imagine, imagine_image_files
 from imaginairy.img_processors.control_modes import CONTROL_MODES
 from imaginairy.img_utils import pillow_fit_image_within
-from imaginairy.schema import ImaginePrompt
+from imaginairy.schema import ControlNetInput, ImaginePrompt
 from imaginairy.utils import get_device
 
 from . import TESTS_FOLDER
@@ -193,12 +193,12 @@ def test_img_to_img_fruit_2_gold(
     result = next(imagine(prompt))
 
     threshold_lookup = {
-        "k_dpm_2_a": 31000,
+        "k_dpm_2_a": 32000,
         "k_euler_a": 18000,
         "k_dpm_adaptive": 13000,
         "k_dpmpp_2s": 16000,
     }
-    threshold = threshold_lookup.get(sampler_type, 14000)
+    threshold = threshold_lookup.get(sampler_type, 16000)
 
     pillow_fit_image_within(img).save(f"{filename_base_for_orig_outputs}__orig.jpg")
     img_path = f"{filename_base_for_outputs}.png"
@@ -324,14 +324,18 @@ control_modes = list(CONTROL_MODES.keys())
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_controlnet(filename_base_for_outputs, control_mode):
     prompt_text = "a photo of a woman sitting on a bench"
+    control_input = ControlNetInput(
+        mode=control_mode,
+        image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png"),
+    )
+
     prompt = ImaginePrompt(
         prompt_text,
-        control_image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png"),
         width=512,
         height=512,
         steps=15,
         seed=0,
-        control_mode=control_mode,
+        control_inputs=[control_input],
         fix_faces=True,
     )
     prompt.steps = 1

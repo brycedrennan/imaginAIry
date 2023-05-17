@@ -20,7 +20,7 @@ from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
         "extracted from the control image. "
         "Defaults to the `--init-image`"
     ),
-    multiple=False,
+    multiple=True,
 )
 @click.option(
     "--control-image-raw",
@@ -30,7 +30,7 @@ from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
         " expects the already extracted signal.  For example the raw control image would be a depth map or"
         "pose information."
     ),
-    multiple=False,
+    multiple=True,
 )
 @click.option(
     "--control-mode",
@@ -51,6 +51,7 @@ from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
         ]
     ),
     help="how the control image is used as signal",
+    multiple=True,
 )
 @click.pass_context
 def imagine_cmd(
@@ -103,6 +104,42 @@ def imagine_cmd(
 
     Can be invoked via either `aimg imagine` or just `imagine`.
     """
+    from imaginairy.schema import ControlNetInput, LazyLoadingImage
+
+    # hacky method of getting order of control images (mixing raw and normal images)
+    control_images = [
+        (o, path)
+        for o, path in ImagineColorsCommand._option_order  # noqa
+        if o.name in ("control_image", "control_image_raw")
+    ]
+    control_inputs = []
+    if control_mode:
+        for i, cm in enumerate(control_mode):
+            try:
+                option = control_images[i]
+            except IndexError:
+                option = None
+            if option is None:
+                control_image = None
+                control_image_raw = None
+            elif option[0].name == "control_image":
+                control_image = option[1]
+                control_image_raw = None
+                if control_image and control_image.startswith("http"):
+                    control_image = LazyLoadingImage(url=control_image)
+            else:
+                control_image = None
+                control_image_raw = option[1]
+                if control_image_raw and control_image_raw.startswith("http"):
+                    control_image_raw = LazyLoadingImage(url=control_image_raw)
+            control_inputs.append(
+                ControlNetInput(
+                    image=control_image,
+                    image_raw=control_image_raw,
+                    mode=cm,
+                )
+            )
+
     return _imagine_cmd(
         ctx,
         prompt_texts,
@@ -144,7 +181,5 @@ def imagine_cmd(
         arg_schedules,
         make_compilation_animation,
         caption_text,
-        control_image,
-        control_image_raw,
-        control_mode,
+        control_inputs=control_inputs,
     )
