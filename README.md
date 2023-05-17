@@ -121,7 +121,7 @@ imagine --control-image pearl-girl.jpg  --control-mode edit --init-image-strengt
 
 Replaces existing details in an image. Good to use with --init-image-strength 0.2
 ```bash
-imagine --control-image "assets/wishbone.jpg" --control-mode canny "sharp focus, high-resolution" --init-image-strength 0.2 --steps 30 -w 2048 -h 2048 
+imagine --control-image "assets/wishbone.jpg" --control-mode details "sharp focus, high-resolution" --init-image-strength 0.2 --steps 30 -w 2048 -h 2048 
 ```
 
 <p float="left">
