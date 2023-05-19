@@ -468,8 +468,11 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+- feature: [disabled] inpainting controlnet can be used instead of finetuned inpainting model
+  - The inpainting controlnet doesn't work as well as the finetuned model
 - feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
-- feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM. 
+- feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM.
+- feature: python interface allows configuration of controlnet strength
 - fix: hide the "triton" error messages
 - feature: show full stack trace on error in cli
 

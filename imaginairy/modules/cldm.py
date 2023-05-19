@@ -394,14 +394,16 @@ class ControlLDM(LatentDiffusion):
         merged_control = None
         cond_txt = torch.cat(cond["c_crossattn"], 1)
 
-        for control_model, c_concat in zip(self.control_models, cond["c_concat"]):
+        for control_model, c_concat, control_strength in zip(
+            self.control_models, cond["c_concat"], cond["control_strengths"]
+        ):
             cond_hint = torch.cat([c_concat], 1)
 
             control = control_model(
                 x=x_noisy, hint=cond_hint, timesteps=t, context=cond_txt
             )
-
-            control = [c * scale for c, scale in zip(control, self.control_scales)]
+            control_scales = [control_strength] * 13
+            control = [c * scale for c, scale in zip(control, control_scales)]
             if self.global_average_pooling:
                 control = [torch.mean(c, dim=(2, 3), keepdim=True) for c in control]
             if merged_control is None:

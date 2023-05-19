@@ -20,8 +20,10 @@ def test_control_images(filename_base_for_outputs, control_func, control_name):
     seed_everything(42)
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png")
     img_t = pillow_img_to_torch_image(img)
-
-    control_t = control_func(img_t.clone())
+    if control_name == "inpaint":
+        control_t = control_func(img_t.clone(), img_t.clone())
+    else:
+        control_t = control_func(img_t.clone())
     control_img = control_img_to_pillow_img(control_t)
     img_path = f"{filename_base_for_outputs}.png"
 
