@@ -187,6 +187,26 @@ def shuffle_map_torch(tensor, h=None, w=None, f=256):
     return shuffled_tensor.to(device)
 
 
+def inpaint_prep(mask_image_t, target_image_t):
+    """
+    Combines the masked image and target image into a single tensor.
+
+    The output tensor has any masked areas set to -1 and other pixel values set between 0 and 1.
+
+    mask_image_t is a 3-channel torch tensor of shape (B, C, H, W) with pixel values in range [-1, 1], where -1 indicates masked areas
+    target_image_t is a 3-channel torch tensor of shape (B, C, H, W) with pixel values in range [-1, 1]
+    """
+    import torch
+
+    # Normalize target_image_t from [-1,1] to [0,1]
+    target_image_t = (target_image_t + 1.0) / 2.0
+
+    # Use mask_image_t to replace masked areas in target_image_t with -1
+    output_image_t = torch.where(mask_image_t == -1, mask_image_t, target_image_t)
+
+    return output_image_t
+
+
 def noop(img):
     return (img + 1.0) / 2.0
 
@@ -201,6 +221,6 @@ CONTROL_MODES = {
     # "scribble": None,
     "shuffle": shuffle_map_torch,
     "edit": noop,
-    "inpaint": noop,
+    "inpaint": inpaint_prep,
     "details": noop,
 }

@@ -73,10 +73,11 @@ class LazyLoadingImage:
 
 
 class ControlNetInput:
-    def __init__(self, *, mode, image=None, image_raw=None):
+    def __init__(self, *, mode, image=None, image_raw=None, strength=1):
         self.mode = mode
         self.image = image
         self.image_raw = image_raw
+        self.strength = strength
 
     def validate(self, default_image=None):
         if isinstance(self.image, str):
