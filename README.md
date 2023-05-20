@@ -486,6 +486,7 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 **13.0.0**
 - 🎉 feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
 - 🎉 feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM.
+- alpha feature: `aimg run-api-server` command. Runs a http webserver (not finished). After running, visit http://127.0.0.1:8000/docs for api.
 - feature: add colorization controlnet. improve `aimg colorize` command
 - feature: [disabled] inpainting controlnet can be used instead of finetuned inpainting model
   - The inpainting controlnet doesn't work as well as the finetuned model
