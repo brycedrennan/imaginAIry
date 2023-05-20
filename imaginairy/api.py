@@ -143,11 +143,14 @@ def imagine(
 
     from imaginairy.schema import ImaginePrompt
     from imaginairy.utils import (
+        check_torch_version,
         fix_torch_group_norm,
         fix_torch_nn_layer_norm,
         get_device,
         platform_appropriate_autocast,
     )
+
+    check_torch_version()
 
     prompts = [ImaginePrompt(prompts)] if isinstance(prompts, str) else prompts
     prompts = [prompts] if isinstance(prompts, ImaginePrompt) else prompts
