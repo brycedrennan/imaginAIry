@@ -236,6 +236,13 @@ CONTROLNET_CONFIGS = [
         weights_url="https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11f1e_sd15_tile.pth",
         alias="details",
     ),
+    ControlNetConfig(
+        short_name="colorize15",
+        control_type="colorize",
+        config_path="configs/control-net-v15.yaml",
+        weights_url="https://huggingface.co/ioclab/ioc-controlnet/resolve/87b589ef8aa80c37be814fffc31203853a2928c1/models/control_v1p_sd15_brightness.safetensors",
+        alias="colorize",
+    ),
 ]
 
 CONTROLNET_CONFIG_SHORTCUTS = {m.short_name: m for m in CONTROLNET_CONFIGS}

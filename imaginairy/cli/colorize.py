@@ -21,8 +21,14 @@ logger = logging.getLogger(__name__)
     type=int,
     help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated.",
 )
+@click.option(
+    "--caption",
+    default="",
+    show_default=False,
+    help="Description of the photo. If not provided, it will be generated automatically.",
+)
 @click.command("colorize")
-def colorize_cmd(image_filepaths, outdir, repeats):
+def colorize_cmd(image_filepaths, outdir, repeats, caption):
     """
     Colorize images using AI. Doesn't work very well yet.
     """
@@ -52,6 +58,6 @@ def colorize_cmd(image_filepaths, outdir, repeats):
                 img = LazyLoadingImage(filepath=p)
             logger.info(f"Colorizing {p} and saving it to {savepath}")
 
-            img = colorize_img(img)
+            img = colorize_img(img, caption=caption)
 
             img.save(savepath)

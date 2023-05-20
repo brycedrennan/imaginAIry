@@ -130,6 +130,21 @@ imagine --control-image "assets/wishbone.jpg" --control-mode details "sharp focu
 </p>
 
 
+### Image (re)Colorization (using brightness control)
+Colorize black and white images or re-color existing images.
+
+The generated colors will be applied back to the original image. You can either provide a caption or 
+allow the tool to generate one for you.
+
+```bash
+aimg colorize pearl-girl.jpg --caption "photo of a woman"
+```
+<p float="left">
+    <img src="assets/girl_with_a_pearl_earring.jpg" height="256">
+    <img src="assets/pearl-gray.jpg" height="256">
+    <img src="assets/pearl-recolor-a.jpg" height="256">
+</p>
+
 ###  Instruction based image edits [by InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix)
 Just tell imaginairy how to edit the image and it will do it for you!
 <p float="left">
@@ -468,10 +483,12 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+**13.0.0**
+- 🎉 feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
+- 🎉 feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM.
+- feature: add colorization controlnet. improve `aimg colorize` command
 - feature: [disabled] inpainting controlnet can be used instead of finetuned inpainting model
   - The inpainting controlnet doesn't work as well as the finetuned model
-- feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
-- feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM.
 - feature: python interface allows configuration of controlnet strength
 - fix: hide the "triton" error messages
 - feature: show full stack trace on error in cli
