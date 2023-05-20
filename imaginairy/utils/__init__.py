@@ -236,3 +236,15 @@ def get_next_filenumber(path):
         last_file_num = 0
 
     return max(file_count, last_file_num + 1)
+
+
+def check_torch_version():
+    """
+    Check that the torch version is compatible with ImaginAIry.
+
+    https://github.com/brycedrennan/imaginAIry/issues/329
+    """
+    from packaging import version
+
+    if version.parse(torch.__version__) >= version.parse("2.0.0"):
+        raise RuntimeError("ImaginAIry is not compatible with torch>=2.0.0")

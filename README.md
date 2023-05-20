@@ -495,7 +495,8 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 - fix: hide the "triton" error messages
 - fix: package will not try to install xformers on `aarch64` machines. While this will allow the dockerfile to build on 
 MacOS M1, [torch will not be able to use the M1 when generating images.](https://github.com/pytorch/pytorch/issues/81224#issuecomment-1499741152)
-- build: specify proper Pillow minimum version (fixes #325) 
+- build: specify proper Pillow minimum version (fixes #325)
+- build: check for torch version at runtime (fixes #329)
 
 **12.0.3**
 - fix: exclude broken versions of timm as dependencies
