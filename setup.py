@@ -68,6 +68,7 @@ setup(
         "protobuf != 3.20.2, != 3.19.5",
         "facexlib",
         "fairscale>=0.4.4",  # for vendored blip
+        "fastapi",
         "ftfy",  # for vendored clip
         # 2.0.0 produced garbage images on MacOS
         "torch>=1.13.1,<2.0.0",
@@ -82,6 +83,7 @@ setup(
         "omegaconf>=2.1.1",
         "open-clip-torch",
         "opencv-python",
+        "pydantic",
         "requests",
         "einops>=0.3.0",
         "safetensors",
@@ -91,6 +93,7 @@ setup(
         "torchmetrics>=0.6.0",
         "torchvision>=0.13.1",
         "kornia>=0.6",
+        "uvicorn",
         "xformers>=0.0.16; sys_platform!='darwin'",
     ],
 )
