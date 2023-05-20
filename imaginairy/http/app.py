@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import FastAPI, Query
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel  # noqa
 
 from imaginairy import ImaginePrompt, imagine
 from imaginairy.log_utils import configure_logging
