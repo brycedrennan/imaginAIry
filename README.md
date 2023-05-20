@@ -486,13 +486,15 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 **13.0.0**
 - 🎉 feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
 - 🎉 feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM.
-- alpha feature: `aimg run-api-server` command. Runs a http webserver (not finished). After running, visit http://127.0.0.1:8000/docs for api.
-- feature: add colorization controlnet. improve `aimg colorize` command
+- 🎉 feature: add colorization controlnet. improve `aimg colorize` command
+- 🧪 alpha feature: `aimg run-api-server` command. Runs a http webserver (not finished). After running, visit http://127.0.0.1:8000/docs for api.
 - feature: [disabled] inpainting controlnet can be used instead of finetuned inpainting model
   - The inpainting controlnet doesn't work as well as the finetuned model
 - feature: python interface allows configuration of controlnet strength
-- fix: hide the "triton" error messages
 - feature: show full stack trace on error in cli
+- fix: hide the "triton" error messages
+- fix: package will not try to install xformers on `aarch64` machines. While this will allow the dockerfile to build on 
+MacOS M1, [torch will not be able to use the M1 when generating images.](https://github.com/pytorch/pytorch/issues/81224#issuecomment-1499741152)
 
 **12.0.3**
 - fix: exclude broken versions of timm as dependencies

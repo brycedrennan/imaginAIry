@@ -21,7 +21,14 @@ else:
 
 @lru_cache()
 def get_git_revision_hash() -> str:
-    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+    try:
+        return (
+            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .decode("ascii")
+            .strip()
+        )
+    except FileNotFoundError:
+        return "no-git"
 
 
 revision_hash = get_git_revision_hash()
@@ -94,6 +101,6 @@ setup(
         "torchvision>=0.13.1",
         "kornia>=0.6",
         "uvicorn",
-        "xformers>=0.0.16; sys_platform!='darwin'",
+        "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
     ],
 )
