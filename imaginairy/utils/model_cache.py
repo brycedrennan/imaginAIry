@@ -171,7 +171,7 @@ class GPUModelCache:
             or self.gpu_cache.memory_usage + bytes_to_free
             > get_mem_free_total(self.device)
         ):
-            msg = f"Unable to make {bytes_to_free} space on GPU. \n{self.stats_msg()}"
+            msg = f"Unable to make {bytes_to_free / (1024 ** 2):.1f} MB space on {self.device}. \n{self.stats_msg()}"
             raise RuntimeError(msg)
 
     def make_cpu_space(self, bytes_to_free):
