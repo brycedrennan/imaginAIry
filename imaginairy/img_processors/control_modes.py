@@ -207,6 +207,24 @@ def inpaint_prep(mask_image_t, target_image_t):
     return output_image_t
 
 
+def to_grayscale(img):
+    # The dimensions of input should be (batch_size, channels, height, width)
+    assert img.dim() == 4 and img.size(1) == 3
+
+    # Apply the formula to convert to grayscale.
+    gray = (
+        0.2989 * img[:, 0, :, :] + 0.5870 * img[:, 1, :, :] + 0.1140 * img[:, 2, :, :]
+    )
+
+    # Expand the dimensions so it's a 1-channel image.
+    gray = gray.unsqueeze(1)
+
+    # Duplicate the single channel to have 3 identical channels
+    gray_3_channels = gray.repeat(1, 3, 1, 1)
+
+    return (gray_3_channels + 1.0) / 2.0
+
+
 def noop(img):
     return (img + 1.0) / 2.0
 
@@ -223,4 +241,5 @@ CONTROL_MODES = {
     "edit": noop,
     "inpaint": inpaint_prep,
     "details": noop,
+    "colorize": to_grayscale,
 }
