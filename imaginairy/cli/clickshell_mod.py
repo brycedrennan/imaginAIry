@@ -43,7 +43,7 @@ def mod_get_invoke(command):
             # and that's not ideal when running in a shell.
             pass
         except Exception as e:  # noqa
-            traceback.print_exception(e)
+            traceback.print_exception(e)  # noqa
             # logger.warning(traceback.format_exc())
 
         # Always return False so the shell doesn't exit
