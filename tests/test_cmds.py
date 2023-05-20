@@ -1,3 +1,5 @@
+from unittest import mock
+
 from click.testing import CliRunner
 
 from imaginairy import ImaginePrompt, LazyLoadingImage, surprise_me
@@ -6,10 +8,12 @@ from imaginairy.cli.edit_demo import edit_demo_cmd
 from imaginairy.cli.imagine import imagine_cmd
 from imaginairy.cli.main import aimg
 from imaginairy.cli.upscale import upscale_cmd
+from imaginairy.utils.model_cache import GPUModelCache
 from tests import TESTS_FOLDER
 
 
-def test_imagine_cmd():
+def test_imagine_cmd(monkeypatch):
+    monkeypatch.setattr(GPUModelCache, "make_gpu_space", mock.MagicMock())
     runner = CliRunner()
     result = runner.invoke(
         imagine_cmd,
@@ -30,7 +34,8 @@ def test_imagine_cmd():
     assert result.exit_code == 0
 
 
-def test_edit_cmd():
+def test_edit_cmd(monkeypatch):
+    monkeypatch.setattr(GPUModelCache, "make_gpu_space", mock.MagicMock())
     runner = CliRunner()
     result = runner.invoke(
         edit_cmd,
@@ -74,6 +79,7 @@ def test_edit_demo(monkeypatch):
         ]
 
     monkeypatch.setattr(surprise_me, "surprise_me_prompts", mock_surprise_me_prompts)
+    monkeypatch.setattr(GPUModelCache, "make_gpu_space", mock.MagicMock())
     surprise_me.generic_prompts = []
     result = runner.invoke(
         edit_demo_cmd,
