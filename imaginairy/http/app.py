@@ -1,9 +1,11 @@
+import os.path
 from asyncio import Lock
 
 from fastapi import FastAPI, Query
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from imaginairy.http.models import ImagineWebPrompt
 from imaginairy.http.stablestudio import routes
@@ -40,3 +42,9 @@ async def imagine_get_endpoint(text: str = Query(...)):
     async with gpu_lock:
         img_io = await run_in_threadpool(generate_image, ImagineWebPrompt(prompt=text))
         return StreamingResponse(img_io, media_type="image/jpg")
+
+
+static_folder = os.path.dirname(os.path.abspath(__file__)) + "/stablestudio/dist"
+print(f"static_folder: {static_folder}")
+
+app.mount("/", StaticFiles(directory=static_folder, html=True), name="static")

@@ -54,6 +54,8 @@ async def list_models():
 
     model_objs = []
     for model_config in MODEL_CONFIGS:
+        if "inpaint" in model_config.description.lower():
+            continue
         model_obj = StableStudioModel(
             id=model_config.short_name,
             name=model_config.description,

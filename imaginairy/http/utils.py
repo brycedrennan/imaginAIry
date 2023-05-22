@@ -5,7 +5,7 @@ from imaginairy import imagine
 
 
 def generate_image(prompt):
-    """ImagineWebPrompt to generated image"""
+    """ImagineWebPrompt to generated image."""
     prompt = prompt.to_imagine_prompt()
     result = next(imagine([prompt]))
     img = result.images["generated"]
@@ -16,7 +16,7 @@ def generate_image(prompt):
 
 
 def generate_image_b64(prompt):
-    """ImagineWebPrompt to generated base64 encoded image"""
+    """ImagineWebPrompt to generated base64 encoded image."""
     img_io = generate_image(prompt)
     img_base64 = base64.b64encode(img_io.getvalue())
     return img_base64
