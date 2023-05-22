@@ -28,6 +28,14 @@ AI imagined images. Pythonic generation of stable diffusion images.
 <img src="assets/009719_942389026_kdpmpp2m15_PS7.5_a_flower.gif" height="256">
 </p>
 
+### Run API server and StableStudio web interface (alpha)
+Generate images via API or web interface.  Much smaller featureset compared to the command line tool.
+```bash
+>> aimg server
+```
+Visit http://localhost:8000/ and http://localhost:8000/docs
+<img src="https://github.com/Stability-AI/StableStudio/blob/a65d4877ad7d309627808a169818f1add8c278ae/misc/GenerateScreenshot.png?raw=true">
+
 ### Image Structure Control [by ControlNet](https://github.com/lllyasviel/ControlNet)
 Generate images guided by body poses, depth maps, canny edges, hed boundaries, or normal maps.
 
@@ -486,6 +494,7 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 **13.0.0**
 - 🎉 feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
 - 🎉 feature: add colorization controlnet. improve `aimg colorize` command
+- 🎉🧪 feature: Graphical Web Interface [StableStudio](https://github.com/Stability-AI/StableStudio). run `aimg server` and visit http://127.0.0.1:8000/
 - 🎉🧪 feature: API server `aimg server` command. Runs a http webserver (not finished). After running, visit http://127.0.0.1:8000/docs for api.
 - 🎉🧪 feature: API support for [Stablity AI's new open-source Generative AI interface, StableStudio](https://github.com/Stability-AI/StableStudio).
 - 🎉🧪 feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM. I'm not confident this works well.

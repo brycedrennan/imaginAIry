@@ -79,6 +79,19 @@ require_pyenv:
 	  echo -e "\033[0;32m ✔️  pyenv-virtualenv installed\033[0m";\
 	fi
 
+update-stablestudio:
+	@echo "Updating stablestudio"
+	cd ../imaginAIry-StableStudio && \
+	yarn build && \
+	yarn build:production
+	rm -rf imaginairy/http/stablestudio/dist
+	cp -R ../imaginAIry-StableStudio/packages/stablestudio-ui/dist imaginairy/http/stablestudio/dist
+	rm -rf imaginairy/http/stablestudio/dist/examples
+	rm -rf imaginairy/http/stablestudio/dist/media
+	rm -rf imaginairy/http/stablestudio/dist/presets
+	cp ../imaginAIry-StableStudio/LICENSE imaginairy/http/stablestudio/dist/LICENSE
+	@echo "Updated stablestudio"
+
 vendor_openai_clip:
 	mkdir -p ./downloads
 	-cd ./downloads && git clone git@github.com:openai/CLIP.git
