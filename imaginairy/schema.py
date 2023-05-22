@@ -181,6 +181,9 @@ class ImaginePrompt:
         from imaginairy.samplers import SAMPLER_LOOKUP, SamplerName
 
         self.prompts = self.process_prompt_input(self.prompts)
+        self.prompt_strength = (
+            7.5 if self.prompt_strength is None else self.prompt_strength
+        )
 
         if self.tile_mode is True:
             self.tile_mode = "xy"
