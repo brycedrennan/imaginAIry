@@ -1,8 +1,8 @@
 import click
 
 
-@click.command("run-api-server")
-def run_api_server_cmd():
+@click.command("run-server")
+def run_server_cmd():
     """Run a HTTP API server."""
     import uvicorn
 

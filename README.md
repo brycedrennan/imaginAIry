@@ -486,8 +486,9 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 **13.0.0**
 - 🎉 feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
 - 🎉 feature: add colorization controlnet. improve `aimg colorize` command
-- 🧪 feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM. I'm not confident this works well.
-- 🧪 alpha feature: `aimg run-api-server` command. Runs a http webserver (not finished). After running, visit http://127.0.0.1:8000/docs for api.
+- 🎉🧪 feature: API server `aimg server` command. Runs a http webserver (not finished). After running, visit http://127.0.0.1:8000/docs for api.
+- 🎉🧪 feature: API support for [Stablity AI's new open-source Generative AI interface, StableStudio](https://github.com/Stability-AI/StableStudio).
+- 🎉🧪 feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM. I'm not confident this works well.
 - feature: [disabled] inpainting controlnet can be used instead of finetuned inpainting model
   - The inpainting controlnet doesn't work as well as the finetuned model
 - feature: python interface allows configuration of controlnet strength
