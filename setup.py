@@ -106,4 +106,6 @@ setup(
         "uvicorn",
         "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
     ],
+    # torchvision doesn't support python 3.11 unless we switch to torch 2.0
+    python_requires="<3.11",
 )
