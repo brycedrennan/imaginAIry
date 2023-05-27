@@ -491,6 +491,7 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+**13.0.1**
 - feature: show full stack trace when there is an api error
 - fix: make lack of support for python 3.11 explicit
 - fix: add some routes to match StableStudio routes
