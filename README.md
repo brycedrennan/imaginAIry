@@ -491,6 +491,10 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+- feature: show full stack trace when there is an api error
+- fix: make lack of support for python 3.11 explicit
+- fix: add some routes to match StableStudio routes
+
 **13.0.0**
 - 🎉 feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
 - 🎉 feature: add colorization controlnet. improve `aimg colorize` command
