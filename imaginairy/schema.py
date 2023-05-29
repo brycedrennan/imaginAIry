@@ -1,11 +1,23 @@
+# pylint: disable=E0213
+import base64
 import hashlib
+import io
 import json
 import logging
 import os.path
 import random
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Any, List, Literal, Optional
+
+from pydantic import BaseModel, Field, validator
 
 from imaginairy import config
+
+if TYPE_CHECKING:
+    from PIL import Image
+else:
+    Image = Any
+
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +27,12 @@ class InvalidUrlError(ValueError):
 
 
 class LazyLoadingImage:
-    def __init__(self, *, filepath=None, url=None):
-        if not filepath and not url:
-            raise ValueError("You must specify a url or filepath")
-        if filepath and url:
+    """Image file encoded as base64 string."""
+
+    def __init__(self, *, filepath=None, url=None, img=None):
+        if not filepath and not url and not img:
+            raise ValueError("You must specify a url or filepath or img")
+        if sum([bool(filepath), bool(url), bool(img)]) > 1:
             raise ValueError("You cannot specify a url and filepath")
 
         # validate file exists
@@ -39,236 +53,331 @@ class LazyLoadingImage:
 
         self._lazy_filepath = filepath
         self._lazy_url = url
-        self._img = None
+        self._img = img
 
     def __getattr__(self, key):
         if key == "_img":
             #  http://nedbatchelder.com/blog/201010/surprising_getattr_recursion.html
             raise AttributeError()
-        if self._img:
-            return getattr(self._img, key)
-        from PIL import Image, ImageOps
-
-        if self._lazy_filepath:
-            self._img = Image.open(self._lazy_filepath)
-            logger.debug(
-                f"Loaded input 🖼  of size {self._img.size} from {self._lazy_filepath}"
-            )
-        elif self._lazy_url:
-            import requests
-
-            self._img = Image.open(
-                requests.get(self._lazy_url, stream=True, timeout=60).raw
-            )
-            logger.debug(
-                f"Loaded input 🖼  of size {self._img.size} from {self._lazy_url}"
-            )
-        # fix orientation
-        self._img = ImageOps.exif_transpose(self._img)
-
+        self._load_img()
         return getattr(self._img, key)
 
+    def _load_img(self):
+        if self._img is None:
+            from PIL import Image, ImageOps
+
+            if self._lazy_filepath:
+                self._img = Image.open(self._lazy_filepath)
+                logger.debug(
+                    f"Loaded input 🖼  of size {self._img.size} from {self._lazy_filepath}"
+                )
+            elif self._lazy_url:
+                import requests
+
+                self._img = Image.open(
+                    requests.get(self._lazy_url, stream=True, timeout=60).raw
+                )
+                logger.debug(
+                    f"Loaded input 🖼  of size {self._img.size} from {self._lazy_url}"
+                )
+            else:
+                raise ValueError("You must specify a url or filepath")
+            # fix orientation
+            self._img = ImageOps.exif_transpose(self._img)
+
+    @classmethod
+    def __modify_schema__(cls, field_schema, field):
+        field_schema["title"] = field.name.replace("_", " ").title()
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        from PIL import Image
+
+        if isinstance(v, cls):
+            return v
+        if isinstance(v, Image.Image):
+            return cls(img=v)
+        if isinstance(v, str):
+            return cls(img=cls.load_image_from_base64(v))
+        raise ValueError(
+            "Image value must be either a PIL.Image.Image or a Base64 string"
+        )
+
+    @staticmethod
+    def save_image_as_base64(image: "Image.Image") -> str:
+        buffered = io.BytesIO()
+        image.save(buffered, format="PNG")
+        img_bytes = buffered.getvalue()
+        return base64.b64encode(img_bytes).decode()
+
+    @staticmethod
+    def load_image_from_base64(image_str: str) -> "Image.Image":
+        from PIL import Image
+
+        img_bytes = base64.b64decode(image_str)
+        return Image.open(io.BytesIO(img_bytes))
+
     def __str__(self):
-        return self._lazy_filepath or self._lazy_url
+        self._load_img()
+        return self.save_image_as_base64(self._img)  # type: ignore
+
+    def __repr__(self):
+        """human readable representation.
+
+        shows filepath or url if available.
+        """
+        return f"<LazyLoadingImage filepath={self._lazy_filepath} url={self._lazy_url}>"
 
 
-class ControlNetInput:
-    def __init__(self, *, mode, image=None, image_raw=None, strength=1):
-        self.mode = mode
-        self.image = image
-        self.image_raw = image_raw
-        self.strength = strength
+class ControlNetInput(BaseModel):
+    mode: str
+    image: Optional[LazyLoadingImage] = None
+    image_raw: Optional[LazyLoadingImage] = None
+    strength: int = Field(1, ge=0)
 
-    def validate(self, default_image=None):
-        if isinstance(self.image, str):
-            if not self.image.startswith("*prev."):
-                self.image = LazyLoadingImage(filepath=self.image)
-
-        if isinstance(self.image_raw, str):
-            if not self.image_raw.startswith("*prev."):
-                self.image_raw = LazyLoadingImage(filepath=self.image_raw)
-
-        if self.image is None and self.image_raw is None and default_image is not None:
-            self.image = default_image
-
-        if self.image is None and self.image_raw is None:
-            raise ValueError("You must specify either image or image_raw")
-
-        if self.image is not None and self.image_raw is not None:
+    @validator("image_raw")
+    def image_raw_validate(cls, v, values):
+        if values.get("image") is not None and v is not None:
             raise ValueError("You cannot specify both image and image_raw")
 
+        # if v is None and values.get("image") is None:
+        #     raise ValueError("You must specify either image or image_raw")
 
-class WeightedPrompt:
-    def __init__(self, text, weight=1):
-        self.text = text
-        self.weight = weight
+        return v
 
-    def __str__(self):
+
+class WeightedPrompt(BaseModel):
+    text: str
+    weight: int = Field(1, ge=0)
+
+    def __repr__(self):
         return f"{self.weight}*({self.text})"
 
 
-class ImaginePrompt:
+class ImaginePrompt(BaseModel):
+    prompt: Optional[List[WeightedPrompt]]
+    negative_prompt: Optional[List[WeightedPrompt]]
+    prompt_strength: Optional[float] = 7.5
+    init_image: Optional[LazyLoadingImage] = Field(
+        None, description="base64 encoded image"
+    )
+    init_image_strength: Optional[float] = Field(ge=0, le=1)
+    control_inputs: Optional[List[ControlNetInput]]
+    mask_prompt: Optional[str] = Field(
+        description="text description of the things to be masked"
+    )
+    mask_image: Optional[LazyLoadingImage]
+    mask_mode: Optional[Literal["keep", "replace"]] = "replace"
+    mask_modify_original: bool = True
+    outpaint: Optional[str]
+    model: str = config.DEFAULT_MODEL
+    model_config_path: Optional[str]
+    sampler_type: str = config.DEFAULT_SAMPLER
+    seed: Optional[int]
+    steps: Optional[int]
+    height: Optional[int] = Field(None, ge=1)
+    width: Optional[int] = Field(None, ge=1)
+    upscale: bool = False
+    fix_faces: bool = False
+    fix_faces_fidelity: Optional[float] = Field(0.2, ge=0, le=1)
+    conditioning: Optional[str] = None
+    tile_mode: str = ""
+    allow_compose_phase: bool = True
+    is_intermediate: bool = False
+    collect_progress_latents: bool = False
+    caption_text: str = Field("", description="text to be overlaid on the image")
+
     class MaskMode:
-        KEEP = "keep"
         REPLACE = "replace"
+        KEEP = "keep"
 
-    DEFAULT_FACE_FIDELITY = 0.2
+    def __init__(self, prompt=None, **kwargs):
+        # allows `prompt` to be positional
+        super().__init__(prompt=prompt, **kwargs)
 
-    def __init__(
-        self,
-        prompt=None,
-        negative_prompt=None,
-        prompt_strength=7.5,
-        init_image=None,  # Pillow Image, LazyLoadingImage, or filepath str
-        init_image_strength=None,
-        control_inputs=None,
-        mask_prompt=None,
-        mask_image=None,
-        mask_mode=MaskMode.REPLACE,
-        mask_modify_original=True,
-        outpaint=None,
-        seed=None,
-        steps=None,
-        height=None,
-        width=None,
-        upscale=False,
-        fix_faces=False,
-        fix_faces_fidelity=DEFAULT_FACE_FIDELITY,
-        sampler_type=config.DEFAULT_SAMPLER,
-        conditioning=None,
-        tile_mode="",
-        allow_compose_phase=True,
-        model=config.DEFAULT_MODEL,
-        model_config_path=None,
-        is_intermediate=False,
-        collect_progress_latents=False,
-        caption_text="",
-    ):
-        self.prompts = prompt
-        self.negative_prompt = negative_prompt
-        self.prompt_strength = prompt_strength
-        self.init_image = init_image
-        self.init_image_strength = init_image_strength
-        self.control_inputs = control_inputs
-        self._orig_seed = seed
-        self.seed = seed
-        self.steps = steps
-        self.height = height
-        self.width = width
-        self.upscale = upscale
-        self.fix_faces = fix_faces
-        self.fix_faces_fidelity = fix_faces_fidelity
-        self.sampler_type = sampler_type
-        self.conditioning = conditioning
-        self.mask_prompt = mask_prompt
-        self.mask_image = mask_image
-        self.mask_mode = mask_mode
-        self.mask_modify_original = mask_modify_original
-        self.outpaint = outpaint
-        self.tile_mode = tile_mode
-        self.allow_compose_phase = allow_compose_phase
-        self.model = model
-        self.model_config_path = model_config_path
-        self.caption_text = caption_text
+    @validator("prompt", "negative_prompt", pre=True, always=True)
+    def make_into_weighted_prompts(cls, v):
+        # if isinstance(v, list):
+        #     v = [WeightedPrompt.parse_obj(p) if isinstance(p, dict) else p for p in v]
+        if isinstance(v, str):
+            v = [WeightedPrompt(text=v)]
+        elif isinstance(v, WeightedPrompt):
+            v = [v]
+        return v
 
-        # we don't want to save intermediate images
-        self.is_intermediate = is_intermediate
-        self.collect_progress_latents = collect_progress_latents
+    @validator("prompt", "negative_prompt", always=True)
+    def sort_prompts(cls, v):
+        if isinstance(v, list):
+            v.sort(key=lambda p: p.weight, reverse=True)
+        return v
 
-        self.validate()
-
-    def validate(self):
-        from imaginairy.samplers import SAMPLER_LOOKUP, SamplerName
-
-        self.prompts = self.process_prompt_input(self.prompts)
-        self.prompt_strength = (
-            7.5 if self.prompt_strength is None else self.prompt_strength
-        )
-
-        if self.tile_mode is True:
-            self.tile_mode = "xy"
-        elif self.tile_mode is False:
-            self.tile_mode = ""
-        else:
-            self.tile_mode = self.tile_mode.lower()
-            assert self.tile_mode in ("", "x", "y", "xy")
-
-        if isinstance(self.init_image, str):
-            if not self.init_image.startswith("*prev."):
-                self.init_image = LazyLoadingImage(filepath=self.init_image)
-
-        if isinstance(self.mask_image, str):
-            if not self.mask_image.startswith("*prev."):
-                self.mask_image = LazyLoadingImage(filepath=self.mask_image)
-
-        if self.control_inputs:
-            for control_input in self.control_inputs:
-                control_input.validate(default_image=self.init_image)
-
-            if self.init_image is None:
-                if self.control_inputs[0].image:
-                    self.init_image = self.control_inputs[0].image
-
-        if self.mask_image is not None and self.mask_prompt is not None:
-            raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
-
-        if self.model is None:
-            self.model = config.DEFAULT_MODEL
-
-        if self.init_image_strength is None:
-            if self.control_inputs:
-                self.init_image_strength = 0.0
-            elif self.outpaint or self.mask_image or self.mask_prompt:
-                self.init_image_strength = 0.0
-            else:
-                self.init_image_strength = 0.2
-
-        self.seed = random.randint(1, 1_000_000_000) if self.seed is None else self.seed
-
-        self.sampler_type = self.sampler_type.lower()
-
-        self.fix_faces_fidelity = (
-            self.fix_faces_fidelity
-            if self.fix_faces_fidelity
-            else self.DEFAULT_FACE_FIDELITY
-        )
-
-        if self.height is None or self.width is None or self.steps is None:
-            from imaginairy.model_manager import get_model_default_image_size
-
-            SamplerCls = SAMPLER_LOOKUP[self.sampler_type]
-            self.steps = self.steps or SamplerCls.default_steps
-            self.width = self.width or get_model_default_image_size(self.model)
-            self.height = self.height or get_model_default_image_size(self.model)
-        self.steps = int(self.steps)
-        if self.negative_prompt is None:
-            model_config = config.MODEL_CONFIG_SHORTCUTS.get(self.model, None)
+    @validator("negative_prompt", always=True)
+    def validate_negative_prompt(cls, v, values):
+        if not v:
+            model_config = config.MODEL_CONFIG_SHORTCUTS.get(v, None)
             if model_config:
-                self.negative_prompt = model_config.default_negative_prompt
+                v = [WeightedPrompt(text=model_config.default_negative_prompt)]
             else:
-                self.negative_prompt = config.DEFAULT_NEGATIVE_PROMPT
+                v = [WeightedPrompt(text=config.DEFAULT_NEGATIVE_PROMPT)]
 
-        self.negative_prompt = self.process_prompt_input(self.negative_prompt)
+        return v
 
-        if self.model == "SD-2.0-v" and self.sampler_type == SamplerName.PLMS:
+    @validator("prompt_strength", always=True)
+    def validate_prompt_strength(cls, v):
+        return 7.5 if v is None else v
+
+    @validator("tile_mode", always=True)
+    def validate_tile_mode(cls, v):
+        if v is True:
+            return "xy"
+
+        if v is False:
+            return ""
+
+        v = v.lower()
+        assert v in ("", "x", "y", "xy")
+        return v
+
+    @validator("init_image", "mask_image", always=True)
+    def handle_images(cls, v):
+        if isinstance(v, str):
+            return LazyLoadingImage(filepath=v)
+
+        return v
+
+    @validator("init_image", always=True)
+    def set_init_from_control_inputs(cls, v, values):
+        if v is None and values.get("control_inputs"):
+            for control_input in values["control_inputs"]:
+                if control_input.image:
+                    return control_input.image
+
+        return v
+
+    @validator("control_inputs", always=True)
+    def set_image_from_init_image(cls, v, values):
+        v = v or []
+        for control_input in v:
+            print(control_input)
+            if control_input.image is None and control_input.image_raw is None:
+                control_input.image = values["init_image"]
+        return v
+
+    @validator("mask_image", always=True)
+    def validate_mask_image(cls, v, values):
+        if v is not None and values["mask_prompt"] is not None:
+            raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
+        return v
+
+    @validator("mask_prompt", always=True)
+    def validate_mask_prompt(cls, v, values):
+        if values["init_image"] is None and v:
+            raise ValueError(
+                "You must set `init_image` if you want to use `mask_prompt`"
+            )
+        return v
+
+    @validator("model", always=True)
+    def set_default_diffusion_model(cls, v):
+        if v is None:
+            return config.DEFAULT_MODEL
+
+        return v
+
+    @validator("seed", always=True)
+    def validate_seed(cls, v):
+        return v
+
+    @validator("fix_faces_fidelity", always=True)
+    def validate_fix_faces_fidelity(cls, v):
+        if v is None:
+            return 0.2
+
+        return v
+
+    @validator("sampler_type", pre=True, always=True)
+    def validate_sampler_type(cls, v, values):
+        from imaginairy.samplers import SamplerName
+
+        if v is None:
+            v = config.DEFAULT_SAMPLER
+
+        v = v.lower()
+
+        if values["model"] == "SD-2.0-v" and v == SamplerName.PLMS:
             raise ValueError("PLMS sampler is not supported for SD-2.0-v model.")
 
-        if self.model == "edit" and self.sampler_type in (
+        if values["model"] == "edit" and v in (
             SamplerName.PLMS,
             SamplerName.DDIM,
         ):
             raise ValueError(
                 "PLMS and DDIM samplers are not supported for pix2pix edit model."
             )
+        return v
+
+    @validator("steps", always=True)
+    def validate_steps(cls, v, values):
+        from imaginairy.samplers import SAMPLER_LOOKUP
+
+        if v is None:
+            SamplerCls = SAMPLER_LOOKUP[values["sampler_type"]]
+            v = SamplerCls.default_steps
+
+        return int(v)
+
+    @validator("init_image_strength", always=True)
+    def validate_init_image_strength(cls, v, values):
+        if v is None:
+            if values.get("control_inputs"):
+                v = 0.0
+            elif (
+                values.get("outpaint")
+                or values.get("mask_image")
+                or values.get("mask_prompt")
+            ):
+                v = 0.0
+            else:
+                v = 0.2
+
+        return v
+
+    @validator("height", "width", always=True)
+    def validate_image_size(cls, v, values):
+        from imaginairy.model_manager import get_model_default_image_size
+
+        if v is None:
+            v = get_model_default_image_size(values["model"])
+
+        return v
+
+    @validator("caption_text", pre=True, always=True)
+    def validate_caption_text(cls, v, values):
+        if v is None:
+            v = ""
+
+        return v
+
+    @property
+    def prompts(self):
+        return self.prompt
 
     @property
     def prompt_text(self):
-        if len(self.prompts) == 1:
-            return self.prompts[0].text
-        return "|".join(str(p) for p in self.prompts)
+        if not self.prompt:
+            return ""
+        if len(self.prompt) == 1:
+            return self.prompt[0].text
+        return "|".join(str(p) for p in self.prompt)
 
     @property
     def negative_prompt_text(self):
+        if not self.negative_prompt:
+            return ""
         if len(self.negative_prompt) == 1:
             return self.negative_prompt[0].text
         return "|".join(str(p) for p in self.negative_prompt)
@@ -280,34 +389,37 @@ class ImaginePrompt:
             f"seed:{self.seed} prompt-strength:{self.prompt_strength} steps:{self.steps} sampler-type:{self.sampler_type} init-image-strength:{self.init_image_strength} model:{self.model}"
         )
 
-    def as_dict(self):
-        prompts = [(p.weight, p.text) for p in self.prompts]
-        negative_prompts = [(p.weight, p.text) for p in self.negative_prompt]
-        return {
-            "software": "imaginAIry",
-            "model": self.model,
-            "prompts": prompts,
-            "prompt_strength": self.prompt_strength,
-            "negative_prompt": negative_prompts,
-            "init_image": str(self.init_image),
-            "init_image_strength": self.init_image_strength,
-            # "seed": self.seed,
-            "steps": self.steps,
-            "height": self.height,
-            "width": self.width,
-            "upscale": self.upscale,
-            "fix_faces": self.fix_faces,
-            "sampler_type": self.sampler_type,
-        }
+    def logging_dict(self):
+        """Return a dict of the object but with binary data replaced with reprs."""
+        data = self.dict()
+        data["init_image"] = repr(self.init_image)
+        data["mask_image"] = repr(self.mask_image)
+        if self.control_inputs:
+            data["control_inputs"] = [repr(ci) for ci in self.control_inputs]
+        return data
 
-    def process_prompt_input(self, prompt_input):
-        prompt_input = prompt_input if prompt_input is not None else ""
+    def full_copy(self, deep=True, update=None):
+        new_prompt = self.copy(
+            deep=deep,
+            update=update,
+        )
+        new_prompt = new_prompt.validate(
+            dict(
+                new_prompt._iter(  # noqa
+                    to_dict=False, by_alias=False, exclude_unset=True
+                )
+            )
+        )
+        return new_prompt
 
-        if isinstance(prompt_input, str):
-            prompt_input = [WeightedPrompt(prompt_input, 1)]
-
-        prompt_input.sort(key=lambda p: p.weight, reverse=True)
-        return prompt_input
+    def make_concrete_copy(self):
+        seed = self.seed if self.seed is not None else random.randint(1, 1_000_000_000)
+        return self.full_copy(
+            deep=False,
+            update={
+                "seed": seed,
+            },
+        )
 
 
 class ExifCodes:
@@ -359,13 +471,14 @@ class ImagineResult:
         if mask_grayscale:
             self.images["mask_grayscale"] = mask_grayscale
 
-        for img_type, r_img in result_images.items():
-            if isinstance(r_img, torch.Tensor):
-                if r_img.shape[1] == 4:
-                    r_img = model_latent_to_pillow_img(r_img)
-                else:
-                    r_img = torch_img_to_pillow_img(r_img)
-            self.images[img_type] = r_img
+        if result_images:
+            for img_type, r_img in result_images.items():
+                if isinstance(r_img, torch.Tensor):
+                    if r_img.shape[1] == 4:
+                        r_img = model_latent_to_pillow_img(r_img)
+                    else:
+                        r_img = torch_img_to_pillow_img(r_img)
+                self.images[img_type] = r_img
 
         self.timings = timings
         self.progress_latents = progress_latents
@@ -385,7 +498,7 @@ class ImagineResult:
 
     def metadata_dict(self):
         return {
-            "prompt": self.prompt.as_dict(),
+            "prompt": self.prompt.logging_dict(),
         }
 
     def timings_str(self):

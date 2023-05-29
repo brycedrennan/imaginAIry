@@ -171,7 +171,7 @@ def imagine(
                 f"🖼  Generating  {i + 1}/{num_prompts}: {prompt.prompt_description()}"
             )
             for attempt in range(0, unsafe_retry_count + 1):
-                if attempt > 0:
+                if attempt > 0 and isinstance(prompt.seed, int):
                     prompt.seed += 100_000_000 + attempt
                 result = _generate_single_image(
                     prompt,
@@ -240,12 +240,14 @@ def _generate_single_image(
     batch_size = 1
     global _most_recent_result  # noqa
     # handle prompt pulling in previous values
-    if isinstance(prompt.init_image, str) and prompt.init_image.startswith("*prev"):
-        _, img_type = prompt.init_image.strip("*").split(".")
-        prompt.init_image = _most_recent_result.images[img_type]
-    if isinstance(prompt.mask_image, str) and prompt.mask_image.startswith("*prev"):
-        _, img_type = prompt.mask_image.strip("*").split(".")
-        prompt.mask_image = _most_recent_result.images[img_type]
+    # if isinstance(prompt.init_image, str) and prompt.init_image.startswith("*prev"):
+    #     _, img_type = prompt.init_image.strip("*").split(".")
+    #     prompt.init_image = _most_recent_result.images[img_type]
+    # if isinstance(prompt.mask_image, str) and prompt.mask_image.startswith("*prev"):
+    #     _, img_type = prompt.mask_image.strip("*").split(".")
+    #     prompt.mask_image = _most_recent_result.images[img_type]
+    prompt = prompt.make_concrete_copy()
+
     control_modes = []
     control_inputs = prompt.control_inputs or []
     control_inputs = control_inputs.copy()
@@ -669,28 +671,28 @@ def _scale_latent(
 
 
 def _generate_composition_image(prompt, target_height, target_width, cutoff=512):
-    from copy import copy
-
     from PIL import Image
 
     if prompt.width <= cutoff and prompt.height <= cutoff:
         return None
 
-    composition_prompt = copy(prompt)
     shrink_scale = calc_scale_to_fit_within(
         height=prompt.height,
         width=prompt.width,
         max_size=cutoff,
     )
-    composition_prompt.width = int(prompt.width * shrink_scale)
-    composition_prompt.height = int(prompt.height * shrink_scale)
 
-    composition_prompt.steps = None
-    composition_prompt.upscaled = False
-    composition_prompt.fix_faces = False
-    composition_prompt.mask_modify_original = False
-
-    composition_prompt.validate()
+    composition_prompt = prompt.full_copy(
+        deep=True,
+        update={
+            "width": int(prompt.width * shrink_scale),
+            "height": int(prompt.height * shrink_scale),
+            "steps": None,
+            "upscale": False,
+            "fix_faces": False,
+            "mask_modify_original": False,
+        },
+    )
 
     result = _generate_single_image(composition_prompt)
     img = result.images["generated"]

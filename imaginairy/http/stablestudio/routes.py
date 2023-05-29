@@ -3,7 +3,6 @@ import uuid
 from fastapi import APIRouter
 from fastapi.concurrency import run_in_threadpool
 
-from imaginairy.http.models import ImagineWebPrompt
 from imaginairy.http.stablestudio.models import (
     StableStudioBatchRequest,
     StableStudioBatchResponse,
@@ -21,7 +20,7 @@ async def generate(studio_request: StableStudioBatchRequest):
     from imaginairy.http.app import gpu_lock
 
     generated_images = []
-    imagine_prompt = ImagineWebPrompt.from_stable_studio_input(studio_request.input)
+    imagine_prompt = studio_request.input.to_imagine_prompt()
     starting_seed = imagine_prompt.seed if imagine_prompt.seed is not None else None
 
     for run_num in range(studio_request.count):

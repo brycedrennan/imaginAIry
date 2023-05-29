@@ -10,9 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from imaginairy.http.models import ImagineWebPrompt
 from imaginairy.http.stablestudio import routes
 from imaginairy.http.utils import generate_image
+from imaginairy.schema import ImaginePrompt
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ app.include_router(routes.router, prefix="/api/stablestudio")
 
 
 @app.post("/api/imagine")
-async def imagine_endpoint(prompt: ImagineWebPrompt):
+async def imagine_endpoint(prompt: ImaginePrompt):
     async with gpu_lock:
         img_io = await run_in_threadpool(generate_image, prompt)
         return StreamingResponse(img_io, media_type="image/jpg")
@@ -49,7 +49,7 @@ async def imagine_endpoint(prompt: ImagineWebPrompt):
 @app.get("/api/imagine")
 async def imagine_get_endpoint(text: str = Query(...)):
     async with gpu_lock:
-        img_io = await run_in_threadpool(generate_image, ImagineWebPrompt(prompt=text))
+        img_io = await run_in_threadpool(generate_image, ImaginePrompt(prompt=text))
         return StreamingResponse(img_io, media_type="image/jpg")
 
 

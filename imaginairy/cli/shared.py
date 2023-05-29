@@ -104,13 +104,18 @@ def _imagine_cmd(
     for _init_image in init_images:
         if _init_image and _init_image.startswith("http"):
             _init_image = LazyLoadingImage(url=_init_image)
+        else:
+            _init_image = LazyLoadingImage(filepath=_init_image)
         new_init_images.append(_init_image)
     init_images = new_init_images
     if not init_images:
         init_images = [None]
 
-    if mask_image and mask_image.startswith("http"):
-        mask_image = LazyLoadingImage(url=mask_image)
+    if mask_image:
+        if mask_image.startswith("http"):
+            mask_image = LazyLoadingImage(url=mask_image)
+        else:
+            mask_image = LazyLoadingImage(filepath=mask_image)
 
     prompts = []
     prompt_expanding_iterators = {}
@@ -136,7 +141,7 @@ def _imagine_cmd(
 
             for _init_image in init_images:
                 prompt = ImaginePrompt(
-                    next(prompt_iterator),
+                    prompt=next(prompt_iterator),
                     negative_prompt=negative_prompt,
                     prompt_strength=prompt_strength,
                     init_image=_init_image,

@@ -10,7 +10,7 @@ from tqdm import tqdm
 from urllib3 import HTTPConnectionPool
 
 from imaginairy import api
-from imaginairy.log_utils import suppress_annoying_logs_and_warnings
+from imaginairy.log_utils import configure_logging, suppress_annoying_logs_and_warnings
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.utils import (
     fix_torch_group_norm,
@@ -66,6 +66,7 @@ def pre_setup():
     #     return real_randn(*args, **kwargs)
     #
     # torch.randn = randn_tattle
+    configure_logging("DEBUG")
 
     with fix_torch_nn_layer_norm(), fix_torch_group_norm(), platform_appropriate_autocast():
         yield
