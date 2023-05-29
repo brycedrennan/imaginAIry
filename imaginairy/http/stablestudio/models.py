@@ -4,6 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Extra, Field, HttpUrl, validator
 
 from imaginairy.http.utils import Base64Bytes
+from imaginairy.schema import ImaginePrompt
 
 
 class StableStudioPrompt(BaseModel):
@@ -66,6 +67,47 @@ class StableStudioInput(BaseModel, extra=Extra.forbid):
         if v == 0:
             return None
         return v
+
+    def to_imagine_prompt(self):
+        """Converts this StableStudioInput to an ImaginePrompt."""
+        from io import BytesIO
+
+        from PIL import Image
+
+        if self.prompts:
+            positive_prompt = self.prompts[0].text
+        else:
+            positive_prompt = None
+        if self.prompts and len(self.prompts) > 1:
+            negative_prompt = self.prompts[1].text if len(self.prompts) > 1 else None
+        else:
+            negative_prompt = None
+
+        init_image = None
+        init_image_strength = None
+        if self.initial_image:
+            init_image = self.initial_image.blob
+            init_image_strength = self.initial_image.weight
+
+        mask_image = self.mask_image.blob if self.mask_image else None
+
+        sampler_type = self.sampler.id if self.sampler else None
+
+        return ImaginePrompt(
+            prompt=positive_prompt,
+            prompt_strength=self.cfg_scale,
+            negative_prompt=negative_prompt,
+            model=self.model,
+            sampler_type=sampler_type,
+            seed=self.seed,
+            steps=self.steps,
+            height=self.height,
+            width=self.width,
+            init_image=Image.open(BytesIO(init_image)) if init_image else None,
+            init_image_strength=init_image_strength,
+            mask_image=Image.open(BytesIO(mask_image)) if mask_image else None,
+            mask_mode="keep",
+        )
 
 
 class StableStudioBatchRequest(BaseModel):
