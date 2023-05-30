@@ -247,6 +247,12 @@ def configure_logging(level="INFO"):
                 "level": "ERROR",
                 "propagate": False,
             },
+            # disable https://github.com/huggingface/transformers/blob/17a55534f5e5df10ac4804d4270bf6b8cc24998d/src/transformers/models/clip/configuration_clip.py#L330
+            "transformers.models.clip.configuration_clip": {
+                "handlers": ["default"],
+                "level": "ERROR",
+                "propagate": False,
+            },
             # disable the stupid triton is not available messages
             # https://github.com/facebookresearch/xformers/blob/6425fd0cacb1a6579aa2f0c4a570b737cb10e9c3/xformers/__init__.py#L52
             "xformers": {"handlers": ["default"], "level": "ERROR", "propagate": False},
