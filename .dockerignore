@@ -14,7 +14,7 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.git
+# .git
 .mypy_cache
 .pytest_cache
 .hypothesis
