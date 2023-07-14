@@ -85,6 +85,13 @@ class LazyLoadingImage:
             # fix orientation
             self._img = ImageOps.exif_transpose(self._img)
 
+    # def __get_pydantic_json_schema__(
+    #     cls, core_schema: CoreSchema, handler: GetJsonSchemaHandler, field) -> dict[str, Any]:
+    #     json_schema = super().__get_pydantic_json_schema__(core_schema, handler)
+    #     json_schema = handler.resolve_ref_schema(json_schema)
+    #     json_schema["title"] = field.name.replace("_", " ").title()
+    #     return json_schema
+
     @classmethod
     def __modify_schema__(cls, field_schema, field):
         field_schema["title"] = field.name.replace("_", " ").title()
@@ -148,6 +155,9 @@ class ControlNetInput(BaseModel):
         #     raise ValueError("You must specify either image or image_raw")
 
         return v
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class WeightedPrompt(BaseModel):

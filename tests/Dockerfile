@@ -26,6 +26,7 @@ WORKDIR /app
 
 COPY requirements-dev.in ./
 
+RUN pip cache purge
 RUN pip install -r requirements-dev.in
 
 COPY --from=build_wheel /app/dist/* ./

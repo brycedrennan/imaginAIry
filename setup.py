@@ -93,7 +93,8 @@ setup(
         "omegaconf>=2.1.1",
         "open-clip-torch",
         "opencv-python",
-        "pydantic",
+        # regressing to fix model_Schema error
+        "pydantic<2.0.0",
         "requests",
         "einops>=0.3.0",
         "safetensors",
