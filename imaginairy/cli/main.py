@@ -5,6 +5,7 @@ import click
 from imaginairy.cli.clickshell_mod import ColorShell, ImagineColorsCommand
 from imaginairy.cli.colorize import colorize_cmd
 from imaginairy.cli.describe import describe_cmd
+from imaginairy.cli.describe_video import describe_video_cmd
 from imaginairy.cli.edit import edit_cmd
 from imaginairy.cli.edit_demo import edit_demo_cmd
 from imaginairy.cli.imagine import imagine_cmd
@@ -42,6 +43,7 @@ aimg.command_class = ImagineColorsCommand
 
 aimg.add_command(colorize_cmd, name="colorize")
 aimg.add_command(describe_cmd, name="describe")
+aimg.add_command(describe_video_cmd, name="describe-video")
 aimg.add_command(edit_cmd, name="edit")
 aimg.add_command(edit_demo_cmd, name="edit-demo")
 aimg.add_command(imagine_cmd, name="imagine")

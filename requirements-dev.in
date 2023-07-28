@@ -2,6 +2,7 @@ black
 coverage
 isort
 ruff
+openai
 pycln
 pylama
 pylint
@@ -9,4 +10,5 @@ pytest
 pytest-randomly
 pytest-sugar
 responses
+scikit-image
 wheel
