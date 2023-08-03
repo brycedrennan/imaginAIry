@@ -42,19 +42,19 @@ def describe_video(video_path, delete_frames=True, frames_directory="key_frames"
         descriptions_chunk = chunk
 
         prompt = f"""
-        I want you to summarize what's happened in a video, based of the description of key frames given to you in chronological order, in batches.
-        The key frames are frames where something changed in the video. Please tell me the description of what the camera sees, along with a summary of events or changes.
-        The response should be in the form of json, with keys for the setting_description and video_summary. You may recieve this information in batches, so add on to what will
-        be given to you, which will the answers you gave me in previous queries. environment_description is simply a description of what the setting of the video. video_summary is a summary of
-        what changes have happened in this setting. setting_description is a description of the setting, the non changing aspects of what the camera is seeing. frame_descriptions here are more
-        key frame descriptions that you can use to add descriptions to summary and setting_description.
+        In this video analysis task, you'll receive key frames in batches, presented in chronological order. Key frames represent pivotal moments where changes occur.
+        Your response should include both a setting description and a summary of the video's events, in JSON format.
+
+        Your task is twofold:
+        - setting_description: Describe the unchanging aspects of the video setting.
+        - video_summary: Summarize the changes and events taking place in the video, based on the given frame descriptions.
+
+        Build upon previous answers with each new batch of frame descriptions you receive.
 
         setting_description: {setting_description}
-
-        summary: {video_summary}
-
+        video_summary: {video_summary}
         frame_descriptions: {descriptions_chunk}
-    """
+        """
 
         completion = openai.ChatCompletion.create(
             model="gpt-4", messages=[{"role": "user", "content": prompt}]
@@ -71,6 +71,48 @@ def describe_video(video_path, delete_frames=True, frames_directory="key_frames"
         shutil.rmtree(frames_directory)
 
     return summary
+
+import os
+import shutil
+from unittest.mock import patch, Mock
+import pytest
+from describe_video import describe_video
+
+@pytest.fixture
+def video_path():
+    return "test_video.mp4"
+
+@pytest.fixture
+def mock_openai_completion():
+    return Mock(choices=[Mock(message=Mock(content='{"setting_description": "test setting", "video_summary": "test summary"}'))])
+
+@patch("describe_video.openai.Completion.create")
+def test_describe_video(mock_completion_create, video_path, mock_openai_completion):
+    mock_completion_create.return_value = mock_openai_completion
+
+    # Create a temporary directory for the key frames
+    frames_directory = "test_key_frames"
+    os.mkdir(frames_directory)
+
+    # Create a test video file
+    with open(video_path, "w") as f:
+        f.write("test video")
+
+    # Call the describe_video function
+    summary = describe_video(video_path, delete_frames=False, frames_directory=frames_directory)
+
+    # Check that the function returns the expected summary
+    assert "setting_description" in summary
+    assert "video_summary" in summary
+
+    # Check that the key frames directory was not deleted
+    assert os.path.exists(frames_directory)
+
+    # Clean up the test files and directory
+    os.remove(video_path)
+    shutil.rmtree(frames_directory)
+
+
 
 
 def describe_frame(frame):
@@ -274,3 +316,5 @@ def test_difference_between_images_different_images():
 
 
 # describe_video(video_path="test_security_feed.mp4")
+
+test_describe_video()
