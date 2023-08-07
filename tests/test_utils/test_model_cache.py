@@ -65,10 +65,15 @@ def test_set_cpu_full():
 
 @pytest.mark.skipif(get_device() == "cpu", reason="GPU not available")
 def test_set_gpu_full():
+    device = get_device()
     cache = GPUModelCache(
-        max_cpu_memory_gb=1, max_gpu_memory_gb=0.0000001, device=get_device()
+        max_cpu_memory_gb=1, max_gpu_memory_gb=0.0000001, device=device
     )
-    assert cache.max_cpu_memory == 1073741824
+    if device is None:
+        assert cache.max_cpu_memory == 1073741824
+    else:
+        assert cache.max_cpu_memory == 0
+
     model = create_model_of_n_bytes(100_000)
     with pytest.raises(RuntimeError):
         cache.set("key1", model)
@@ -100,9 +105,8 @@ def test_get_existing_move_to_gpu():
 
 @pytest.mark.skipif(get_device() == "cpu", reason="GPU not available")
 def test_cache_ordering():
-    cache = GPUModelCache(
-        max_cpu_memory_gb=0.01, max_gpu_memory_gb=0.01, device=get_device()
-    )
+    device = get_device()
+    cache = GPUModelCache(max_cpu_memory_gb=0.01, max_gpu_memory_gb=0.01, device=device)
 
     cache.set("key-0", create_model_of_n_bytes(4_000_000))
     assert list(cache.cpu_cache.keys()) == []
@@ -121,34 +125,63 @@ def test_cache_ordering():
     )
 
     cache.set("key-2", create_model_of_n_bytes(4_000_000))
-    assert list(cache.cpu_cache.keys()) == ["key-0"]
+    if device is None:
+        assert list(cache.cpu_cache.keys()) == ["key-0"]
+    else:
+        assert not list(cache.cpu_cache.keys())
     assert list(cache.gpu_cache.keys()) == ["key-1", "key-2"]
-    assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
-        4_000_000,
-        8_000_000,
-    )
+    if device is None:
+        assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
+            4_000_000,
+            8_000_000,
+        )
+    else:
+        assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
+            0,
+            8_000_000,
+        )
 
     cache.set("key-3", create_model_of_n_bytes(4_000_000))
-    assert list(cache.cpu_cache.keys()) == ["key-0", "key-1"]
+    if device is None:
+        assert list(cache.cpu_cache.keys()) == ["key-0", "key-1"]
+        assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
+            8_000_000,
+            8_000_000,
+        )
+    else:
+        assert not list(cache.cpu_cache.keys())
+        assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
+            0,
+            8_000_000,
+        )
     assert list(cache.gpu_cache.keys()) == ["key-2", "key-3"]
-    assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
-        8_000_000,
-        8_000_000,
-    )
 
     cache.set("key-4", create_model_of_n_bytes(4_000_000))
-    assert list(cache.cpu_cache.keys()) == ["key-1", "key-2"]
+    if device is None:
+        assert list(cache.cpu_cache.keys()) == ["key-1", "key-2"]
+        assert list(cache.keys()) == ["key-1", "key-2", "key-3", "key-4"]
+        assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
+            8_000_000,
+            8_000_000,
+        )
+    else:
+        assert not list(cache.cpu_cache.keys())
+        assert list(cache.keys()) == ["key-3", "key-4"]
+        assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
+            0,
+            8_000_000,
+        )
     assert list(cache.gpu_cache.keys()) == ["key-3", "key-4"]
-    assert list(cache.keys()) == ["key-1", "key-2", "key-3", "key-4"]
-    assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
-        8_000_000,
-        8_000_000,
-    )
 
-    cache.get("key-2")
-    assert list(cache.keys()) == ["key-3", "key-4", "key-2"]
+    if device is None:
+        cache.get("key-2")
+        assert list(cache.keys()) == ["key-3", "key-4", "key-2"]
 
     cache.set("key-5", create_model_of_n_bytes(9_000_000))
-    assert list(cache.cpu_cache.keys()) == ["key-4", "key-2"]
+    if device is None:
+        assert list(cache.cpu_cache.keys()) == ["key-4", "key-2"]
+        assert list(cache.keys()) == ["key-4", "key-2", "key-5"]
+    else:
+        assert not list(cache.cpu_cache.keys())
+        assert list(cache.keys()) == ["key-5"]
     assert list(cache.gpu_cache.keys()) == ["key-5"]
-    assert list(cache.keys()) == ["key-4", "key-2", "key-5"]
