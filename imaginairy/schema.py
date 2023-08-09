@@ -7,9 +7,19 @@ import logging
 import os.path
 import random
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, List, Literal, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    FieldValidationInfo,
+    GetJsonSchemaHandler,
+    field_validator,
+    model_validator,
+)
+from pydantic_core import CoreSchema
+from typing_extensions import Annotated
 
 from imaginairy import config
 
@@ -26,10 +36,11 @@ class InvalidUrlError(ValueError):
     pass
 
 
-class LazyLoadingImage:
+class LazyLoadingImage(BaseModel):
     """Image file encoded as base64 string."""
 
     def __init__(self, *, filepath=None, url=None, img=None):
+        super().__init__()
         if not filepath and not url and not img:
             raise ValueError("You must specify a url or filepath or img")
         if sum([bool(filepath), bool(url), bool(img)]) > 1:
@@ -86,8 +97,16 @@ class LazyLoadingImage:
             self._img = ImageOps.exif_transpose(self._img)
 
     @classmethod
-    def __modify_schema__(cls, field_schema, field):
-        field_schema["title"] = field.name.replace("_", " ").title()
+    def __get_pydantic_json_schema__(
+        cls, core_schema: CoreSchema, handler: GetJsonSchemaHandler
+    ) -> Dict[str, Any]:
+        json_schema = super().__get_pydantic_json_schema__(core_schema, handler)
+        json_schema = handler.resolve_ref_schema(json_schema)
+
+        for field_name, field_data in json_schema.get("properties", {}).items():
+            field_data["title"] = field_name.replace("_", " ").title()
+
+        return json_schema
 
     @classmethod
     def __get_validators__(cls):
@@ -134,13 +153,17 @@ class LazyLoadingImage:
 
 
 class ControlNetInput(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     mode: str
     image: Optional[LazyLoadingImage] = None
     image_raw: Optional[LazyLoadingImage] = None
     strength: int = Field(1, ge=0)
 
-    @validator("image_raw")
-    def image_raw_validate(cls, v, values):
+    @field_validator("image_raw")
+    @classmethod
+    def image_raw_validate(cls, v, info: FieldValidationInfo):
+        values = info.data
         if values.get("image") is not None and v is not None:
             raise ValueError("You cannot specify both image and image_raw")
 
@@ -159,33 +182,45 @@ class WeightedPrompt(BaseModel):
 
 
 class ImaginePrompt(BaseModel):
-    prompt: Optional[List[WeightedPrompt]]
-    negative_prompt: Optional[List[WeightedPrompt]]
-    prompt_strength: Optional[float] = 7.5
-    init_image: Optional[LazyLoadingImage] = Field(
-        None, description="base64 encoded image"
-    )
-    init_image_strength: Optional[float] = Field(ge=0, le=1)
-    control_inputs: Optional[List[ControlNetInput]]
-    mask_prompt: Optional[str] = Field(
+    prompt: Annotated[
+        Optional[List[WeightedPrompt]], Field(validate_default=True)
+    ] = None
+    negative_prompt: Annotated[
+        Optional[List[WeightedPrompt]], Field(validate_default=True)
+    ] = None
+    prompt_strength: Annotated[Optional[float], Field(validate_default=True)] = 7.5
+    init_image: Annotated[
+        Optional[LazyLoadingImage], Field(validate_default=True)
+    ] = Field(None, description="base64 encoded image")
+    init_image_strength: Annotated[
+        Optional[float], Field(validate_default=True)
+    ] = Field(ge=0, le=1)
+    control_inputs: Annotated[
+        Optional[List[ControlNetInput]], Field(validate_default=True)
+    ] = None
+    mask_prompt: Annotated[Optional[str], Field(validate_default=True)] = Field(
         description="text description of the things to be masked"
     )
-    mask_image: Optional[LazyLoadingImage]
+    mask_image: Annotated[
+        Optional[LazyLoadingImage], Field(validate_default=True)
+    ] = None
     mask_mode: Optional[Literal["keep", "replace"]] = "replace"
     mask_modify_original: bool = True
-    outpaint: Optional[str]
-    model: str = config.DEFAULT_MODEL
-    model_config_path: Optional[str]
-    sampler_type: str = config.DEFAULT_SAMPLER
-    seed: Optional[int]
-    steps: Optional[int]
-    height: Optional[int] = Field(None, ge=1)
-    width: Optional[int] = Field(None, ge=1)
+    outpaint: Optional[str] = None
+    model: Annotated[str, Field(validate_default=True)] = config.DEFAULT_MODEL
+    model_config_path: Optional[str] = None
+    sampler_type: Annotated[str, Field(validate_default=True)] = config.DEFAULT_SAMPLER
+    seed: Annotated[Optional[int], Field(validate_default=True)] = None
+    steps: Annotated[Optional[int], Field(validate_default=True)] = None
+    height: Annotated[Optional[int], Field(validate_default=True)] = Field(None, ge=1)
+    width: Annotated[Optional[int], Field(validate_default=True)] = Field(None, ge=1)
     upscale: bool = False
     fix_faces: bool = False
-    fix_faces_fidelity: Optional[float] = Field(0.2, ge=0, le=1)
+    fix_faces_fidelity: Annotated[
+        Optional[float], Field(validate_default=True)
+    ] = Field(0.2, ge=0, le=1)
     conditioning: Optional[str] = None
-    tile_mode: str = ""
+    tile_mode: Annotated[str, Field(validate_default=True)] = ""
     allow_compose_phase: bool = True
     is_intermediate: bool = False
     collect_progress_latents: bool = False
@@ -199,7 +234,8 @@ class ImaginePrompt(BaseModel):
         # allows `prompt` to be positional
         super().__init__(prompt=prompt, **kwargs)
 
-    @validator("prompt", "negative_prompt", pre=True, always=True)
+    @field_validator("prompt", "negative_prompt", mode="before")
+    @classmethod
     def make_into_weighted_prompts(cls, v):
         # if isinstance(v, list):
         #     v = [WeightedPrompt.parse_obj(p) if isinstance(p, dict) else p for p in v]
@@ -209,14 +245,16 @@ class ImaginePrompt(BaseModel):
             v = [v]
         return v
 
-    @validator("prompt", "negative_prompt", always=True)
+    @field_validator("prompt", "negative_prompt")
+    @classmethod
     def sort_prompts(cls, v):
         if isinstance(v, list):
             v.sort(key=lambda p: p.weight, reverse=True)
         return v
 
-    @validator("negative_prompt", always=True)
-    def validate_negative_prompt(cls, v, values):
+    @field_validator("negative_prompt")
+    @classmethod
+    def validate_negative_prompt(cls, v, info: FieldValidationInfo):
         if not v:
             model_config = config.MODEL_CONFIG_SHORTCUTS.get(v, None)
             if model_config:
@@ -226,11 +264,13 @@ class ImaginePrompt(BaseModel):
 
         return v
 
-    @validator("prompt_strength", always=True)
+    @field_validator("prompt_strength")
+    @classmethod
     def validate_prompt_strength(cls, v):
         return 7.5 if v is None else v
 
-    @validator("tile_mode", always=True)
+    @field_validator("tile_mode")
+    @classmethod
     def validate_tile_mode(cls, v):
         if v is True:
             return "xy"
@@ -242,15 +282,18 @@ class ImaginePrompt(BaseModel):
         assert v in ("", "x", "y", "xy")
         return v
 
-    @validator("init_image", "mask_image", always=True)
+    @field_validator("init_image", "mask_image")
+    @classmethod
     def handle_images(cls, v):
         if isinstance(v, str):
             return LazyLoadingImage(filepath=v)
 
         return v
 
-    @validator("init_image", always=True)
-    def set_init_from_control_inputs(cls, v, values):
+    @field_validator("init_image")
+    @classmethod
+    def set_init_from_control_inputs(cls, v, info: FieldValidationInfo):
+        values = info.data
         if v is None and values.get("control_inputs"):
             for control_input in values["control_inputs"]:
                 if control_input.image:
@@ -258,8 +301,10 @@ class ImaginePrompt(BaseModel):
 
         return v
 
-    @validator("control_inputs", always=True)
-    def set_image_from_init_image(cls, v, values):
+    @field_validator("control_inputs")
+    @classmethod
+    def set_image_from_init_image(cls, v, info: FieldValidationInfo):
+        values = info.data
         v = v or []
         for control_input in v:
             print(control_input)
@@ -267,40 +312,47 @@ class ImaginePrompt(BaseModel):
                 control_input.image = values["init_image"]
         return v
 
-    @validator("mask_image", always=True)
-    def validate_mask_image(cls, v, values):
+    @field_validator("mask_image")
+    @classmethod
+    def validate_mask_image(cls, v, info: FieldValidationInfo):
+        values = info.data
         if v is not None and values["mask_prompt"] is not None:
             raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
         return v
 
-    @validator("mask_prompt", always=True)
-    def validate_mask_prompt(cls, v, values):
-        if values["init_image"] is None and v:
+    @model_validator(mode="after")
+    def validate_mask_prompt(self):
+        if self.init_image is None and self.mask_prompt:
             raise ValueError(
                 "You must set `init_image` if you want to use `mask_prompt`"
             )
-        return v
+        return self
 
-    @validator("model", always=True)
+    @field_validator("model")
+    @classmethod
     def set_default_diffusion_model(cls, v):
         if v is None:
             return config.DEFAULT_MODEL
 
         return v
 
-    @validator("seed", always=True)
+    @field_validator("seed")
+    @classmethod
     def validate_seed(cls, v):
         return v
 
-    @validator("fix_faces_fidelity", always=True)
+    @field_validator("fix_faces_fidelity")
+    @classmethod
     def validate_fix_faces_fidelity(cls, v):
         if v is None:
             return 0.2
 
         return v
 
-    @validator("sampler_type", pre=True, always=True)
-    def validate_sampler_type(cls, v, values):
+    @field_validator("sampler_type", mode="before")
+    @classmethod
+    def validate_sampler_type(cls, v, info: FieldValidationInfo):
+        values = info.data
         from imaginairy.samplers import SamplerName
 
         if v is None:
@@ -320,8 +372,10 @@ class ImaginePrompt(BaseModel):
             )
         return v
 
-    @validator("steps", always=True)
-    def validate_steps(cls, v, values):
+    @field_validator("steps")
+    @classmethod
+    def validate_steps(cls, v, info: FieldValidationInfo):
+        values = info.data
         from imaginairy.samplers import SAMPLER_LOOKUP
 
         if v is None:
@@ -330,8 +384,10 @@ class ImaginePrompt(BaseModel):
 
         return int(v)
 
-    @validator("init_image_strength", always=True)
-    def validate_init_image_strength(cls, v, values):
+    @field_validator("init_image_strength")
+    @classmethod
+    def validate_init_image_strength(cls, v, info: FieldValidationInfo):
+        values = info.data
         if v is None:
             if values.get("control_inputs"):
                 v = 0.0
@@ -346,8 +402,10 @@ class ImaginePrompt(BaseModel):
 
         return v
 
-    @validator("height", "width", always=True)
-    def validate_image_size(cls, v, values):
+    @field_validator("height", "width")
+    @classmethod
+    def validate_image_size(cls, v, info: FieldValidationInfo):
+        values = info.data
         from imaginairy.model_manager import get_model_default_image_size
 
         if v is None:
@@ -355,8 +413,9 @@ class ImaginePrompt(BaseModel):
 
         return v
 
-    @validator("caption_text", pre=True, always=True)
-    def validate_caption_text(cls, v, values):
+    @field_validator("caption_text", mode="before")
+    @classmethod
+    def validate_caption_text(cls, v, info: FieldValidationInfo):
         if v is None:
             v = ""
 

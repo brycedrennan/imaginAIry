@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Extra, Field, HttpUrl, validator
+from pydantic import BaseModel, Extra, Field, HttpUrl, field_validator
 
 from imaginairy.http.utils import Base64Bytes
 from imaginairy.schema import ImaginePrompt
@@ -62,7 +62,8 @@ class StableStudioInput(BaseModel, extra=Extra.forbid):
     mask_image: Optional[StableStudioInputImage] = Field(None, alias="maskImage")
     initial_image: Optional[StableStudioInputImage] = Field(None, alias="initialImage")
 
-    @validator("seed")
+    @field_validator("seed")
+    @classmethod
     def validate_seed(cls, v):  # noqa
         if v == 0:
             return None

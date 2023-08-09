@@ -2,7 +2,7 @@ import pytest
 from PIL import Image
 from pytorch_lightning import seed_everything
 
-from imaginairy import ImaginePrompt, imagine
+from imaginairy import ImaginePrompt, LazyLoadingImage, imagine
 from imaginairy.enhancers.bool_masker import MASK_PROMPT
 from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
@@ -28,7 +28,9 @@ def test_fix_faces(filename_base_for_orig_outputs, filename_base_for_outputs):
 
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_clip_masking(filename_base_for_outputs):
-    img = Image.open(f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring_large.jpg")
+    img = LazyLoadingImage(
+        filepath=f"{TESTS_FOLDER}/data/girl_with_a_pearl_earring_large.jpg"
+    )
 
     for mask_modifier in ["*0.5", "*6", "+1", "+11", "+101", "-25"]:
         pred_bin, pred_grayscale = get_img_mask(
