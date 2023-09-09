@@ -93,10 +93,13 @@ setup(
         "omegaconf>=2.1.1",
         "open-clip-torch",
         "opencv-python",
-        "pydantic",
+        # need to migration to 2.0
+        "pydantic<2.0.0",
         "requests",
         "einops>=0.3.0",
         "safetensors",
+        # scipy is a sub dependency but v1.11 doesn't support python 3.8.  https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy
+        "scipy<1.11",
         "timm>=0.4.12,!=0.9.0,!=0.9.1",  # for vendored blip
         "torchdiffeq",
         "transformers>=4.19.2",
@@ -107,5 +110,5 @@ setup(
         "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
     ],
     # torchvision doesn't support python 3.11 unless we switch to torch 2.0
-    python_requires="<3.11",
+    python_requires=">=3.8,<3.11",
 )
