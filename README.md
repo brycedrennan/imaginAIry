@@ -493,6 +493,8 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+- fix: allow tile_mode to be set to True or False for backward compatibility
+
 **13.1.0**
 - feature: *api server now has feature parity with the python API*. View the docs at http://127.0.0.1:8000/docs after running `aimg server`
   - `ImaginePrompt` is now a pydantic model and can thus be sent over the rest API

@@ -230,7 +230,7 @@ class ImaginePrompt(BaseModel):
     def validate_prompt_strength(cls, v):
         return 7.5 if v is None else v
 
-    @validator("tile_mode", always=True)
+    @validator("tile_mode", always=True, pre=True)
     def validate_tile_mode(cls, v):
         if v is True:
             return "xy"
