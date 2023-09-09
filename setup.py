@@ -110,6 +110,9 @@ setup(
         "uvicorn>=0.16.0",
         "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
     ],
-    # torchvision doesn't support python 3.11 unless we switch to torch 2.0
-    python_requires=">=3.8,<3.11",
+    # don't specify maximum python versions as it can cause very long dependency resolution issues as the resolver
+    # goes back to older versions of packages that didn't specify a maximum
+    # https://discuss.python.org/t/requires-python-upper-limits/12663/75
+    # https://github.com/brycedrennan/imaginAIry/pull/341#issuecomment-1574723908
+    python_requires=">=3.8",
 )
