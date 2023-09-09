@@ -497,6 +497,10 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 - feature: *api server now has feature parity with the python API*. View the docs at http://127.0.0.1:8000/docs after running `aimg server`
   - `ImaginePrompt` is now a pydantic model and can thus be sent over the rest API
   - images are expected in base64 string format
+- fix: pin pydantic to 2.0 for now
+- build: better python 3.11 incompatibility messaging (fixes #342)
+- build: add minimum versions to requirements to improve dependency resolution
+- docs: add a discord link
 
 **13.0.1**
 - feature: show full stack trace when there is an api error
