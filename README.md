@@ -6,6 +6,7 @@
 [![image](https://img.shields.io/badge/license-MIT-green)](https://github.com/brycedrennan/imaginAIry/blob/master/LICENSE/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![Python Checks](https://github.com/brycedrennan/imaginAIry/actions/workflows/ci.yaml/badge.svg)](https://github.com/brycedrennan/imaginAIry/actions/workflows/ci.yaml)
+[![Discord](https://flat.badgen.net/discord/members/FdD7ut3YjW)](https://discord.gg/FdD7ut3YjW)
 
 AI imagined images. Pythonic generation of stable diffusion images.
 
