@@ -32,7 +32,7 @@ autoformat:  ## Run the autoformatter.
 	@# ERA,T201
 	@-ruff --extend-ignore ANN,ARG001,C90,DTZ,D100,D101,D102,D103,D202,D203,D212,D415,E501,RET504,S101,UP006,UP007 --extend-select C,D400,I,W --unfixable T,ERA --fix-only .
 	@black .
-	@isort --atomic --profile black .
+	@isort --atomic --profile black --skip downloads/** .
 
 test:  ## Run the tests.
 	@pytest
