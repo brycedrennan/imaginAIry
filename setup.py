@@ -72,41 +72,42 @@ setup(
         ]
     },
     install_requires=[
-        "click",
-        "click-help-colors",
-        "click-shell",
+        "click>=8.0.0",
+        "click-help-colors>=0.9.1",
+        "click-shell>=2.0",
         "protobuf != 3.20.2, != 3.19.5",
-        "facexlib",
+        "facexlib>=0.2.1.1",
         "fairscale>=0.4.4",  # for vendored blip
-        "fastapi",
-        "ftfy",  # for vendored clip
-        # 2.0.0 produced garbage images on MacOS
+        "fastapi>=0.70.0",
+        "ftfy>=6.0.1",  # for vendored clip
+        # 2.0.0 produced garbage images on macOS
         "torch>=1.13.1,<2.0.0",
-        "numpy",
-        "tqdm",
-        "diffusers",
+        # https://numpy.org/neps/nep-0029-deprecation_policy.html
+        "numpy>=1.19.0,<1.26.0",
+        "tqdm>=4.64.0",
+        "diffusers>=0.3.0",
         "imageio>=2.9.0",
         "Pillow>=9.1.0",
-        "psutil",
+        "psutil>5.7.3",
         # 2.0.0 need to fix `ImportError: cannot import name 'rank_zero_only' from 'pytorch_lightning.utilities.distributed' `
         "pytorch-lightning>=1.4.2,<2.0.0",
         "omegaconf>=2.1.1",
-        "open-clip-torch",
-        "opencv-python",
+        "open-clip-torch>=2.0.0",
+        "opencv-python>=4.4.0.46",
         # need to migration to 2.0
         "pydantic<2.0.0",
-        "requests",
+        "requests>=2.28.1",
         "einops>=0.3.0",
-        "safetensors",
+        "safetensors>=0.2.1",
         # scipy is a sub dependency but v1.11 doesn't support python 3.8.  https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy
         "scipy<1.11",
         "timm>=0.4.12,!=0.9.0,!=0.9.1",  # for vendored blip
-        "torchdiffeq",
+        "torchdiffeq>=0.2.0",
         "transformers>=4.19.2",
         "torchmetrics>=0.6.0",
         "torchvision>=0.13.1",
         "kornia>=0.6",
-        "uvicorn",
+        "uvicorn>=0.16.0",
         "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
     ],
     # torchvision doesn't support python 3.11 unless we switch to torch 2.0
