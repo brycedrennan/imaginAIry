@@ -206,6 +206,8 @@ def prepare_image_for_outpaint(
 
 
 def outpaint_arg_str_parse(arg_str):
+    if not arg_str:
+        return {}
     arg_pattern = re.compile(r"([A-Z]+)(\d+)")
 
     args = arg_str.upper().split(",")

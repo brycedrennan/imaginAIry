@@ -184,3 +184,7 @@ def imagine_cmd(
         caption_text,
         control_inputs=control_inputs,
     )
+
+
+if __name__ == "__main__":
+    imagine_cmd()  # noqa

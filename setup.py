@@ -95,7 +95,7 @@ setup(
         "open-clip-torch>=2.0.0",
         "opencv-python>=4.4.0.46",
         # need to migration to 2.0
-        "pydantic<2.0.0",
+        "pydantic>=2.3.0",
         "requests>=2.28.1",
         "einops>=0.3.0",
         "safetensors>=0.2.1",

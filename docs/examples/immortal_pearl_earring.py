@@ -30,15 +30,15 @@ def generate_image_morph_video():
         transcendence_weight = (max(year - 2050, 0) / 3) * robotic_weight
         subprompts = [
             WeightedPrompt(
-                f"{year_txt} professional {color_txt} headshot photo of a woman with a pearl earring  wearing an {year_txt} outfit. {scene}",
+                text=f"{year_txt} professional {color_txt} headshot photo of a woman with a pearl earring  wearing an {year_txt} outfit. {scene}",
                 weight=pearl_weight + 0.1,
             ),
             WeightedPrompt(
-                "photo of a cybernetic woman computer chips in her head. circuits, cybernetic, robotic, biomechanical, elegant, sharp focus, highly detailed, intricate details. scenic majestic mountains of mars in the background",
+                text="photo of a cybernetic woman computer chips in her head. circuits, cybernetic, robotic, biomechanical, elegant, sharp focus, highly detailed, intricate details. scenic majestic mountains of mars in the background",
                 weight=robotic_weight + 0.01,
             ),
             WeightedPrompt(
-                "photo of a cybernetic woman floating above a wormhole. computer chips in her head. circuits, cybernetic, robotic, biomechanical, elegant, sharp focus, highly detailed, intricate details",
+                text="photo of a cybernetic woman floating above a wormhole. computer chips in her head. circuits, cybernetic, robotic, biomechanical, elegant, sharp focus, highly detailed, intricate details",
                 weight=transcendence_weight,
             ),
         ]
