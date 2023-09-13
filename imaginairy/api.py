@@ -715,8 +715,8 @@ def _generate_composition_image(prompt, target_height, target_width, cutoff=512)
     return img
 
 
-def prompt_normalized(prompt):
-    return re.sub(r"[^a-zA-Z0-9.,\[\]-]+", "_", prompt)[:130]
+def prompt_normalized(prompt, length=130):
+    return re.sub(r"[^a-zA-Z0-9.,\[\]-]+", "_", prompt)[:length]
 
 
 def combine_image(original_img, generated_img, mask_img):
