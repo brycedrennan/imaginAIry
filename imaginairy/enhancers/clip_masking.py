@@ -102,3 +102,14 @@ def get_img_masks(img, mask_descriptions: Sequence[str]):
         preds_dict[desc] = p
 
     return preds_dict
+
+
+def img_mask_to_bounding_box(mask_img: PIL.Image.Image):
+    mask_np = np.array(mask_img)
+    mask_np = mask_np.astype(np.uint8)
+    contours, _ = cv2.findContours(mask_np, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if len(contours) == 0:
+        return None
+    contour = contours[0]
+    x, y, w, h = cv2.boundingRect(contour)
+    return x, y, x + w, y + h
