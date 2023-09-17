@@ -493,7 +493,10 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+**13.2.0**
 - fix: allow tile_mode to be set to True or False for backward compatibility
+- fix: various pydantic issues have been resolved
+- feature: switch to pydantic 2.3 (faster but was a pain to migrate)
 
 **13.1.0**
 - feature: *api server now has feature parity with the python API*. View the docs at http://127.0.0.1:8000/docs after running `aimg server`

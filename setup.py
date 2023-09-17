@@ -44,7 +44,7 @@ setup(
     name="imaginAIry",
     author="Bryce Drennan",
     # author_email="b r y p y d o t io",
-    version="13.1.0",
+    version="13.2.0",
     description="AI imagined images. Pythonic generation of images.",
     long_description=readme,
     long_description_content_type="text/markdown",
