@@ -30,3 +30,4 @@ tests/vastai_cli.py
 **/.eggs
 /img_size_memory_usage.csv
 /tests/test_cluster_output/
+/.env

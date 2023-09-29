@@ -10,3 +10,5 @@ pytest-randomly
 pytest-sugar
 responses
 wheel
+
+-c tests/constraints.txt

@@ -103,9 +103,10 @@ setup(
         "scipy<1.11",
         "timm>=0.4.12,!=0.9.0,!=0.9.1",  # for vendored blip
         "torchdiffeq>=0.2.0",
-        "transformers>=4.19.2",
         "torchmetrics>=0.6.0",
         "torchvision>=0.13.1",
+        "transformers>=4.19.2",
+        "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64'",
         "kornia>=0.6",
         "uvicorn>=0.16.0",
         "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
