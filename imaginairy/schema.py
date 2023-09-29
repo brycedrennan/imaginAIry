@@ -51,17 +51,19 @@ class InvalidUrlError(ValueError):
 class LazyLoadingImage:
     """Image file encoded as base64 string."""
 
-    def __init__(self, *, filepath=None, url=None, img: Image = None, b64: str = None):
+    def __init__(
+        self, *, filepath=None, url=None, img: Image = None, b64: Optional[str] = None
+    ):
         if not filepath and not url and not img and not b64:
-            raise ValueError(
-                "You must specify a url or filepath or img or base64 string"
-            )
+            msg = "You must specify a url or filepath or img or base64 string"
+            raise ValueError(msg)
         if sum([bool(filepath), bool(url), bool(img), bool(b64)]) > 1:
             raise ValueError("You cannot multiple input methods")
 
         # validate file exists
         if filepath and not os.path.exists(filepath):
-            raise FileNotFoundError(f"File does not exist: {filepath}")
+            msg = f"File does not exist: {filepath}"
+            raise FileNotFoundError(msg)
 
         # validate url is valid url
         if url:
@@ -73,7 +75,8 @@ class LazyLoadingImage:
             except LocationParseError:
                 raise InvalidUrlError(f"Invalid url: {url}")  # noqa
             if parsed_url.scheme not in {"http", "https"} or not parsed_url.host:
-                raise InvalidUrlError(f"Invalid url: {url}")
+                msg = f"Invalid url: {url}"
+                raise InvalidUrlError(msg)
 
         if b64:
             img = self.load_image_from_base64(b64)
@@ -145,16 +148,14 @@ class LazyLoadingImage:
                     raise ValueError(msg)  # noqa
             if isinstance(value, dict):
                 return cls(**value)
-            raise ValueError(
-                "Image value must be either a LazyLoadingImage, PIL.Image.Image or a Base64 string"
-            )
+            msg = "Image value must be either a LazyLoadingImage, PIL.Image.Image or a Base64 string"
+            raise ValueError(msg)
 
         def handle_b64(value: Any) -> "LazyLoadingImage":
             if isinstance(value, str):
                 return cls(b64=value)
-            raise ValueError(
-                "Image value must be either a LazyLoadingImage, PIL.Image.Image or a Base64 string"
-            )
+            msg = "Image value must be either a LazyLoadingImage, PIL.Image.Image or a Base64 string"
+            raise ValueError(msg)
 
         return core_schema.json_or_python_schema(
             json_schema=core_schema.chain_schema(
@@ -349,15 +350,13 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             return ""
 
         if not isinstance(v, str):
-            raise ValueError(
-                f"Invalid tile_mode: '{v}'. Valid modes are: {valid_tile_modes}"
-            )
+            msg = f"Invalid tile_mode: '{v}'. Valid modes are: {valid_tile_modes}"
+            raise ValueError(msg)  # noqa
 
         v = v.lower()
         if v not in valid_tile_modes:
-            raise ValueError(
-                f"Invalid tile_mode: '{v}'. Valid modes are: {valid_tile_modes}"
-            )
+            msg = f"Invalid tile_mode: '{v}'. Valid modes are: {valid_tile_modes}"
+            raise ValueError(msg)
         return v
 
     @field_validator("outpaint", mode="after")
@@ -375,7 +374,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             return v
 
         if not isinstance(v, Tensor):
-            raise ValueError("conditioning must be a torch.Tensor")
+            raise ValueError("conditioning must be a torch.Tensor")  # noqa
         return v
 
     # @field_validator("init_image", "mask_image", mode="after")
@@ -412,13 +411,15 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     @field_validator("mask_image")
     def validate_mask_image(cls, v, info: core_schema.FieldValidationInfo):
         if v is not None and info.data.get("mask_prompt") is not None:
-            raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
+            msg = "You can only set one of `mask_image` and `mask_prompt`"
+            raise ValueError(msg)
         return v
 
     @field_validator("mask_prompt", "mask_image", mode="before")
     def validate_mask_prompt(cls, v, info: core_schema.FieldValidationInfo):
         if info.data.get("init_image") is None and v:
-            raise ValueError("You must set `init_image` if you want to use a mask")
+            msg = "You must set `init_image` if you want to use a mask"
+            raise ValueError(msg)
         return v
 
     @field_validator("model", mode="before")
@@ -455,9 +456,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             SamplerName.PLMS,
             SamplerName.DDIM,
         ):
-            raise ValueError(
-                "PLMS and DDIM samplers are not supported for pix2pix edit model."
-            )
+            msg = "PLMS and DDIM samplers are not supported for pix2pix edit model."
+            raise ValueError(msg)
         return v
 
     @field_validator("steps")
@@ -620,7 +620,7 @@ class ImagineResult:
 
         self.is_nsfw = is_nsfw
         self.safety_score = safety_score
-        self.created_at = datetime.utcnow().replace(tzinfo=timezone.utc)
+        self.created_at = datetime.now(tz=timezone.utc)
         self.torch_backend = get_device()
         self.hardware_name = get_hardware_description(get_device())
 
@@ -655,9 +655,8 @@ class ImagineResult:
     def save(self, save_path, image_type="generated"):
         img = self.images.get(image_type, None)
         if img is None:
-            raise ValueError(
-                f"Image of type {image_type} not stored. Options are: {self.images.keys()}"
-            )
+            msg = f"Image of type {image_type} not stored. Options are: {self.images.keys()}"
+            raise ValueError(msg)
 
         img.convert("RGB").save(save_path, exif=self._exif())
 

@@ -15,10 +15,10 @@ formatter = Formatter()
 PROMPT_EXPANSION_PATTERN = re.compile(r"[|a-z0-9_ -]+")
 
 
-@lru_cache()
+@lru_cache
 def prompt_library_filepaths(prompt_library_paths=None):
     """Return all available category/filepath pairs."""
-    prompt_library_paths = [] if not prompt_library_paths else prompt_library_paths
+    prompt_library_paths = prompt_library_paths if prompt_library_paths else []
     combined_prompt_library_filepaths = {}
     for prompt_path in DEFAULT_PROMPT_LIBRARY_PATHS + list(prompt_library_paths):
         library_prompts = prompt_library_filepath(prompt_path)
@@ -27,7 +27,7 @@ def prompt_library_filepaths(prompt_library_paths=None):
     return combined_prompt_library_filepaths
 
 
-@lru_cache()
+@lru_cache
 def category_list(prompt_library_paths=None):
     """Return the names of available phrase-lists."""
     categories = list(prompt_library_filepaths(prompt_library_paths).keys())
@@ -35,7 +35,7 @@ def category_list(prompt_library_paths=None):
     return categories
 
 
-@lru_cache()
+@lru_cache
 def prompt_library_filepath(library_path):
     lookup = {}
 
@@ -55,9 +55,8 @@ def get_phrases(category_name, prompt_library_paths=None):
     try:
         filepath = lookup[category_name]
     except KeyError as e:
-        raise LookupError(
-            f"'{category_name}' is not a valid prompt expansion category. Could not find the txt file."
-        ) from e
+        msg = f"'{category_name}' is not a valid prompt expansion category. Could not find the txt file."
+        raise LookupError(msg) from e
     _open = open
     if filepath.endswith(".gz"):
         _open = gzip.open
@@ -83,13 +82,12 @@ def expand_prompts(prompt_text, n=1, prompt_library_paths=None):
     """
     prompt_parts = list(formatter.parse(prompt_text))
     field_names = []
-    for literal_text, field_name, format_spec, conversion in prompt_parts:  # noqa
+    for literal_text, field_name, format_spec, conversion in prompt_parts:
         if field_name:
             field_name = field_name.lower()
             if not PROMPT_EXPANSION_PATTERN.match(field_name):
-                raise ValueError(
-                    "Invalid prompt expansion. Only a-z0-9_|- characters permitted. "
-                )
+                msg = "Invalid prompt expansion. Only a-z0-9_|- characters permitted. "
+                raise ValueError(msg)
             field_names.append(field_name)
 
     phrases = []
@@ -120,9 +118,7 @@ def expand_prompts(prompt_text, n=1, prompt_library_paths=None):
         yield output_prompt
 
 
-def get_random_non_repeating_combination(  # noqa
-    n=1, *sequences, allow_oversampling=True
-):
+def get_random_non_repeating_combination(n=1, *sequences, allow_oversampling=True):
     """
     Efficiently return a non-repeating random sample of the product sequences.
 

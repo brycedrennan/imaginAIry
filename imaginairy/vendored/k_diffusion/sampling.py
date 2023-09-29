@@ -85,7 +85,7 @@ class BatchedBrownianTree:
             seed = [seed]
             self.batched = False
         self.trees = [
-            torchsde.BrownianTree(t0, w0, t1, entropy=s, **kwargs) for s in seed
+            torchsde.BrownianTree(t0, w0, t1, entropy=s, **kwargs) for s in seed  # noqa
         ]
 
     @staticmethod

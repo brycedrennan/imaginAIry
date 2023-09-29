@@ -92,7 +92,8 @@ class SingleConceptDataset(Dataset):
         try:
             image = Image.open(img_path).convert("RGB")
         except RuntimeError as e:
-            raise RuntimeError(f"Could not read image {img_path}") from e
+            msg = f"Could not read image {img_path}"
+            raise RuntimeError(msg) from e
         image = self.image_transforms(image)
         data = {"image": image, "txt": txt}
         return data

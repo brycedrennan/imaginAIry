@@ -92,13 +92,13 @@ def imagine_image_files(
             os.makedirs(subpath, exist_ok=True)
             filepath = os.path.join(subpath, f"{basefilename}.gif")
 
-            frames = result.progress_latents + [result.images["generated"]]
+            frames = [*result.progress_latents, result.images["generated"]]
 
             if prompt.init_image:
                 resized_init_image = pillow_fit_image_within(
                     prompt.init_image, prompt.width, prompt.height
                 )
-                frames = [resized_init_image] + frames
+                frames = [resized_init_image, *frames]
             frames.reverse()
             make_bounce_animation(
                 imgs=frames,
@@ -170,7 +170,7 @@ def imagine(
             logger.info(
                 f"🖼  Generating  {i + 1}/{num_prompts}: {prompt.prompt_description()}"
             )
-            for attempt in range(0, unsafe_retry_count + 1):
+            for attempt in range(unsafe_retry_count + 1):
                 if attempt > 0 and isinstance(prompt.seed, int):
                     prompt.seed += 100_000_000 + attempt
                 result = _generate_single_image(
@@ -238,7 +238,7 @@ def _generate_single_image(
     latent_channels = 4
     downsampling_factor = 8
     batch_size = 1
-    global _most_recent_result  # noqa
+    global _most_recent_result
     # handle prompt pulling in previous values
     # if isinstance(prompt.init_image, str) and prompt.init_image.startswith("*prev"):
     #     _, img_type = prompt.init_image.strip("*").split(".")
@@ -457,16 +457,17 @@ def _generate_single_image(
                 if control_image_t.shape[1] != 3:
                     raise RuntimeError("Control image must have 3 channels")
 
-                if control_input.mode != "inpaint":
-                    if control_image_t.min() < 0 or control_image_t.max() > 1:
-                        raise RuntimeError(
-                            f"Control image must be in [0, 1] but we received {control_image_t.min()} and {control_image_t.max()}"
-                        )
+                if (
+                    control_input.mode != "inpaint"
+                    and control_image_t.min() < 0
+                    or control_image_t.max() > 1
+                ):
+                    msg = f"Control image must be in [0, 1] but we received {control_image_t.min()} and {control_image_t.max()}"
+                    raise RuntimeError(msg)
 
                 if control_image_t.max() == control_image_t.min():
-                    raise RuntimeError(
-                        f"No control signal found in control image {control_input.mode}."
-                    )
+                    msg = f"No control signal found in control image {control_input.mode}."
+                    raise RuntimeError(msg)
 
                 c_cat.append(control_image_t)
                 control_strengths.append(control_input.strength)
@@ -517,7 +518,7 @@ def _generate_single_image(
         if (
             prompt.allow_compose_phase
             and not is_controlnet_model
-            and not model.cond_stage_key == "edit"
+            and model.cond_stage_key != "edit"
         ):
             if prompt.init_image:
                 comp_image = _generate_composition_image(

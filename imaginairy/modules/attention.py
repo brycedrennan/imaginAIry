@@ -14,8 +14,8 @@ XFORMERS_IS_AVAILABLE = False
 
 try:
     if get_device() == "cuda":
-        import xformers  # noqa
-        import xformers.ops  # noqa
+        import xformers
+        import xformers.ops
 
         XFORMERS_IS_AVAILABLE = True
 except ImportError:
@@ -79,7 +79,7 @@ class LinearAttention(nn.Module):
         self.to_out = nn.Conv2d(hidden_dim, dim, 1)
 
     def forward(self, x):
-        b, c, h, w = x.shape  # noqa
+        b, c, h, w = x.shape
         qkv = self.to_qkv(x)
         q, k, v = rearrange(
             qkv, "b (qkv heads c) h w -> qkv b heads c (h w)", heads=self.heads, qkv=3
@@ -120,7 +120,7 @@ class SpatialSelfAttention(nn.Module):
         v = self.v(h_)
 
         # compute attention
-        b, c, h, w = q.shape  # noqa
+        b, c, h, w = q.shape
         q = rearrange(q, "b c h w -> b (h w) c")
         k = rearrange(k, "b c h w -> b c (h w)")
         w_ = torch.einsum("bij,bjk->bik", q, k)
@@ -183,7 +183,7 @@ class CrossAttention(nn.Module):
         # if mask is None and _global_mask_hack is not None:
         #     mask = _global_mask_hack.to(torch.bool)
 
-        if get_device() == "cuda" or "mps" in get_device():
+        if get_device() == "cuda" or "mps" in get_device():  # noqa
             if not XFORMERS_IS_AVAILABLE and ALLOW_SPLITMEM:
                 return self.forward_splitmem(x, context=context, mask=mask)
 
@@ -222,7 +222,7 @@ class CrossAttention(nn.Module):
         out = rearrange(out, "(b h) n d -> b n (h d)", h=h)
         return self.to_out(out)
 
-    def forward_splitmem(self, x, context=None, mask=None):  # noqa
+    def forward_splitmem(self, x, context=None, mask=None):
         h = self.heads
 
         q_in = self.to_q(x)
@@ -262,10 +262,8 @@ class CrossAttention(nn.Module):
                 max_res = (
                     math.floor(math.sqrt(math.sqrt(mem_free_total / 2.5)) / 8) * 64
                 )
-                raise RuntimeError(
-                    f"Not enough memory, use lower resolution (max approx. {max_res}x{max_res}). "
-                    f"Need: {mem_required / 64 / gb:0.1f}GB free, Have:{mem_free_total / gb:0.1f}GB free"
-                )
+                msg = f"Not enough memory, use lower resolution (max approx. {max_res}x{max_res}). Need: {mem_required / 64 / gb:0.1f}GB free, Have:{mem_free_total / gb:0.1f}GB free"
+                raise RuntimeError(msg)
             slice_size = (
                 q.shape[1] // steps if (q.shape[1] % steps) == 0 else q.shape[1]
             )
@@ -474,7 +472,7 @@ class SpatialTransformer(nn.Module):
         # note: if no context is given, cross-attention defaults to self-attention
         if not isinstance(context, list):
             context = [context]
-        b, c, h, w = x.shape  # noqa
+        b, c, h, w = x.shape
         x_in = x
         x = self.norm(x)
         if self.use_linear:

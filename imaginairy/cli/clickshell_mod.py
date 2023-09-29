@@ -4,6 +4,7 @@ import logging
 import shlex
 import traceback
 from functools import update_wrapper
+from typing import ClassVar
 
 import click
 from click_help_colors import HelpColorsCommand, HelpColorsMixin
@@ -43,27 +44,23 @@ def mod_get_invoke(command):
             # and that's not ideal when running in a shell.
             pass
         except Exception as e:  # noqa
-            traceback.print_exception(e)  # noqa
+            traceback.print_exception(e)
             # logger.warning(traceback.format_exc())
 
         # Always return False so the shell doesn't exit
         return False
 
     invoke_ = update_wrapper(invoke_, command.callback)
-    invoke_.__name__ = "do_%s" % command.name  # noqa
+    invoke_.__name__ = "do_%s" % command.name
     return invoke_
 
 
 class ModClickShell(ClickShell):
     def add_command(self, cmd, name):
         # Use the MethodType to add these as bound methods to our current instance
-        setattr(
-            self, "do_%s" % name, get_method_type(mod_get_invoke(cmd), self)  # noqa
-        )
-        setattr(self, "help_%s" % name, get_method_type(get_help(cmd), self))  # noqa
-        setattr(
-            self, "complete_%s" % name, get_method_type(get_complete(cmd), self)  # noqa
-        )
+        setattr(self, "do_%s" % name, get_method_type(mod_get_invoke(cmd), self))
+        setattr(self, "help_%s" % name, get_method_type(get_help(cmd), self))
+        setattr(self, "complete_%s" % name, get_method_type(get_complete(cmd), self))
 
 
 class ModShell(Shell):
@@ -85,7 +82,7 @@ class ColorShell(HelpColorsMixin, ModShell):
 
 
 class ImagineColorsCommand(HelpColorsCommand):
-    _option_order = []
+    _option_order: ClassVar = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

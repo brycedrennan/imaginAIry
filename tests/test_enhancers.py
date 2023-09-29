@@ -126,7 +126,7 @@ boolean_mask_test_cases = [
 ]
 
 
-@pytest.mark.parametrize("mask_text,expected", boolean_mask_test_cases)
+@pytest.mark.parametrize(("mask_text", "expected"), boolean_mask_test_cases)
 def test_clip_mask_parser(mask_text, expected):
     parsed = MASK_PROMPT.parseString(mask_text)[0][0]
     assert str(parsed) == expected

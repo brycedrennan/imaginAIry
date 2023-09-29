@@ -43,7 +43,7 @@ remove_option(edit_options, "allow_compose_phase")
 )
 @add_options(edit_options)
 @click.pass_context
-def edit_cmd(  # noqa
+def edit_cmd(
     ctx,
     image_paths,
     image_strength,
@@ -77,7 +77,7 @@ def edit_cmd(  # noqa
     model_weights_path,
     model_config_path,
     prompt_library_path,
-    version,  # noqa
+    version,
     make_gif,
     make_compare_gif,
     arg_schedules,
@@ -130,7 +130,7 @@ def edit_cmd(  # noqa
         model_weights_path,
         model_config_path,
         prompt_library_path,
-        version,  # noqa
+        version,
         make_gif,
         make_compare_gif,
         arg_schedules,

@@ -43,7 +43,7 @@ class ClassEmbedder(nn.Module):
         return uc
 
 
-def disabled_train(self, mode=True):  # noqa
+def disabled_train(self, mode=True):
     """
     For disabling train/eval mode.
 

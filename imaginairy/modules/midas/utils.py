@@ -94,9 +94,8 @@ def write_pfm(path, image, scale=1):
         ):  # greyscale
             color = False
         else:
-            raise ValueError(
-                "Image must have H x W x 3, H x W x 1 or H x W dimensions."
-            )
+            msg = "Image must have H x W x 3, H x W x 1 or H x W dimensions."
+            raise ValueError(msg)
 
         file.write("PF\n" if color else b"Pf\n")
         file.write(b"%d %d\n" % (image.shape[1], image.shape[0]))
@@ -144,10 +143,7 @@ def resize_image(img):
     height_orig = img.shape[0]
     width_orig = img.shape[1]
 
-    if width_orig > height_orig:
-        scale = width_orig / 384
-    else:
-        scale = height_orig / 384
+    scale = width_orig / 384 if width_orig > height_orig else height_orig / 384
 
     height = (np.ceil(height_orig / scale / 32) * 32).astype(int)
     width = (np.ceil(width_orig / scale / 32) * 32).astype(int)

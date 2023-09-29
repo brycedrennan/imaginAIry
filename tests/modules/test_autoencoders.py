@@ -26,7 +26,7 @@ strat_combos = [
 
 
 @pytest.mark.skipif(True, reason="Run manually as needed. Uses too much memory.")
-@pytest.mark.parametrize("encode_strat,decode_strat", strat_combos)
+@pytest.mark.parametrize(("encode_strat", "decode_strat"), strat_combos)
 def test_encode_decode(filename_base_for_outputs, encode_strat, decode_strat):
     """
     Test that encoding and decoding works.

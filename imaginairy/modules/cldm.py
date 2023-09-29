@@ -19,12 +19,12 @@ from imaginairy.modules.diffusion.util import (
 
 
 class ControlledUnetModel(UNetModel):
-    def forward(  # noqa
+    def forward(
         self,
         x,
         timesteps=None,
         context=None,
-        control=None,  # noqa
+        control=None,
         only_mid_control=False,
         **kwargs,
     ):
@@ -129,10 +129,8 @@ class ControlNet(nn.Module):
             self.num_res_blocks = len(channel_mult) * [num_res_blocks]
         else:
             if len(num_res_blocks) != len(channel_mult):
-                raise ValueError(
-                    "provide num_res_blocks either as an int (globally constant) or "
-                    "as a list/tuple (per-level) with the same length as channel_mult"
-                )
+                msg = "provide num_res_blocks either as an int (globally constant) or as a list/tuple (per-level) with the same length as channel_mult"
+                raise ValueError(msg)
             self.num_res_blocks = num_res_blocks
         if disable_self_attentions is not None:
             # should be a list of booleans, indicating whether to disable self-attention in TransformerBlocks or not
@@ -140,10 +138,8 @@ class ControlNet(nn.Module):
         if num_attention_blocks is not None:
             assert len(num_attention_blocks) == len(self.num_res_blocks)
             assert all(
-                (
-                    self.num_res_blocks[i] >= num_attention_blocks[i]
-                    for i in range(len(num_attention_blocks))
-                )
+                self.num_res_blocks[i] >= num_attention_blocks[i]
+                for i in range(len(num_attention_blocks))
             )
             print(
                 f"Constructor of UNetModel received num_attention_blocks={num_attention_blocks}. "
@@ -425,10 +421,10 @@ class ControlLDM(LatentDiffusion):
         if is_diffusing:
             self.model = self.model.cuda()
             self.control_models = [cm.cuda() for cm in self.control_models]
-            self.first_stage_model = self.first_stage_model.cpu()  # noqa
+            self.first_stage_model = self.first_stage_model.cpu()
             self.cond_stage_model = self.cond_stage_model.cpu()
         else:
             self.model = self.model.cpu()
             self.control_models = [cm.cpu() for cm in self.control_models]
-            self.first_stage_model = self.first_stage_model.cuda()  # noqa
+            self.first_stage_model = self.first_stage_model.cuda()
             self.cond_stage_model = self.cond_stage_model.cuda()

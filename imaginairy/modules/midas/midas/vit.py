@@ -22,10 +22,7 @@ class AddReadout(nn.Module):
         self.start_index = start_index
 
     def forward(self, x):
-        if self.start_index == 2:
-            readout = (x[:, 0] + x[:, 1]) / 2
-        else:
-            readout = x[:, 0]
+        readout = (x[:, 0] + x[:, 1]) / 2 if self.start_index == 2 else x[:, 0]
         return x[:, self.start_index :] + readout.unsqueeze(1)
 
 
@@ -118,7 +115,7 @@ def _resize_pos_embed(self, posemb, gs_h, gs_w):
 def forward_flex(self, x):
     b, c, h, w = x.shape
 
-    pos_embed = self._resize_pos_embed(  # noqa
+    pos_embed = self._resize_pos_embed(
         self.pos_embed, h // self.patch_size[1], w // self.patch_size[0]
     )
 
@@ -174,9 +171,8 @@ def get_readout_oper(vit_features, features, use_readout, start_index=1):
             ProjectReadout(vit_features, start_index) for out_feat in features
         ]
     else:
-        assert (
-            False
-        ), "wrong operation for readout token, use_readout can be 'ignore', 'add', or 'project'"
+        msg = "wrong operation for readout token, use_readout can be 'ignore', 'add', or 'project'"
+        raise ValueError(msg)
 
     return readout_oper
 
@@ -288,7 +284,7 @@ def _make_vit_b16_backbone(
     # We inject this function into the VisionTransformer instances so that
     # we can use it with interpolated position embeddings without modifying the library source.
     pretrained.model.forward_flex = types.MethodType(forward_flex, pretrained.model)
-    pretrained.model._resize_pos_embed = types.MethodType(  # noqa
+    pretrained.model._resize_pos_embed = types.MethodType(
         _resize_pos_embed, pretrained.model
     )
 
@@ -469,7 +465,7 @@ def _make_vit_b_rn50_backbone(
 
     # We inject this function into the VisionTransformer instances so that
     # we can use it with interpolated position embeddings without modifying the library source.
-    pretrained.model._resize_pos_embed = types.MethodType(  # noqa
+    pretrained.model._resize_pos_embed = types.MethodType(
         _resize_pos_embed, pretrained.model
     )
 

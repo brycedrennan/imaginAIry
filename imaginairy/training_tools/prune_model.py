@@ -29,7 +29,7 @@ def prune_model_data(data, only_keep_ema=True):
     data.pop("optimizer_states", None)
     if only_keep_ema:
         state_dict = data["state_dict"]
-        model_keys = [k for k in state_dict.keys() if k.startswith("model.")]
+        model_keys = [k for k in state_dict if k.startswith("model.")]
 
         for model_key in model_keys:
             ema_key = "model_ema." + model_key[6:].replace(".", "")

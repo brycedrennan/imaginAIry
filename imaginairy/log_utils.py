@@ -94,13 +94,13 @@ class ImageLoggingContext:
         self._prev_log_context = None
 
     def __enter__(self):
-        global _CURRENT_LOGGING_CONTEXT  # noqa
+        global _CURRENT_LOGGING_CONTEXT
         self._prev_log_context = _CURRENT_LOGGING_CONTEXT
         _CURRENT_LOGGING_CONTEXT = self
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        global _CURRENT_LOGGING_CONTEXT  # noqa
+        global _CURRENT_LOGGING_CONTEXT
         _CURRENT_LOGGING_CONTEXT = self._prev_log_context
 
     def timing(self, description):
@@ -120,21 +120,20 @@ class ImageLoggingContext:
         )
 
     def log_latents(self, latents, description):
-        from imaginairy.img_utils import model_latents_to_pillow_imgs  # noqa
+        from imaginairy.img_utils import model_latents_to_pillow_imgs
 
         if "predicted_latent" in description:
             if self.progress_latent_callback is not None:
                 self.progress_latent_callback(latents)
             if (
                 self.step_count - self.last_progress_img_step
-            ) > self.progress_img_interval_steps:
-                if (
-                    time.perf_counter() - self.last_progress_img_ts
-                    > self.progress_img_interval_min_s
-                ):
-                    self.log_progress_latent(latents)
-                    self.last_progress_img_step = self.step_count
-                    self.last_progress_img_ts = time.perf_counter()
+            ) > self.progress_img_interval_steps and (
+                time.perf_counter() - self.last_progress_img_ts
+                > self.progress_img_interval_min_s
+            ):
+                self.log_progress_latent(latents)
+                self.last_progress_img_step = self.step_count
+                self.last_progress_img_ts = time.perf_counter()
 
         if not self.debug_img_callback:
             return
@@ -168,7 +167,7 @@ class ImageLoggingContext:
         )
 
     def log_progress_latent(self, latent):
-        from imaginairy.img_utils import model_latents_to_pillow_imgs  # noqa
+        from imaginairy.img_utils import model_latents_to_pillow_imgs
 
         if not self.progress_img_callback:
             return
@@ -280,7 +279,7 @@ def disable_pytorch_lighting_custom_logging():
     from pytorch_lightning import _logger as pytorch_logger
 
     try:
-        from pytorch_lightning.utilities.seed import log  # noqa
+        from pytorch_lightning.utilities.seed import log
 
         log.setLevel(logging.NOTSET)
         log.handlers = []

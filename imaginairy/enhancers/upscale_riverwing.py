@@ -187,7 +187,7 @@ class CLIPEmbedder(nn.Module):
         )
 
 
-@lru_cache()
+@lru_cache
 def clip_up_models():
     with platform_appropriate_autocast():
         tok_up = CLIPTokenizerTransform()
@@ -290,7 +290,8 @@ def upscale_latent(
                 eta=eta,
                 **sampler_opts,
             )
-        raise ValueError(f"Unknown sampler {sampler}")
+        msg = f"Unknown sampler {sampler}"
+        raise ValueError(msg)
 
     for _ in range((num_samples - 1) // batch_size + 1):
         if noise_aug_type == "gaussian":
@@ -300,7 +301,7 @@ def upscale_latent(
         elif noise_aug_type == "fake":
             latent_noised = low_res_latent * (noise_aug_level**2 + 1) ** 0.5
         extra_args = {
-            "low_res": latent_noised,  # noqa
+            "low_res": latent_noised,
             "low_res_sigma": low_res_sigma,
             "c": c,
         }

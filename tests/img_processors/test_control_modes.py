@@ -15,7 +15,7 @@ def control_img_to_pillow_img(img_t):
 control_mode_params = list(CONTROL_MODES.items())
 
 
-@pytest.mark.parametrize("control_name,control_func", control_mode_params)
+@pytest.mark.parametrize(("control_name", "control_func"), control_mode_params)
 def test_control_images(filename_base_for_outputs, control_func, control_name):
     seed_everything(42)
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png")

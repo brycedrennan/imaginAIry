@@ -107,7 +107,7 @@ def test_cache_ordering():
     )
 
     cache.set("key-0", create_model_of_n_bytes(4_000_000))
-    assert list(cache.cpu_cache.keys()) == []  # noqa
+    assert list(cache.cpu_cache.keys()) == []
     assert list(cache.gpu_cache.keys()) == ["key-0"]
     assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
         0,
@@ -115,7 +115,7 @@ def test_cache_ordering():
     )
 
     cache.set("key-1", create_model_of_n_bytes(4_000_000))
-    assert list(cache.cpu_cache.keys()) == []  # noqa
+    assert list(cache.cpu_cache.keys()) == []
     assert list(cache.gpu_cache.keys()) == ["key-0", "key-1"]
     assert (cache.cpu_cache.memory_usage, cache.gpu_cache.memory_usage) == (
         0,

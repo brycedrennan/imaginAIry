@@ -52,7 +52,8 @@ def make_beta_schedule(
             ** 0.5
         )
     else:
-        raise ValueError(f"schedule '{schedule}' unknown.")
+        msg = f"schedule '{schedule}' unknown."
+        raise ValueError(msg)
     return betas.numpy()
 
 
@@ -80,9 +81,8 @@ def make_ddim_timesteps(
             (np.linspace(0, np.sqrt(num_ddpm_timesteps * 0.8), num_ddim_timesteps)) ** 2
         ).astype(int)
     else:
-        raise NotImplementedError(
-            f'There is no ddim discretization method called "{ddim_discr_method}"'
-        )
+        msg = f'There is no ddim discretization method called "{ddim_discr_method}"'
+        raise NotImplementedError(msg)
 
     # assert ddim_timesteps.shape[0] == num_ddim_timesteps
     # add one to get the final alpha values right (the ones from first scale to data during sampling)
@@ -93,7 +93,7 @@ def make_ddim_timesteps(
 def make_ddim_sampling_parameters(alphacums, ddim_timesteps, eta):
     # select alphas for computing the variance schedule
     alphas = alphacums[ddim_timesteps]
-    alphas_prev = np.asarray([alphacums[0]] + alphacums[ddim_timesteps[:-1]].tolist())
+    alphas_prev = np.asarray([alphacums[0], *alphacums[ddim_timesteps[:-1]].tolist()])
 
     # according to the formula provided in https://arxiv.org/abs/2010.02502
     sigmas = eta * np.sqrt(
@@ -151,7 +151,7 @@ def checkpoint(func, inputs, params, flag):
     return func(*inputs)
 
 
-class CheckpointFunction(torch.autograd.Function):  # noqa
+class CheckpointFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, run_function, length, *args):
         ctx.run_function = run_function
@@ -180,7 +180,7 @@ class CheckpointFunction(torch.autograd.Function):  # noqa
         del ctx.input_tensors
         del ctx.input_params
         del output_tensors
-        return (None, None) + input_grads
+        return (None, None, *input_grads)
 
 
 def timestep_embedding(timesteps, dim, max_period=10000, repeat_only=False):
@@ -246,7 +246,7 @@ def normalization(channels):
 
 
 class GroupNorm32(nn.GroupNorm):
-    def forward(self, x):  # noqa
+    def forward(self, x):
         return super().forward(x.float()).type(x.dtype)
 
 
@@ -260,7 +260,8 @@ def conv_nd(dims, *args, **kwargs):
         return nn.Conv2d(*args, **kwargs)
     if dims == 3:
         return nn.Conv3d(*args, **kwargs)
-    raise ValueError(f"unsupported dimensions: {dims}")
+    msg = f"unsupported dimensions: {dims}"
+    raise ValueError(msg)
 
 
 def linear(*args, **kwargs):
@@ -278,7 +279,8 @@ def avg_pool_nd(dims, *args, **kwargs):
         return nn.AvgPool2d(*args, **kwargs)
     if dims == 3:
         return nn.AvgPool3d(*args, **kwargs)
-    raise ValueError(f"unsupported dimensions: {dims}")
+    msg = f"unsupported dimensions: {dims}"
+    raise ValueError(msg)
 
 
 class HybridConditioner(nn.Module):

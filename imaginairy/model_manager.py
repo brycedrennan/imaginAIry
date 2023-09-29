@@ -7,9 +7,11 @@ from functools import wraps
 
 import requests
 import torch
-from huggingface_hub import HfFolder
-from huggingface_hub import hf_hub_download as _hf_hub_download
-from huggingface_hub import try_to_load_from_cache
+from huggingface_hub import (
+    HfFolder,
+    hf_hub_download as _hf_hub_download,
+    try_to_load_from_cache,
+)
 from omegaconf import OmegaConf
 from safetensors.torch import load_file
 
@@ -65,16 +67,19 @@ def load_state_dict(weights_location, half_mode=False, device=None):
                 f'Error: "{ckpt_path}" not a valid path to model weights.\nPreconfigured models you can use: {MODEL_SHORT_NAMES}.'
             )
             sys.exit(1)
-        raise e
+        raise
     except RuntimeError as e:
-        if "PytorchStreamReader failed reading zip archive" in str(e):
-            if weights_location.startswith("http"):
-                logger.warning("Corrupt checkpoint. deleting and re-downloading...")
-                os.remove(ckpt_path)
-                ckpt_path = get_cached_url_path(weights_location, category="weights")
-                state_dict = load_tensors(ckpt_path, map_location="cpu")
+        err_str = str(e)
+        if (
+            "PytorchStreamReader failed reading zip archive" in err_str
+            and weights_location.startswith("http")
+        ):
+            logger.warning("Corrupt checkpoint. deleting and re-downloading...")
+            os.remove(ckpt_path)
+            ckpt_path = get_cached_url_path(weights_location, category="weights")
+            state_dict = load_tensors(ckpt_path, map_location="cpu")
         if state_dict is None:
-            raise e
+            raise
 
     state_dict = state_dict.get("state_dict", state_dict)
 
@@ -166,7 +171,7 @@ def get_diffusion_model(
     except HuggingFaceAuthorizationError as e:
         if for_inpainting:
             logger.warning(
-                f"Failed to load inpainting model. Attempting to fall-back to standard model.   {str(e)}"
+                f"Failed to load inpainting model. Attempting to fall-back to standard model.   {e!s}"
             )
             return _get_diffusion_model(
                 iconfig.DEFAULT_MODEL,
@@ -176,7 +181,7 @@ def get_diffusion_model(
                 for_training=for_training,
                 control_weights_locations=control_weights_locations,
             )
-        raise e
+        raise
 
 
 def _get_diffusion_model(
@@ -192,7 +197,7 @@ def _get_diffusion_model(
 
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
-    global MOST_RECENTLY_LOADED_MODEL  # noqa
+    global MOST_RECENTLY_LOADED_MODEL
 
     (
         model_config,
@@ -293,9 +298,8 @@ def resolve_model_paths(
         if for_training:
             weights_path = model_metadata_w.weights_url_full
             if weights_path is None:
-                raise ValueError(
-                    "No full training weights configured for this model. Edit the code or subimt a github issue."
-                )
+                msg = "No full training weights configured for this model. Edit the code or subimt a github issue."
+                raise ValueError(msg)
         else:
             weights_path = model_metadata_w.weights_url
 
@@ -306,9 +310,8 @@ def resolve_model_paths(
         config_path = iconfig.MODEL_CONFIG_SHORTCUTS[iconfig.DEFAULT_MODEL].config_path
     if control_net_metadatas:
         if "stable-diffusion-v1" not in config_path:
-            raise ValueError(
-                "Control net is only supported for stable diffusion v1. Please use a different model."
-            )
+            msg = "Control net is only supported for stable diffusion v1. Please use a different model."
+            raise ValueError(msg)
         control_weights_paths = [cnm.weights_url for cnm in control_net_metadatas]
         config_path = control_net_metadatas[0].config_path
     model_metadata = model_metadata_w or model_metadata_c
@@ -374,7 +377,7 @@ def get_cached_url_path(url, category=None):
         os.rename(old_dest_path, dest_path)
         return dest_path
 
-    r = requests.get(url)  # noqa
+    r = requests.get(url)
 
     with open(dest_path, "wb") as f:
         f.write(r.content)
@@ -390,12 +393,8 @@ def check_huggingface_url_authorized(url):
         headers["authorization"] = f"Bearer {token}"
     response = requests.head(url, allow_redirects=True, headers=headers, timeout=5)
     if response.status_code == 401:
-        raise HuggingFaceAuthorizationError(
-            "Unauthorized access to HuggingFace model. This model requires a huggingface token.  "
-            "Please login to HuggingFace "
-            "or set HUGGING_FACE_HUB_TOKEN to your User Access Token. "
-            "See https://huggingface.co/docs/huggingface_hub/quick-start#login for more information"
-        )
+        msg = "Unauthorized access to HuggingFace model. This model requires a huggingface token.  Please login to HuggingFace or set HUGGING_FACE_HUB_TOKEN to your User Access Token. See https://huggingface.co/docs/huggingface_hub/quick-start#login for more information"
+        raise HuggingFaceAuthorizationError(msg)
     return None
 
 
@@ -413,7 +412,7 @@ def hf_hub_download(*args, **kwargs):
         if "unexpected keyword argument 'token'" in str(e):
             kwargs["use_auth_token"] = kwargs.pop("token")
             return _hf_hub_download(*args, **kwargs)
-        raise e
+        raise
 
 
 def huggingface_cached_path(url):

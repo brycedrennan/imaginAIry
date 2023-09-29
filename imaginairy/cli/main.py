@@ -92,4 +92,4 @@ def model_list_cmd():
 
 
 if __name__ == "__main__":
-    aimg()  # noqa
+    aimg()

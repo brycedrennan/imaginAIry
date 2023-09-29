@@ -18,6 +18,7 @@ Examples:
 """
 import operator
 from abc import ABC
+from typing import ClassVar
 
 import pyparsing as pp
 import torch
@@ -57,7 +58,7 @@ class SimpleMask(Mask):
 
 
 class ModifiedMask(Mask):
-    ops = {
+    ops: ClassVar = {
         "+": operator.add,
         "-": operator.sub,
         "*": operator.mul,
@@ -80,7 +81,7 @@ class ModifiedMask(Mask):
         return cls(mask=ret_tokens[0][0], modifier=ret_tokens[0][1])
 
     def __repr__(self):
-        return f"{repr(self.mask)}{self.modifier}"
+        return f"{self.mask!r}{self.modifier}"
 
     def gather_text_descriptions(self):
         return self.mask.gather_text_descriptions()
@@ -141,7 +142,8 @@ class NestedMask(Mask):
         elif self.op == "NOT":
             mask = 1 - mask
         else:
-            raise ValueError(f"Invalid operand {self.op}")
+            msg = f"Invalid operand {self.op}"
+            raise ValueError(msg)
         return torch.clamp(mask, 0, 1)
 
 

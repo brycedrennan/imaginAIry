@@ -101,9 +101,10 @@ def torch_img_to_pillow_img(img_t: torch.Tensor):
     elif img_t.shape[1] == 3:
         colorspace = "RGB"
     else:
-        raise ValueError(
+        msg = (
             f"Unsupported colorspace. {img_t.shape[1]} channels in {img_t.shape} shape"
         )
+        raise ValueError(msg)
     img_t = rearrange(img_t, "b c h w -> b h w c")
     img_t = torch.clamp((img_t + 1.0) / 2.0, min=0.0, max=1.0)
     img_np = (255.0 * img_t).cpu().numpy().astype(np.uint8)[0]
@@ -113,7 +114,7 @@ def torch_img_to_pillow_img(img_t: torch.Tensor):
 
 
 def model_latent_to_pillow_img(latent: torch.Tensor) -> PIL.Image.Image:
-    from imaginairy.model_manager import get_current_diffusion_model  # noqa
+    from imaginairy.model_manager import get_current_diffusion_model
 
     if len(latent.shape) == 3:
         latent = latent.unsqueeze(0)

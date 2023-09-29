@@ -5,7 +5,7 @@ from imaginairy.utils import frange
 
 
 @pytest.mark.parametrize(
-    "schedule_str,expected",
+    ("schedule_str", "expected"),
     [
         ("prompt_strength[2:40:1]", ("prompt_strength", list(range(2, 40)))),
         ("prompt_strength[2:40:0.5]", ("prompt_strength", list(frange(2, 40, 0.5)))),

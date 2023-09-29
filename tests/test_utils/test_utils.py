@@ -68,7 +68,7 @@ def test_instantiate_from_config():
         "params": {"year": 2002, "month": 10, "day": 1},
     }
     o = instantiate_from_config(config)
-    assert o == datetime(2002, 10, 1)
+    assert o == datetime(2002, 10, 1)  # noqa: DTZ001
 
     config = "__is_first_stage__"
     assert instantiate_from_config(config) is None

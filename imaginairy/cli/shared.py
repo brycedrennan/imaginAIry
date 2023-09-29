@@ -43,7 +43,7 @@ def _imagine_cmd(
     model_weights_path,
     model_config_path,
     prompt_library_path,
-    version=False,  # noqa
+    version=False,
     make_gif=False,
     make_compare_gif=False,
     arg_schedules=None,
@@ -78,10 +78,7 @@ def _imagine_cmd(
 
     configure_logging(log_level)
 
-    if isinstance(init_image, str):
-        init_images = [init_image]
-    else:
-        init_images = init_image
+    init_images = [init_image] if isinstance(init_image, str) else init_image
 
     from imaginairy.utils import glob_expand_paths
 
@@ -89,9 +86,8 @@ def _imagine_cmd(
     init_images = glob_expand_paths(init_images)
 
     if len(init_images) < num_prexpaned_init_images:
-        raise ValueError(
-            f"Could not find any images matching the glob pattern(s) {init_image}. Are you sure the file(s) exists?"
-        )
+        msg = f"Could not find any images matching the glob pattern(s) {init_image}. Are you sure the file(s) exists?"
+        raise ValueError(msg)
 
     total_image_count = len(prompt_texts) * max(len(init_images), 1) * repeats
     logger.info(
@@ -227,7 +223,8 @@ def replace_option(options, option_name, new_option):
         if option.name == option_name:
             options[i] = new_option
             return
-    raise ValueError(f"Option {option_name} not found")
+    msg = f"Option {option_name} not found"
+    raise ValueError(msg)
 
 
 def remove_option(options, option_name):
@@ -242,7 +239,8 @@ def remove_option(options, option_name):
         if option.name == option_name:
             del options[i]
             return
-    raise ValueError(f"Option {option_name} not found")
+    msg = f"Option {option_name} not found"
+    raise ValueError(msg)
 
 
 common_options = [

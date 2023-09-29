@@ -135,9 +135,8 @@ class Resize:
                     # fit height
                     scale_width = scale_height
             else:
-                raise ValueError(
-                    f"resize_method {self.__resize_method} not implemented"
-                )
+                msg = f"resize_method {self.__resize_method} not implemented"
+                raise ValueError(msg)
 
         if self.__resize_method == "lower_bound":
             new_height = self.constrain_to_multiple_of(
@@ -157,7 +156,8 @@ class Resize:
             new_height = self.constrain_to_multiple_of(scale_height * height)
             new_width = self.constrain_to_multiple_of(scale_width * width)
         else:
-            raise ValueError(f"resize_method {self.__resize_method} not implemented")
+            msg = f"resize_method {self.__resize_method} not implemented"
+            raise ValueError(msg)
 
         return (new_width, new_height)
 

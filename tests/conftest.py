@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 import sys
@@ -33,16 +34,14 @@ elif get_device() == "cpu":
 
 
 @pytest.fixture(scope="session", autouse=True)
-def pre_setup():
+def _pre_setup():
     api.IMAGINAIRY_SAFETY_MODE = "disabled"
     suppress_annoying_logs_and_warnings()
     test_output_folder = f"{TESTS_FOLDER}/test_output"
 
     # delete the testoutput folder and recreate it
-    try:
+    with contextlib.suppress(FileNotFoundError):
         rmtree(test_output_folder)
-    except FileNotFoundError:
-        pass
     os.makedirs(test_output_folder, exist_ok=True)
 
     orig_urlopen = HTTPConnectionPool.urlopen
@@ -73,7 +72,7 @@ def pre_setup():
 
 
 @pytest.fixture(autouse=True)
-def reset_get_device():
+def _reset_get_device():
     get_device.cache_clear()
 
 
@@ -94,7 +93,7 @@ def sampler_type(request):
     return request.param
 
 
-@pytest.fixture
+@pytest.fixture()
 def mocked_responses():
     with responses.RequestsMock() as rsps:
         yield rsps

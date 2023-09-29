@@ -4,7 +4,7 @@ from imaginairy import config
 from imaginairy.model_manager import get_cached_url_path
 
 
-class BaseModel(torch.nn.Module):  # noqa
+class BaseModel(torch.nn.Module):
     def load(self, path):
         """
         Load model from file.

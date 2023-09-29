@@ -203,9 +203,8 @@ class GPUModelCache:
                 total_ram_gb = round(psutil.virtual_memory().total / (1024**3), 2)
                 pct_to_use = float(self._max_cpu_memory_gb[:-1]) / 100.0
                 return total_ram_gb * pct_to_use * (1024**3)
-            raise ValueError(
-                f"Invalid value for max_cpu_memory_gb: {self._max_cpu_memory_gb}"
-            )
+            msg = f"Invalid value for max_cpu_memory_gb: {self._max_cpu_memory_gb}"
+            raise ValueError(msg)
         return self._max_cpu_memory_gb * (1024**3)
 
     @cached_property
@@ -224,9 +223,8 @@ class GPUModelCache:
                     total_ram_gb = round(psutil.virtual_memory().total / (1024**3), 2)
                 pct_to_use = float(self._max_gpu_memory_gb[:-1]) / 100.0
                 return total_ram_gb * pct_to_use * (1024**3)
-            raise ValueError(
-                f"Invalid value for max_gpu_memory_gb: {self._max_gpu_memory_gb}"
-            )
+            msg = f"Invalid value for max_gpu_memory_gb: {self._max_gpu_memory_gb}"
+            raise ValueError(msg)
         return self._max_gpu_memory_gb * (1024**3)
 
     def _move_to_gpu(self, key, model):
@@ -280,12 +278,12 @@ class GPUModelCache:
         import torch
 
         if key not in self:
-            raise KeyError(f"The key {key} does not exist in the cache")
+            msg = f"The key {key} does not exist in the cache"
+            raise KeyError(msg)
 
-        if key in self.cpu_cache:
-            if self.device != torch.device("cpu"):
-                self.cpu_cache.move_to_end(key)
-                self._move_to_gpu(key, self.cpu_cache[key])
+        if key in self.cpu_cache and self.device != torch.device("cpu"):
+            self.cpu_cache.move_to_end(key)
+            self._move_to_gpu(key, self.cpu_cache[key])
 
         if key in self.gpu_cache:
             self.gpu_cache.move_to_end(key)
@@ -337,7 +335,7 @@ class MemoryManagedModelWrapper:
         self._mmmw_kwargs = kwargs
         self._mmmw_namespace = namespace
         self._mmmw_estimated_ram_size_mb = estimated_ram_size_mb
-        self._mmmw_cache_key = (namespace,) + args + tuple(kwargs.items())
+        self._mmmw_cache_key = (namespace, *args, *tuple(kwargs.items()))
 
     def _mmmw_load_model(self):
         if self._mmmw_cache_key not in self.__class__._mmmw_cache:
