@@ -16,7 +16,7 @@ anyio==3.7.1
     # via
     #   fastapi
     #   starlette
-astroid==2.15.6
+astroid==2.15.8
     # via pylint
 async-timeout==4.0.3
     # via aiohttp
@@ -42,13 +42,13 @@ click-help-colors==0.9.2
     # via imaginAIry (setup.py)
 click-shell==2.1
     # via imaginAIry (setup.py)
-contourpy==1.1.0
+contourpy==1.1.1
     # via matplotlib
 coverage==7.3.1
     # via -r requirements-dev.in
-cycler==0.11.0
+cycler==0.12.0
     # via matplotlib
-diffusers==0.20.2
+diffusers==0.21.3
     # via imaginAIry (setup.py)
 dill==0.3.7
     # via pylint
@@ -62,9 +62,9 @@ facexlib==0.3.0
     # via imaginAIry (setup.py)
 fairscale==0.4.13
     # via imaginAIry (setup.py)
-fastapi==0.103.1
+fastapi==0.103.2
     # via imaginAIry (setup.py)
-filelock==3.12.3
+filelock==3.12.4
     # via
     #   diffusers
     #   huggingface-hub
@@ -77,7 +77,7 @@ frozenlist==1.4.0
     # via
     #   aiohttp
     #   aiosignal
-fsspec[http]==2023.9.0
+fsspec[http]==2023.9.2
     # via
     #   huggingface-hub
     #   pytorch-lightning
@@ -87,7 +87,7 @@ ftfy==6.1.1
     #   open-clip-torch
 h11==0.14.0
     # via uvicorn
-huggingface-hub==0.17.1
+huggingface-hub==0.17.3
     # via
     #   diffusers
     #   open-clip-torch
@@ -98,7 +98,7 @@ idna==3.4
     #   anyio
     #   requests
     #   yarl
-imageio==2.31.3
+imageio==2.31.4
     # via imaginAIry (setup.py)
 importlib-metadata==6.8.0
     # via diffusers
@@ -120,10 +120,12 @@ lightning-utilities==0.9.0
     # via
     #   pytorch-lightning
     #   torchmetrics
-llvmlite==0.40.1
+llvmlite==0.41.0
     # via numba
 matplotlib==3.7.3
-    # via filterpy
+    # via
+    #   -c tests/constraints.txt
+    #   filterpy
 mccabe==0.7.0
     # via
     #   pylama
@@ -136,10 +138,11 @@ mypy-extensions==1.0.0
     # via
     #   black
     #   typing-inspect
-numba==0.57.1
+numba==0.58.0
     # via facexlib
 numpy==1.24.4
     # via
+    #   -c tests/constraints.txt
     #   contourpy
     #   diffusers
     #   facexlib
@@ -159,7 +162,7 @@ omegaconf==2.3.0
     # via imaginAIry (setup.py)
 open-clip-torch==2.20.0
     # via imaginAIry (setup.py)
-opencv-python==4.8.0.76
+opencv-python==4.8.1.78
     # via
     #   facexlib
     #   imaginAIry (setup.py)
@@ -178,7 +181,7 @@ pathspec==0.11.2
     # via
     #   black
     #   pycln
-pillow==10.0.0
+pillow==10.0.1
     # via
     #   diffusers
     #   facexlib
@@ -202,11 +205,11 @@ pycln==2.2.2
     # via -r requirements-dev.in
 pycodestyle==2.11.0
     # via pylama
-pydantic==2.3.0
+pydantic==2.4.2
     # via
     #   fastapi
     #   imaginAIry (setup.py)
-pydantic-core==2.6.3
+pydantic-core==2.10.1
     # via pydantic
 pydocstyle==6.3.0
     # via pylama
@@ -214,7 +217,7 @@ pyflakes==3.1.0
     # via pylama
 pylama==8.4.1
     # via -r requirements-dev.in
-pylint==2.17.5
+pylint==2.17.6
     # via -r requirements-dev.in
 pyparsing==3.1.1
     # via matplotlib
@@ -257,7 +260,7 @@ requests==2.31.0
     #   transformers
 responses==0.23.3
     # via -r requirements-dev.in
-ruff==0.0.288
+ruff==0.0.291
     # via -r requirements-dev.in
 safetensors==0.3.3
     # via
@@ -312,7 +315,7 @@ torch==1.13.1
     #   torchvision
 torchdiffeq==0.2.3
     # via imaginAIry (setup.py)
-torchmetrics==1.1.2
+torchmetrics==1.2.0
     # via
     #   imaginAIry (setup.py)
     #   pytorch-lightning
@@ -330,18 +333,17 @@ tqdm==4.66.1
     #   open-clip-torch
     #   pytorch-lightning
     #   transformers
-transformers==4.33.1
+transformers==4.33.3
     # via imaginAIry (setup.py)
 typer==0.9.0
     # via pycln
-types-pyyaml==6.0.12.11
+types-pyyaml==6.0.12.12
     # via responses
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   astroid
     #   black
     #   fastapi
-    #   filelock
     #   huggingface-hub
     #   libcst
     #   lightning-utilities
@@ -355,13 +357,13 @@ typing-extensions==4.7.1
     #   uvicorn
 typing-inspect==0.9.0
     # via libcst
-urllib3==2.0.4
+urllib3==2.0.5
     # via
     #   requests
     #   responses
 uvicorn==0.23.2
     # via imaginAIry (setup.py)
-wcwidth==0.2.6
+wcwidth==0.2.7
     # via ftfy
 wheel==0.41.2
     # via -r requirements-dev.in
@@ -369,5 +371,5 @@ wrapt==1.15.0
     # via astroid
 yarl==1.9.2
     # via aiohttp
-zipp==3.16.2
+zipp==3.17.0
     # via importlib-metadata

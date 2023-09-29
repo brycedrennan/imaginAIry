@@ -18,7 +18,6 @@ from pydantic import (
     model_validator,
 )
 from pydantic_core import core_schema
-from pydantic_core.core_schema import FieldValidationInfo
 
 from imaginairy import config
 
@@ -89,6 +88,12 @@ class LazyLoadingImage:
             raise AttributeError()
         self._load_img()
         return getattr(self._img, key)
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+    def __getstate__(self):
+        return self.__dict__
 
     def _load_img(self):
         if self._img is None:
@@ -192,16 +197,10 @@ class LazyLoadingImage:
 
         shows filepath or url if available.
         """
-        return f"<LazyLoadingImage filepath={self._lazy_filepath} url={self._lazy_url}>"
-
-
-#
-# LazyLoadingImage = Annotated[
-#     _LazyLoadingImage,
-#     AfterValidator(_LazyLoadingImage.validate),
-#     PlainSerializer(lambda i: str(i), return_type=str),
-#     WithJsonSchema({"type": "string"}, mode="serialization"),
-# ]
+        try:
+            return f"<LazyLoadingImage filepath={self._lazy_filepath} url={self._lazy_url}>"
+        except Exception as e:  # noqa
+            return f"<LazyLoadingImage RENDER EXCEPTION*{e}*>"
 
 
 class ControlNetInput(BaseModel):
@@ -218,7 +217,7 @@ class ControlNetInput(BaseModel):
     #     return v
 
     @field_validator("image_raw")
-    def image_raw_validate(cls, v, info: FieldValidationInfo):
+    def image_raw_validate(cls, v, info: core_schema.FieldValidationInfo):
         if info.data.get("image") is not None and v is not None:
             raise ValueError("You cannot specify both image and image_raw")
 
@@ -245,7 +244,7 @@ class WeightedPrompt(BaseModel):
         return f"{self.weight}*({self.text})"
 
 
-class ImaginePrompt(BaseModel):
+class ImaginePrompt(BaseModel, protected_namespaces=()):
     prompt: Optional[List[WeightedPrompt]] = Field(default=None, validate_default=True)
     negative_prompt: Optional[List[WeightedPrompt]] = Field(
         default=None, validate_default=True
@@ -403,7 +402,7 @@ class ImaginePrompt(BaseModel):
         return v
 
     @field_validator("control_inputs", mode="after")
-    def set_image_from_init_image(cls, v, info: FieldValidationInfo):
+    def set_image_from_init_image(cls, v, info: core_schema.FieldValidationInfo):
         v = v or []
         for control_input in v:
             if control_input.image is None and control_input.image_raw is None:
@@ -411,13 +410,13 @@ class ImaginePrompt(BaseModel):
         return v
 
     @field_validator("mask_image")
-    def validate_mask_image(cls, v, info: FieldValidationInfo):
+    def validate_mask_image(cls, v, info: core_schema.FieldValidationInfo):
         if v is not None and info.data.get("mask_prompt") is not None:
             raise ValueError("You can only set one of `mask_image` and `mask_prompt`")
         return v
 
     @field_validator("mask_prompt", "mask_image", mode="before")
-    def validate_mask_prompt(cls, v, info: FieldValidationInfo):
+    def validate_mask_prompt(cls, v, info: core_schema.FieldValidationInfo):
         if info.data.get("init_image") is None and v:
             raise ValueError("You must set `init_image` if you want to use a mask")
         return v
@@ -441,7 +440,7 @@ class ImaginePrompt(BaseModel):
         return v
 
     @field_validator("sampler_type", mode="after")
-    def validate_sampler_type(cls, v, info: FieldValidationInfo):
+    def validate_sampler_type(cls, v, info: core_schema.FieldValidationInfo):
         from imaginairy.samplers import SamplerName
 
         if v is None:
@@ -462,7 +461,7 @@ class ImaginePrompt(BaseModel):
         return v
 
     @field_validator("steps")
-    def validate_steps(cls, v, info: FieldValidationInfo):
+    def validate_steps(cls, v, info: core_schema.FieldValidationInfo):
         from imaginairy.samplers import SAMPLER_LOOKUP
 
         if v is None:
@@ -484,7 +483,7 @@ class ImaginePrompt(BaseModel):
         return self
 
     @field_validator("height", "width")
-    def validate_image_size(cls, v, info: FieldValidationInfo):
+    def validate_image_size(cls, v, info: core_schema.FieldValidationInfo):
         from imaginairy.model_manager import get_model_default_image_size
 
         if v is None:

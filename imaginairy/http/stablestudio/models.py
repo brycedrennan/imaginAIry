@@ -119,5 +119,5 @@ class StableStudioBatchResponse(BaseModel):
     images: List[StableStudioImage]
 
 
-StableStudioInput.update_forward_refs()
-StableStudioImage.update_forward_refs()
+StableStudioInput.model_rebuild()
+StableStudioImage.model_rebuild()

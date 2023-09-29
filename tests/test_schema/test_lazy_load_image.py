@@ -101,3 +101,14 @@ def test_image_deserialization(red_path, red_url):
     for row in rows:
         obj = TestModel.model_validate(row)
         assert obj.header_img.size == (512, 512)
+
+
+def test_image_state(red_path):
+    """I dont remember what this fixes. Maybe the ability of pydantic to copy an object?."""
+    img = LazyLoadingImage(filepath=red_path)
+
+    # bypass init
+    img2 = LazyLoadingImage.__new__(LazyLoadingImage)
+    img2.__setstate__(img.__getstate__())
+
+    assert repr(img) == repr(img2)

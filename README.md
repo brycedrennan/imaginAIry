@@ -493,6 +493,10 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 ## ChangeLog
 
+**13.2.1**
+- fix: pydantic models for http server working now. Fixes #380
+- fix: install triton so annoying message is gone
+
 **13.2.0**
 - fix: allow tile_mode to be set to True or False for backward compatibility
 - fix: various pydantic issues have been resolved

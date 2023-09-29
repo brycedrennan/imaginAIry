@@ -5,7 +5,7 @@ from imaginairy import imagine
 
 
 def generate_image(prompt):
-    """ImaginPrompt to generated image."""
+    """ImaginePrompt to generated image."""
     result = next(imagine([prompt]))
     img = result.images["generated"]
     img_io = BytesIO()
@@ -27,7 +27,7 @@ class Base64Bytes(bytes):
         yield cls.validate
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls, v, info):
         if isinstance(v, bytes):
             return v
         if isinstance(v, str):
