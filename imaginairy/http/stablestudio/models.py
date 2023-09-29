@@ -63,7 +63,7 @@ class StableStudioInput(BaseModel, extra=Extra.forbid):
     initial_image: Optional[StableStudioInputImage] = Field(None, alias="initialImage")
 
     @validator("seed")
-    def validate_seed(cls, v):  # noqa
+    def validate_seed(cls, v):
         if v == 0:
             return None
         return v
@@ -74,10 +74,7 @@ class StableStudioInput(BaseModel, extra=Extra.forbid):
 
         from PIL import Image
 
-        if self.prompts:
-            positive_prompt = self.prompts[0].text
-        else:
-            positive_prompt = None
+        positive_prompt = self.prompts[0].text if self.prompts else None
         if self.prompts and len(self.prompts) > 1:
             negative_prompt = self.prompts[1].text if len(self.prompts) > 1 else None
         else:

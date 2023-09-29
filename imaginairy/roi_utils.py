@@ -24,7 +24,8 @@ def square_roi_coordinate(roi, max_width, max_height, best_effort=False):
     width = x2 - x1
     height = y2 - y1
     if not best_effort and width != height:
-        raise RuntimeError(f"ROI is not square: {width}x{height}")
+        msg = f"ROI is not square: {width}x{height}"
+        raise RuntimeError(msg)
     return x1, y1, x2, y2
 
 
@@ -96,8 +97,7 @@ def move_roi_into_bounds(roi, max_width, max_height, force=False):
     if x1 < 0 or y1 < 0 or x2 > max_width or y2 > max_height:
         roi_width = x2 - x1
         roi_height = y2 - y1
-        raise RoiNotInBoundsError(
-            f"Not possible to fit ROI into boundaries: {roi_width}x{roi_height} won't fit inside {max_width}x{max_height}"
-        )
+        msg = f"Not possible to fit ROI into boundaries: {roi_width}x{roi_height} won't fit inside {max_width}x{max_height}"
+        raise RoiNotInBoundsError(msg)
 
     return x1, y1, x2, y2

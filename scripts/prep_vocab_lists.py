@@ -54,7 +54,7 @@ def make_txts():
     with open(src_json, encoding="utf-8") as f:
         prompts = json.load(f)
     categories = []
-    for c in prompts.keys():
+    for c in prompts:
         if any(c.startswith(p) for p in excluded_prefixes):
             continue
         categories.append(c)

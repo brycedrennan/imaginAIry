@@ -33,7 +33,7 @@ def make_bounce_animation(
 
     middle_imgs = shrink_list(middle_imgs, max_frames)
 
-    frames = [first_img] + middle_imgs + [last_img] + list(reversed(middle_imgs))
+    frames = [first_img, *middle_imgs, last_img, *list(reversed(middle_imgs))]
 
     # convert from latents
     converted_frames = []

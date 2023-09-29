@@ -52,8 +52,8 @@ def main():
         time.sleep(1)
         controlnet_statedict = torch.load(controlnet_path, map_location="cpu")
         print("\n\nComparing reconstructed controlnet with original")
-        for k in controlnet_statedict.keys():
-            if k not in reconstituted_controlnet_statedict.keys():
+        for k in controlnet_statedict:
+            if k not in reconstituted_controlnet_statedict:
                 print(f"Key {k} not in reconstituted")
             elif (
                 controlnet_statedict[k].shape

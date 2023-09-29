@@ -17,9 +17,9 @@ if "mps" in device:
 BLIP_EVAL_SIZE = 384
 
 
-@lru_cache()
+@lru_cache
 def blip_model():
-    from imaginairy.paths import PKG_ROOT  # noqa
+    from imaginairy.paths import PKG_ROOT
 
     config_path = os.path.join(
         PKG_ROOT, "vendored", "blip", "configs", "med_config.json"
@@ -28,7 +28,7 @@ def blip_model():
 
     model = BLIP_Decoder(image_size=BLIP_EVAL_SIZE, vit="base", med_config=config_path)
     cached_url_path = get_cached_url_path(url)
-    model, msg = load_checkpoint(model, cached_url_path)  # noqa
+    model, msg = load_checkpoint(model, cached_url_path)
     model.eval()
     model = model.to(device)
     return model

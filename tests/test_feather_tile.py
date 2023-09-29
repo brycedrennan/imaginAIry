@@ -46,7 +46,7 @@ cases = [
 ]
 
 
-@pytest.mark.parametrize("img_ratio, tile_size, overlap_pct", cases)
+@pytest.mark.parametrize(("img_ratio", "tile_size", "overlap_pct"), cases)
 def test_feather_tile_simple(img_ratio, tile_size, overlap_pct):
     img = pillow_img_to_torch_image(
         LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bowl_of_fruit.jpg")

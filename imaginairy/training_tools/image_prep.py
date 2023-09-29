@@ -145,7 +145,7 @@ def create_class_images(class_description, output_folder, num_images=200):
 
     while existing_image_count < num_images:
         prompt = ImaginePrompt(class_description, steps=20)
-        result = list(imagine([prompt]))[0]
+        result = next(iter(imagine([prompt])))
         if result.is_nsfw:
             continue
         dest = os.path.join(

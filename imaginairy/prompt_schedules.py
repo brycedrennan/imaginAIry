@@ -11,13 +11,13 @@ def parse_schedule_str(schedule_str):
     pattern = re.compile(r"([a-zA-Z0-9_-]+)\[([a-zA-Z0-9_:,. -]+)\]")
     match = pattern.match(schedule_str)
     if not match:
-        raise ValueError(f"Invalid kwarg schedule: {schedule_str}")
+        msg = f"Invalid kwarg schedule: {schedule_str}"
+        raise ValueError(msg)
 
     arg_name = match.group(1).replace("-", "_")
     if not hasattr(ImaginePrompt(), arg_name):
-        raise ValueError(
-            f"Invalid kwarg schedule. Not a valid argument name: {arg_name}"
-        )
+        msg = f"Invalid kwarg schedule. Not a valid argument name: {arg_name}"
+        raise ValueError(msg)
 
     arg_values = match.group(2)
     if ":" in arg_values:
@@ -53,7 +53,7 @@ def prompt_mutator(prompt, schedules):
     }
 
     """
-    schedule_length = len(list(schedules.values())[0])
+    schedule_length = len(next(iter(schedules.values())))
     for i in range(schedule_length):
         new_prompt = copy(prompt)
         for attr_name, schedule in schedules.items():

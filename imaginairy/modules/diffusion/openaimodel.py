@@ -1,5 +1,6 @@
 import math
 from abc import abstractmethod
+from typing import Optional
 
 import numpy as np
 import torch as th
@@ -38,7 +39,7 @@ class AttentionPool2d(nn.Module):
         spacial_dim: int,
         embed_dim: int,
         num_heads_channels: int,
-        output_dim: int = None,
+        output_dim: Optional[int] = None,
     ):
         super().__init__()
         self.positional_embedding = nn.Parameter(
@@ -519,10 +520,8 @@ class UNetModel(nn.Module):
             self.num_res_blocks = len(channel_mult) * [num_res_blocks]
         else:
             if len(num_res_blocks) != len(channel_mult):
-                raise ValueError(
-                    "provide num_res_blocks either as an int (globally constant) or "
-                    "as a list/tuple (per-level) with the same length as channel_mult"
-                )
+                msg = "provide num_res_blocks either as an int (globally constant) or as a list/tuple (per-level) with the same length as channel_mult"
+                raise ValueError(msg)
             self.num_res_blocks = num_res_blocks
         if disable_self_attentions is not None:
             # should be a list of booleans, indicating whether to disable self-attention in TransformerBlocks or not

@@ -26,7 +26,7 @@ def _red_url(mocked_responses):
         status=200,
         content_type="image/png",
     )
-    yield url
+    return url
 
 
 @pytest.fixture(name="red_path")

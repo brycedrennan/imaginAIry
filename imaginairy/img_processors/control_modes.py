@@ -79,7 +79,7 @@ def _create_depth_map_raw(img):
         align_corners=False,
     )
 
-    depth_pt = model(img)[0]  # noqa
+    depth_pt = model(img)[0]
     return depth_pt
 
 
@@ -209,7 +209,10 @@ def inpaint_prep(mask_image_t, target_image_t):
 
 def to_grayscale(img):
     # The dimensions of input should be (batch_size, channels, height, width)
-    assert img.dim() == 4 and img.size(1) == 3
+    if img.dim() != 4:
+        raise ValueError("Input should be a 4d tensor")
+    if img.size(1) != 3:
+        raise ValueError("Input should have 3 channels")
 
     # Apply the formula to convert to grayscale.
     gray = (

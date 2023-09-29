@@ -192,7 +192,7 @@ def surprise_me_prompts(
                             width=width,
                             height=height,
                             seed=seed,
-                            **kwargs,  # noqa
+                            **kwargs,
                         )
                     )
                 else:
@@ -206,7 +206,7 @@ def surprise_me_prompts(
                             width=width,
                             height=height,
                             seed=seed,
-                            **kwargs,  # noqa
+                            **kwargs,
                         )
                     )
 

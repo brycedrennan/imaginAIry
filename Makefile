@@ -28,18 +28,16 @@ init: require_pyenv  ## Setup a dev environment for local development.
 
 af: autoformat  ## Alias for `autoformat`
 autoformat:  ## Run the autoformatter.
-	@pycln . --all --quiet --extend-exclude __init__\.py
-	@# ERA,T201
-	@-ruff --extend-ignore ANN,ARG001,C90,DTZ,D100,D101,D102,D103,D202,D203,D212,D415,E501,RET504,S101,UP006,UP007 --extend-select C,D400,I,W --unfixable T,ERA --fix-only .
+	@-ruff check --config tests/ruff.toml . --fix-only
 	@black .
-	@isort --atomic --profile black --skip downloads/** .
+
 
 test:  ## Run the tests.
 	@pytest
 	@echo -e "The tests pass! ✨ 🍰 ✨"
 
 lint:  ## Run the code linter.
-	@pylama
+	@ruff check --config tests/ruff.toml .
 	@echo -e "No linting errors - well done! ✨ 🍰 ✨"
 
 deploy:  ## Deploy the package to pypi.org

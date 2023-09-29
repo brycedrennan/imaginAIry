@@ -20,6 +20,8 @@ except ImportError:
     # let's not break all of imaginairy just because a training import doesn't exist in an older version of PL
     # Use >= 1.6.0 to make this work
     DDPStrategy = None
+import contextlib
+
 from pytorch_lightning.trainer import Trainer
 from pytorch_lightning.utilities import rank_zero_info
 from pytorch_lightning.utilities.distributed import rank_zero_only
@@ -220,10 +222,8 @@ class SetupCallback(Callback):
                 dst, name = os.path.split(self.logdir)
                 dst = os.path.join(dst, "child_runs", name)
                 os.makedirs(os.path.split(dst)[0], exist_ok=True)
-                try:
+                with contextlib.suppress(FileNotFoundError):
                     os.rename(self.logdir, dst)
-                except FileNotFoundError:
-                    pass
 
 
 class ImageLogger(Callback):
@@ -342,11 +342,12 @@ class ImageLogger(Callback):
     ):
         if not self.disabled and pl_module.global_step > 0:
             self.log_img(pl_module, batch, batch_idx, split="val")
-        if hasattr(pl_module, "calibrate_grad_norm"):
-            if (
-                pl_module.calibrate_grad_norm and batch_idx % 25 == 0
-            ) and batch_idx > 0:
-                self.log_gradients(trainer, pl_module, batch_idx=batch_idx)
+        if (
+            hasattr(pl_module, "calibrate_grad_norm")
+            and (pl_module.calibrate_grad_norm and batch_idx % 25 == 0)
+            and batch_idx > 0
+        ):
+            self.log_gradients(trainer, pl_module, batch_idx=batch_idx)
 
 
 class CUDACallback(Callback):
@@ -356,9 +357,9 @@ class CUDACallback(Callback):
         if "cuda" in get_device():
             torch.cuda.reset_peak_memory_stats(trainer.strategy.root_device.index)
             torch.cuda.synchronize(trainer.strategy.root_device.index)
-        self.start_time = time.time()  # noqa
+        self.start_time = time.time()
 
-    def on_train_epoch_end(self, trainer, pl_module):  # noqa
+    def on_train_epoch_end(self, trainer, pl_module):
         if "cuda" in get_device():
             torch.cuda.synchronize(trainer.strategy.root_device.index)
             max_memory = (
@@ -394,19 +395,20 @@ def train_diffusion_model(
     accumulate_grad_batches used to simulate a bigger batch size - https://arxiv.org/pdf/1711.00489.pdf
     """
     if DDPStrategy is None:
-        raise ImportError("Please install pytorch-lightning>=1.6.0 to train a model")
+        msg = "Please install pytorch-lightning>=1.6.0 to train a model"
+        raise ImportError(msg)
 
     batch_size = 1
     seed = 23
     num_workers = 1
     num_val_workers = 0
-    now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+    now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")  # noqa: DTZ005
     logdir = os.path.join(logdir, now)
 
     ckpt_output_dir = os.path.join(logdir, "checkpoints")
     cfg_output_dir = os.path.join(logdir, "configs")
     seed_everything(seed)
-    model = get_diffusion_model(  # noqa
+    model = get_diffusion_model(
         weights_location=weights_location, half_mode=False, for_training=True
     )._model
     model.learning_rate = learning_rate * accumulate_grad_batches * batch_size
@@ -501,9 +503,7 @@ def train_diffusion_model(
         num_sanity_val_steps=0,
         accumulate_grad_batches=accumulate_grad_batches,
         strategy=DDPStrategy(),
-        callbacks=[
-            instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg  # noqa
-        ],
+        callbacks=[instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg],
         gpus=1,
         default_root_dir=".",
     )

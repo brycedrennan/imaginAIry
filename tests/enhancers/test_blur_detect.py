@@ -12,7 +12,7 @@ blur_params = [
 ]
 
 
-@pytest.mark.parametrize("img_path,expected", blur_params)
+@pytest.mark.parametrize(("img_path", "expected"), blur_params)
 def test_calculate_blurriness_level(img_path, expected):
     img = Image.open(img_path)
 

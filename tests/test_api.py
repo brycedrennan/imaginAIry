@@ -174,10 +174,7 @@ def test_img_to_img_fruit_2_gold(
         filepath=os.path.join(TESTS_FOLDER, "data", "bowl_of_fruit.jpg")
     )
     target_steps = 25
-    if init_strength >= 1:
-        needed_steps = 25
-    else:
-        needed_steps = int(target_steps / (1 - init_strength))
+    needed_steps = 25 if init_strength >= 1 else int(target_steps / (1 - init_strength))
     prompt = ImaginePrompt(
         "a white bowl filled with gold coins",
         prompt_strength=12,

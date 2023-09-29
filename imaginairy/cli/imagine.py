@@ -90,7 +90,7 @@ def imagine_cmd(
     model_weights_path,
     model_config_path,
     prompt_library_path,
-    version,  # noqa
+    version,
     make_gif,
     make_compare_gif,
     arg_schedules,
@@ -110,7 +110,7 @@ def imagine_cmd(
     # hacky method of getting order of control images (mixing raw and normal images)
     control_images = [
         (o, path)
-        for o, path in ImagineColorsCommand._option_order  # noqa
+        for o, path in ImagineColorsCommand._option_order
         if o.name in ("control_image", "control_image_raw")
     ]
     control_inputs = []
@@ -176,7 +176,7 @@ def imagine_cmd(
         model_weights_path,
         model_config_path,
         prompt_library_path,
-        version,  # noqa
+        version,
         make_gif,
         make_compare_gif,
         arg_schedules,
@@ -187,4 +187,4 @@ def imagine_cmd(
 
 
 if __name__ == "__main__":
-    imagine_cmd()  # noqa
+    imagine_cmd()

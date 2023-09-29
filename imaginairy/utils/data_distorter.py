@@ -1,3 +1,4 @@
+import contextlib
 import math
 import sys
 from copy import deepcopy
@@ -77,7 +78,7 @@ class DataDistorter:
     def __init__(self, data, add_data_values=True):
         self.data = deepcopy(data)
         self.data_map, self.data_unique_values = create_node_map(self.data)
-        self.distortion_values = DISTORTED_VALUES + []
+        self.distortion_values = [*DISTORTED_VALUES]
         if add_data_values:
             self.distortion_values += list(self.data_unique_values)
 
@@ -141,15 +142,13 @@ def create_node_map(data: Union[dict, list, tuple]) -> Tuple[Dict[int, list], se
 
         if isinstance(curr_data, dict):
             for key, value in curr_data.items():
-                _traverse(value, curr_path + [key])
+                _traverse(value, [*curr_path, key])
         elif isinstance(curr_data, (list, tuple)):
             for idx, item in enumerate(curr_data):
-                _traverse(item, curr_path + [idx])
+                _traverse(item, [*curr_path, idx])
         else:
-            try:
+            with contextlib.suppress(TypeError):
                 node_values.add(curr_data)
-            except TypeError:
-                pass
 
     _traverse(data, [])
     return node_map, node_values

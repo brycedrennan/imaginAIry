@@ -17,7 +17,7 @@ face_restore_device = torch.device("cuda" if torch.cuda.is_available() else "cpu
 half_mode = face_restore_device == "cuda"
 
 
-@lru_cache()
+@lru_cache
 def codeformer_model():
     model = CodeFormer(
         dim_embd=512,
@@ -36,7 +36,7 @@ def codeformer_model():
     return model
 
 
-@lru_cache()
+@lru_cache
 def face_restore_helper():
     """
     Provide a singleton of FaceRestoreHelper.
@@ -85,11 +85,11 @@ def enhance_faces(img, fidelity=0):
 
         try:
             with torch.no_grad():
-                output = net(cropped_face_t, w=fidelity, adain=True)[0]  # noqa
+                output = net(cropped_face_t, w=fidelity, adain=True)[0]
                 restored_face = tensor2img(output, rgb2bgr=True, min_max=(-1, 1))
             del output
             torch.cuda.empty_cache()
-        except Exception as error:  # noqa
+        except Exception as error:
             logger.exception(f"\tFailed inference for CodeFormer: {error}")
             restored_face = tensor2img(cropped_face_t, rgb2bgr=True, min_max=(-1, 1))
 

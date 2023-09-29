@@ -3,7 +3,7 @@ from collections import OrderedDict
 from functools import lru_cache
 
 import cv2
-import matplotlib
+import matplotlib as mpl
 import numpy as np
 import torch
 from scipy.ndimage.filters import gaussian_filter
@@ -40,7 +40,7 @@ def pad_right_down_corner(img, stride, padValue):
 def transfer(model, model_weights):
     # transfer caffe model to pytorch which will match the layer name
     transfered_model_weights = {}
-    for weights_name in model.state_dict().keys():
+    for weights_name in model.state_dict():
         transfered_model_weights[weights_name] = model_weights[
             ".".join(weights_name.split(".")[1:])
         ]
@@ -93,14 +93,14 @@ def draw_bodypose(canvas, candidate, subset):
         [255, 0, 85],
     ]
     for i in range(18):
-        for n in range(len(subset)):  # noqa
+        for n in range(len(subset)):
             index = int(subset[n][i])
             if index == -1:
                 continue
             x, y = candidate[index][0:2]
             cv2.circle(canvas, (int(x), int(y)), 4, colors[i], thickness=-1)
     for i in range(17):
-        for n in range(len(subset)):  # noqa
+        for n in range(len(subset)):
             index = subset[n][np.array(limbSeq[i]) - 1]
             if -1 in index:
                 continue
@@ -155,8 +155,7 @@ def draw_handpose(canvas, all_hand_peaks, show_number=False):
                     canvas,
                     (x1, y1),
                     (x2, y2),
-                    matplotlib.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0])
-                    * 255,
+                    mpl.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0]) * 255,
                     thickness=2,
                 )
 
@@ -368,7 +367,7 @@ class bodypose_model(nn.Module):
                 ]
             )
 
-        for k in blocks.keys():
+        for k in blocks:
             blocks[k] = make_layers(blocks[k], no_relu_layers)
 
         self.model1_1 = blocks["block1_1"]
@@ -473,7 +472,7 @@ class handpose_model(nn.Module):
                 ]
             )
 
-        for k in blocks.keys():
+        for k in blocks:
             blocks[k] = make_layers(blocks[k], no_relu_layers)
 
         self.model1_0 = blocks["block1_0"]
@@ -625,7 +624,7 @@ def create_body_pose(original_img_t):
         peaks = list(
             zip(np.nonzero(peaks_binary)[1], np.nonzero(peaks_binary)[0])
         )  # note reverse
-        peaks_with_score = [x + (map_ori[x[1], x[0]],) for x in peaks]
+        peaks_with_score = [(*x, map_ori[x[1], x[0]]) for x in peaks]
         peak_id = range(peak_counter, peak_counter + len(peaks))
         peaks_with_score_and_id = [
             peaks_with_score[i] + (peak_id[i],) for i in range(len(peak_id))
@@ -751,7 +750,7 @@ def create_body_pose(original_img_t):
                 connection_candidate, key=lambda x: x[2], reverse=True
             )
             connection = np.zeros((0, 5))
-            for c in range(len(connection_candidate)):  # noqa
+            for c in range(len(connection_candidate)):
                 i, j, s = connection_candidate[c][0:3]
                 if i not in connection[:, 3] and j not in connection[:, 4]:
                     connection = np.vstack(

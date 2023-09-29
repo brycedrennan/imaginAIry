@@ -290,10 +290,7 @@ class AutoencoderKL(pl.LightningModule):
 
     def forward(self, input, sample_posterior=True):  # noqa
         posterior = self.encode(input)
-        if sample_posterior:
-            z = posterior.sample()
-        else:
-            z = posterior.mode()
+        z = posterior.sample() if sample_posterior else posterior.mode()
         dec = self.decode(z)
         return dec, posterior
 
@@ -484,7 +481,7 @@ class AutoencoderKL(pl.LightningModule):
         :param x: img of size (bs, c, h, w)
         :return: n img crops of size (n, bs, c, kernel_size[0], kernel_size[1])
         """
-        bs, nc, h, w = x.shape  # noqa
+        bs, nc, h, w = x.shape
 
         # number of crops in image
         Ly = (h - kernel_size[0]) // stride[0] + 1

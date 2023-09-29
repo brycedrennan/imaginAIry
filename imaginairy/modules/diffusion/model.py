@@ -16,8 +16,8 @@ XFORMERS_IS_AVAILABLE = False
 
 try:
     if get_device() == "cuda":
-        import xformers  # noqa
-        import xformers.ops  # noqa
+        import xformers
+        import xformers.ops
 
         XFORMERS_IS_AVAILABLE = True
 except ImportError:
@@ -415,7 +415,7 @@ class Model(nn.Module):
         )
 
         curr_res = resolution
-        in_ch_mult = (1,) + tuple(ch_mult)
+        in_ch_mult = (1, *tuple(ch_mult))
         self.down = nn.ModuleList()
         for i_level in range(self.num_resolutions):
             block = nn.ModuleList()
@@ -581,7 +581,7 @@ class Encoder(nn.Module):
         )
 
         curr_res = resolution
-        in_ch_mult = (1,) + tuple(ch_mult)
+        in_ch_mult = (1, *tuple(ch_mult))
         self.in_ch_mult = in_ch_mult
         self.down = nn.ModuleList()
         for i_level in range(self.num_resolutions):
@@ -853,10 +853,7 @@ class SimpleDecoder(nn.Module):
 
     def forward(self, x):
         for i, layer in enumerate(self.model):
-            if i in [1, 2, 3]:
-                x = layer(x, None)
-            else:
-                x = layer(x)
+            x = layer(x, None) if i in [1, 2, 3] else layer(x)
 
         h = self.norm_out(x)
         h = silu(h)

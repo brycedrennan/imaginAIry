@@ -63,7 +63,7 @@ def generate_image_morph_video():
         if os.path.exists(filename):
             continue
 
-        result = list(imagine([prompt]))[0]
+        result = next(iter(imagine([prompt])))
         generated_image = result.images["generated"]
 
         draw = ImageDraw.Draw(generated_image)

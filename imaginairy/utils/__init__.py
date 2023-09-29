@@ -14,7 +14,7 @@ from torch.overrides import handle_torch_function, has_torch_function_variadic
 logger = logging.getLogger(__name__)
 
 
-@lru_cache()
+@lru_cache
 def get_device() -> str:
     """Return the best torch backend available."""
     if torch.cuda.is_available():
@@ -26,7 +26,7 @@ def get_device() -> str:
     return "cpu"
 
 
-@lru_cache()
+@lru_cache
 def get_hardware_description(device_type: str) -> str:
     """Description of the hardware being used."""
     desc = platform.platform()
@@ -185,10 +185,9 @@ def check_torch_working():
         torch.randn(1, device=get_device())
     except RuntimeError as e:
         if "CUDA" in str(e):
-            raise RuntimeError(
-                "CUDA is not working.  Make sure you have a GPU and CUDA installed."
-            ) from e
-        raise e
+            msg = "CUDA is not working.  Make sure you have a GPU and CUDA installed."
+            raise RuntimeError(msg) from e
+        raise
 
 
 def frange(start, stop, step):
@@ -209,7 +208,7 @@ def shrink_list(items, max_size):
     new_items = {}
     for i, item in enumerate(items):
         new_items[int(i / removal_ratio)] = item
-    return [items[0]] + list(new_items.values())
+    return [items[0], *list(new_items.values())]
 
 
 def glob_expand_paths(paths):

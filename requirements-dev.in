@@ -1,10 +1,6 @@
 black
 coverage
-isort
 ruff
-pycln
-pylama
-pylint
 pytest
 pytest-randomly
 pytest-sugar

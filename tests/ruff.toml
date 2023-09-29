@@ -1,0 +1,14 @@
+extend-ignore =  ["E501", "G004", "PT005", "RET504", "SIM114", "TRY003", "TRY400", "TRY401", "RUF012", "RUF100"]
+extend-exclude = ["imaginairy/vendored", "downloads", "other"]
+
+extend-select = [
+    "I", "E", "W", "UP", "ASYNC", "BLE", "A001", "A002",
+    "C4", "DTZ", "T10", "EM", "ISC", "ICN", "G", "PIE", "PT",
+    "Q", "SIM", "TID", "TCH", "PLC", "PLE", "TRY", "RUF"
+]
+
+[isort]
+combine-as-imports = true
+
+[flake8-errmsg]
+max-string-length = 50

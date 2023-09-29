@@ -36,7 +36,7 @@ def colorize_img(img, max_width=1024, max_height=1024, caption=None):
         steps=30,
         prompt_strength=12,
     )
-    result = list(imagine(prompt))[0]
+    result = next(iter(imagine(prompt)))
     colorized_img = replace_color(img, result.images["generated"])
 
     # allows the algorithm some leeway for the overall brightness of the image

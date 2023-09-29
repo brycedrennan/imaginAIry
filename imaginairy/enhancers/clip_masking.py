@@ -14,9 +14,9 @@ from imaginairy.vendored.clipseg import CLIPDensePredT
 weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth"
 
 
-@lru_cache()
+@lru_cache
 def clip_mask_model():
-    from imaginairy.paths import PKG_ROOT  # noqa
+    from imaginairy.paths import PKG_ROOT
 
     model = CLIPDensePredT(version="ViT-B/16", reduce_dim=64, complex_trans_conv=True)
     model.eval()
@@ -36,7 +36,7 @@ def get_img_mask(
     mask_description_statement: str,
     threshold: Optional[float] = None,
 ):
-    from imaginairy.enhancers.bool_masker import MASK_PROMPT  # noqa
+    from imaginairy.enhancers.bool_masker import MASK_PROMPT
 
     parsed = MASK_PROMPT.parseString(mask_description_statement)
     parsed_mask = parsed[0][0]

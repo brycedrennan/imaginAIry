@@ -23,7 +23,7 @@ def test_outpainting_outpaint(filename_base_for_outputs):
         steps=20,
         seed=542906833,
     )
-    result = list(imagine([prompt]))[0]
+    result = next(iter(imagine([prompt])))
     img_path = f"{filename_base_for_outputs}.png"
     assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=17000)
 
@@ -37,6 +37,6 @@ outpaint_test_params = [
 ]
 
 
-@pytest.mark.parametrize("arg_str, expected_kwargs", outpaint_test_params)
+@pytest.mark.parametrize(("arg_str", "expected_kwargs"), outpaint_test_params)
 def test_outpaint_parse_kwargs(arg_str, expected_kwargs):
     assert outpaint_arg_str_parse(arg_str) == expected_kwargs

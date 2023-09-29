@@ -61,9 +61,8 @@ def load_midas_transform(model_type="dpt_hybrid"):
         )
 
     else:
-        assert (
-            False
-        ), f"model_type '{model_type}' not implemented, use: --model_type large"
+        msg = f"model_type '{model_type}' not implemented, use: --model_type large"
+        raise NotImplementedError(msg)
 
     transform = Compose(
         [
@@ -133,8 +132,8 @@ def load_model(model_type):
         )
 
     else:
-        print(f"model_type '{model_type}' not implemented, use: --model_type large")
-        assert False
+        msg = f"model_type '{model_type}' not implemented, use: --model_type large"
+        raise NotImplementedError(msg)
 
     transform = Compose(
         [
@@ -155,13 +154,13 @@ def load_model(model_type):
     return model.eval(), transform
 
 
-@lru_cache()
+@lru_cache
 def midas_device():
     # mps returns incorrect results ~50% of the time
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-@lru_cache()
+@lru_cache
 def load_midas(model_type="dpt_hybrid"):
     model = MiDaSInference(model_type)
     model.to(midas_device())

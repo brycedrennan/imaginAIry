@@ -56,8 +56,8 @@ def _make_encoder(
             [32, 48, 136, 384], features, groups=groups, expand=expand
         )  # efficientnet_lite3
     else:
-        print(f"Backbone '{backbone}' not implemented")
-        assert False
+        msg = f"Backbone '{backbone}' not implemented"
+        raise NotImplementedError(msg)
 
     return pretrained, scratch
 

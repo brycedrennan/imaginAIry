@@ -19,7 +19,7 @@ else:
     entry_points = None
 
 
-@lru_cache()
+@lru_cache
 def get_git_revision_hash() -> str:
     try:
         return (
