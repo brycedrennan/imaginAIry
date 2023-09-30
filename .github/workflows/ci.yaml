@@ -5,6 +5,13 @@ on:
     branches:
       - master
   workflow_dispatch:
+env:
+  CACHE_PATHS: |
+          ~/.cache/huggingface
+          ~/.cache/clip
+          ~/.cache/imaginairy
+          ~/.cache/torch
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -68,24 +75,39 @@ jobs:
       run: echo "::set-output name=curmonth::$(date +'%Y-%m')"
     - name: Cache Model Files
       id: cache-model-files
-      uses: actions/cache@v3
+      uses: actions/cache/restore@v3
       with:
-        path: |
-          ~/.cache/huggingface
-          ~/.cache/clip
-          ~/.cache/imaginairy
-          ~/.cache/torch
+        path: ${{ env.CACHE_PATHS }}
         key: ${{ steps.date.outputs.curmonth }}-b
+    # Generate initial file list for all directories
+    - name: Generate initial model file list
+      run: |
+        for dir in $CACHE_PATHS; do
+          if [ -d "$dir" ]; then
+            find $dir
+          fi
+        done > initial_file_list.txt
     - name: Test with pytest
       timeout-minutes: 20
       run: |
         pytest --durations=50 -v --subset ${{ matrix.subset }}
+    # Generate final file list and check for new files
+    - name: Generate final model file list
+      run: |
+        for dir in CACHE_PATHS; do
+          if [ -d "$dir" ]; then
+            find $dir
+          fi
+        done > final_file_list.txt
+        if ! diff initial_file_list.txt final_file_list.txt > /dev/null; then
+          echo "New files detected."
+          echo "new_files=true" >> $GITHUB_ENV
+        else
+          echo "No new files detected."
+        fi
     - uses: actions/cache/save@v3
       id: cache
+      if: env.new_files == 'true'
       with:
-        path: |
-          ~/.cache/huggingface
-          ~/.cache/clip
-          ~/.cache/imaginairy
-          ~/.cache/torch
+        path: ${{ env.CACHE_PATHS }}
         key: ${{ steps.date.outputs.curmonth }}-b
