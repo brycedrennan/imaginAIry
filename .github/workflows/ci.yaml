@@ -50,6 +50,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.10"]
+        subset: ["1/10", "2/10", "3/10", "4/10", "5/10", "6/10", "7/10", "8/10", "9/10", "10/10"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -78,4 +79,13 @@ jobs:
     - name: Test with pytest
       timeout-minutes: 20
       run: |
-        pytest --durations=50 -v
+        pytest --durations=50 -v --subset ${{ matrix.subset }}
+    - uses: actions/cache/save@v3
+      id: cache
+      with:
+        path: |
+          ~/.cache/huggingface
+          ~/.cache/clip
+          ~/.cache/imaginairy
+          ~/.cache/torch
+        key: ${{ steps.date.outputs.curmonth }}-b
