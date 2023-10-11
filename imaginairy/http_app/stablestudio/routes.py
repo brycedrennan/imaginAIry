@@ -3,21 +3,21 @@ import uuid
 from fastapi import APIRouter
 from fastapi.concurrency import run_in_threadpool
 
-from imaginairy.http.stablestudio.models import (
+from imaginairy.http_app.stablestudio.models import (
     StableStudioBatchRequest,
     StableStudioBatchResponse,
     StableStudioImage,
     StableStudioModel,
     StableStudioSampler,
 )
-from imaginairy.http.utils import generate_image_b64
+from imaginairy.http_app.utils import generate_image_b64
 
 router = APIRouter()
 
 
 @router.post("/generate", response_model=StableStudioBatchResponse)
 async def generate(studio_request: StableStudioBatchRequest):
-    from imaginairy.http.app import gpu_lock
+    from imaginairy.http_app.app import gpu_lock
 
     generated_images = []
     imagine_prompt = studio_request.input.to_imagine_prompt()
