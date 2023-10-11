@@ -10,7 +10,7 @@ def run_server_cmd():
     """Run a HTTP API server."""
     import uvicorn
 
-    from imaginairy.http.app import app
+    from imaginairy.http_app.app import app
     from imaginairy.log_utils import configure_logging
 
     configure_logging(level="DEBUG")

@@ -10,8 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from imaginairy.http.stablestudio import routes
-from imaginairy.http.utils import generate_image
+from imaginairy.http_app.stablestudio import routes
+from imaginairy.http_app.utils import generate_image
 from imaginairy.schema import ImaginePrompt
 
 logger = logging.getLogger(__name__)

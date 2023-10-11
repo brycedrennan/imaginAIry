@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Extra, Field, HttpUrl, validator
 
-from imaginairy.http.utils import Base64Bytes
+from imaginairy.http_app.utils import Base64Bytes
 from imaginairy.schema import ImaginePrompt
 
 
