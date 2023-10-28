@@ -1,0 +1,5 @@
+#!/bin/env python
+import imaginairy.cli.imaginai
+
+if __name__ == "__main__":
+    imaginairy.cli.imaginai.imaginai_cmd()

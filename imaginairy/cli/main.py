@@ -7,6 +7,7 @@ from imaginairy.cli.colorize import colorize_cmd
 from imaginairy.cli.describe import describe_cmd
 from imaginairy.cli.edit import edit_cmd
 from imaginairy.cli.edit_demo import edit_demo_cmd
+from imaginairy.cli.imaginai import imaginai_cmd
 from imaginairy.cli.imagine import imagine_cmd
 from imaginairy.cli.run_api import run_server_cmd
 from imaginairy.cli.train import prep_images_cmd, prune_ckpt_cmd, train_concept_cmd
@@ -46,6 +47,7 @@ aimg.add_command(edit_cmd, name="edit")
 aimg.add_command(edit_demo_cmd, name="edit-demo")
 aimg.add_command(imagine_cmd, name="imagine")
 aimg.add_command(prep_images_cmd, name="prep-images")
+aimg.add_command(imaginai_cmd, name="imaginai")
 aimg.add_command(prune_ckpt_cmd, name="prune-ckpt")
 aimg.add_command(train_concept_cmd, name="train-concept")
 aimg.add_command(upscale_cmd, name="upscale")

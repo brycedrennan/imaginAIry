@@ -15,7 +15,11 @@ if is_for_windows:
         ],
     }
 else:
-    scripts = ["imaginairy/bin/aimg", "imaginairy/bin/imagine"]
+    scripts = [
+        "imaginairy/bin/aimg",
+        "imaginairy/bin/imagine",
+        "imaginairy/bin/imaginai",
+    ]
     entry_points = None
 
 
