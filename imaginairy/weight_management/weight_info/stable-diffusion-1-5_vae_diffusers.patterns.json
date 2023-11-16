@@ -1,0 +1,15 @@
+[
+  "(decoder|encoder).(conv_in|conv_norm_out|conv_out)",
+  "(decoder|encoder).mid_block.attentions.0.(group_norm|to_k|to_q|to_v)",
+  "(decoder|encoder).mid_block.attentions.0.to_out.0",
+  "(decoder|encoder).mid_block.resnets.(0|1).(conv1|conv2|norm1|norm2)",
+  "(post_quant_conv|quant_conv)",
+  "decoder.up_blocks.(0|1).resnets.(0|1|2).(conv1|conv2|norm1|norm2)",
+  "decoder.up_blocks.(0|1|2).upsamplers.0.conv",
+  "decoder.up_blocks.(2|3).resnets.(1|2).(conv1|conv2|norm1|norm2)",
+  "decoder.up_blocks.(2|3).resnets.0.(conv1|conv2|conv_shortcut|norm1|norm2)",
+  "encoder.down_blocks.(0|1|2).downsamplers.0.conv",
+  "encoder.down_blocks.(0|3).resnets.(0|1).(conv1|conv2|norm1|norm2)",
+  "encoder.down_blocks.(1|2).resnets.0.(conv1|conv2|conv_shortcut|norm1|norm2)",
+  "encoder.down_blocks.(1|2).resnets.1.(conv1|conv2|norm1|norm2)"
+]

@@ -40,9 +40,7 @@ compare_prompts = [
 
 
 @pytest.mark.skipif(get_device() != "cuda", reason="Too slow to run on CPU or MPS")
-@pytest.mark.parametrize(
-    "model_version", ["SD-1.4", "SD-1.5", "SD-2.0", "SD-2.0-v", "SD-2.1", "SD-2.1-v"]
-)
+@pytest.mark.parametrize("model_version", ["SD-1.5"])
 def test_model_versions(filename_base_for_orig_outputs, model_version):
     """Test that we can switch between model versions."""
     prompts = []
@@ -218,7 +216,6 @@ def test_img_to_img_fruit_2_gold_repeat():
         "mask_mode": "replace",
         "steps": 20,
         "seed": 946188797,
-        "sampler_type": "plms",
         "fix_faces": True,
         "upscale": True,
     }
@@ -229,7 +226,7 @@ def test_img_to_img_fruit_2_gold_repeat():
     ]
     for result in imagine(prompts, debug_img_callback=None):
         result.img.save(
-            f"{TESTS_FOLDER}/test_output/img2img_fruit_2_gold_plms_{get_device()}_run-{run_count:02}.jpg"
+            f"{TESTS_FOLDER}/test_output/img2img_fruit_2_gold_{result.prompt.sampler_type}_{get_device()}_run-{run_count:02}.jpg"
         )
         run_count += 1
 
@@ -242,7 +239,6 @@ def test_img_to_file():
         height=512 - 64,
         steps=20,
         seed=2,
-        sampler_type="PLMS",
         upscale=True,
     )
     out_folder = f"{TESTS_FOLDER}/test_output"
@@ -261,7 +257,6 @@ def test_inpainting_bench(filename_base_for_outputs, filename_base_for_orig_outp
         height=512,
         steps=40,
         seed=1,
-        sampler_type="plms",
     )
     result = next(imagine(prompt))
 
@@ -287,7 +282,6 @@ def test_cliptext_inpainting_pearl_doctor(
         width=512,
         height=512,
         steps=40,
-        sampler_type="plms",
         seed=181509347,
     )
     result = next(imagine(prompt))
@@ -355,7 +349,7 @@ def test_large_image(filename_base_for_outputs):
         prompt_text,
         width=1920,
         height=1080,
-        steps=15,
+        steps=30,
         seed=0,
     )
     result = next(imagine(prompt))

@@ -21,7 +21,7 @@ def get_device() -> str:
         return "cuda"
 
     if torch.backends.mps.is_available():
-        return "mps:0"
+        return "mps"
 
     return "cpu"
 
@@ -250,5 +250,5 @@ def check_torch_version():
     """
     from packaging import version
 
-    if version.parse(torch.__version__) >= version.parse("2.0.0"):
-        raise RuntimeError("ImaginAIry is not compatible with torch>=2.0.0")
+    if version.parse(torch.__version__) < version.parse("2.0.0"):
+        raise RuntimeError("ImaginAIry is not compatible with torch<2.0.0")

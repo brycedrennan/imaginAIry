@@ -3,7 +3,7 @@ import os
 import re
 import sys
 import urllib.parse
-from functools import wraps
+from functools import lru_cache, wraps
 
 import requests
 import torch
@@ -13,6 +13,7 @@ from huggingface_hub import (
     try_to_load_from_cache,
 )
 from omegaconf import OmegaConf
+from refiners.foundationals.latent_diffusion import SD1ControlnetAdapter, SD1UNet
 from safetensors.torch import load_file
 
 from imaginairy import config as iconfig
@@ -21,6 +22,7 @@ from imaginairy.modules import attention
 from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
 from imaginairy.utils.model_cache import memory_managed_model
+from imaginairy.weight_management.conversion import cast_weights
 
 logger = logging.getLogger(__name__)
 
@@ -232,6 +234,150 @@ def _get_diffusion_model(
     return diffusion_model
 
 
+def get_diffusion_model_refiners(
+    weights_location=iconfig.DEFAULT_MODEL,
+    config_path="configs/stable-diffusion-v1.yaml",
+    control_weights_locations=None,
+    half_mode=None,
+    for_inpainting=False,
+    for_training=False,
+):
+    """
+    Load a diffusion model.
+
+    Weights location may also be shortcut name, e.g. "SD-1.5"
+    """
+    try:
+        return _get_diffusion_model_refiners(
+            weights_location,
+            config_path,
+            half_mode,
+            for_inpainting,
+            control_weights_locations=control_weights_locations,
+            for_training=for_training,
+        )
+    except HuggingFaceAuthorizationError as e:
+        if for_inpainting:
+            logger.warning(
+                f"Failed to load inpainting model. Attempting to fall-back to standard model.   {e!s}"
+            )
+            return _get_diffusion_model_refiners(
+                iconfig.DEFAULT_MODEL,
+                config_path,
+                half_mode,
+                for_inpainting=False,
+                for_training=for_training,
+                control_weights_locations=control_weights_locations,
+            )
+        raise
+
+
+def _get_diffusion_model_refiners(
+    weights_location=iconfig.DEFAULT_MODEL,
+    config_path="configs/stable-diffusion-v1.yaml",
+    half_mode=None,
+    for_inpainting=False,
+    for_training=False,
+    control_weights_locations=None,
+    device=None,
+    dtype=torch.float16,
+):
+    """
+    Load a diffusion model.
+
+    Weights location may also be shortcut name, e.g. "SD-1.5"
+    """
+
+    sd = _get_diffusion_model_refiners_only(
+        weights_location=weights_location,
+        config_path=config_path,
+        for_inpainting=for_inpainting,
+        for_training=for_training,
+        device=device,
+        dtype=dtype,
+    )
+
+    return sd
+
+
+@lru_cache(maxsize=1)
+def _get_diffusion_model_refiners_only(
+    weights_location=iconfig.DEFAULT_MODEL,
+    config_path="configs/stable-diffusion-v1.yaml",
+    for_inpainting=False,
+    for_training=False,
+    control_weights_locations=None,
+    device=None,
+    dtype=torch.float16,
+):
+    """
+    Load a diffusion model.
+
+    Weights location may also be shortcut name, e.g. "SD-1.5"
+    """
+    from imaginairy.modules.refiners_sd import (
+        SD1AutoencoderSliced,
+        StableDiffusion_1,
+        StableDiffusion_1_Inpainting,
+    )
+
+    global MOST_RECENTLY_LOADED_MODEL
+
+    device = device or get_device()
+
+    (
+        model_config,
+        weights_location,
+        config_path,
+        control_weights_locations,
+    ) = resolve_model_paths(
+        weights_path=weights_location,
+        config_path=config_path,
+        control_weights_paths=control_weights_locations,
+        for_inpainting=for_inpainting,
+        for_training=for_training,
+    )
+    # some models need the attention calculated in float32
+    if model_config is not None:
+        attention.ATTENTION_PRECISION_OVERRIDE = model_config.forced_attn_precision
+    else:
+        attention.ATTENTION_PRECISION_OVERRIDE = "default"
+
+    (
+        vae_weights,
+        unet_weights,
+        text_encoder_weights,
+    ) = load_stable_diffusion_compvis_weights(weights_location)
+
+    if for_inpainting:
+        unet = SD1UNet(in_channels=9)
+        StableDiffusionCls = StableDiffusion_1_Inpainting
+    else:
+        unet = SD1UNet(in_channels=4)
+        StableDiffusionCls = StableDiffusion_1
+    logger.debug(f"Using class {StableDiffusionCls.__name__}")
+
+    sd = StableDiffusionCls(
+        device=device, dtype=dtype, lda=SD1AutoencoderSliced(), unet=unet
+    )
+    logger.debug("Loading VAE")
+    sd.lda.load_state_dict(vae_weights)
+
+    logger.debug("Loading text encoder")
+    sd.clip_text_encoder.load_state_dict(text_encoder_weights)
+
+    logger.debug("Loading UNet")
+    sd.unet.load_state_dict(unet_weights, strict=False)
+
+    logger.debug(f"'{weights_location}' Loaded")
+
+    MOST_RECENTLY_LOADED_MODEL = sd
+
+    sd.set_self_attention_guidance(enable=True)
+
+    return sd
+
+
 @memory_managed_model("stable-diffusion", memory_usage_mb=1951)
 def _load_diffusion_model(config_path, weights_location, half_mode, for_training):
     model_config = OmegaConf.load(f"{PKG_ROOT}/{config_path}")
@@ -248,6 +394,35 @@ def _load_diffusion_model(config_path, weights_location, half_mode, for_training
         half_mode=half_mode,
     )
     return model
+
+
+def load_controlnet_adapter(
+    name,
+    control_weights_location,
+    target_unet,
+    scale=1.0,
+    half_mode=False,
+):
+    controlnet_state_dict = load_state_dict(
+        control_weights_location, half_mode=half_mode
+    )
+    controlnet_state_dict = cast_weights(
+        source_weights=controlnet_state_dict,
+        source_model_name="controlnet-1-1",
+        source_component_name="all",
+        source_format="diffusers",
+        dest_format="refiners",
+    )
+
+    for key in controlnet_state_dict:
+        controlnet_state_dict[key] = controlnet_state_dict[key].to(
+            device=target_unet.device, dtype=target_unet.dtype
+        )
+    adapter = SD1ControlnetAdapter(
+        target=target_unet, name=name, scale=scale, weights=controlnet_state_dict
+    )
+
+    return adapter
 
 
 @memory_managed_model("controlnet")
@@ -447,3 +622,164 @@ def extract_huggingface_repo_commit_file_from_url(url):
     filepath = "/".join(path_components[4:])
 
     return repo, commit_hash, filepath
+
+
+def download_diffusers_weights(repo, sub, filename):
+    from imaginairy.model_manager import get_cached_url_path
+
+    url = f"https://huggingface.co/{repo}/resolve/main/{sub}/{filename}"
+    return get_cached_url_path(url, category="weights")
+
+
+@lru_cache
+def load_stable_diffusion_diffusers_weights(diffusers_repo, device=None):
+    from imaginairy.utils import get_device
+    from imaginairy.weight_management.conversion import cast_weights
+    from imaginairy.weight_management.utils import (
+        COMPONENT_NAMES,
+        FORMAT_NAMES,
+        MODEL_NAMES,
+    )
+
+    if device is None:
+        device = get_device()
+    vae_weights_path = download_diffusers_weights(
+        repo=diffusers_repo, sub="vae", filename="diffusion_pytorch_model.safetensors"
+    )
+    vae_weights = open_weights(vae_weights_path, device=device)
+    vae_weights = cast_weights(
+        source_weights=vae_weights,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.VAE,
+        source_format=FORMAT_NAMES.DIFFUSERS,
+        dest_format=FORMAT_NAMES.REFINERS,
+    )
+
+    unet_weights_path = download_diffusers_weights(
+        repo=diffusers_repo, sub="unet", filename="diffusion_pytorch_model.safetensors"
+    )
+    unet_weights = open_weights(unet_weights_path, device=device)
+    unet_weights = cast_weights(
+        source_weights=unet_weights,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.UNET,
+        source_format=FORMAT_NAMES.DIFFUSERS,
+        dest_format=FORMAT_NAMES.REFINERS,
+    )
+
+    text_encoder_weights_path = download_diffusers_weights(
+        repo=diffusers_repo, sub="text_encoder", filename="model.safetensors"
+    )
+    text_encoder_weights = open_weights(text_encoder_weights_path, device=device)
+    text_encoder_weights = cast_weights(
+        source_weights=text_encoder_weights,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.TEXT_ENCODER,
+        source_format=FORMAT_NAMES.DIFFUSERS,
+        dest_format=FORMAT_NAMES.REFINERS,
+    )
+
+    return vae_weights, unet_weights, text_encoder_weights
+
+
+def open_weights(filepath, device=None):
+    from imaginairy.utils import get_device
+
+    if device is None:
+        device = get_device()
+
+    if "safetensor" in filepath.lower():
+        from refiners.fluxion.utils import safe_open
+
+        with safe_open(path=filepath, framework="pytorch", device=device) as tensors:
+            state_dict = {key: tensors.get_tensor(key) for key in tensors}
+    else:
+        import torch
+
+        state_dict = torch.load(filepath, map_location=device)
+
+    while "state_dict" in state_dict:
+        state_dict = state_dict["state_dict"]
+
+    return state_dict
+
+
+@lru_cache
+def load_stable_diffusion_compvis_weights(weights_url):
+    from imaginairy.model_manager import get_cached_url_path
+    from imaginairy.utils import get_device
+    from imaginairy.weight_management.conversion import cast_weights
+    from imaginairy.weight_management.utils import (
+        COMPONENT_NAMES,
+        FORMAT_NAMES,
+        MODEL_NAMES,
+    )
+
+    weights_path = get_cached_url_path(weights_url, category="weights")
+    logger.info(f"Loading weights from {weights_path}")
+    state_dict = open_weights(weights_path, device=get_device())
+
+    text_encoder_prefix = "cond_stage_model."
+    cut_start = len(text_encoder_prefix)
+    text_encoder_state_dict = {
+        k[cut_start:]: v
+        for k, v in state_dict.items()
+        if k.startswith(text_encoder_prefix)
+    }
+    text_encoder_state_dict = cast_weights(
+        source_weights=text_encoder_state_dict,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.TEXT_ENCODER,
+        source_format=FORMAT_NAMES.COMPVIS,
+        dest_format=FORMAT_NAMES.DIFFUSERS,
+    )
+    text_encoder_state_dict = cast_weights(
+        source_weights=text_encoder_state_dict,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.TEXT_ENCODER,
+        source_format=FORMAT_NAMES.DIFFUSERS,
+        dest_format=FORMAT_NAMES.REFINERS,
+    )
+
+    vae_prefix = "first_stage_model."
+    cut_start = len(vae_prefix)
+    vae_state_dict = {
+        k[cut_start:]: v for k, v in state_dict.items() if k.startswith(vae_prefix)
+    }
+    vae_state_dict = cast_weights(
+        source_weights=vae_state_dict,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.VAE,
+        source_format=FORMAT_NAMES.COMPVIS,
+        dest_format=FORMAT_NAMES.DIFFUSERS,
+    )
+    vae_state_dict = cast_weights(
+        source_weights=vae_state_dict,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.VAE,
+        source_format=FORMAT_NAMES.DIFFUSERS,
+        dest_format=FORMAT_NAMES.REFINERS,
+    )
+
+    unet_prefix = "model."
+    cut_start = len(unet_prefix)
+    unet_state_dict = {
+        k[cut_start:]: v for k, v in state_dict.items() if k.startswith(unet_prefix)
+    }
+    unet_state_dict = cast_weights(
+        source_weights=unet_state_dict,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.UNET,
+        source_format=FORMAT_NAMES.COMPVIS,
+        dest_format=FORMAT_NAMES.DIFFUSERS,
+    )
+
+    unet_state_dict = cast_weights(
+        source_weights=unet_state_dict,
+        source_model_name=MODEL_NAMES.SD15,
+        source_component_name=COMPONENT_NAMES.UNET,
+        source_format=FORMAT_NAMES.DIFFUSERS,
+        dest_format=FORMAT_NAMES.REFINERS,
+    )
+
+    return vae_state_dict, unet_state_dict, text_encoder_state_dict

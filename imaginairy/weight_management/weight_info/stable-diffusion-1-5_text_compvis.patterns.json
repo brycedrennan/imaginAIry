@@ -1,0 +1,7 @@
+[
+  "cond_stage_model.transformer.text_model.(embeddings|final_layer_norm)",
+  "cond_stage_model.transformer.text_model.embeddings.(position_embedding|token_embedding)",
+  "cond_stage_model.transformer.text_model.encoder.layers.(0|1|2|3|4|5|6|7|8|9|10|11).(layer_norm1|layer_norm2)",
+  "cond_stage_model.transformer.text_model.encoder.layers.(0|1|2|3|4|5|6|7|8|9|10|11).mlp.(fc1|fc2)",
+  "cond_stage_model.transformer.text_model.encoder.layers.(0|1|2|3|4|5|6|7|8|9|10|11).self_attn.(k_proj|out_proj|q_proj|v_proj)"
+]

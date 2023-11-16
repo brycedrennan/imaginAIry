@@ -16,9 +16,9 @@ init: require_pyenv  ## Setup a dev environment for local development.
 	@echo -e "\033[0;32m ✔️  🐍 $(venv_name) virtualenv activated \033[0m"
 	pip install --upgrade pip pip-tools
 	pip-sync requirements-dev.txt
-	pip install -e . --no-deps
+	pip install -e .
 	# the compiled requirements don't included OS specific subdependencies so we trigger those this way
-	pip install `pip freeze | grep "^torch=="`
+	#pip install `pip freeze | grep "^torch=="`
 	@echo -e "\nEnvironment setup! ✨ 🍰 ✨ 🐍 \n\nCopy this path to tell PyCharm where your virtualenv is. You may have to click the refresh button in the pycharm file explorer.\n"
 	@echo -e "\033[0;32m"
 	@pyenv which python

@@ -1,0 +1,14 @@
+[
+  "first_stage_model.(decoder|encoder).(conv_in|conv_out|norm_out)",
+  "first_stage_model.(decoder|encoder).mid.(block_1|block_2).(conv1|conv2|norm1|norm2)",
+  "first_stage_model.(decoder|encoder).mid.attn_1.(k|norm|proj_out|q|v)",
+  "first_stage_model.(post_quant_conv|quant_conv)",
+  "first_stage_model.decoder.up.(0|1).block.(1|2).(conv1|conv2|norm1|norm2)",
+  "first_stage_model.decoder.up.(0|1).block.0.(conv1|conv2|nin_shortcut|norm1|norm2)",
+  "first_stage_model.decoder.up.(1|2|3).upsample.conv",
+  "first_stage_model.decoder.up.(2|3).block.(0|1|2).(conv1|conv2|norm1|norm2)",
+  "first_stage_model.encoder.down.(0|1|2).downsample.conv",
+  "first_stage_model.encoder.down.(0|3).block.(0|1).(conv1|conv2|norm1|norm2)",
+  "first_stage_model.encoder.down.(1|2).block.0.(conv1|conv2|nin_shortcut|norm1|norm2)",
+  "first_stage_model.encoder.down.(1|2).block.1.(conv1|conv2|norm1|norm2)"
+]

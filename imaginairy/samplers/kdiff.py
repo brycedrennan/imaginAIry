@@ -64,7 +64,7 @@ class KDiffusionSampler(ImageSampler, ABC):
         super().__init__(model)
         denoiseer_cls = (
             StandardCompVisVDenoiser
-            if model.parameterization == "v"
+            if getattr(model, "parameterization", "") == "v"
             else StandardCompVisDenoiser
         )
         self.cv_denoiser = denoiseer_cls(model)
