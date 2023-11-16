@@ -48,7 +48,7 @@ def test_clip_masking(filename_base_for_outputs):
         assert_image_similar_to_expectation(pred_bin, img_path=img_path, threshold=10)
 
     prompt = ImaginePrompt(
-        "",
+        "woman in sparkly gold jacket",
         init_image=img,
         init_image_strength=0.5,
         # lower steps for faster tests
@@ -58,7 +58,7 @@ def test_clip_masking(filename_base_for_outputs):
         upscale=False,
         fix_faces=True,
         seed=42,
-        sampler_type="plms",
+        # sampler_type="plms",
     )
 
     result = next(imagine(prompt))

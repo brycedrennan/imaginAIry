@@ -141,6 +141,7 @@ def imagine(
 ):
     import torch.nn
 
+    from imaginairy.api_refiners import _generate_single_image
     from imaginairy.schema import ImaginePrompt
     from imaginairy.utils import (
         check_torch_version,
@@ -190,7 +191,7 @@ def imagine(
             yield result
 
 
-def _generate_single_image(
+def _generate_single_image_compvis(
     prompt,
     debug_img_callback=None,
     progress_img_callback=None,
@@ -674,8 +675,10 @@ def _scale_latent(
 def _generate_composition_image(prompt, target_height, target_width, cutoff=512):
     from PIL import Image
 
+    from imaginairy.api_refiners import _generate_single_image
+
     if prompt.width <= cutoff and prompt.height <= cutoff:
-        return None
+        return None, None
 
     shrink_scale = calc_scale_to_fit_within(
         height=prompt.height,
@@ -713,7 +716,7 @@ def _generate_composition_image(prompt, target_height, target_width, cutoff=512)
         resample=Image.Resampling.LANCZOS,
     )
 
-    return img
+    return img, result.images["generated"]
 
 
 def prompt_normalized(prompt, length=130):

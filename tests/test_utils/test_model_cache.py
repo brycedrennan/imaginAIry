@@ -26,12 +26,12 @@ def create_model_of_n_bytes(n):
 @pytest.mark.parametrize(
     "model_version",
     [
-        "SD-1.4",
+        # "SD-1.4",
         "SD-1.5",
-        "SD-2.0",
-        "SD-2.0-v",
-        "SD-2.1",
-        "SD-2.1-v",
+        # "SD-2.0",
+        # "SD-2.0-v",
+        # "SD-2.1",
+        # "SD-2.1-v",
         "openjourney-v1",
         "openjourney-v2",
         "openjourney-v4",

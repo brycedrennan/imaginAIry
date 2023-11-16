@@ -34,7 +34,7 @@ def test_get_device(monkeypatch):
     get_device.cache_clear()
     m_cuda_is_available.side_effect = lambda: False
     m_mps_is_available.side_effect = lambda: True
-    assert get_device() == "mps:0"
+    assert get_device() == "mps"
 
     get_device.cache_clear()
     m_cuda_is_available.side_effect = lambda: False

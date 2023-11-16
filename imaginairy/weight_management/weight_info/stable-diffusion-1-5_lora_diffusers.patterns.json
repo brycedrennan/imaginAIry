@@ -1,0 +1,5 @@
+[
+  "down_blocks.(0|1|2).attentions.(0|1).transformer_blocks.0.(attn1|attn2).processor.(to_k_lora|to_out_lora|to_q_lora|to_v_lora).(down|up).weight",
+  "mid_block.attentions.0.transformer_blocks.0.(attn1|attn2).processor.(to_k_lora|to_out_lora|to_q_lora|to_v_lora).(down|up).weight",
+  "up_blocks.(1|2|3).attentions.(0|1|2).transformer_blocks.0.(attn1|attn2).processor.(to_k_lora|to_out_lora|to_q_lora|to_v_lora).(down|up).weight"
+]

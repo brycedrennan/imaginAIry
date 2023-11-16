@@ -121,7 +121,7 @@ def model_latent_to_pillow_img(latent: torch.Tensor) -> PIL.Image.Image:
     if latent.shape[0] != 1:
         raise ValueError("Only batch size 1 supported")
     model = get_current_diffusion_model()
-    img_t = model.decode_first_stage(latent)
+    img_t = model.lda.decode(latent)
     return torch_img_to_pillow_img(img_t)
 
 

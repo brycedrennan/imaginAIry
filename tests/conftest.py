@@ -32,6 +32,8 @@ if get_device() == "mps:0":
 elif get_device() == "cpu":
     SAMPLERS_FOR_TESTING = []
 
+SAMPLERS_FOR_TESTING = ["ddim", "k_dpmpp_2m"]
+
 
 @pytest.fixture(scope="session", autouse=True)
 def _pre_setup():

@@ -81,7 +81,7 @@ setup(
         "fastapi>=0.70.0",
         "ftfy>=6.0.1",  # for vendored clip
         # 2.0.0 produced garbage images on macOS
-        "torch>=1.13.1,<2.0.0",
+        "torch>=2.1.0",
         # https://numpy.org/neps/nep-0029-deprecation_policy.html
         "numpy>=1.19.0,<1.26.0",
         "tqdm>=4.64.0",
@@ -97,6 +97,7 @@ setup(
         # need to migration to 2.0
         "pydantic>=2.3.0",
         "requests>=2.28.1",
+        "refiners>=0.2.0",
         "einops>=0.3.0",
         "safetensors>=0.2.1",
         # scipy is a sub dependency but v1.11 doesn't support python 3.8.  https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy
@@ -106,10 +107,9 @@ setup(
         "torchmetrics>=0.6.0",
         "torchvision>=0.13.1",
         "transformers>=4.19.2",
-        "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64'",
+        # "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64'",
         "kornia>=0.6",
         "uvicorn>=0.16.0",
-        "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
     ],
     # don't specify maximum python versions as it can cause very long dependency resolution issues as the resolver
     # goes back to older versions of packages that didn't specify a maximum
