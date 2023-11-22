@@ -31,14 +31,6 @@ class ModelConfig:
 midas_url = "https://github.com/intel-isl/DPT/releases/download/1_0/dpt_hybrid-midas-501f0c75.pt"
 
 MODEL_CONFIGS = [
-    # ModelConfig(
-    #     description="Stable Diffusion 1.4",
-    #     short_name="SD-1.4",
-    #     config_path="configs/stable-diffusion-v1.yaml",
-    #     weights_url="https://huggingface.co/bstddev/sd-v1-4/resolve/77221977fa8de8ab8f36fac0374c120bd5b53287/sd-v1-4.ckpt",
-    #     default_image_size=512,
-    #     alias="sd14",
-    # ),
     ModelConfig(
         description="Stable Diffusion 1.5",
         short_name="SD-1.5",
@@ -56,63 +48,6 @@ MODEL_CONFIGS = [
         default_image_size=512,
         alias="sd15in",
     ),
-    # ModelConfig(
-    #     description="Stable Diffusion 2.0 - bad at making people",
-    #     short_name="SD-2.0",
-    #     config_path="configs/stable-diffusion-v2-inference.yaml",
-    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-base/resolve/main/512-base-ema.ckpt",
-    #     default_image_size=512,
-    #     alias="sd20",
-    # ),
-    # ModelConfig(
-    #     description="Stable Diffusion 2.0 - Inpainting",
-    #     short_name="SD-2.0-inpaint",
-    #     config_path="configs/stable-diffusion-v2-inpainting-inference.yaml",
-    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-inpainting/resolve/main/512-inpainting-ema.ckpt",
-    #     default_image_size=512,
-    #     alias="sd20in",
-    # ),
-    # ModelConfig(
-    #     description="Stable Diffusion 2.0 v - 768x768 - bad at making people",
-    #     short_name="SD-2.0-v",
-    #     config_path="configs/stable-diffusion-v2-inference-v.yaml",
-    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-2/resolve/main/768-v-ema.ckpt",
-    #     default_image_size=768,
-    #     alias="sd20v",
-    # ),
-    # ModelConfig(
-    #     description="Stable Diffusion 2.0 - Depth",
-    #     short_name="SD-2.0-depth",
-    #     config_path="configs/stable-diffusion-v2-midas-inference.yaml",
-    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-depth/resolve/main/512-depth-ema.ckpt",
-    #     default_image_size=512,
-    #     alias="sd20dep",
-    # ),
-    # ModelConfig(
-    #     description="Stable Diffusion 2.1",
-    #     short_name="SD-2.1",
-    #     config_path="configs/stable-diffusion-v2-inference.yaml",
-    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt",
-    #     default_image_size=512,
-    #     alias="sd21",
-    # ),
-    # ModelConfig(
-    #     description="Stable Diffusion 2.1 - Inpainting",
-    #     short_name="SD-2.1-inpaint",
-    #     config_path="configs/stable-diffusion-v2-inpainting-inference.yaml",
-    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-inpainting/resolve/main/512-inpainting-ema.ckpt",
-    #     default_image_size=512,
-    #     alias="sd21in",
-    # ),
-    # ModelConfig(
-    #     description="Stable Diffusion 2.1 v - 768x768",
-    #     short_name="SD-2.1-v",
-    #     config_path="configs/stable-diffusion-v2-inference-v.yaml",
-    #     weights_url="https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt",
-    #     default_image_size=768,
-    #     forced_attn_precision="fp32",
-    #     alias="sd21v",
-    # ),
     # ModelConfig(
     #     description="Instruct Pix2Pix - Photo Editing",
     #     short_name="instruct-pix2pix",
