@@ -68,18 +68,20 @@ def instantiate_from_config(config: Union[dict, str]) -> Any:
 
 
 @contextmanager
-def platform_appropriate_autocast(precision="autocast"):
+def platform_appropriate_autocast(precision="autocast", enabled=True):
     """
     Allow calculations to run in mixed precision, which can be faster.
     """
-    precision_scope = nullcontext
     # autocast not supported on CPU
     # https://github.com/pytorch/pytorch/issues/55374
     # https://github.com/invoke-ai/InvokeAI/pull/518
+
     if precision == "autocast" and get_device() in ("cuda",):
-        precision_scope = autocast
-    with precision_scope(get_device()):
-        yield
+        with autocast(get_device(), enabled=enabled):
+            yield
+    else:
+        with nullcontext(get_device()):
+            yield
 
 
 def _fixed_layer_norm(
@@ -252,3 +254,52 @@ def check_torch_version():
 
     if version.parse(torch.__version__) < version.parse("2.0.0"):
         raise RuntimeError("ImaginAIry is not compatible with torch<2.0.0")
+
+
+def exists(val):
+    return val is not None
+
+
+def default(val, d):
+    if val is not None:
+        return val
+    return d() if callable(d) else d
+
+
+def disabled_train(self, mode=True):
+    """Overwrite model.train with this function to make sure train/eval mode
+    does not change anymore."""
+    return self
+
+
+def expand_dims_like(x, y):
+    while x.dim() != y.dim():
+        x = x.unsqueeze(-1)
+    return x
+
+
+def get_nested_attribute(obj, attribute_path, depth=None, return_key=False):
+    """
+    Will return the result of a recursive get attribute call.
+    E.g.:
+        a.b.c
+        = getattr(getattr(a, "b"), "c")
+        = get_nested_attribute(a, "b.c")
+    If any part of the attribute call is an integer x with current obj a, will
+    try to call a[x] instead of a.x first.
+    """
+    attributes = attribute_path.split(".")
+    if depth is not None and depth > 0:
+        attributes = attributes[:depth]
+    assert len(attributes) > 0, "At least one attribute should be selected"
+    current_attribute = obj
+    current_key = None
+    for level, attribute in enumerate(attributes):
+        current_key = ".".join(attributes[: level + 1])
+        try:
+            id_ = int(attribute)
+            current_attribute = current_attribute[id_]
+        except ValueError:
+            current_attribute = getattr(current_attribute, attribute)
+
+    return (current_attribute, current_key) if return_key else current_attribute
