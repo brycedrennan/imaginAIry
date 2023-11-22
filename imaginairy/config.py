@@ -86,6 +86,43 @@ MODEL_CONFIGS = [
     ),
 ]
 
+
+video_models = [
+    {
+        "short_name": "svd",
+        "description": "Stable Video Diffusion",
+        "default_frames": 14,
+        "default_steps": 25,
+        "config_path": "configs/svd.yaml",
+        "weights_url": "https://huggingface.co/imaginairy/stable-video-diffusion/resolve/f9dce2757a0713da6262f35438050357c2be7ee6/svd.fp16.safetensors",
+    },
+    {
+        "short_name": "svd_image_decoder",
+        "description": "Stable Video Diffusion - Image Decoder",
+        "default_frames": 14,
+        "default_steps": 25,
+        "config_path": "configs/svd_image_decoder.yaml",
+        "weights_url": "https://huggingface.co/imaginairy/stable-video-diffusion/resolve/f9dce2757a0713da6262f35438050357c2be7ee6/svd_image_decoder.fp16.safetensors",
+    },
+    {
+        "short_name": "svd_xt",
+        "description": "Stable Video Diffusion - XT",
+        "default_frames": 25,
+        "default_steps": 30,
+        "config_path": "configs/svd_xt.yaml",
+        "weights_url": "https://huggingface.co/imaginairy/stable-video-diffusion/resolve/f9dce2757a0713da6262f35438050357c2be7ee6/svd_xt.fp16.safetensors",
+    },
+    {
+        "short_name": "svd_xt_image_decoder",
+        "description": "Stable Video Diffusion - XT - Image Decoder",
+        "default_frames": 25,
+        "default_steps": 30,
+        "config_path": "configs/svd_xt_image_decoder.yaml",
+        "weights_url": "https://huggingface.co/imaginairy/stable-video-diffusion/resolve/f9dce2757a0713da6262f35438050357c2be7ee6/svd_xt_image_decoder.fp16.safetensors",
+    },
+]
+video_models = {m["short_name"]: m for m in video_models}
+
 MODEL_CONFIG_SHORTCUTS = {m.short_name: m for m in MODEL_CONFIGS}
 for m in MODEL_CONFIGS:
     if m.alias:

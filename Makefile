@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-python_version = 3.10.10
+python_version = 3.10.13
 venv_prefix = imaginairy
 venv_name = $(venv_prefix)-$(python_version)
 pyenv_instructions=https://github.com/pyenv/pyenv#installation
