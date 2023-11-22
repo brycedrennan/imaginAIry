@@ -724,7 +724,7 @@ Use with `--model SD-2.1` or `--model SD-2.0-v`
 - fix: version metadata was broken
 
 **6.1.0**
-- feature: use different default steps and image sizes depending on sampler and model selceted
+- feature: use different default steps and image sizes depending on sampler and model selected
 - fix: #110 use proper version in image metadata
 - refactor: samplers all have their own class that inherits from ImageSampler
 - feature: 🎉🎉🎉 Stable Diffusion 2.0
@@ -846,7 +846,6 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
 
 
 ## Not Supported
- - a GUI. this is a python library
  - exploratory features that don't work well
 
 
