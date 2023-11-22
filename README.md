@@ -39,6 +39,7 @@ Visit http://localhost:8000/ and http://localhost:8000/docs
 <img src="https://github.com/Stability-AI/StableStudio/blob/a65d4877ad7d309627808a169818f1add8c278ae/misc/GenerateScreenshot.png?raw=true">
 
 ### Image Structure Control [by ControlNet](https://github.com/lllyasviel/ControlNet)
+#### (Broken as of 14.0.0)
 Generate images guided by body poses, depth maps, canny edges, hed boundaries, or normal maps.
 
 **Openpose Control**
@@ -156,6 +157,7 @@ aimg colorize pearl-girl.jpg --caption "photo of a woman"
 </p>
 
 ###  Instruction based image edits [by InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix)
+#### (Broken as of 14.0.0)
 Just tell imaginairy how to edit the image and it will do it for you!
 <p float="left">
 <img src="assets/scenic_landscape_winter.jpg" height="256">
@@ -325,10 +327,7 @@ Example:
 ### Work with different generation models
 
 <p float="left">
-    <img src="assets/fairytale-treehouse-sd14.jpg" height="256">
     <img src="assets/fairytale-treehouse-sd15.jpg" height="256">
-    <img src="assets/fairytale-treehouse-sd20.jpg" height="256">
-    <img src="assets/fairytale-treehouse-sd21.jpg" height="256">
     <img src="assets/fairytale-treehouse-openjourney-v1.jpg" height="256">
     <img src="assets/fairytale-treehouse-openjourney-v2.jpg" height="256">
 </p>
@@ -492,6 +491,17 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 
 
 ## ChangeLog
+
+**14.0.0**
+- 🎉 feature: uses refiners library for generation
+- 🎉 feature: adds support for pytorch 2.0
+- fix: stable diffusion 1.5 + inpainting working
+- fix: self-attention guidance working. improves image generation quality
+- fix: tile-mode working
+- fix: self-attention guidance working. improves image generation quality
+- deprecated: support for python 3.8
+- deprecated: support for sd 1.4, 2.0, 2.1
+- broken: pix2pix editing, most samplers, most controlnets, and memory management
 
 **13.2.1**
 - fix: pydantic models for http server working now. Fixes #380
