@@ -74,18 +74,21 @@ def videogen_cmd(
     configure_logging()
 
     output_fps = output_fps or fps
-
-    generate_video(
-        input_path=start_image,
-        num_frames=num_frames,
-        num_steps=steps,
-        model_name=model,
-        fps_id=fps,
-        output_fps=output_fps,
-        motion_bucket_id=motion_amount,
-        cond_aug=cond_aug,
-        seed=seed,
-        decoding_t=decoding_t,
-        output_folder=output_folder,
-        repetitions=repeats,
-    )
+    try:
+        generate_video(
+            input_path=start_image,
+            num_frames=num_frames,
+            num_steps=steps,
+            model_name=model,
+            fps_id=fps,
+            output_fps=output_fps,
+            motion_bucket_id=motion_amount,
+            cond_aug=cond_aug,
+            seed=seed,
+            decoding_t=decoding_t,
+            output_folder=output_folder,
+            repetitions=repeats,
+        )
+    except FileNotFoundError as e:
+        logger.error(str(e))
+        exit(1)

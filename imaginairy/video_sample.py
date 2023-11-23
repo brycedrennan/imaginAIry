@@ -96,7 +96,8 @@ def generate_video(
             if len(all_img_paths) == 0:
                 raise ValueError("Folder does not contain any images.")
         else:
-            raise ValueError
+            msg = f"Could not find file or folder at {input_path}"
+            raise FileNotFoundError(msg)
 
     expected_size = (1024, 576)
     for _ in range(repetitions):
