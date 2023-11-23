@@ -246,7 +246,9 @@ class WeightedPrompt(BaseModel):
 
 
 class ImaginePrompt(BaseModel, protected_namespaces=()):
-    prompt: Optional[List[WeightedPrompt]] = Field(default=None, validate_default=True)
+    prompt: Optional[List[WeightedPrompt] | str] = Field(
+        default=None, validate_default=True, kw_only=False
+    )
     negative_prompt: Optional[List[WeightedPrompt]] = Field(
         default=None, validate_default=True
     )
@@ -276,27 +278,28 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     sampler_type: str = Field(default=config.DEFAULT_SAMPLER, validate_default=True)
     seed: Optional[int] = Field(default=None, validate_default=True)
     steps: Optional[int] = Field(default=None, validate_default=True)
-    height: Optional[int] = Field(None, ge=1, le=100_000, validate_default=True)
-    width: Optional[int] = Field(None, ge=1, le=100_000, validate_default=True)
+    height: Optional[int] = Field(default=None, ge=1, le=100_000, validate_default=True)
+    width: Optional[int] = Field(default=None, ge=1, le=100_000, validate_default=True)
     upscale: bool = False
     fix_faces: bool = False
-    fix_faces_fidelity: Optional[float] = Field(0.2, ge=0, le=1, validate_default=True)
+    fix_faces_fidelity: Optional[float] = Field(
+        default=0.2, ge=0, le=1, validate_default=True
+    )
     conditioning: Optional[str] = None
     tile_mode: str = ""
     allow_compose_phase: bool = True
     is_intermediate: bool = False
     collect_progress_latents: bool = False
     caption_text: str = Field(
-        "", description="text to be overlaid on the image", validate_default=True
+        default="",
+        description="text to be overlaid on the image",
+        validate_default=True,
     )
 
     class MaskMode:
         REPLACE = "replace"
         KEEP = "keep"
 
-    def __init__(self, prompt=None, **kwargs):
-        # allows `prompt` to be positional
-        super().__init__(prompt=prompt, **kwargs)
 
     @field_validator("prompt", "negative_prompt", mode="before")
     @classmethod
