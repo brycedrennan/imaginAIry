@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from imaginairy.modules.sgm.autoencoding.lpips.loss.lpips import LPIPS
-from imaginairy.modules.util import default, instantiate_from_config
+from imaginairy.utils import default, instantiate_from_config
 
 
 class LatentLPIPS(nn.Module):

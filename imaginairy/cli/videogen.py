@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
     help="Input path for image file.",
 )
 @click.option("--num-frames", default=None, type=int, help="Number of frames.")
-@click.option("--num-steps", default=None, type=int, help="Number of steps.")
+@click.option(
+    "-s", "--steps", default=None, type=int, help="Number of diffusion steps."
+)
 @click.option(
     "--model",
     default="svd",
@@ -47,7 +49,7 @@ logger = logging.getLogger(__name__)
 def videogen_cmd(
     start_image,
     num_frames,
-    num_steps,
+    steps,
     model,
     fps,
     output_fps,
@@ -72,18 +74,18 @@ def videogen_cmd(
     configure_logging()
 
     output_fps = output_fps or fps
-    for i in range(repeats):
-        logger.info(f"Generating video from image {start_image}")
-        generate_video(
-            input_path=start_image,
-            num_frames=num_frames,
-            num_steps=num_steps,
-            model_name=model,
-            fps_id=fps,
-            output_fps=output_fps,
-            motion_bucket_id=motion_amount,
-            cond_aug=cond_aug,
-            seed=seed,
-            decoding_t=decoding_t,
-            output_folder=output_folder,
-        )
+
+    generate_video(
+        input_path=start_image,
+        num_frames=num_frames,
+        num_steps=steps,
+        model_name=model,
+        fps_id=fps,
+        output_fps=output_fps,
+        motion_bucket_id=motion_amount,
+        cond_aug=cond_aug,
+        seed=seed,
+        decoding_t=decoding_t,
+        output_folder=output_folder,
+        repetitions=repeats,
+    )

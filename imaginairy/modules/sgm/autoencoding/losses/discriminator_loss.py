@@ -13,7 +13,7 @@ from imaginairy.modules.sgm.autoencoding.lpips.vqperceptual import (
     hinge_d_loss,
     vanilla_d_loss,
 )
-from imaginairy.modules.util import default, instantiate_from_config
+from imaginairy.utils import default, instantiate_from_config
 
 
 class GeneralLPIPSWithDiscriminator(nn.Module):
