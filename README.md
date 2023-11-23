@@ -8,9 +8,9 @@
 [![Python Checks](https://github.com/brycedrennan/imaginAIry/actions/workflows/ci.yaml/badge.svg)](https://github.com/brycedrennan/imaginAIry/actions/workflows/ci.yaml)
 [![Discord](https://flat.badgen.net/discord/members/FdD7ut3YjW)](https://discord.gg/FdD7ut3YjW)
 
-AI imagined images. Pythonic generation of stable diffusion images.
+AI imagined images. Pythonic generation of stable diffusion images **and videos** *!.
 
-"just works" on Linux and macOS(M1) (and maybe windows?).
+"just works" on Linux and macOS(M1) (and sometimes windows).
 
 
 ```bash
@@ -20,7 +20,47 @@ AI imagined images. Pythonic generation of stable diffusion images.
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman" "a bluejay"
 # Make an animation showing the generation process
 >> imagine --gif "a flower"
+# Make an AI video
+>> aimg videogen --start-image rocket.png
 ```
+## Stable Video Diffusion
+<p float="left">
+<img src="assets/svd-rocket.gif" height="256">
+<img src="assets/svd-athens.gif" height="256">
+<img src="assets/svd-pearl-girl.gif" height="256">
+<img src="assets/svd-starry-night.gif" height="256">
+<img src="assets/svd-dog.gif" height="256">
+<img src="assets/svd-xpbliss.gif" height="256">
+</p>
+
+### Rushed release of Stable Diffusion Video!
+Works with Nvidia 3090 or 4090.  Does not work on Mac or CPU. Other GPUs not tested.
+```text
+Usage: aimg videogen [OPTIONS]
+
+  AI generate a video from an image
+
+  Example:
+
+      aimg videogen --start-image assets/rocket-wide.png
+
+Options:
+  --start-image TEXT       Input path for image file.
+  --num-frames INTEGER     Number of frames.
+  --num-steps INTEGER      Number of steps.
+  --model TEXT             Model to use. One of: svd, svd_xt, svd_image_decoder, svd_xt_image_decoder
+  --fps INTEGER            FPS for the AI to target when generating video
+  --output-fps INTEGER     FPS for the output video
+  --motion-amount INTEGER  How much motion to generate. value between 0 and 255.
+  -r, --repeats INTEGER    How many times to repeat the renders.   [default: 1]
+  --cond-aug FLOAT         Conditional augmentation.
+  --seed INTEGER           Seed for random number generator.
+  --decoding_t INTEGER     Number of frames decoded at a time.
+  --output_folder TEXT     Output folder.
+  --help                   Show this message and exit.
+```
+
+### Images
 <p float="left">
 <img src="assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256">
 <img src="assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg" height="256">
@@ -29,6 +69,19 @@ AI imagined images. Pythonic generation of stable diffusion images.
 <img src="assets/013986_1_kdpmpp2m59_PS7.5_a_bluejay_[generated].jpg" height="256">
 <img src="assets/009719_942389026_kdpmpp2m15_PS7.5_a_flower.gif" height="256">
 </p>
+
+### Whats New
+**14.0.0**
+- 🎉 video generation using [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
+- 🎉 imaginairy is now backed by the [refiners library](https://github.com/finegrain-ai/refiners)
+  - This was a huge re-write which is why some features are not yet supported.  On the plus side, refiners supports
+cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
+  - [self-attention guidance](https://github.com/SusungHong/Self-Attention-Guidance) which makes details of images more accurate
+- support for pytorch 2.0
+- deprecated: support for python 3.8
+- deprecated: support for torch 1.13
+- deprecated: support for sd 1.4, 2.0, 2.1
+- broken: pix2pix editing, most samplers, some controlnets, and memory management
 
 ### Run API server and StableStudio web interface (alpha)
 Generate images via API or web interface.  Much smaller featureset compared to the command line tool.
@@ -493,15 +546,16 @@ A: The AI models are cached in `~/.cache/` (or `HUGGINGFACE_HUB_CACHE`). To dele
 ## ChangeLog
 
 **14.0.0**
-- 🎉 feature: uses refiners library for generation
-- 🎉 feature: adds support for pytorch 2.0
-- fix: stable diffusion 1.5 + inpainting working
-- fix: self-attention guidance working. improves image generation quality
-- fix: tile-mode working
-- fix: self-attention guidance working. improves image generation quality
+- 🎉 feature: video generation using [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
+- 🎉 feature: imaginairy is now backed by the [refiners library](https://github.com/finegrain-ai/refiners)
+  - This was a huge re-write which is why some features are not yet supported.  On the plus side, refiners supports
+cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
+  - feature: added support for [self-attention guidance](https://github.com/SusungHong/Self-Attention-Guidance) which makes details of images more accurate
+- feature: adds support for pytorch 2.0
 - deprecated: support for python 3.8
+- deprecated: support for torch 1.13
 - deprecated: support for sd 1.4, 2.0, 2.1
-- broken: pix2pix editing, most samplers, most controlnets, and memory management
+- broken: pix2pix editing, most samplers, some controlnets, and memory management
 
 **13.2.1**
 - fix: pydantic models for http server working now. Fixes #380
