@@ -48,8 +48,7 @@ deploy:  ## Deploy the package to pypi.org
 	python setup.py bdist_wheel
 	python setup.py bdist_wheel --plat-name=win-amd64
 	#python setup.py sdist
-	@echo 'pypi.org Username: '
-	@read username && twine upload --verbose dist/* -u $$username;
+	@twine upload --verbose dist/* -u __token__;
 	rm -rf build
 	rm -rf dist
 	@echo "Deploy successful! ✨ 🍰 ✨"

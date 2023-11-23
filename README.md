@@ -25,12 +25,12 @@ AI imagined images. Pythonic generation of stable diffusion images **and videos*
 ```
 ## Stable Video Diffusion
 <p float="left">
-<img src="assets/svd-rocket.gif" height="256">
-<img src="assets/svd-athens.gif" height="256">
-<img src="assets/svd-pearl-girl.gif" height="256">
-<img src="assets/svd-starry-night.gif" height="256">
-<img src="assets/svd-dog.gif" height="256">
-<img src="assets/svd-xpbliss.gif" height="256">
+<img src="assets/svd-rocket.gif" height="190">
+<img src="assets/svd-athens.gif" height="190">
+<img src="assets/svd-pearl-girl.gif" height="190">
+<img src="assets/svd-starry-night.gif" height="190">
+<img src="assets/svd-dog.gif" height="190">
+<img src="assets/svd-xpbliss.gif" height="190">
 </p>
 
 ### Rushed release of Stable Diffusion Video!
