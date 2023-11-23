@@ -43,7 +43,6 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--decoding_t", default=1, type=int, help="Number of frames decoded at a time."
 )
-@click.option("--device", default=None, help="Device to use.")
 @click.option("--output_folder", default=None, help="Output folder.")
 def videogen_cmd(
     start_image,
@@ -57,7 +56,6 @@ def videogen_cmd(
     cond_aug,
     seed,
     decoding_t,
-    device,
     output_folder,
 ):
     """
@@ -87,6 +85,5 @@ def videogen_cmd(
             cond_aug=cond_aug,
             seed=seed,
             decoding_t=decoding_t,
-            device=device,
             output_folder=output_folder,
         )
