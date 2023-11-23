@@ -186,7 +186,9 @@ def generate_video(
 
             os.makedirs(output_folder, exist_ok=True)
             base_count = len(glob(os.path.join(output_folder, "*.mp4")))
-            video_path = os.path.join(output_folder, f"{base_count:06d}.mp4")
+            input_file_name = os.path.basename(input_img_path)
+            video_path = os.path.join(output_folder, f"{base_count:06d}_{model_name}_{str(seed)}_{input_file_name}.mp4")
+
             writer = cv2.VideoWriter(
                 video_path,
                 cv2.VideoWriter_fourcc(*"MP4V"),
