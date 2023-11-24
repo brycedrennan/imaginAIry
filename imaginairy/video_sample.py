@@ -53,7 +53,6 @@ def generate_video(
     seed = default(seed, random.randint(0, 1000000))
     output_fps = default(output_fps, fps_id)
 
-    torch.cuda.reset_peak_memory_stats()
     video_model_config = config.video_models.get(model_name, None)
     if video_model_config is None:
         msg = f"Version {model_name} does not exist."
@@ -243,10 +242,7 @@ def generate_video(
                 writer.release()
                 video_path_h264 = video_path[:-4] + "_h264.mp4"
                 os.system(f"ffmpeg -i {video_path} -c:v libx264 {video_path_h264}")
-            if torch.cuda.is_available():
-                peak_memory_usage = torch.cuda.max_memory_allocated()
-                msg = f"Peak memory usage: {peak_memory_usage / (1024 ** 2)} MB"
-                logger.info(msg)
+
             duration = time.perf_counter() - start_time
             logger.info(
                 f"Video of {num_frames} frames generated in {duration:.2f} seconds and saved to {video_path}\n"
