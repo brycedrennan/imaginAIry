@@ -22,7 +22,7 @@ remove_option(edit_options, "allow_compose_phase")
 @click.argument("image_paths", metavar="PATH|URL", required=True, nargs=-1)
 @click.option(
     "--image-strength",
-    default=1,
+    default=0.1,
     show_default=False,
     type=float,
     help="Starting image strength. Between 0 and 1.",
@@ -33,7 +33,7 @@ remove_option(edit_options, "allow_compose_phase")
     "--model",
     help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
     show_default=True,
-    default="edit",
+    default="SD-1.5",
 )
 @click.option(
     "--negative-prompt",
@@ -94,7 +94,17 @@ def edit_cmd(
     Same as calling `aimg imagine --model edit --init-image my-dog.jpg --init-image-strength 1` except this command
     can batch edit images.
     """
+    from imaginairy.schema import ControlNetInput
+
     allow_compose_phase = False
+    control_inputs = [
+        ControlNetInput(
+            image=None,
+            image_raw=None,
+            mode="edit",
+        )
+    ]
+
     return _imagine_cmd(
         ctx,
         prompt,
@@ -136,4 +146,5 @@ def edit_cmd(
         arg_schedules,
         make_compilation_animation,
         caption_text,
+        control_inputs=control_inputs,
     )

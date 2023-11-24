@@ -127,7 +127,7 @@ person_prompt_configs = [
 
 
 def surprise_me_prompts(
-    img, person=None, width=None, height=None, steps=30, seed=None, use_controlnet=False
+    img, person=None, width=None, height=None, steps=30, seed=None, use_controlnet=True
 ):
     if isinstance(img, str):
         if img.startswith("http"):
@@ -141,14 +141,14 @@ def surprise_me_prompts(
 
     for prompt_text, strength, kwargs in generic_prompts:
         if use_controlnet:
-            control_input = ControlNetInput(
-                mode="edit",
-            )
+            strength = 5
+            control_input = ControlNetInput(mode="edit", strength=2)
             prompts.append(
                 ImaginePrompt(
                     prompt_text,
+                    negative_prompt="",
                     init_image=img,
-                    init_image_strength=0.05,
+                    init_image_strength=0.3,
                     prompt_strength=strength,
                     control_inputs=[control_input],
                     steps=steps,

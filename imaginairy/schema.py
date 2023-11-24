@@ -212,7 +212,7 @@ class ControlNetInput(BaseModel):
     mode: str
     image: Optional[LazyLoadingImage] = None
     image_raw: Optional[LazyLoadingImage] = None
-    strength: int = Field(1, ge=0, le=1000)
+    strength: float = Field(1, ge=0, le=1000)
 
     # @field_validator("image", "image_raw", mode="before")
     # def validate_images(cls, v):
