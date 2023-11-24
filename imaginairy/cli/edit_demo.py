@@ -28,12 +28,16 @@ import click
 )
 def edit_demo_cmd(image_paths, outdir, height, width):
     """Make some fun pre-set edits to input photos."""
-
-    from imaginairy.log_utils import configure_logging
+    from imaginairy.cli.shared import imaginairy_click_context
     from imaginairy.surprise_me import create_surprise_me_images
 
-    configure_logging()
-    for image_path in image_paths:
-        create_surprise_me_images(
-            image_path, outdir=outdir, make_gif=True, width=width, height=height, seed=1
-        )
+    with imaginairy_click_context():
+        for image_path in image_paths:
+            create_surprise_me_images(
+                image_path,
+                outdir=outdir,
+                make_gif=True,
+                width=width,
+                height=height,
+                seed=1,
+            )

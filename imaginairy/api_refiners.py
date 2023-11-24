@@ -302,9 +302,6 @@ def _generate_single_image(
             )
 
         if init_latent is not None:
-            print(
-                f"noise step: {noise_step} first step: {first_step} len steps: {len(sd.steps)}"
-            )
             noise_step = noise_step if noise_step is not None else first_step
             noised_latent = sd.scheduler.add_noise(
                 x=init_latent, noise=noise, step=sd.steps[noise_step]
@@ -313,7 +310,7 @@ def _generate_single_image(
         x = noised_latent
         x = x.to(device=sd.device, dtype=sd.dtype)
 
-        for step in tqdm(sd.steps[first_step:]):
+        for step in tqdm(sd.steps[first_step:], bar_format="    {l_bar}{bar}{r_bar}"):
             log_latent(x, "noisy_latent")
             x = sd(
                 x,
@@ -392,7 +389,8 @@ def _generate_single_image(
         )
 
         _most_recent_result = result
-        logger.info(f"Image Generated. Timings: {result.timings_str()}")
+        if result.timings:
+            logger.info(f"Image Generated. Timings: {result.timings_str()}")
         for controlnet, _ in controlnets:
             controlnet.eject()
         gc.collect()

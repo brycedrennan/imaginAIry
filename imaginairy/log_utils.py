@@ -204,11 +204,27 @@ def conditioning_to_img(conditioning):
     return ToPILImage()(conditioning)
 
 
-class IndentingFormatter(logging.Formatter):
+class ColorIndentingFormatter(logging.Formatter):
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    RESET = "\033[0m"
+
     def format(self, record):
         s = super().format(record)
+        color = ""
+        reset = ""
+        if record.levelno >= logging.ERROR:
+            color = self.RED
+
         if _CURRENT_LOGGING_CONTEXT is not None:
             s = f"    {s}"
+
+        if not s.startswith("    "):
+            color = self.GREEN
+
+        if color:
+            reset = self.RESET
+        s = f"{color}{s}{reset}"
         return s
 
 
@@ -223,7 +239,7 @@ def configure_logging(level="INFO"):
         "formatters": {
             "standard": {
                 "format": fmt,
-                "class": "imaginairy.log_utils.IndentingFormatter",
+                "class": "imaginairy.log_utils.ColorIndentingFormatter",
             },
         },
         "handlers": {

@@ -1,11 +1,27 @@
 import logging
 import math
+from contextlib import contextmanager
 
 import click
 
 from imaginairy import config
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def imaginairy_click_context():
+    from pydantic import ValidationError
+
+    from imaginairy.log_utils import configure_logging
+
+    errors_to_catch = (FileNotFoundError, ValidationError)
+    configure_logging()
+    try:
+        yield
+    except errors_to_catch as e:
+        logger.error(e)
+        exit(1)
 
 
 def _imagine_cmd(
