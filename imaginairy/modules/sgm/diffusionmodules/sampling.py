@@ -70,11 +70,11 @@ class BaseDiffusionSampler:
             print(f"Sampler: {self.__class__.__name__}")
             print(f"Discretization: {self.discretization.__class__.__name__}")
             print(f"Guider: {self.guider.__class__.__name__}")
-            sigma_generator = tqdm(
-                sigma_generator,
-                total=num_sigmas,
-                desc=f"Sampling with {self.__class__.__name__} for {num_sigmas} steps",
-            )
+        sigma_generator = tqdm(
+            sigma_generator,
+            total=num_sigmas,
+            desc=f"{self.__class__.__name__}",
+        )
         return sigma_generator
 
 
