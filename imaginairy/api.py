@@ -2,7 +2,7 @@ import logging
 import os
 import re
 
-from imaginairy.schema import ControlNetInput, SafetyMode
+from imaginairy.schema import ControlNetInput, ImaginePrompt, SafetyMode
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,10 @@ _most_recent_result = None
 
 
 def imagine_image_files(
-    prompts,
+    prompts: list[ImaginePrompt],
     outdir,
-    precision="autocast",
-    record_step_images=False,
+    precision: str = "autocast",
+    record_step_images: bool = False,
     output_file_extension="jpg",
     print_caption=False,
     make_gif=False,
