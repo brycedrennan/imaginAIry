@@ -58,11 +58,12 @@ setup(
     package_data={
         "imaginairy": [
             "configs/*.yaml",
+            "weight_management/maps/*.json",
             "data/*.*",
             "bin/*.*",
-            "http/stablestudio/dist/*.*",
-            "http/stablestudio/dist/assets/*.*",
-            "http/stablestudio/dist/LICENSE",
+            "http_app/stablestudio/dist/*.*",
+            "http_app/stablestudio/dist/assets/*.*",
+            "http_app/stablestudio/dist/LICENSE",
             "enhancers/phraselists/*.txt",
             "vendored/clip/*.txt.gz",
             "vendored/clipseg/*.pth",
@@ -107,7 +108,7 @@ setup(
         "torchmetrics>=0.6.0",
         "torchvision>=0.13.1",
         "transformers>=4.19.2",
-        # "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64'",
+        "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64'",
         "kornia>=0.6",
         "uvicorn>=0.16.0",
         "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
@@ -116,5 +117,5 @@ setup(
     # goes back to older versions of packages that didn't specify a maximum
     # https://discuss.python.org/t/requires-python-upper-limits/12663/75
     # https://github.com/brycedrennan/imaginAIry/pull/341#issuecomment-1574723908
-    python_requires=">=3.8",
+    python_requires=">=3.10",
 )
