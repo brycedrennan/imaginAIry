@@ -207,6 +207,7 @@ def conditioning_to_img(conditioning):
 class ColorIndentingFormatter(logging.Formatter):
     RED = "\033[31m"
     GREEN = "\033[32m"
+    YELLOW = "\033[33m"
     RESET = "\033[0m"
 
     def format(self, record):
@@ -215,11 +216,13 @@ class ColorIndentingFormatter(logging.Formatter):
         reset = ""
         if record.levelno >= logging.ERROR:
             color = self.RED
+        elif record.levelno >= logging.WARNING:
+            color = self.YELLOW
 
         if _CURRENT_LOGGING_CONTEXT is not None:
             s = f"    {s}"
 
-        if not s.startswith("    "):
+        if color is None and not s.startswith("    "):
             color = self.GREEN
 
         if color:

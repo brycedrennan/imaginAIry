@@ -3,7 +3,7 @@
 """
 
 
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 import torch
 from omegaconf import ListConfig, OmegaConf
@@ -16,7 +16,7 @@ from imaginairy.modules.sgm.diffusionmodules.sampling_utils import (
     to_neg_log_sigma,
     to_sigma,
 )
-from imaginairy.utils import default, get_device, instantiate_from_config
+from imaginairy.utils import default, instantiate_from_config
 from imaginairy.vendored.k_diffusion.utils import append_dims
 
 DEFAULT_GUIDER = {
@@ -31,9 +31,8 @@ class BaseDiffusionSampler:
         num_steps: Union[int, None] = None,
         guider_config: Union[Dict, ListConfig, OmegaConf, None] = None,
         verbose: bool = False,
-        device: Optional[str] = None,
+        # device: Optional[str] = None,
     ):
-        device = default(device, get_device)
         self.num_steps = num_steps
         self.discretization = instantiate_from_config(discretization_config)
         self.guider = instantiate_from_config(
@@ -43,11 +42,11 @@ class BaseDiffusionSampler:
             )
         )
         self.verbose = verbose
-        self.device = device
+        # self.device = device
 
     def prepare_sampling_loop(self, x, cond, uc=None, num_steps=None):
         sigmas = self.discretization(
-            self.num_steps if num_steps is None else num_steps, device=self.device
+            self.num_steps if num_steps is None else num_steps, device=x.device
         )
         uc = default(uc, cond)
 

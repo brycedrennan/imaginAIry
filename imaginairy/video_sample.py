@@ -48,8 +48,24 @@ def generate_video(
     Simple script to generate a single sample conditioned on an image `input_path` or multiple images, one for each
     image file in folder `input_path`. If you run out of VRAM, try decreasing `decoding_t`.
     """
-    start_time = time.perf_counter()
     device = default(device, get_device)
+
+    if device == "mps":
+        msg = "Apple Silicon MPS (M1, M2, etc) is not currently supported for video generation. Switching to cpu generation."
+        logger.warning(msg)
+        device = "cpu"
+
+    elif not torch.cuda.is_available():
+        msg = (
+            "CUDA is not available. This will be verrrry slow or not work at all.\n"
+            "If you have a GPU, make sure you have CUDA installed and PyTorch is compiled with CUDA support.\n"
+            "Unfortunately, we cannot automatically install the proper version.\n\n"
+            "You can install the proper version by following these directions:\n"
+            "https://pytorch.org/get-started/locally/"
+        )
+        logger.warning(msg)
+
+    start_time = time.perf_counter()
     seed = default(seed, random.randint(0, 1000000))
     output_fps = default(output_fps, fps_id)
 
@@ -64,7 +80,7 @@ def generate_video(
     video_config_path = f"{PKG_ROOT}/{video_model_config['config_path']}"
 
     logger.info(
-        f"Generating {num_frames} frame video from {input_path}. Device: {device} seed: {seed}"
+        f"Generating a {num_frames} frame video from {input_path}. Device:{device} seed:{seed}"
     )
     model, safety_filter = load_model(
         config=video_config_path,
@@ -122,9 +138,18 @@ def generate_video(
                 x = (background.width - image.width) // 2
                 y = (background.height - image.height) // 2
                 background.paste(image, (x, y))
-                crop_coords = (x, y, x + image.width, y + image.height)
+                # crop_coords = (x, y, x + image.width, y + image.height)
 
-                image = background
+                # image = background
+            w, h = image.size
+            snap_to = 64
+            if h % snap_to != 0 or w % snap_to != 0:
+                width = w - w % snap_to
+                height = h - h % snap_to
+                image = image.resize((width, height))
+                logger.warning(
+                    f"Your image is of size {h}x{w} which is not divisible by 64. We are resizing to {height}x{width}!"
+                )
 
             image = ToTensor()(image)
             image = image * 2.0 - 1.0
@@ -163,7 +188,14 @@ def generate_video(
             value_dict["cond_aug"] = cond_aug
 
             with torch.no_grad(), platform_appropriate_autocast():
-                reload_model(model.conditioner)
+                reload_model(model.conditioner, device=device)
+                if device == "cpu":
+                    model.conditioner.to(torch.float32)
+                for k in value_dict:
+                    if isinstance(value_dict[k], torch.Tensor):
+                        value_dict[k] = value_dict[k].to(
+                            next(model.conditioner.parameters()).dtype
+                        )
                 batch, batch_uc = get_batch(
                     get_unique_embedder_keys_from_conditioner(model.conditioner),
                     value_dict,
@@ -196,18 +228,18 @@ def generate_video(
                 additional_model_inputs["num_video_frames"] = batch["num_video_frames"]
 
                 def denoiser(_input, sigma, c):
-                    _input = _input.half()
+                    _input = _input.half().to(device)
                     return model.denoiser(
                         model.model, _input, sigma, c, **additional_model_inputs
                     )
 
-                reload_model(model.denoiser)
-                reload_model(model.model)
+                reload_model(model.denoiser, device=device)
+                reload_model(model.model, device=device)
                 samples_z = model.sampler(denoiser, randn, cond=c, uc=uc)
                 unload_model(model.model)
                 unload_model(model.denoiser)
 
-                reload_model(model.first_stage_model)
+                reload_model(model.first_stage_model, device=device)
                 model.en_and_decode_n_samples_a_time = decoding_t
                 samples_x = model.decode_first_stage(samples_z)
                 samples = torch.clamp((samples_x + 1.0) / 2.0, min=0.0, max=1.0)
@@ -332,8 +364,9 @@ def unload_model(model):
             torch.cuda.empty_cache()
 
 
-def reload_model(model):
-    model.to(get_device())
+def reload_model(model, device=None):
+    device = default(device, get_device)
+    model.to(device)
 
 
 def pillow_fit_image_within(
