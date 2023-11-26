@@ -34,7 +34,9 @@ AI imagined images. Pythonic generation of stable diffusion images **and videos*
 </p>
 
 ### Rushed release of Stable Diffusion Video!
-Works with Nvidia 3090 or 4090.  Does not work on Mac or CPU. Other GPUs not tested.
+Works with Nvidia GPUs.  Does not work on Mac or CPU.
+
+On windows you'll need to install torch 2.0 first via https://pytorch.org/get-started/locally/
 ```text
 Usage: aimg videogen [OPTIONS]
 
@@ -77,11 +79,12 @@ Options:
   - This was a huge re-write which is why some features are not yet supported.  On the plus side, refiners supports
 cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
   - [self-attention guidance](https://github.com/SusungHong/Self-Attention-Guidance) which makes details of images more accurate
-- support for pytorch 2.0
-- deprecated: support for python 3.8
+- feature: better logging output: color, error handling
+- feature: support for pytorch 2.0
+- deprecated: support for python 3.8, 3.9
 - deprecated: support for torch 1.13
-- deprecated: support for sd 1.4, 2.0, 2.1
-- broken: pix2pix editing, most samplers, some controlnets, and memory management
+- deprecated: support for Stable Diffusion versions 1.4, 2.0, and 2.1
+- broken: most samplers, tile/details controlnet, and memory management
 
 ### Run API server and StableStudio web interface (alpha)
 Generate images via API or web interface.  Much smaller featureset compared to the command line tool.
