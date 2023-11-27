@@ -54,6 +54,13 @@ from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
     help="how the control image is used as signal",
     multiple=True,
 )
+@click.option(
+    "--videogen",
+    is_flag=True,
+    default=False,
+    show_default=False,
+    help="Turns the generated photo into video",
+)
 @click.pass_context
 def imagine_cmd(
     ctx,
@@ -99,6 +106,7 @@ def imagine_cmd(
     control_image,
     control_image_raw,
     control_mode,
+    videogen,
 ):
     """
     Generate images via AI.
@@ -183,6 +191,7 @@ def imagine_cmd(
         make_compilation_animation,
         caption_text,
         control_inputs=control_inputs,
+        videogen=videogen,
     )
 
 
