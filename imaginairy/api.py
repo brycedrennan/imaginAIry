@@ -29,12 +29,14 @@ def imagine_image_files(
     make_gif=False,
     make_compare_gif=False,
     return_filename_type="generated",
+    videogen=False,
 ):
     from PIL import ImageDraw
 
     from imaginairy.animations import make_bounce_animation
     from imaginairy.img_utils import pillow_fit_image_within
     from imaginairy.utils import get_next_filenumber
+    from imaginairy.video_sample import generate_video
 
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
@@ -86,6 +88,14 @@ def imagine_image_files(
             logger.info(f"    [{image_type}] saved to: {filepath}")
             if image_type == return_filename_type:
                 result_filenames.append(filepath)
+                if videogen:
+                    try:
+                        generate_video(
+                            input_path=filepath,
+                        )
+                    except FileNotFoundError as e:
+                        logger.error(str(e))
+                        exit(1)
 
         if make_gif and result.progress_latents:
             subpath = os.path.join(outdir, "gif")

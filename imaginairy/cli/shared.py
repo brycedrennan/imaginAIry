@@ -66,6 +66,7 @@ def _imagine_cmd(
     make_compilation_animation=False,
     caption_text="",
     control_inputs=None,
+    videogen=False,
 ):
     """Have the AI generate images. alias:imagine."""
 
@@ -199,6 +200,7 @@ def _imagine_cmd(
         precision=precision,
         make_gif=make_gif,
         make_compare_gif=make_compare_gif,
+        videogen=videogen,
     )
     if make_compilation_animation:
         import os.path
@@ -221,7 +223,6 @@ def _imagine_cmd(
             imgs=comp_imgs,
             image_pause_ms=1000,
         )
-
         logger.info(f"[compilation] saved to: {new_filename}")
 
 
