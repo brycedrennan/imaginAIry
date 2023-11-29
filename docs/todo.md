@@ -1,5 +1,20 @@
 ## Todo
 
+### v14 todo
+
+ - configurable composition cutoff
+ - rename model parameter weights 
+ - rename model_config parameter to architecture and make it case insensitive
+ - add --size parameter that accepts strings (e.g. 256x256, 4k, uhd, 8k, etc)
+ - detect if cuda torch missing and give better error message
+ - add method to install correct torch version
+ - add composition cutoff parameter
+ - allow selection of output video format
+ - chain multiple operations together imggen => videogen
+ - make sure terminal output on windows doesn't suck
+
+### Old Todo
+
  - Inference Performance Optimizations
    - ✅ fp16
    - ✅ [Doggettx Sliced attention](https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#)

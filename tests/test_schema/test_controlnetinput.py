@@ -35,5 +35,6 @@ def test_controlnetinput_filepath_input(lazy_img):
 
 
 def test_controlnetinput_big(lazy_img):
-    with pytest.raises(ValidationError, match=r".*less than or.*"):
+    ControlNetInput(mode="canny", strength=2)
+    with pytest.raises(ValidationError, match=r".*float_type.*"):
         ControlNetInput(mode="canny", strength=2**2048)

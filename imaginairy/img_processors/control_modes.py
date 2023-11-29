@@ -243,6 +243,6 @@ CONTROL_MODES = {
     "shuffle": shuffle_map_torch,
     "edit": noop,
     "inpaint": inpaint_prep,
-    "details": noop,
+    # "details": noop,
     "colorize": to_grayscale,
 }
