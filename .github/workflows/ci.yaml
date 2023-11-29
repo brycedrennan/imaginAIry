@@ -54,7 +54,7 @@ jobs:
         run: |
           black --diff --fast .
   test:
-    runs-on: macos-13-xlarge
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:

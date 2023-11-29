@@ -151,32 +151,34 @@ class KDiffusionSampler(ImageSampler, ABC):
         return samples
 
 
-class DPMFastSampler(KDiffusionSampler):
-    short_name = SamplerName.K_DPM_FAST
-    name = "Diffusion probabilistic models - fast"
-    default_steps = 15
-    sampler_func = staticmethod(sample_dpm_fast)
-
-
-class DPMAdaptiveSampler(KDiffusionSampler):
-    short_name = SamplerName.K_DPM_ADAPTIVE
-    name = "Diffusion probabilistic models - adaptive"
-    default_steps = 40
-    sampler_func = staticmethod(sample_dpm_adaptive)
-
-
-class DPM2Sampler(KDiffusionSampler):
-    short_name = SamplerName.K_DPM_2
-    name = "Diffusion probabilistic models - 2"
-    default_steps = 40
-    sampler_func = staticmethod(k_sampling.sample_dpm_2)
-
-
-class DPM2AncestralSampler(KDiffusionSampler):
-    short_name = SamplerName.K_DPM_2_ANCESTRAL
-    name = "Diffusion probabilistic models - 2 ancestral"
-    default_steps = 40
-    sampler_func = staticmethod(k_sampling.sample_dpm_2_ancestral)
+#
+# class DPMFastSampler(KDiffusionSampler):
+#     short_name = SamplerName.K_DPM_FAST
+#     name = "Diffusion probabilistic models - fast"
+#     default_steps = 15
+#     sampler_func = staticmethod(sample_dpm_fast)
+#
+#
+# class DPMAdaptiveSampler(KDiffusionSampler):
+#     short_name = SamplerName.K_DPM_ADAPTIVE
+#     name = "Diffusion probabilistic models - adaptive"
+#     default_steps = 40
+#     sampler_func = staticmethod(sample_dpm_adaptive)
+#
+#
+# class DPM2Sampler(KDiffusionSampler):
+#     short_name = SamplerName.K_DPM_2
+#     name = "Diffusion probabilistic models - 2"
+#     default_steps = 40
+#     sampler_func = staticmethod(k_sampling.sample_dpm_2)
+#
+#
+# class DPM2AncestralSampler(KDiffusionSampler):
+#     short_name = SamplerName.K_DPM_2_ANCESTRAL
+#     name = "Diffusion probabilistic models - 2 ancestral"
+#     default_steps = 40
+#     sampler_func = staticmethod(k_sampling.sample_dpm_2_ancestral)
+#
 
 
 class DPMPP2MSampler(KDiffusionSampler):
@@ -186,39 +188,40 @@ class DPMPP2MSampler(KDiffusionSampler):
     sampler_func = staticmethod(k_sampling.sample_dpmpp_2m)
 
 
-class DPMPP2SAncestralSampler(KDiffusionSampler):
-    short_name = SamplerName.K_DPMPP_2S_ANCESTRAL
-    name = "Ancestral sampling with DPM-Solver++(2S) second-order steps."
-    default_steps = 15
-    sampler_func = staticmethod(k_sampling.sample_dpmpp_2s_ancestral)
-
-
-class EulerSampler(KDiffusionSampler):
-    short_name = SamplerName.K_EULER
-    name = "Algorithm 2 (Euler steps) from Karras et al. (2022)"
-    default_steps = 40
-    sampler_func = staticmethod(k_sampling.sample_euler)
-
-
-class EulerAncestralSampler(KDiffusionSampler):
-    short_name = SamplerName.K_EULER_ANCESTRAL
-    name = "Euler ancestral"
-    default_steps = 40
-    sampler_func = staticmethod(k_sampling.sample_euler_ancestral)
-
-
-class HeunSampler(KDiffusionSampler):
-    short_name = SamplerName.K_HEUN
-    name = "Algorithm 2 (Heun steps) from Karras et al. (2022)."
-    default_steps = 40
-    sampler_func = staticmethod(k_sampling.sample_heun)
-
-
-class LMSSampler(KDiffusionSampler):
-    short_name = SamplerName.K_LMS
-    name = "LMS"
-    default_steps = 40
-    sampler_func = staticmethod(k_sampling.sample_lms)
+#
+# class DPMPP2SAncestralSampler(KDiffusionSampler):
+#     short_name = SamplerName.K_DPMPP_2S_ANCESTRAL
+#     name = "Ancestral sampling with DPM-Solver++(2S) second-order steps."
+#     default_steps = 15
+#     sampler_func = staticmethod(k_sampling.sample_dpmpp_2s_ancestral)
+#
+#
+# class EulerSampler(KDiffusionSampler):
+#     short_name = SamplerName.K_EULER
+#     name = "Algorithm 2 (Euler steps) from Karras et al. (2022)"
+#     default_steps = 40
+#     sampler_func = staticmethod(k_sampling.sample_euler)
+#
+#
+# class EulerAncestralSampler(KDiffusionSampler):
+#     short_name = SamplerName.K_EULER_ANCESTRAL
+#     name = "Euler ancestral"
+#     default_steps = 40
+#     sampler_func = staticmethod(k_sampling.sample_euler_ancestral)
+#
+#
+# class HeunSampler(KDiffusionSampler):
+#     short_name = SamplerName.K_HEUN
+#     name = "Algorithm 2 (Heun steps) from Karras et al. (2022)."
+#     default_steps = 40
+#     sampler_func = staticmethod(k_sampling.sample_heun)
+#
+#
+# class LMSSampler(KDiffusionSampler):
+#     short_name = SamplerName.K_LMS
+#     name = "LMS"
+#     default_steps = 40
+#     sampler_func = staticmethod(k_sampling.sample_lms)
 
 
 class CFGDenoiser(nn.Module):

@@ -111,7 +111,7 @@ setup(
         "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64'",
         "kornia>=0.6",
         "uvicorn>=0.16.0",
-        "xformers>=0.0.16; sys_platform!='darwin' and platform_machine!='aarch64'",
+        # "xformers>=0.0.22; sys_platform!='darwin' and platform_machine!='aarch64'",
     ],
     # don't specify maximum python versions as it can cause very long dependency resolution issues as the resolver
     # goes back to older versions of packages that didn't specify a maximum

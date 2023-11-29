@@ -124,9 +124,11 @@ def _generate_single_image(
         ]
 
         init_latent = None
+        noise_step = None
         if prompt.init_image:
             starting_image = prompt.init_image
-            first_step = int((prompt.steps - 1) * prompt.init_image_strength)
+            first_step = int((prompt.steps) * prompt.init_image_strength)
+            # noise_step = int((prompt.steps - 1) * prompt.init_image_strength)
 
             if prompt.mask_prompt:
                 mask_image, mask_grayscale = get_img_mask(
@@ -201,6 +203,9 @@ def _generate_single_image(
                     max_height=prompt.height,
                     max_width=prompt.width,
                 )
+                if control_input.mode == "inpaint":
+                    control_image_input = ImageOps.invert(control_image_input)
+
                 control_image_input_t = pillow_img_to_torch_image(control_image_input)
                 control_image_input_t = control_image_input_t.to(get_device())
 
@@ -251,7 +256,6 @@ def _generate_single_image(
                 )
                 controlnets.append((controlnet, control_image_t))
 
-        noise_step = None
         if prompt.allow_compose_phase:
             if prompt.init_image:
                 comp_image, comp_img_orig = _generate_composition_image(
@@ -272,7 +276,8 @@ def _generate_single_image(
                 result_images["composition-upscaled"] = comp_image
                 # noise = noise[:, :, : comp_image.height, : comp_image.shape[3]]
                 comp_cutoff = 0.60
-                first_step = int((prompt.steps - 1) * comp_cutoff)
+                first_step = int((prompt.steps) * comp_cutoff)
+                noise_step = int((prompt.steps - 1) * comp_cutoff)
                 # noise_step = int(prompt.steps * max(comp_cutoff - 0.05, 0))
                 # noise_step = max(noise_step, 0)
                 # noise_step = min(noise_step, prompt.steps - 1)
@@ -303,9 +308,12 @@ def _generate_single_image(
 
         if init_latent is not None:
             noise_step = noise_step if noise_step is not None else first_step
-            noised_latent = sd.scheduler.add_noise(
-                x=init_latent, noise=noise, step=sd.steps[noise_step]
-            )
+            if first_step >= len(sd.steps):
+                noised_latent = init_latent
+            else:
+                noised_latent = sd.scheduler.add_noise(
+                    x=init_latent, noise=noise, step=sd.steps[noise_step]
+                )
 
         x = noised_latent
         x = x.to(device=sd.device, dtype=sd.dtype)

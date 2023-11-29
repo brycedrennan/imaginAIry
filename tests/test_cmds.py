@@ -31,7 +31,7 @@ def test_imagine_cmd(monkeypatch):
             f"{TESTS_FOLDER}/test_output",
         ],
     )
-    assert result.exit_code == 0
+    assert result.exit_code == 0, (result.stdout, result.stderr)
 
 
 def test_edit_cmd(monkeypatch):
@@ -45,13 +45,13 @@ def test_edit_cmd(monkeypatch):
             "1",
             "-p",
             "turn the dog into a cat",
-            "--model",
-            "empty",
+            # "--model",
+            # "empty",
             "--outdir",
             f"{TESTS_FOLDER}/test_output",
         ],
     )
-    assert result.exit_code == 0
+    assert result.exit_code == 0, (result.stdout, result.stderr)
 
 
 def test_aimg_shell():
@@ -74,7 +74,7 @@ def test_edit_demo(monkeypatch):
                 steps=1,
                 width=256,
                 height=256,
-                model="empty",
+                # model="empty",
             )
         ]
 

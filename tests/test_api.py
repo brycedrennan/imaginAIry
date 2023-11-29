@@ -315,19 +315,33 @@ control_modes = list(CONTROL_MODES.keys())
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_controlnet(filename_base_for_outputs, control_mode):
     prompt_text = "a photo of a woman sitting on a bench"
+    img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png")
     control_input = ControlNetInput(
         mode=control_mode,
-        image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png"),
+        image=img,
     )
+
+    seed = 0
+    if control_mode == "inpaint":
+        prompt_text = "a wise old man"
+        seed = 1
+        mask_image = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2_mask.png")
+        control_input = ControlNetInput(
+            mode=control_mode,
+            image=mask_image,
+        )
 
     prompt = ImaginePrompt(
         prompt_text,
         width=512,
         height=512,
-        steps=15,
-        seed=0,
+        steps=45,
+        seed=seed,
+        init_image=img,
+        init_image_strength=0,
         control_inputs=[control_input],
         fix_faces=True,
+        sampler="ddim",
     )
     prompt.steps = 1
     prompt.width = 256
