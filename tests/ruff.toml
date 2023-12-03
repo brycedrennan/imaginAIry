@@ -1,4 +1,4 @@
-extend-ignore =  ["E501", "G004", "PT005", "RET504", "SIM114", "TRY003", "TRY400", "TRY401", "RUF012", "RUF100"]
+extend-ignore =  ["E501", "G004", "PT004", "PT005", "RET504", "SIM114", "TRY003", "TRY400", "TRY401", "RUF012", "RUF100"]
 extend-exclude = ["imaginairy/vendored", "downloads", "other"]
 
 extend-select = [

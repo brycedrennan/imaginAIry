@@ -95,6 +95,7 @@ def test_img_to_img_from_url_cats(
     filename_base_for_outputs,
     mocked_responses,
     filename_base_for_orig_outputs,
+    default_model_loaded,
 ):
     with open(
         os.path.join(TESTS_FOLDER, "data", "val2017-000000039769-cococats.jpg"), "rb"
