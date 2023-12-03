@@ -12,6 +12,7 @@
  - allow selection of output video format
  - chain multiple operations together imggen => videogen
  - make sure terminal output on windows doesn't suck
+ - add karras schedule to refiners
 
 ### Old Todo
 

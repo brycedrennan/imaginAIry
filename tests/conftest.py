@@ -10,7 +10,7 @@ import responses
 from tqdm import tqdm
 from urllib3 import HTTPConnectionPool
 
-from imaginairy import api
+from imaginairy import ImaginePrompt, api, imagine
 from imaginairy.log_utils import configure_logging, suppress_annoying_logs_and_warnings
 from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.utils import (
@@ -108,6 +108,24 @@ def pytest_addoption(parser):
         default=None,
         help="Runs an exclusive subset of tests: '1/3', '2/3', '3/3'. Useful for distributed testing",
     )
+
+
+@pytest.fixture(scope="session")
+def default_model_loaded():
+    """
+    Just to make sure default weights are downloaded before the test runs
+
+    """
+    prompt = ImaginePrompt(
+        "dogs lying on a hot pink couch",
+        width=64,
+        height=64,
+        steps=2,
+        seed=1,
+        sampler_type="ddim",
+    )
+
+    next(imagine(prompt))
 
 
 @pytest.hookimpl()
