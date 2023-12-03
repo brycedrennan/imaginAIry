@@ -75,8 +75,10 @@ Options:
 ### Whats New
 **14.0.0**
 - 🎉 video generation using [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
+ - add `--videogen` to any image generation to create a short video from the generated image
+ - or use `aimg videogen` to generate a video from an image
 - 🎉 imaginairy is now backed by the [refiners library](https://github.com/finegrain-ai/refiners)
-  - This was a huge re-write which is why some features are not yet supported.  On the plus side, refiners supports
+  - This was a huge rewrite which is why some features are not yet supported.  On the plus side, refiners supports
 cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
   - [self-attention guidance](https://github.com/SusungHong/Self-Attention-Guidance) which makes details of images more accurate
 - feature: better logging output: color, error handling
@@ -84,7 +86,7 @@ cutting edge features (SDXL, image prompts, etc) which will be added to imaginai
 - deprecated: support for python 3.8, 3.9
 - deprecated: support for torch 1.13
 - deprecated: support for Stable Diffusion versions 1.4, 2.0, and 2.1
-- broken: most samplers, tile/details controlnet, and memory management
+- broken: most samplers, tile/details controlnet, and model memory management
 
 ### Run API server and StableStudio web interface (alpha)
 Generate images via API or web interface.  Much smaller featureset compared to the command line tool.
