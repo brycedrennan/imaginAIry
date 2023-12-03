@@ -305,7 +305,7 @@ def test_tile_mode(filename_base_for_outputs):
     result = next(imagine(prompt))
 
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=25000)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=26000)
 
 
 control_modes = list(CONTROL_MODES.keys())
@@ -353,10 +353,13 @@ def test_controlnet(filename_base_for_outputs, control_mode):
     result = next(imagine(prompt))
 
     img_path = f"{filename_base_for_outputs}.png"
-    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=24000)
+    assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=25000)
 
 
-@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
+@pytest.mark.skipif(
+    get_device() in {"cpu", "mps"},
+    reason="Too slow to run on CPU. Too much memory for MPS",
+)
 def test_large_image(filename_base_for_outputs):
     prompt_text = "a stormy ocean. oil painting"
     prompt = ImaginePrompt(

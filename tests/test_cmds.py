@@ -31,7 +31,7 @@ def test_imagine_cmd(monkeypatch):
             f"{TESTS_FOLDER}/test_output",
         ],
     )
-    assert result.exit_code == 0, (result.stdout, result.stderr)
+    assert result.exit_code == 0, result.stdout
 
 
 def test_edit_cmd(monkeypatch):
@@ -51,7 +51,7 @@ def test_edit_cmd(monkeypatch):
             f"{TESTS_FOLDER}/test_output",
         ],
     )
-    assert result.exit_code == 0, (result.stdout, result.stderr)
+    assert result.exit_code == 0, result.stdout
 
 
 def test_aimg_shell():
