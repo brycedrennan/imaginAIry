@@ -238,7 +238,7 @@ def get_diffusion_model_refiners(
     weights_location=iconfig.DEFAULT_MODEL,
     config_path="configs/stable-diffusion-v1.yaml",
     control_weights_locations=None,
-    half_mode=None,
+    dtype=None,
     for_inpainting=False,
     for_training=False,
 ):
@@ -251,8 +251,8 @@ def get_diffusion_model_refiners(
         return _get_diffusion_model_refiners(
             weights_location,
             config_path,
-            half_mode,
             for_inpainting,
+            dtype=dtype,
             control_weights_locations=control_weights_locations,
             for_training=for_training,
         )
@@ -264,7 +264,7 @@ def get_diffusion_model_refiners(
             return _get_diffusion_model_refiners(
                 iconfig.DEFAULT_MODEL,
                 config_path,
-                half_mode,
+                dtype=dtype,
                 for_inpainting=False,
                 for_training=for_training,
                 control_weights_locations=control_weights_locations,
@@ -275,7 +275,6 @@ def get_diffusion_model_refiners(
 def _get_diffusion_model_refiners(
     weights_location=iconfig.DEFAULT_MODEL,
     config_path="configs/stable-diffusion-v1.yaml",
-    half_mode=None,
     for_inpainting=False,
     for_training=False,
     control_weights_locations=None,
@@ -401,11 +400,8 @@ def load_controlnet_adapter(
     control_weights_location,
     target_unet,
     scale=1.0,
-    half_mode=False,
 ):
-    controlnet_state_dict = load_state_dict(
-        control_weights_location, half_mode=half_mode
-    )
+    controlnet_state_dict = load_state_dict(control_weights_location, half_mode=False)
     controlnet_state_dict = cast_weights(
         source_weights=controlnet_state_dict,
         source_model_name="controlnet-1-1",

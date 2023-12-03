@@ -27,6 +27,18 @@ def get_device() -> str:
 
 
 @lru_cache
+def get_default_dtype():
+    """Return the default dtype for torch."""
+    if get_device() == "cuda":
+        return torch.float16
+
+    if get_device() == "mps":
+        return torch.float16
+
+    return torch.float32
+
+
+@lru_cache
 def get_hardware_description(device_type: str) -> str:
     """Description of the hardware being used."""
     desc = platform.platform()

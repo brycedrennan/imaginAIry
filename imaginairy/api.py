@@ -174,6 +174,9 @@ def imagine(
     if get_device() == "cpu":
         logger.info("Running in CPU mode. it's gonna be slooooooow.")
 
+    if half_mode is None:
+        half_mode = "cuda" in get_device() or get_device() == "mps"
+
     with torch.no_grad(), platform_appropriate_autocast(
         precision
     ), fix_torch_nn_layer_norm(), fix_torch_group_norm():
@@ -192,6 +195,7 @@ def imagine(
                     progress_img_interval_min_s=progress_img_interval_min_s,
                     half_mode=half_mode,
                     add_caption=add_caption,
+                    dtype=torch.float16 if half_mode else torch.float32,
                 )
                 if not result.safety_score.is_filtered:
                     break
@@ -682,13 +686,18 @@ def _scale_latent(
     return latent
 
 
-def _generate_composition_image(prompt, target_height, target_width, cutoff=512):
+def _generate_composition_image(
+    prompt, target_height, target_width, cutoff=512, dtype=None
+):
     from PIL import Image
 
     from imaginairy.api_refiners import _generate_single_image
+    from imaginairy.utils import default, get_default_dtype
 
     if prompt.width <= cutoff and prompt.height <= cutoff:
         return None, None
+
+    dtype = default(dtype, get_default_dtype)
 
     shrink_scale = calc_scale_to_fit_within(
         height=prompt.height,
@@ -708,7 +717,7 @@ def _generate_composition_image(prompt, target_height, target_width, cutoff=512)
         },
     )
 
-    result = _generate_single_image(composition_prompt)
+    result = _generate_single_image(composition_prompt, dtype=dtype)
     img = result.images["generated"]
     while img.width < target_width:
         from imaginairy.enhancers.upscale_realesrgan import upscale_image

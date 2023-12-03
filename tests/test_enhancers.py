@@ -141,6 +141,7 @@ def test_describe_picture():
         "a painting of a girl with a pearl earring wearing a yellow dress and a pearl earring in her ear and a black background",
         "a painting of a girl with a pearl ear wearing a yellow dress and a pearl earring on her left ear and a black background",
         "a painting of a woman with a pearl ear wearing an ornament pearl earring and wearing an orange, white, blue and yellow dress",
+        "a painting of a woman with a pearl earring looking to her left, in profile with her right eye partially closed, standing upright",
     }
 
 

@@ -14,11 +14,12 @@ def _generate_single_image(
     progress_img_callback=None,
     progress_img_interval_steps=3,
     progress_img_interval_min_s=0.1,
-    half_mode=None,
     add_caption=False,
     # controlnet, finetune, naive, auto
     inpaint_method="finetune",
     return_latent=False,
+    dtype=None,
+    half_mode=None,
 ):
     import gc
 
@@ -58,6 +59,9 @@ def _generate_single_image(
     from imaginairy.schema import ImaginePrompt, ImagineResult
     from imaginairy.utils import get_device, randn_seeded
 
+    if dtype is None:
+        dtype = torch.float16 if half_mode else torch.float32
+
     get_device()
     gc.collect()
     torch.cuda.empty_cache()
@@ -75,7 +79,7 @@ def _generate_single_image(
         weights_location=prompt.model,
         config_path=prompt.model_config_path,
         control_weights_locations=tuple(control_modes),
-        half_mode=half_mode,
+        dtype=dtype,
         for_inpainting=for_inpainting and inpaint_method == "finetune",
     )
 
@@ -110,6 +114,7 @@ def _generate_single_image(
             positive_conditioning=prompt.conditioning,
             text_encoder=sd.clip_text_encoder,
         )
+        clip_text_embedding = clip_text_embedding.to(device=sd.device, dtype=sd.dtype)
 
         result_images = {}
         progress_latents = []
@@ -151,6 +156,7 @@ def _generate_single_image(
             init_image_t = pillow_img_to_torch_image(init_image)
             init_image_t = init_image_t.to(device=sd.device, dtype=sd.dtype)
             init_latent = sd.lda.encode(init_image_t)
+
             shape = init_latent.shape
 
             log_latent(init_latent, "init_latent")
@@ -263,6 +269,7 @@ def _generate_single_image(
                     target_height=init_image.height,
                     target_width=init_image.width,
                     cutoff=get_model_default_image_size(prompt.model),
+                    dtype=dtype,
                 )
             else:
                 comp_image, comp_img_orig = _generate_composition_image(
@@ -270,21 +277,20 @@ def _generate_single_image(
                     target_height=prompt.height,
                     target_width=prompt.width,
                     cutoff=get_model_default_image_size(prompt.model),
+                    dtype=dtype,
                 )
             if comp_image is not None:
                 result_images["composition"] = comp_img_orig
                 result_images["composition-upscaled"] = comp_image
-                # noise = noise[:, :, : comp_image.height, : comp_image.shape[3]]
-                comp_cutoff = 0.60
+                comp_cutoff = 0.50
                 first_step = int((prompt.steps) * comp_cutoff)
                 noise_step = int((prompt.steps - 1) * comp_cutoff)
-                # noise_step = int(prompt.steps * max(comp_cutoff - 0.05, 0))
-                # noise_step = max(noise_step, 0)
-                # noise_step = min(noise_step, prompt.steps - 1)
-                log_img(comp_image, "comp_image")
+                log_img(comp_img_orig, "comp_image")
+                log_img(comp_image, "comp_image_upscaled")
                 comp_image_t = pillow_img_to_torch_image(comp_image)
                 comp_image_t = comp_image_t.to(sd.device, dtype=sd.dtype)
                 init_latent = sd.lda.encode(comp_image_t)
+
         for controlnet, control_image_t in controlnets:
             controlnet.set_controlnet_condition(
                 control_image_t.to(device=sd.device, dtype=sd.dtype)
@@ -299,6 +305,7 @@ def _generate_single_image(
             raise ValueError(msg)
         sd.scheduler.to(device=sd.device, dtype=sd.dtype)
         sd.set_num_inference_steps(prompt.steps)
+
         if hasattr(sd, "mask_latents"):
             sd.set_inpainting_conditions(
                 target_image=init_image,
@@ -318,6 +325,12 @@ def _generate_single_image(
         x = noised_latent
         x = x.to(device=sd.device, dtype=sd.dtype)
 
+        # if "cuda" in str(sd.lda.device):
+        #     sd.lda.to("cpu")
+        gc.collect()
+        torch.cuda.empty_cache()
+        # print(f"moving unet to {sd.device}")
+        # sd.unet.to(device=sd.device, dtype=sd.dtype)
         for step in tqdm(sd.steps[first_step:], bar_format="    {l_bar}{bar}{r_bar}"):
             log_latent(x, "noisy_latent")
             x = sd(
@@ -327,7 +340,26 @@ def _generate_single_image(
                 condition_scale=prompt.prompt_strength,
             )
 
+        # z = sd(
+        #     randn_seeded(seed=prompt.seed, size=[1, 4, 8, 8]).to(
+        #         device=sd.device, dtype=sd.dtype
+        #     ),
+        #     step=step,
+        #     clip_text_embedding=clip_text_embedding,
+        #     condition_scale=prompt.prompt_strength,
+        # )
+
+        if "cuda" in str(sd.unet.device):
+            # print("moving unet to cpu")
+            # sd.unet.to("cpu")
+            gc.collect()
+            torch.cuda.empty_cache()
+
         logger.debug("Decoding image")
+        if x.device != sd.lda.device:
+            sd.lda.to(x.device)
+        gc.collect()
+        torch.cuda.empty_cache()
         gen_img = sd.lda.decode_latents(x)
 
         if mask_image_orig and init_image:
@@ -407,7 +439,11 @@ def _generate_single_image(
 
 
 def _prompts_to_embeddings(prompts, text_encoder):
+    import torch
+
     total_weight = sum(wp.weight for wp in prompts)
+    if str(text_encoder.device) == "cpu":
+        text_encoder = text_encoder.to(dtype=torch.float32)
     conditioning = sum(
         text_encoder(wp.text) * (wp.weight / total_weight) for wp in prompts
     )
