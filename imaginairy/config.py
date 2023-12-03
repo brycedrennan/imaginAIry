@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 DEFAULT_MODEL = "SD-1.5"
-DEFAULT_SAMPLER = "k_dpmpp_2m"
+DEFAULT_SAMPLER = "ddim"
 
 DEFAULT_NEGATIVE_PROMPT = (
     "Ugly, duplication, duplicates, mutilation, deformed, mutilated, mutation, twisted body, disfigured, bad anatomy, "

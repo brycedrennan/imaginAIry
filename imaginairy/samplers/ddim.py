@@ -28,7 +28,7 @@ class DDIMSampler(ImageSampler):
 
     short_name = SamplerName.DDIM
     name = "Denoising Diffusion Implicit Models"
-    default_steps = 40
+    default_steps = 50
 
     @torch.no_grad()
     def sample(
