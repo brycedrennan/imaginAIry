@@ -36,6 +36,7 @@ def _imagine_cmd(
     repeats,
     height,
     width,
+    size,
     steps,
     seed,
     upscale,
@@ -94,6 +95,15 @@ def _imagine_cmd(
     from imaginairy.log_utils import configure_logging
 
     configure_logging(log_level)
+
+    if (height is not None or width is not None) and size is not None:
+        msg = "You cannot specify both --size and --height/--width. Please choose one."
+        raise ValueError(msg)
+
+    if size is not None:
+        from imaginairy.utils.named_resolutions import get_named_resolution
+
+        width, height = get_named_resolution(size)
 
     init_images = [init_image] if isinstance(init_image, str) else init_image
 
@@ -323,6 +333,13 @@ common_options = [
         show_default=True,
         type=int,
         help="Image width. Should be multiple of 8.",
+    ),
+    click.option(
+        "--size",
+        default=None,
+        show_default=True,
+        type=str,
+        help="Image size as a string. Can be a named size or WIDTHxHEIGHT format. Should be multiple of 8. Examples: 512x512, 4k, UHD, 8k, ",
     ),
     click.option(
         "--steps",

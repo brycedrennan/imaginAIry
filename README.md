@@ -75,12 +75,13 @@ Options:
 ### Whats New
 **14.0.0**
 - 🎉 video generation using [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
- - add `--videogen` to any image generation to create a short video from the generated image
- - or use `aimg videogen` to generate a video from an image
+  - add `--videogen` to any image generation to create a short video from the generated image
+  - or use `aimg videogen` to generate a video from an image
 - 🎉 imaginairy is now backed by the [refiners library](https://github.com/finegrain-ai/refiners)
   - This was a huge rewrite which is why some features are not yet supported.  On the plus side, refiners supports
 cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
   - [self-attention guidance](https://github.com/SusungHong/Self-Attention-Guidance) which makes details of images more accurate
+- feature: added `--size` parameter for more intuitive sizing (e.g. 512, 256x256, 4k, uhd, FHD, VGA, etc)
 - feature: better logging output: color, error handling
 - feature: support for pytorch 2.0
 - deprecated: support for python 3.8, 3.9
