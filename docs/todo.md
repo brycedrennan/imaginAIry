@@ -8,11 +8,13 @@
  - add --size parameter that accepts strings (e.g. 256x256, 4k, uhd, 8k, etc)
  - detect if cuda torch missing and give better error message
  - add method to install correct torch version
- - add composition cutoff parameter
  - allow selection of output video format
  - chain multiple operations together imggen => videogen
  - make sure terminal output on windows doesn't suck
  - add karras schedule to refiners
+ - add method to show cache size
+ - add method to clear model cache
+ - add method to clear cached items not recently used (does diffusers have one?)
 
 ### Old Todo
 
