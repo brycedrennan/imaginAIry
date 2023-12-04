@@ -207,51 +207,6 @@ class SelfAttention(nn.Module):
         return x
 
 
-class SpatialSelfAttention(nn.Module):
-    def __init__(self, in_channels):
-        super().__init__()
-        self.in_channels = in_channels
-
-        self.norm = Normalize(in_channels)
-        self.q = torch.nn.Conv2d(
-            in_channels, in_channels, kernel_size=1, stride=1, padding=0
-        )
-        self.k = torch.nn.Conv2d(
-            in_channels, in_channels, kernel_size=1, stride=1, padding=0
-        )
-        self.v = torch.nn.Conv2d(
-            in_channels, in_channels, kernel_size=1, stride=1, padding=0
-        )
-        self.proj_out = torch.nn.Conv2d(
-            in_channels, in_channels, kernel_size=1, stride=1, padding=0
-        )
-
-    def forward(self, x):
-        h_ = x
-        h_ = self.norm(h_)
-        q = self.q(h_)
-        k = self.k(h_)
-        v = self.v(h_)
-
-        # compute attention
-        b, c, h, w = q.shape
-        q = rearrange(q, "b c h w -> b (h w) c")
-        k = rearrange(k, "b c h w -> b c (h w)")
-        w_ = torch.einsum("bij,bjk->bik", q, k)
-
-        w_ = w_ * (int(c) ** (-0.5))
-        w_ = torch.nn.functional.softmax(w_, dim=2)
-
-        # attend to values
-        v = rearrange(v, "b c h w -> b c (h w)")
-        w_ = rearrange(w_, "b i j -> b j i")
-        h_ = torch.einsum("bij,bjk->bik", v, w_)
-        h_ = rearrange(h_, "b c (h w) -> b c h w", h=h)
-        h_ = self.proj_out(h_)
-
-        return x + h_
-
-
 class CrossAttention(nn.Module):
     def __init__(
         self,
@@ -312,23 +267,6 @@ class CrossAttention(nn.Module):
 
         q, k, v = (rearrange(t, "b n (h d) -> b h n d", h=h) for t in (q, k, v))
 
-        ## old
-        """
-        sim = einsum('b i d, b j d -> b i j', q, k) * self.scale
-        del q, k
-
-        if exists(mask):
-            mask = rearrange(mask, 'b ... -> b (...)')
-            max_neg_value = -torch.finfo(sim.dtype).max
-            mask = repeat(mask, 'b j -> (b h) () j', h=h)
-            sim.masked_fill_(~mask, max_neg_value)
-
-        # attention, what we cannot get enough of
-        sim = sim.softmax(dim=-1)
-
-        out = einsum('b i j, b j d -> b i d', sim, v)
-        """
-        ## new
         with sdp_kernel(**BACKEND_MAP[self.backend]):
             # print("dispatching into backend", self.backend, "q/k/v shape: ", q.shape, k.shape, v.shape)
             out = F.scaled_dot_product_attention(
@@ -342,6 +280,111 @@ class CrossAttention(nn.Module):
             # remove additional token
             out = out[:, n_tokens_to_mask:]
         return self.to_out(out)
+
+
+class SlicedCrossAttention(nn.Module):
+    def __init__(
+        self,
+        query_dim,
+        context_dim=None,
+        heads=8,
+        dim_head=64,
+        dropout=0.0,
+        backend=None,
+    ):
+        super().__init__()
+        inner_dim = dim_head * heads
+        context_dim = default(context_dim, query_dim)
+
+        self.scale = dim_head**-0.5
+        self.heads = heads
+
+        self.to_q = nn.Linear(query_dim, inner_dim, bias=False)
+        self.to_k = nn.Linear(context_dim, inner_dim, bias=False)
+        self.to_v = nn.Linear(context_dim, inner_dim, bias=False)
+
+        self.to_out = nn.Sequential(
+            nn.Linear(inner_dim, query_dim), nn.Dropout(dropout)
+        )
+        self.backend = backend
+
+    def forward(
+        self,
+        x,
+        context=None,
+        mask=None,
+        additional_tokens=None,
+        n_times_crossframe_attn_in_self=0,
+        slice_size=4096,
+    ):
+        h = self.heads
+
+        if additional_tokens is not None:
+            # get the number of masked tokens at the beginning of the output sequence
+            n_tokens_to_mask = additional_tokens.shape[1]
+            # add additional token
+            x = torch.cat([additional_tokens, x], dim=1)
+
+        q = self.to_q(x)
+        context = default(context, x)
+        k = self.to_k(context)
+        v = self.to_v(context)
+
+        if n_times_crossframe_attn_in_self:
+            # reprogramming cross-frame attention as in https://arxiv.org/abs/2303.13439
+            assert x.shape[0] % n_times_crossframe_attn_in_self == 0
+            n_cp = x.shape[0] // n_times_crossframe_attn_in_self
+            k = repeat(
+                k[::n_times_crossframe_attn_in_self], "b ... -> (b n) ...", n=n_cp
+            )
+            v = repeat(
+                v[::n_times_crossframe_attn_in_self], "b ... -> (b n) ...", n=n_cp
+            )
+
+        q, k, v = (rearrange(t, "b n (h d) -> b h n d", h=h) for t in (q, k, v))
+
+        print(
+            "dispatching into backend",
+            self.backend,
+            "q/k/v shape: ",
+            q.shape,
+            k.shape,
+            v.shape,
+        )
+
+        if slice_size is not None:
+            out = self._sliced_attention(q, k, v, mask, slice_size)
+        else:
+            with sdp_kernel(**BACKEND_MAP[self.backend]):
+                # scale is dim_head ** -0.5 per default
+                out = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
+
+        del q, k, v
+        out = rearrange(out, "b h n d -> b n (h d)", h=h)
+
+        if additional_tokens is not None:
+            # remove additional token
+            out = out[:, n_tokens_to_mask:]
+        return self.to_out(out)
+
+    def _sliced_attention(self, q, k, v, mask, slice_size):
+        _, num_queries, _ = q.shape
+        output = torch.zeros_like(q)
+        for start_idx in range(0, num_queries, slice_size):
+            end_idx = min(start_idx + slice_size, num_queries)
+            q_slice = q[:, start_idx:end_idx, :]
+            mask_slice = None
+            if mask is not None:
+                mask_slice = mask[:, start_idx:end_idx, :]
+
+            with sdp_kernel(**BACKEND_MAP[self.backend]):
+                out_slice = F.scaled_dot_product_attention(
+                    q_slice, k, v, attn_mask=mask_slice
+                )
+
+            output[:, start_idx:end_idx, :] = out_slice
+
+        return output
 
 
 class MemoryEfficientCrossAttention(nn.Module):
@@ -412,6 +455,12 @@ class MemoryEfficientCrossAttention(nn.Module):
             .contiguous()
             for t in (q, k, v)
         )
+        # print(
+        #     "q/k/v shape: ",
+        #     q.shape,
+        #     k.shape,
+        #     v.shape,
+        # )
 
         # actually compute the attention, what we cannot get enough of
         if version.parse(xformers.__version__) >= version.parse("0.0.21"):
