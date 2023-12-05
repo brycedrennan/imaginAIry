@@ -276,6 +276,13 @@ CONTROL_CONFIGS = [
         config_path="configs/control-net-v15.yaml",
         weights_location="https://huggingface.co/ioclab/control_v1p_sd15_brightness/resolve/8509361eb1ba89c03839040ed8c75e5f11bbd9c5/diffusion_pytorch_model.safetensors",
     ),
+    ControlConfig(
+        name="qrcode",
+        control_type="qrcode",
+        config_path="configs/control-net-v15.yaml",
+        weights_location="https://huggingface.co/monster-labs/control_v1p_sd15_qrcode_monster/resolve/4a946e610f670c4cd6cf46b8641fca190e4f56c4/diffusion_pytorch_model.safetensors",
+        aliases=["qrcode"],
+    ),
 ]
 
 CONTROL_CONFIG_SHORTCUTS: dict[str, ControlConfig] = {}

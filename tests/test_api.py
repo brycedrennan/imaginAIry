@@ -325,6 +325,13 @@ def test_controlnet(filename_base_for_outputs, control_mode):
             mode=control_mode,
             image=mask_image,
         )
+    elif control_mode == "qrcode":
+        prompt_text = "a fruit salad"
+        swirl_img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/swirl.jpeg")
+        control_input = ControlInput(
+            mode=control_mode,
+            image=swirl_img,
+        )
 
     prompt = ImaginePrompt(
         prompt_text,
