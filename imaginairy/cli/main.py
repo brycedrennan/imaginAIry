@@ -67,11 +67,18 @@ def system_info():
     """
     Display system information. Submit this when reporting bugs.
     """
-    from imaginairy.debug_info import get_debug_info
+    from imaginairy.utils.debug_info import get_debug_info
 
-    for k, v in get_debug_info().items():
+    debug_info = get_debug_info()
+
+    for k, v in debug_info.items():
+        if k == "nvidia_smi":
+            continue
         k += ":"
         click.secho(f"{k: <30} {v}")
+
+    if "nvidia_smi" in debug_info:
+        click.secho(debug_info["nvidia_smi"])
 
 
 @aimg.command("model-list")

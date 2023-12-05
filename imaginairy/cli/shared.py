@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 @contextmanager
-def imaginairy_click_context():
+def imaginairy_click_context(log_level="INFO"):
     from pydantic import ValidationError
 
     from imaginairy.log_utils import configure_logging
 
     errors_to_catch = (FileNotFoundError, ValidationError)
-    configure_logging()
+    configure_logging(level=log_level)
     try:
         yield
     except errors_to_catch as e:

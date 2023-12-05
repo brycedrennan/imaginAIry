@@ -82,6 +82,7 @@ Options:
 cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
   - [self-attention guidance](https://github.com/SusungHong/Self-Attention-Guidance) which makes details of images more accurate
 - feature: added `--size` parameter for more intuitive sizing (e.g. 512, 256x256, 4k, uhd, FHD, VGA, etc)
+- feature: detect if wrong torch version is installed and provide instructions on how to install proper version
 - feature: better logging output: color, error handling
 - feature: support for pytorch 2.0
 - deprecated: support for python 3.8, 3.9
