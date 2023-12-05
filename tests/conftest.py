@@ -153,3 +153,18 @@ def pytest_collection_modifyitems(config, items):
         filtered_node_ids.sort()
         for n in filtered_node_ids:
             print(f"   {n}")
+
+
+def pytest_sessionstart(session):
+    from imaginairy.utils.debug_info import get_debug_info
+
+    debug_info = get_debug_info()
+
+    for k, v in debug_info.items():
+        if k == "nvidia_smi":
+            continue
+        k += ":"
+        print(f"{k: <30} {v}")
+
+    if "nvidia_smi" in debug_info:
+        print(debug_info["nvidia_smi"])

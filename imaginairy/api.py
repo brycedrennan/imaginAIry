@@ -172,7 +172,10 @@ def imagine(
         num_prompts = "?"
 
     if get_device() == "cpu":
-        logger.info("Running in CPU mode. it's gonna be slooooooow.")
+        logger.warning("Running in CPU mode. It's gonna be slooooooow.")
+        from imaginairy.utils.torch_installer import torch_version_check
+
+        torch_version_check()
 
     if half_mode is None:
         half_mode = "cuda" in get_device() or get_device() == "mps"

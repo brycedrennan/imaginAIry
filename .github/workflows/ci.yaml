@@ -7,11 +7,6 @@ on:
   workflow_dispatch:
 env:
   PIP_DISABLE_PIP_VERSION_CHECK: 1
-  CACHE_PATHS: |
-          ~/.cache/huggingface
-          ~/.cache/clip
-          ~/.cache/imaginairy
-          ~/.cache/torch
 
 jobs:
   lint:
@@ -54,61 +49,27 @@ jobs:
         run: |
           black --diff --fast .
   test:
-    runs-on: [self-hosted, cuda]
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10"]
-#        subset: ["1/10", "2/10", "3/10", "4/10", "5/10", "6/10", "7/10", "8/10", "9/10", "10/10"]
+        os: ["nvidia-4090"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-        cache: pip
-        cache-dependency-path: requirements-dev.txt
+#        cache: pip
+#        cache-dependency-path: requirements-dev.txt
     - name: Install dependencies
       run: |
-        python -m pip install -r requirements-dev.txt .
-#    - name: Get current date
-#      id: date
-#      run: echo "::set-output name=curmonth::$(date +'%Y-%m')"
-#    - name: Cache Model Files
-#      id: cache-model-files
-#      uses: actions/cache/restore@v3
-#      with:
-#        path: ${{ env.CACHE_PATHS }}
-#        key: ${{ steps.date.outputs.curmonth }}-b
-    # Generate initial file list for all directories
-#    - name: Generate initial model file list
-#      run: |
-#        for dir in $CACHE_PATHS; do
-#          if [ -d "$dir" ]; then
-#            find $dir
-#          fi
-#        done > initial_file_list.txt
+        python -m pip uninstall torch torchvision xformers triton imaginairy -y
+        python -m pip install -r requirements-dev.in . --upgrade
     - name: Test with pytest
       timeout-minutes: 30
+      env:
+        CUDA_LAUNCH_BLOCKING: 1
       run: |
         pytest --durations=10 -v
-    # Generate final file list and check for new files
-#    - name: Generate final model file list
-#      run: |
-#        for dir in CACHE_PATHS; do
-#          if [ -d "$dir" ]; then
-#            find $dir
-#          fi
-#        done > final_file_list.txt
-#        if ! diff initial_file_list.txt final_file_list.txt > /dev/null; then
-#          echo "New files detected."
-#          echo "new_files=true" >> $GITHUB_ENV
-#        else
-#          echo "No new files detected."
-#        fi
-#    - uses: actions/cache/save@v3
-#      id: cache
-#      if: env.new_files == 'true'
-#      with:
-#        path: ${{ env.CACHE_PATHS }}
-#        key: ${{ steps.date.outputs.curmonth }}-b

@@ -43,7 +43,7 @@ coverage==7.3.2
     # via -r requirements-dev.in
 cycler==0.12.1
     # via matplotlib
-diffusers==0.23.1
+diffusers==0.24.0
     # via imaginAIry (setup.py)
 einops==0.7.0
     # via imaginAIry (setup.py)
@@ -65,13 +65,13 @@ filelock==3.13.1
     #   transformers
 filterpy==1.4.5
     # via facexlib
-fonttools==4.45.1
+fonttools==4.46.0
     # via matplotlib
 frozenlist==1.4.0
     # via
     #   aiohttp
     #   aiosignal
-fsspec[http]==2023.10.0
+fsspec[http]==2023.12.0
     # via
     #   huggingface-hub
     #   pytorch-lightning
@@ -96,7 +96,7 @@ idna==3.6
     #   yarl
 imageio==2.33.0
     # via imaginAIry (setup.py)
-importlib-metadata==6.8.0
+importlib-metadata==7.0.0
     # via diffusers
 iniconfig==2.0.0
     # via pytest
@@ -170,6 +170,7 @@ packaging==23.2
     #   pytest
     #   pytest-sugar
     #   pytorch-lightning
+    #   torchmetrics
     #   transformers
 pathspec==0.11.2
     # via black
@@ -182,7 +183,7 @@ pillow==10.1.0
     #   matplotlib
     #   refiners
     #   torchvision
-platformdirs==4.0.0
+platformdirs==4.1.0
     # via black
 pluggy==1.3.0
     # via pytest
@@ -239,7 +240,7 @@ requests==2.31.0
     #   transformers
 responses==0.24.1
     # via -r requirements-dev.in
-ruff==0.1.6
+ruff==0.1.7
     # via -r requirements-dev.in
 safetensors==0.3.3
     # via
@@ -264,7 +265,7 @@ starlette==0.27.0
     # via fastapi
 sympy==1.12
     # via torch
-termcolor==2.3.0
+termcolor==2.4.0
     # via pytest-sugar
 timm==0.9.12
     # via
@@ -291,7 +292,7 @@ torch==2.1.1
     #   torchvision
 torchdiffeq==0.2.3
     # via imaginAIry (setup.py)
-torchmetrics==1.2.0
+torchmetrics==1.2.1
     # via
     #   imaginAIry (setup.py)
     #   pytorch-lightning
