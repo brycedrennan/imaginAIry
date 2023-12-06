@@ -56,6 +56,7 @@ def _imagine_cmd(
     mask_modify_original,
     outpaint,
     caption,
+    composition_strength,
     precision,
     model_weights_path,
     model_config_path,
@@ -67,7 +68,6 @@ def _imagine_cmd(
     make_compilation_animation=False,
     caption_text="",
     control_inputs=None,
-    composition_strength=None,
     videogen=False,
 ):
     """Have the AI generate images. alias:imagine."""

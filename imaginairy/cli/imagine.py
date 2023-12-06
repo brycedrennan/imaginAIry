@@ -199,6 +199,7 @@ def imagine_cmd(
         mask_modify_original,
         outpaint,
         caption,
+        composition_strength,
         precision,
         model_weights_path,
         model_config_path,
@@ -209,7 +210,6 @@ def imagine_cmd(
         arg_schedules,
         make_compilation_animation,
         caption_text,
-        composition_strength,
         control_inputs=control_inputs,
         videogen=videogen,
     )
