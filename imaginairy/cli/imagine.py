@@ -33,6 +33,13 @@ from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
     multiple=True,
 )
 @click.option(
+    "--control-strength",
+    help=(
+        "Strength of the control signal."
+    ),
+    multiple=True,
+)
+@click.option(
     "--control-mode",
     default=None,
     show_default=False,
@@ -106,6 +113,7 @@ def imagine_cmd(
     caption_text,
     control_image,
     control_image_raw,
+    control_strength,
     control_mode,
     videogen,
 ):
@@ -146,6 +154,7 @@ def imagine_cmd(
                 ControlNetInput(
                     image=control_image,
                     image_raw=control_image_raw,
+                    strength=float(control_strength[i]),
                     mode=cm,
                 )
             )
