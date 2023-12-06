@@ -67,6 +67,7 @@ def _imagine_cmd(
     make_compilation_animation=False,
     caption_text="",
     control_inputs=None,
+    composition_strength=None,
     videogen=False,
 ):
     """Have the AI generate images. alias:imagine."""
@@ -211,6 +212,7 @@ def _imagine_cmd(
         make_gif=make_gif,
         make_compare_gif=make_compare_gif,
         videogen=videogen,
+        composition_strength=composition_strength,
     )
     if make_compilation_animation:
         import os.path

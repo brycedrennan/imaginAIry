@@ -30,6 +30,7 @@ def imagine_image_files(
     make_compare_gif=False,
     return_filename_type="generated",
     videogen=False,
+    composition_strength=0.5,
 ):
     from PIL import ImageDraw
 
@@ -65,6 +66,7 @@ def imagine_image_files(
         precision=precision,
         debug_img_callback=_record_step if record_step_images else None,
         add_caption=print_caption,
+        composition_strength=composition_strength,
     ):
         prompt = result.prompt
         if prompt.is_intermediate:
@@ -148,6 +150,7 @@ def imagine(
     half_mode=None,
     add_caption=False,
     unsafe_retry_count=1,
+    composition_strength=0.5,
 ):
     import torch.nn
 
@@ -199,6 +202,7 @@ def imagine(
                     half_mode=half_mode,
                     add_caption=add_caption,
                     dtype=torch.float16 if half_mode else torch.float32,
+                    composition_strength=composition_strength,
                 )
                 if not result.safety_score.is_filtered:
                     break
@@ -217,6 +221,7 @@ def _generate_single_image_compvis(
     half_mode=None,
     add_caption=False,
     # controlnet, finetune, naive, auto
+    composition_strength=0.5,
     inpaint_method="finetune",
     return_latent=False,
 ):
@@ -544,6 +549,7 @@ def _generate_single_image_compvis(
                     target_height=init_image.height,
                     target_width=init_image.width,
                     cutoff=get_model_default_image_size(prompt.model),
+                    composition_strength=composition_strength,
                 )
             else:
                 comp_image = _generate_composition_image(
@@ -551,6 +557,7 @@ def _generate_single_image_compvis(
                     target_height=prompt.height,
                     target_width=prompt.width,
                     cutoff=get_model_default_image_size(prompt.model),
+                    composition_strength=composition_strength,
                 )
             if comp_image is not None:
                 result_images["composition"] = comp_image
@@ -690,7 +697,7 @@ def _scale_latent(
 
 
 def _generate_composition_image(
-    prompt, target_height, target_width, cutoff=512, dtype=None
+    prompt, target_height, target_width, cutoff=512, dtype=None, composition_strength=0.5
 ):
     from PIL import Image
 
@@ -720,7 +727,7 @@ def _generate_composition_image(
         },
     )
 
-    result = _generate_single_image(composition_prompt, dtype=dtype)
+    result = _generate_single_image(composition_prompt, composition_strength, dtype=dtype)
     img = result.images["generated"]
     while img.width < target_width:
         from imaginairy.enhancers.upscale_realesrgan import upscale_image

@@ -40,6 +40,13 @@ from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
     multiple=True,
 )
 @click.option(
+    "--composition-strength",
+    help=(
+        "Strength of the composition phase. "
+    ),
+    multiple=True,
+)
+@click.option(
     "--control-mode",
     default=None,
     show_default=False,
@@ -116,6 +123,7 @@ def imagine_cmd(
     control_strength,
     control_mode,
     videogen,
+    composition_strength,
 ):
     """
     Generate images via AI.
@@ -201,6 +209,7 @@ def imagine_cmd(
         arg_schedules,
         make_compilation_animation,
         caption_text,
+        composition_strength,
         control_inputs=control_inputs,
         videogen=videogen,
     )

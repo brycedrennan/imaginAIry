@@ -18,6 +18,7 @@ def _generate_single_image(
     # controlnet, finetune, naive, auto
     inpaint_method="finetune",
     return_latent=False,
+    composition_strength=0.5,
     dtype=None,
     half_mode=None,
 ):
@@ -269,6 +270,7 @@ def _generate_single_image(
                     target_height=init_image.height,
                     target_width=init_image.width,
                     cutoff=get_model_default_image_size(prompt.model),
+                    composition_strength=composition_strength,
                     dtype=dtype,
                 )
             else:
@@ -277,14 +279,15 @@ def _generate_single_image(
                     target_height=prompt.height,
                     target_width=prompt.width,
                     cutoff=get_model_default_image_size(prompt.model),
+                    composition_strength=composition_strength,
                     dtype=dtype,
                 )
             if comp_image is not None:
                 result_images["composition"] = comp_img_orig
                 result_images["composition-upscaled"] = comp_image
-                comp_cutoff = 0.50
-                first_step = int((prompt.steps) * comp_cutoff)
-                noise_step = int((prompt.steps - 1) * comp_cutoff)
+                composition_strength = composition_strength
+                first_step = int((prompt.steps) * composition_strength)
+                noise_step = int((prompt.steps - 1) * composition_strength)
                 log_img(comp_img_orig, "comp_image")
                 log_img(comp_image, "comp_image_upscaled")
                 comp_image_t = pillow_img_to_torch_image(comp_image)
