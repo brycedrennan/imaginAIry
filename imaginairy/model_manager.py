@@ -154,7 +154,6 @@ def get_diffusion_model(
     control_weights_locations=None,
     half_mode=None,
     for_inpainting=False,
-    for_training=False,
 ):
     """
     Load a diffusion model.
@@ -168,7 +167,6 @@ def get_diffusion_model(
             half_mode,
             for_inpainting,
             control_weights_locations=control_weights_locations,
-            for_training=for_training,
         )
     except HuggingFaceAuthorizationError as e:
         if for_inpainting:
@@ -180,7 +178,6 @@ def get_diffusion_model(
                 config_path,
                 half_mode,
                 for_inpainting=False,
-                for_training=for_training,
                 control_weights_locations=control_weights_locations,
             )
         raise
@@ -191,7 +188,6 @@ def _get_diffusion_model(
     config_path="configs/stable-diffusion-v1.yaml",
     half_mode=None,
     for_inpainting=False,
-    for_training=False,
     control_weights_locations=None,
 ):
     """
@@ -211,7 +207,6 @@ def _get_diffusion_model(
         config_path=config_path,
         control_weights_paths=control_weights_locations,
         for_inpainting=for_inpainting,
-        for_training=for_training,
     )
     # some models need the attention calculated in float32
     if model_config is not None:
@@ -222,7 +217,6 @@ def _get_diffusion_model(
         config_path=config_path,
         weights_location=weights_location,
         half_mode=half_mode,
-        for_training=for_training,
     )
     MOST_RECENTLY_LOADED_MODEL = diffusion_model
     if control_weights_locations:
@@ -240,7 +234,6 @@ def get_diffusion_model_refiners(
     control_weights_locations=None,
     dtype=None,
     for_inpainting=False,
-    for_training=False,
 ):
     """
     Load a diffusion model.
@@ -254,7 +247,6 @@ def get_diffusion_model_refiners(
             for_inpainting,
             dtype=dtype,
             control_weights_locations=control_weights_locations,
-            for_training=for_training,
         )
     except HuggingFaceAuthorizationError as e:
         if for_inpainting:
@@ -266,7 +258,6 @@ def get_diffusion_model_refiners(
                 config_path,
                 dtype=dtype,
                 for_inpainting=False,
-                for_training=for_training,
                 control_weights_locations=control_weights_locations,
             )
         raise
@@ -276,7 +267,6 @@ def _get_diffusion_model_refiners(
     weights_location=iconfig.DEFAULT_MODEL,
     config_path="configs/stable-diffusion-v1.yaml",
     for_inpainting=False,
-    for_training=False,
     control_weights_locations=None,
     device=None,
     dtype=torch.float16,
@@ -291,7 +281,6 @@ def _get_diffusion_model_refiners(
         weights_location=weights_location,
         config_path=config_path,
         for_inpainting=for_inpainting,
-        for_training=for_training,
         device=device,
         dtype=dtype,
     )
@@ -304,7 +293,6 @@ def _get_diffusion_model_refiners_only(
     weights_location=iconfig.DEFAULT_MODEL,
     config_path="configs/stable-diffusion-v1.yaml",
     for_inpainting=False,
-    for_training=False,
     control_weights_locations=None,
     device=None,
     dtype=torch.float16,
@@ -334,7 +322,6 @@ def _get_diffusion_model_refiners_only(
         config_path=config_path,
         control_weights_paths=control_weights_locations,
         for_inpainting=for_inpainting,
-        for_training=for_training,
     )
     # some models need the attention calculated in float32
     if model_config is not None:
@@ -378,11 +365,8 @@ def _get_diffusion_model_refiners_only(
 
 
 @memory_managed_model("stable-diffusion", memory_usage_mb=1951)
-def _load_diffusion_model(config_path, weights_location, half_mode, for_training):
+def _load_diffusion_model(config_path, weights_location, half_mode):
     model_config = OmegaConf.load(f"{PKG_ROOT}/{config_path}")
-    if for_training:
-        model_config.use_ema = True
-        # model_config.use_scheduler = True
 
     # only run half-mode on cuda. run it by default
     half_mode = half_mode is None and get_device() == "cuda"
@@ -443,7 +427,6 @@ def resolve_model_paths(
     config_path=None,
     control_weights_paths=None,
     for_inpainting=False,
-    for_training=False,
 ):
     """Resolve weight and config path if they happen to be shortcuts."""
     model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(weights_path, None)
@@ -466,13 +449,8 @@ def resolve_model_paths(
     if model_metadata_w:
         if config_path is None:
             config_path = model_metadata_w.config_path
-        if for_training:
-            weights_path = model_metadata_w.weights_url_full
-            if weights_path is None:
-                msg = "No full training weights configured for this model. Edit the code or subimt a github issue."
-                raise ValueError(msg)
-        else:
-            weights_path = model_metadata_w.weights_url
+
+        weights_path = model_metadata_w.weights_url
 
     if model_metadata_c:
         config_path = model_metadata_c.config_path
