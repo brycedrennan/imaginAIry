@@ -34,9 +34,7 @@ from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
 )
 @click.option(
     "--control-strength",
-    help=(
-        "Strength of the control signal."
-    ),
+    help=("Strength of the control signal."),
     multiple=True,
 )
 @click.option(

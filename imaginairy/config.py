@@ -22,7 +22,6 @@ class ModelConfig:
     config_path: str
     weights_url: str
     default_image_size: int
-    weights_url_full: str = None
     forced_attn_precision: str = "default"
     default_negative_prompt: str = DEFAULT_NEGATIVE_PROMPT
     alias: str = None
@@ -36,7 +35,6 @@ MODEL_CONFIGS = [
         short_name="SD-1.5",
         config_path="configs/stable-diffusion-v1.yaml",
         weights_url="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/889b629140e71758e1e0006e355c331a5744b4bf/v1-5-pruned-emaonly.ckpt",
-        weights_url_full="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/889b629140e71758e1e0006e355c331a5744b4bf/v1-5-pruned.ckpt",
         default_image_size=512,
         alias="sd15",
     ),

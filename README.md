@@ -88,6 +88,7 @@ cutting edge features (SDXL, image prompts, etc) which will be added to imaginai
 - deprecated: support for python 3.8, 3.9
 - deprecated: support for torch 1.13
 - deprecated: support for Stable Diffusion versions 1.4, 2.0, and 2.1
+- deprecated: image training
 - broken: most samplers, tile/details controlnet, and model memory management
 
 ### Run API server and StableStudio web interface (alpha)
@@ -476,8 +477,7 @@ a bowl full of gold bars sitting on a table
  - Prompt metadata saved into image file metadata
  - Have AI generate captions for images `aimg describe <filename-or-url>`
  - Interactive prompt: just run `aimg`
- - finetune your own image model. kind of like dreambooth. Read instructions on ["Concept Training"](docs/concept-training.md) page
-
+ 
 ## How To
 
 For full command line instructions run `aimg --help`
