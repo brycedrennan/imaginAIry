@@ -1,15 +1,16 @@
 import logging
 from typing import List, Optional
 
-from imaginairy import WeightedPrompt
-from imaginairy.config import CONTROLNET_CONFIG_SHORTCUTS
+from imaginairy import ImaginePrompt, WeightedPrompt
+from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
 from imaginairy.model_manager import load_controlnet_adapter
+from imaginairy.schema import MaskMode
 
 logger = logging.getLogger(__name__)
 
 
 def _generate_single_image(
-    prompt,
+    prompt: ImaginePrompt,
     debug_img_callback=None,
     progress_img_callback=None,
     progress_img_interval_steps=3,
@@ -55,7 +56,7 @@ def _generate_single_image(
     )
     from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
     from imaginairy.safety import create_safety_score
-    from imaginairy.samplers import SamplerName
+    from imaginairy.samplers import SolverName
     from imaginairy.schema import ImaginePrompt, ImagineResult
     from imaginairy.utils import get_device, randn_seeded
 
@@ -76,8 +77,8 @@ def _generate_single_image(
         control_modes = [c.mode for c in prompt.control_inputs]
 
     sd = get_diffusion_model_refiners(
-        weights_location=prompt.model,
-        config_path=prompt.model_config_path,
+        weights_location=prompt.model_weights,
+        model_architecture=prompt.model_architecture,
         control_weights_locations=tuple(control_modes),
         dtype=dtype,
         for_inpainting=for_inpainting and inpaint_method == "finetune",
@@ -90,7 +91,7 @@ def _generate_single_image(
 
     mask_image = None
     mask_image_orig = None
-    prompt = prompt.make_concrete_copy()
+    prompt: ImaginePrompt = prompt.make_concrete_copy()
 
     def latent_logger(latents):
         progress_latents.append(latents)
@@ -171,7 +172,7 @@ def _generate_single_image(
 
                 log_img(mask_image, "init mask")
 
-                if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
+                if prompt.mask_mode == MaskMode.REPLACE:
                     mask_image = ImageOps.invert(mask_image)
 
                 mask_image_orig = mask_image
@@ -182,7 +183,7 @@ def _generate_single_image(
                 # if inpaint_method == "controlnet":
                 #     result_images["control-inpaint"] = mask_image
                 #     control_inputs.append(
-                #         ControlNetInput(mode="inpaint", image=mask_image)
+                #         ControlInput(mode="inpaint", image=mask_image)
                 #     )
 
         seed_everything(prompt.seed)
@@ -194,7 +195,6 @@ def _generate_single_image(
         controlnets = []
 
         if control_modes:
-            control_strengths = []
             from imaginairy.img_processors.control_modes import CONTROL_MODES
 
             for control_input in control_inputs:
@@ -231,10 +231,10 @@ def _generate_single_image(
                 log_img(control_image_disp, "control_image")
 
                 if len(control_image_t.shape) == 3:
-                    raise RuntimeError("Control image must be 4D")
+                    raise ValueError("Control image must be 4D")
 
                 if control_image_t.shape[1] != 3:
-                    raise RuntimeError("Control image must have 3 channels")
+                    raise ValueError("Control image must have 3 channels")
 
                 if (
                     control_input.mode != "inpaint"
@@ -242,21 +242,20 @@ def _generate_single_image(
                     or control_image_t.max() > 1
                 ):
                     msg = f"Control image must be in [0, 1] but we received {control_image_t.min()} and {control_image_t.max()}"
-                    raise RuntimeError(msg)
+                    raise ValueError(msg)
 
                 if control_image_t.max() == control_image_t.min():
                     msg = f"No control signal found in control image {control_input.mode}."
-                    raise RuntimeError(msg)
+                    raise ValueError(msg)
 
-                control_strengths.append(control_input.strength)
-
-                control_weights_path = CONTROLNET_CONFIG_SHORTCUTS.get(
-                    control_input.mode, None
-                ).weights_url
+                control_config = CONTROL_CONFIG_SHORTCUTS.get(control_input.mode, None)
+                if not control_config:
+                    msg = f"Unknown control mode: {control_input.mode}"
+                    raise ValueError(msg)
 
                 controlnet = load_controlnet_adapter(
                     name=control_input.mode,
-                    control_weights_location=control_weights_path,
+                    control_weights_location=control_config.weights_location,
                     target_unet=sd.unet,
                     scale=control_input.strength,
                 )
@@ -268,7 +267,7 @@ def _generate_single_image(
                     prompt=prompt,
                     target_height=init_image.height,
                     target_width=init_image.width,
-                    cutoff=get_model_default_image_size(prompt.model),
+                    cutoff=get_model_default_image_size(prompt.model_architecture),
                     dtype=dtype,
                 )
             else:
@@ -276,7 +275,7 @@ def _generate_single_image(
                     prompt=prompt,
                     target_height=prompt.height,
                     target_width=prompt.width,
-                    cutoff=get_model_default_image_size(prompt.model),
+                    cutoff=get_model_default_image_size(prompt.model_architecture),
                     dtype=dtype,
                 )
             if comp_image is not None:
@@ -296,12 +295,12 @@ def _generate_single_image(
                 control_image_t.to(device=sd.device, dtype=sd.dtype)
             )
             controlnet.inject()
-        if prompt.sampler_type.lower() == SamplerName.K_DPMPP_2M:
+        if prompt.solver_type.lower() == SolverName.DPMPP:
             sd.scheduler = DPMSolver(num_inference_steps=prompt.steps)
-        elif prompt.sampler_type.lower() == SamplerName.DDIM:
+        elif prompt.solver_type.lower() == SolverName.DDIM:
             sd.scheduler = DDIM(num_inference_steps=prompt.steps)
         else:
-            msg = f"Unknown sampler type: {prompt.sampler_type}"
+            msg = f"Unknown solver type: {prompt.solver_type}"
             raise ValueError(msg)
         sd.scheduler.to(device=sd.device, dtype=sd.dtype)
         sd.set_num_inference_steps(prompt.steps)
@@ -414,18 +413,24 @@ def _generate_single_image(
                 caption_text = prompt.caption_text.format(prompt=prompt.prompt_text)
                 add_caption_to_image(gen_img, caption_text)
 
+        # todo: do something smarter
+        result_images.update(
+            {
+                "upscaled": upscaled_img,
+                "modified_original": rebuilt_orig_img,
+                "mask_binary": mask_image_orig,
+                "mask_grayscale": mask_grayscale,
+            }
+        )
+
         result = ImagineResult(
             img=gen_img,
             prompt=prompt,
-            upscaled_img=upscaled_img,
             is_nsfw=safety_score.is_nsfw,
             safety_score=safety_score,
-            modified_original=rebuilt_orig_img,
-            mask_binary=mask_image_orig,
-            mask_grayscale=mask_grayscale,
             result_images=result_images,
-            timings={},
-            progress_latents=[],
+            timings={},  # todo
+            progress_latents=[],  # todo
         )
 
         _most_recent_result = result
@@ -440,6 +445,9 @@ def _generate_single_image(
 
 def _prompts_to_embeddings(prompts, text_encoder):
     import torch
+
+    if not prompts:
+        prompts = [WeightedPrompt(text="")]
 
     total_weight = sum(wp.weight for wp in prompts)
     if str(text_encoder.device) == "cpu":

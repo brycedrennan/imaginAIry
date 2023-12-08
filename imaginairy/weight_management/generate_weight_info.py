@@ -3,7 +3,7 @@ import safetensors
 from imaginairy.model_manager import (
     get_cached_url_path,
     open_weights,
-    resolve_model_paths,
+    resolve_model_weights_config,
 )
 from imaginairy.weight_management import utils
 from imaginairy.weight_management.pattern_collapse import find_state_dict_key_patterns
@@ -11,15 +11,12 @@ from imaginairy.weight_management.utils import save_model_info
 
 
 def save_compvis_patterns():
-    (
-        model_metadata,
-        weights_url,
-        config_path,
-        control_weights_paths,
-    ) = resolve_model_paths(
-        weights_path="openjourney-v1",
+    model_weights_config = resolve_model_weights_config(
+        model_weights="openjourney-v1",
     )
-    weights_path = get_cached_url_path(weights_url, category="weights")
+    weights_path = get_cached_url_path(
+        model_weights_config.weights_location, category="weights"
+    )
 
     with safetensors.safe_open(weights_path, "pytorch") as f:
         weights_keys = f.keys()
@@ -98,7 +95,7 @@ def save_weight_info(
     model_name, component_name, format_name, weights_url=None, weights_keys=None
 ):
     if weights_keys is None and weights_url is None:
-        msg = "Either weights_keys or weights_url must be provided"
+        msg = "Either weights_keys or weights_location must be provided"
         raise ValueError(msg)
 
     if weights_keys is None:

@@ -4,7 +4,7 @@ from PIL import Image, ImageEnhance, ImageStat
 
 from imaginairy import ImaginePrompt, imagine
 from imaginairy.enhancers.describe_image_blip import generate_caption
-from imaginairy.schema import ControlNetInput
+from imaginairy.schema import ControlInput
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def colorize_img(img, max_width=1024, max_height=1024, caption=None):
         caption = caption.replace(" old ", " ")
         logger.info(caption)
     control_inputs = [
-        ControlNetInput(mode="colorize", image=img, strength=2),
+        ControlInput(mode="colorize", image=img, strength=2),
     ]
     prompt_add = ". color photo, sharp-focus, highly detailed, intricate, Canon 5D"
     prompt = ImaginePrompt(

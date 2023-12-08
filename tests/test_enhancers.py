@@ -58,7 +58,7 @@ def test_clip_masking(filename_base_for_outputs):
         upscale=False,
         fix_faces=True,
         seed=42,
-        # sampler_type="plms",
+        # solver_type="plms",
     )
 
     result = next(imagine(prompt))

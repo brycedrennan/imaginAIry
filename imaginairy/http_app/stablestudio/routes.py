@@ -8,7 +8,7 @@ from imaginairy.http_app.stablestudio.models import (
     StableStudioBatchResponse,
     StableStudioImage,
     StableStudioModel,
-    StableStudioSampler,
+    StableStudioSolver,
 )
 from imaginairy.http_app.utils import generate_image_b64
 
@@ -37,11 +37,14 @@ async def generate(studio_request: StableStudioBatchRequest):
 
 @router.get("/samplers")
 async def list_samplers():
-    from imaginairy.config import SAMPLER_TYPE_OPTIONS
+    from imaginairy.config import SOLVER_CONFIGS
 
     sampler_objs = []
-    for sampler_type in SAMPLER_TYPE_OPTIONS:
-        sampler_obj = StableStudioSampler(id=sampler_type, name=sampler_type)
+
+    for solver_config in SOLVER_CONFIGS:
+        sampler_obj = StableStudioSolver(
+            id=solver_config.aliases[0], name=solver_config.aliases[0]
+        )
         sampler_objs.append(sampler_obj)
 
     return sampler_objs
@@ -49,10 +52,10 @@ async def list_samplers():
 
 @router.get("/models")
 async def list_models():
-    from imaginairy.config import MODEL_CONFIGS
+    from imaginairy.config import MODEL_WEIGHT_CONFIGS
 
     model_objs = []
-    for model_config in MODEL_CONFIGS:
+    for model_config in MODEL_WEIGHT_CONFIGS:
         if "inpaint" in model_config.description.lower():
             continue
         model_obj = StableStudioModel(

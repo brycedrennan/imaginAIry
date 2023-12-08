@@ -1,35 +1,37 @@
 import logging
 import os
 import re
+from typing import TYPE_CHECKING, Callable
 
-from imaginairy.schema import ControlNetInput, SafetyMode
+if TYPE_CHECKING:
+    from imaginairy.schema import ImaginePrompt
 
 logger = logging.getLogger(__name__)
 
 # leave undocumented. I'd ask that no one publicize this flag. Just want a
 # slight barrier to entry. Please don't use this is any way that's gonna cause
 # the media or politicians to freak out about AI...
-IMAGINAIRY_SAFETY_MODE = os.getenv("IMAGINAIRY_SAFETY_MODE", SafetyMode.STRICT)
+IMAGINAIRY_SAFETY_MODE = os.getenv("IMAGINAIRY_SAFETY_MODE", "strict")
 if IMAGINAIRY_SAFETY_MODE in {"disabled", "classify"}:
-    IMAGINAIRY_SAFETY_MODE = SafetyMode.RELAXED
+    IMAGINAIRY_SAFETY_MODE = "relaxed"
 elif IMAGINAIRY_SAFETY_MODE == "filter":
-    IMAGINAIRY_SAFETY_MODE = SafetyMode.STRICT
+    IMAGINAIRY_SAFETY_MODE = "strict"
 
 # we put this in the global scope so it can be used in the interactive shell
 _most_recent_result = None
 
 
 def imagine_image_files(
-    prompts,
-    outdir,
-    precision="autocast",
-    record_step_images=False,
-    output_file_extension="jpg",
-    print_caption=False,
-    make_gif=False,
-    make_compare_gif=False,
-    return_filename_type="generated",
-    videogen=False,
+    prompts: "list[ImaginePrompt] | ImaginePrompt",
+    outdir: str,
+    precision: str = "autocast",
+    record_step_images: bool = False,
+    output_file_extension: str = "jpg",
+    print_caption: bool = False,
+    make_gif: bool = False,
+    make_compare_gif: bool = False,
+    return_filename_type: str = "generated",
+    videogen: bool = False,
 ):
     from PIL import ImageDraw
 
@@ -45,6 +47,9 @@ def imagine_image_files(
     output_file_extension = output_file_extension.lower()
     if output_file_extension not in {"jpg", "png"}:
         raise ValueError("Must output a png or jpg")
+
+    if not isinstance(prompts, list):
+        prompts = [prompts]
 
     def _record_step(img, description, image_count, step_count, prompt):
         steps_path = os.path.join(outdir, "steps", f"{base_count:08}_S{prompt.seed}")
@@ -74,7 +79,7 @@ def imagine_image_files(
         if prompt.init_image:
             img_str = f"_img2img-{prompt.init_image_strength}"
         basefilename = (
-            f"{base_count:06}_{prompt.seed}_{prompt.sampler_type.replace('_', '')}{prompt.steps}_"
+            f"{base_count:06}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
             f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
         )
 
@@ -139,15 +144,15 @@ def imagine_image_files(
 
 
 def imagine(
-    prompts,
-    precision="autocast",
-    debug_img_callback=None,
-    progress_img_callback=None,
-    progress_img_interval_steps=3,
+    prompts: "list[ImaginePrompt] | str | ImaginePrompt",
+    precision: str = "autocast",
+    debug_img_callback: Callable | None = None,
+    progress_img_callback: Callable | None = None,
+    progress_img_interval_steps: int = 3,
     progress_img_interval_min_s=0.1,
     half_mode=None,
-    add_caption=False,
-    unsafe_retry_count=1,
+    add_caption: bool = False,
+    unsafe_retry_count: int = 1,
 ):
     import torch.nn
 
@@ -209,7 +214,7 @@ def imagine(
 
 
 def _generate_single_image_compvis(
-    prompt,
+    prompt: "ImaginePrompt",
     debug_img_callback=None,
     progress_img_callback=None,
     progress_img_interval_steps=3,
@@ -248,9 +253,9 @@ def _generate_single_image_compvis(
     from imaginairy.modules.midas.api import torch_image_to_depth_map
     from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
     from imaginairy.safety import create_safety_score
-    from imaginairy.samplers import SAMPLER_LOOKUP
+    from imaginairy.samplers import SOLVER_LOOKUP
     from imaginairy.samplers.editing import CFGEditingDenoiser
-    from imaginairy.schema import ImaginePrompt, ImagineResult
+    from imaginairy.schema import ControlInput, ImagineResult, MaskMode
     from imaginairy.utils import get_device, randn_seeded
 
     latent_channels = 4
@@ -326,8 +331,8 @@ def _generate_single_image_compvis(
             prompt.height // downsampling_factor,
             prompt.width // downsampling_factor,
         ]
-        SamplerCls = SAMPLER_LOOKUP[prompt.sampler_type.lower()]
-        sampler = SamplerCls(model)
+        SolverCls = SOLVER_LOOKUP[prompt.solver_type.lower()]
+        solver = SolverCls(model)
         mask_latent = mask_image = mask_image_orig = mask_grayscale = None
         t_enc = init_latent = control_image = None
         starting_image = None
@@ -385,7 +390,7 @@ def _generate_single_image_compvis(
 
                 log_img(mask_image, "init mask")
 
-                if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
+                if prompt.mask_mode == MaskMode.REPLACE:
                     mask_image = ImageOps.invert(mask_image)
 
                 mask_image_orig = mask_image
@@ -396,7 +401,7 @@ def _generate_single_image_compvis(
                 if inpaint_method == "controlnet":
                     result_images["control-inpaint"] = mask_image
                     control_inputs.append(
-                        ControlNetInput(mode="inpaint", image=mask_image)
+                        ControlInput(mode="inpaint", image=mask_image)
                     )
 
             seed_everything(prompt.seed)
@@ -543,7 +548,7 @@ def _generate_single_image_compvis(
                     prompt=prompt,
                     target_height=init_image.height,
                     target_width=init_image.width,
-                    cutoff=get_model_default_image_size(prompt.model),
+                    cutoff=get_model_default_image_size(prompt.model_architecture),
                 )
             else:
                 comp_image = _generate_composition_image(
@@ -563,7 +568,7 @@ def _generate_single_image_compvis(
                     model.encode_first_stage(comp_image_t)
                 )
         with lc.timing("sampling"):
-            samples = sampler.sample(
+            samples = solver.sample(
                 num_steps=prompt.steps,
                 positive_conditioning=positive_conditioning,
                 neutral_conditioning=neutral_conditioning,
@@ -711,8 +716,10 @@ def _generate_composition_image(
     composition_prompt = prompt.full_copy(
         deep=True,
         update={
-            "width": int(prompt.width * shrink_scale),
-            "height": int(prompt.height * shrink_scale),
+            "size": (
+                int(prompt.width * shrink_scale),
+                int(prompt.height * shrink_scale),
+            ),
             "steps": None,
             "upscale": False,
             "fix_faces": False,

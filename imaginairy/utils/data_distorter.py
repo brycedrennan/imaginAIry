@@ -170,7 +170,21 @@ def replace_value_at_path(data, path, new_value):
     parent = get_path(data, path[:-1])
     last_key = path[-1]
     if new_value == NODE_DELETE:
-        del parent[last_key]
+        if isinstance(parent, tuple):
+            grandparent = get_path(data, path[:-2])
+            grandparent_key = path[-2]
+            new_parent = list(parent)
+            del new_parent[last_key]
+            grandparent[grandparent_key] = tuple(new_parent)
+        else:
+            del parent[last_key]
     else:
-        parent[last_key] = new_value
+        if isinstance(parent, tuple):
+            grandparent = get_path(data, path[:-2])
+            grandparent_key = path[-2]
+            new_parent = list(parent)
+            new_parent[last_key] = new_value
+            grandparent[grandparent_key] = tuple(new_parent)
+        else:
+            parent[last_key] = new_value
     return data

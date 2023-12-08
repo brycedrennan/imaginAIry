@@ -87,7 +87,7 @@ def generate_video(
         device="cpu",
         num_frames=num_frames,
         num_steps=num_steps,
-        weights_url=video_model_config["weights_url"],
+        weights_url=video_model_config["weights_location"],
     )
     torch.manual_seed(seed)
 

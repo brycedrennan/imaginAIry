@@ -10,7 +10,7 @@ from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
 from imaginairy.animations import make_gif_animation
 from imaginairy.enhancers.facecrop import detect_faces
 from imaginairy.img_utils import add_caption_to_image, pillow_fit_image_within
-from imaginairy.schema import ControlNetInput
+from imaginairy.schema import ControlInput
 
 preserve_head_kwargs = {
     "mask_prompt": "head|face",
@@ -142,7 +142,7 @@ def surprise_me_prompts(
     for prompt_text, strength, kwargs in generic_prompts:
         if use_controlnet:
             strength = 5
-            control_input = ControlNetInput(mode="edit", strength=2)
+            control_input = ControlInput(mode="edit", strength=2)
             prompts.append(
                 ImaginePrompt(
                     prompt_text,
@@ -163,7 +163,7 @@ def surprise_me_prompts(
                     prompt_text,
                     init_image=img,
                     prompt_strength=strength,
-                    model="edit",
+                    model_weights="edit",
                     steps=steps,
                     width=width,
                     height=height,
@@ -178,7 +178,7 @@ def surprise_me_prompts(
             for prompt_subconfig in prompt_subconfigs:
                 prompt_text, strength, kwargs = prompt_subconfig
                 if use_controlnet:
-                    control_input = ControlNetInput(
+                    control_input = ControlInput(
                         mode="edit",
                     )
                     prompts.append(
@@ -201,7 +201,7 @@ def surprise_me_prompts(
                             prompt_text,
                             init_image=img,
                             prompt_strength=strength,
-                            model="edit",
+                            model_weights="edit",
                             steps=steps,
                             width=width,
                             height=height,

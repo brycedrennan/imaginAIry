@@ -77,15 +77,13 @@ def imagine_cmd(
     outdir,
     output_file_extension,
     repeats,
-    height,
-    width,
     size,
     steps,
     seed,
     upscale,
     fix_faces,
     fix_faces_fidelity,
-    sampler_type,
+    solver,
     log_level,
     quiet,
     show_work,
@@ -101,7 +99,7 @@ def imagine_cmd(
     caption,
     precision,
     model_weights_path,
-    model_config_path,
+    model_architecture,
     prompt_library_path,
     version,
     make_gif,
@@ -120,7 +118,7 @@ def imagine_cmd(
 
     Can be invoked via either `aimg imagine` or just `imagine`.
     """
-    from imaginairy.schema import ControlNetInput, LazyLoadingImage
+    from imaginairy.schema import ControlInput, LazyLoadingImage
 
     # hacky method of getting order of control images (mixing raw and normal images)
     control_images = [
@@ -128,13 +126,18 @@ def imagine_cmd(
         for o, path in ImagineColorsCommand._option_order
         if o.name in ("control_image", "control_image_raw")
     ]
+    control_strengths = [
+        strength
+        for o, strength in ImagineColorsCommand._option_order
+        if o.name == "control_strength"
+    ]
+
     control_inputs = []
     if control_mode:
         for i, cm in enumerate(control_mode):
-            try:
-                option = control_images[i]
-            except IndexError:
-                option = None
+            option = index_default(control_images, i, None)
+            control_strength = index_default(control_strengths, i, 1.0)
+
             if option is None:
                 control_image = None
                 control_image_raw = None
@@ -149,10 +152,10 @@ def imagine_cmd(
                 if control_image_raw and control_image_raw.startswith("http"):
                     control_image_raw = LazyLoadingImage(url=control_image_raw)
             control_inputs.append(
-                ControlNetInput(
+                ControlInput(
                     image=control_image,
                     image_raw=control_image_raw,
-                    strength=float(control_strength[i]),
+                    strength=float(control_strength),
                     mode=cm,
                 )
             )
@@ -167,15 +170,13 @@ def imagine_cmd(
         outdir,
         output_file_extension,
         repeats,
-        height,
-        width,
         size,
         steps,
         seed,
         upscale,
         fix_faces,
         fix_faces_fidelity,
-        sampler_type,
+        solver,
         log_level,
         quiet,
         show_work,
@@ -191,7 +192,7 @@ def imagine_cmd(
         caption,
         precision,
         model_weights_path,
-        model_config_path,
+        model_architecture,
         prompt_library_path,
         version,
         make_gif,
@@ -202,6 +203,13 @@ def imagine_cmd(
         control_inputs=control_inputs,
         videogen=videogen,
     )
+
+
+def index_default(items, index, default):
+    try:
+        return items[index]
+    except IndexError:
+        return default
 
 
 if __name__ == "__main__":

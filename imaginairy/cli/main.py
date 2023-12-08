@@ -45,8 +45,6 @@ aimg.add_command(describe_cmd, name="describe")
 aimg.add_command(edit_cmd, name="edit")
 aimg.add_command(edit_demo_cmd, name="edit-demo")
 aimg.add_command(imagine_cmd, name="imagine")
-# aimg.add_command(prep_images_cmd, name="prep-images")
-# aimg.add_command(prune_ckpt_cmd, name="prune-ckpt")
 aimg.add_command(upscale_cmd, name="upscale")
 aimg.add_command(run_server_cmd, name="server")
 aimg.add_command(videogen_cmd, name="videogen")
@@ -85,14 +83,14 @@ def model_list_cmd():
     from imaginairy import config
 
     print(f"{'ALIAS': <10} {'NAME': <18} {'DESCRIPTION'}")
-    for model_config in config.MODEL_CONFIGS:
+    for model_config in config.MODEL_WEIGHT_CONFIGS:
         print(
             f"{model_config.alias: <10} {model_config.short_name: <18} {model_config.description}"
         )
 
     print("\nCONTROL MODES:")
     print(f"{'ALIAS': <10} {'NAME': <18} {'CONTROL TYPE'}")
-    for control_mode in config.CONTROLNET_CONFIGS:
+    for control_mode in config.CONTROL_CONFIGS:
         print(
             f"{control_mode.alias: <10} {control_mode.short_name: <18} {control_mode.control_type}"
         )

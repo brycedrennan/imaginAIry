@@ -787,7 +787,7 @@ Use with `--model SD-2.1` or `--model SD-2.0-v`
 **6.1.0**
 - feature: use different default steps and image sizes depending on sampler and model selected
 - fix: #110 use proper version in image metadata
-- refactor: samplers all have their own class that inherits from ImageSampler
+- refactor: solvers all have their own class that inherits from ImageSolver
 - feature: 🎉🎉🎉 Stable Diffusion 2.0
   - `--model SD-2.0` to use (it makes worse images than 1.5 though...) 
   - Tested on macOS and Linux
