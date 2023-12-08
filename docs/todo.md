@@ -11,10 +11,11 @@
  - allow selection of output video format
  - chain multiple operations together imggen => videogen
  - make sure terminal output on windows doesn't suck
- - add karras schedule to refiners
+ - add interface for loading diffusers weights
  - add method to show cache size
  - add method to clear model cache
  - add method to clear cached items not recently used (does diffusers have one?)
+ - https://huggingface.co/playgroundai/playground-v2-1024px-aesthetic
 
 ### Old Todo
 

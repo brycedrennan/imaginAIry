@@ -34,15 +34,13 @@ def _imagine_cmd(
     outdir,
     output_file_extension,
     repeats,
-    height,
-    width,
     size,
     steps,
     seed,
     upscale,
     fix_faces,
     fix_faces_fidelity,
-    sampler_type,
+    solver,
     log_level,
     quiet,
     show_work,
@@ -58,7 +56,7 @@ def _imagine_cmd(
     caption,
     precision,
     model_weights_path,
-    model_config_path,
+    model_architecture,
     prompt_library_path,
     version=False,
     make_gif=False,
@@ -95,15 +93,6 @@ def _imagine_cmd(
     from imaginairy.log_utils import configure_logging
 
     configure_logging(log_level)
-
-    if (height is not None or width is not None) and size is not None:
-        msg = "You cannot specify both --size and --height/--width. Please choose one."
-        raise ValueError(msg)
-
-    if size is not None:
-        from imaginairy.utils.named_resolutions import get_named_resolution
-
-        width, height = get_named_resolution(size)
 
     init_images = [init_image] if isinstance(init_image, str) else init_image
 
@@ -171,10 +160,9 @@ def _imagine_cmd(
                     init_image_strength=init_image_strength,
                     control_inputs=control_inputs,
                     seed=seed,
-                    sampler_type=sampler_type,
+                    solver_type=solver,
                     steps=steps,
-                    height=height,
-                    width=width,
+                    size=size,
                     mask_image=mask_image,
                     mask_prompt=mask_prompt,
                     mask_mode=mask_mode,
@@ -185,8 +173,8 @@ def _imagine_cmd(
                     fix_faces_fidelity=fix_faces_fidelity,
                     tile_mode=_tile_mode,
                     allow_compose_phase=allow_compose_phase,
-                    model=model_weights_path,
-                    model_config_path=model_config_path,
+                    model_weights=model_weights_path,
+                    model_architecture=model_architecture,
                     caption_text=caption_text,
                 )
                 from imaginairy.prompt_schedules import (
@@ -319,27 +307,11 @@ common_options = [
         help="How many times to repeat the renders. If you provide two prompts and --repeat=3 then six images will be generated.",
     ),
     click.option(
-        "-h",
-        "--height",
-        default=None,
-        show_default=True,
-        type=int,
-        help="Image height. Should be multiple of 8.",
-    ),
-    click.option(
-        "-w",
-        "--width",
-        default=None,
-        show_default=True,
-        type=int,
-        help="Image width. Should be multiple of 8.",
-    ),
-    click.option(
         "--size",
         default=None,
         show_default=True,
         type=str,
-        help="Image size as a string. Can be a named size or WIDTHxHEIGHT format. Should be multiple of 8. Examples: 512x512, 4k, UHD, 8k, ",
+        help="Image size as a string. Can be a named size, WIDTHxHEIGHT, or single integer. Should be multiple of 8. Examples: 512x512, 4k, UHD, 8k, 512, 1080p",
     ),
     click.option(
         "--steps",
@@ -363,18 +335,18 @@ common_options = [
         help="How faithful to the original should face enhancement be. 1 = best fidelity, 0 = best looking face.",
     ),
     click.option(
-        "--sampler-type",
+        "--solver",
         "--sampler",
-        default=config.DEFAULT_SAMPLER,
+        default=config.DEFAULT_SOLVER,
         show_default=True,
-        type=click.Choice(config.SAMPLER_TYPE_OPTIONS),
-        help="What sampling strategy to use.",
+        type=click.Choice(config.SOLVER_TYPE_NAMES, case_sensitive=False),
+        help="Solver algorithm to generate the image with. (AKA 'Sampler' or 'Scheduler' in other libraries.",
     ),
     click.option(
         "--log-level",
         default="INFO",
         show_default=True,
-        type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"]),
+        type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False),
         help="What level of logs to show.",
     ),
     click.option(
@@ -429,7 +401,7 @@ common_options = [
         "--mask-mode",
         default="replace",
         show_default=True,
-        type=click.Choice(["keep", "replace"]),
+        type=click.Choice(["keep", "replace"], case_sensitive=False),
         help="Should we replace the masked area or keep it?",
     ),
     click.option(
@@ -458,20 +430,20 @@ common_options = [
     click.option(
         "--precision",
         help="Evaluate at this precision.",
-        type=click.Choice(["full", "autocast"]),
+        type=click.Choice(["full", "autocast"], case_sensitive=False),
         default="autocast",
         show_default=True,
     ),
     click.option(
         "--model-weights-path",
         "--model",
-        help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
+        help=f"Model to use. Should be one of {', '.join(config.IMAGE_WEIGHTS_SHORT_NAMES)}, or a path to custom weights.",
         show_default=True,
-        default=config.DEFAULT_MODEL,
+        default=config.DEFAULT_MODEL_WEIGHTS,
     ),
     click.option(
-        "--model-config-path",
-        help="Model config file to use. If a model name is specified, the appropriate config will be used.",
+        "--model-architecture",
+        help="Model architecture. When specifying custom weights the model architecture must be specified. (sd15, sdxl, etc).",
         show_default=True,
         default=None,
     ),

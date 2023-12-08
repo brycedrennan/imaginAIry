@@ -16,9 +16,10 @@ from imaginairy.utils import get_device
 logger = logging.getLogger(__name__)
 
 
-class SamplerName:
+class SolverName:
     PLMS = "plms"
     DDIM = "ddim"
+    DPMPP = "dpmpp"
     K_DPM_FAST = "k_dpm_fast"
     K_DPM_ADAPTIVE = "k_dpm_adaptive"
     K_LMS = "k_lms"
@@ -31,7 +32,7 @@ class SamplerName:
     K_HEUN = "k_heun"
 
 
-class ImageSampler(ABC):
+class ImageSolver(ABC):
     short_name: str
     name: str
     default_steps: int

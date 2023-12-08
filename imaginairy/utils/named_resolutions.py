@@ -43,27 +43,37 @@ _NAMED_RESOLUTIONS = {
     "SVD": (1024, 576),  # stable video diffusion
 }
 
+_NAMED_RESOLUTIONS = {k.upper(): v for k, v in _NAMED_RESOLUTIONS.items()}
 
-def get_named_resolution(resolution: str):
-    resolution = resolution.upper()
 
-    size = _NAMED_RESOLUTIONS.get(resolution)
-
-    if size is None:
-        # is it WIDTHxHEIGHT format?
-        try:
-            width, height = resolution.split("X")
-            size = (int(width), int(height))
-        except ValueError:
-            pass
-
-    if size is None:
-        # is it just a single number?
-        with contextlib.suppress(ValueError):
-            size = (int(resolution), int(resolution))
-
-    if size is None:
-        msg = f"Unknown resolution: {resolution}"
+def normalize_image_size(resolution: str | int | tuple[int, int]) -> tuple[int, int]:
+    match resolution:
+        case (int(), int()):
+            size = resolution
+        case int():
+            size = resolution, resolution
+        case str():
+            resolution = resolution.strip().upper()
+            resolution = resolution.replace(" ", "").replace("X", ",").replace("*", ",")
+            size = _NAMED_RESOLUTIONS.get(resolution.upper())
+            if size is None:
+                # is it WIDTH,HEIGHT format?
+                try:
+                    width, height = resolution.split(",")
+                    size = int(width), int(height)
+                except ValueError:
+                    pass
+            if size is None:
+                # is it just a single number?
+                with contextlib.suppress(ValueError):
+                    size = (int(resolution), int(resolution))
+            if size is None:
+                msg = f"Invalid resolution: '{resolution}'"
+                raise ValueError(msg)
+        case _:
+            msg = f"Invalid resolution: {resolution!r}"
+            raise ValueError(msg)
+    if size[0] <= 0 or size[1] <= 0:
+        msg = f"Invalid resolution: {resolution!r}"
         raise ValueError(msg)
-
     return size

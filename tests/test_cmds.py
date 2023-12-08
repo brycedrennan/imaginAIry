@@ -72,8 +72,7 @@ def test_edit_demo(monkeypatch):
             ImaginePrompt(
                 "",
                 steps=1,
-                width=256,
-                height=256,
+                size=256,
                 # model="empty",
             )
         ]
@@ -89,7 +88,7 @@ def test_edit_demo(monkeypatch):
             f"{TESTS_FOLDER}/test_output",
         ],
     )
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
 
 
 def test_upscale(monkeypatch):

@@ -44,9 +44,9 @@ logger = logging.getLogger(__name__)
     "--model-weights-path",
     "--model",
     "model",
-    help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
+    help=f"Model to use. Should be one of {', '.join(config.IMAGE_WEIGHTS_SHORT_NAMES)}, or a path to custom weights.",
     show_default=True,
-    default=config.DEFAULT_MODEL,
+    default=config.DEFAULT_MODEL_WEIGHTS,
 )
 @click.option(
     "--person",

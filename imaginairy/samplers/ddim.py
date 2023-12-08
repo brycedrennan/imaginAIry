@@ -8,9 +8,9 @@ from tqdm import tqdm
 from imaginairy.log_utils import increment_step, log_latent
 from imaginairy.modules.diffusion.util import extract_into_tensor, noise_like
 from imaginairy.samplers.base import (
-    ImageSampler,
+    ImageSolver,
     NoiseSchedule,
-    SamplerName,
+    SolverName,
     get_noise_prediction,
     mask_blend,
 )
@@ -19,14 +19,14 @@ from imaginairy.utils import get_device
 logger = logging.getLogger(__name__)
 
 
-class DDIMSampler(ImageSampler):
+class DDIMSolver(ImageSolver):
     """
     Denoising Diffusion Implicit Models.
 
     https://arxiv.org/abs/2010.02502
     """
 
-    short_name = SamplerName.DDIM
+    short_name = SolverName.DDIM
     name = "Denoising Diffusion Implicit Models"
     default_steps = 50
 

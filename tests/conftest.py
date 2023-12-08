@@ -12,7 +12,6 @@ from urllib3 import HTTPConnectionPool
 
 from imaginairy import ImaginePrompt, api, imagine
 from imaginairy.log_utils import configure_logging, suppress_annoying_logs_and_warnings
-from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
 from imaginairy.utils import (
     fix_torch_group_norm,
     fix_torch_nn_layer_norm,
@@ -26,13 +25,13 @@ if "pytest" in str(sys.argv):
 
 logger = logging.getLogger(__name__)
 
-SAMPLERS_FOR_TESTING = SAMPLER_TYPE_OPTIONS
-if get_device() == "mps:0":
-    SAMPLERS_FOR_TESTING = ["plms", "k_euler_a"]
-elif get_device() == "cpu":
-    SAMPLERS_FOR_TESTING = []
+# SOLVERS_FOR_TESTING = SOLVER_TYPE_OPTIONS
+# if get_device() == "mps:0":
+#     SOLVERS_FOR_TESTING = ["plms", "k_euler_a"]
+# elif get_device() == "cpu":
+#     SOLVERS_FOR_TESTING = []
 
-SAMPLERS_FOR_TESTING = ["ddim", "k_dpmpp_2m"]
+SOLVERS_FOR_TESTING = ["ddim", "dpmpp"]
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -90,8 +89,8 @@ def filename_base_for_orig_outputs(request):
     return filename_base
 
 
-@pytest.fixture(params=SAMPLERS_FOR_TESTING)
-def sampler_type(request):
+@pytest.fixture(params=SOLVERS_FOR_TESTING)
+def solver_type(request):
     return request.param
 
 
@@ -118,11 +117,10 @@ def default_model_loaded():
     """
     prompt = ImaginePrompt(
         "dogs lying on a hot pink couch",
-        width=64,
-        height=64,
+        size=64,
         steps=2,
         seed=1,
-        sampler_type="ddim",
+        solver_type="ddim",
     )
 
     next(imagine(prompt))

@@ -6,8 +6,8 @@ from torch import nn
 
 from imaginairy.log_utils import increment_step, log_latent
 from imaginairy.samplers.base import (
-    ImageSampler,
-    SamplerName,
+    ImageSolver,
+    SolverName,
     get_noise_prediction,
     mask_blend,
 )
@@ -57,7 +57,7 @@ def sample_dpm_fast(model, x, sigmas, extra_args=None, disable=False, callback=N
     )
 
 
-class KDiffusionSampler(ImageSampler, ABC):
+class KDiffusionSolver(ImageSolver, ABC):
     sampler_func: callable
 
     def __init__(self, model):
@@ -98,9 +98,9 @@ class KDiffusionSampler(ImageSampler, ABC):
 
         # see https://github.com/crowsonkb/k-diffusion/issues/43#issuecomment-1305195666
         if self.short_name in (
-            SamplerName.K_DPM_2,
-            SamplerName.K_DPMPP_2M,
-            SamplerName.K_DPM_2_ANCESTRAL,
+            SolverName.K_DPM_2,
+            SolverName.K_DPMPP_2M,
+            SolverName.K_DPM_2_ANCESTRAL,
         ):
             sigmas = torch.cat([sigmas[:-2], sigmas[-1:]])
 
@@ -152,73 +152,73 @@ class KDiffusionSampler(ImageSampler, ABC):
 
 
 #
-# class DPMFastSampler(KDiffusionSampler):
-#     short_name = SamplerName.K_DPM_FAST
+# class DPMFastSampler(KDiffusionSolver):
+#     short_name = SolverName.K_DPM_FAST
 #     name = "Diffusion probabilistic models - fast"
 #     default_steps = 15
 #     sampler_func = staticmethod(sample_dpm_fast)
 #
 #
-# class DPMAdaptiveSampler(KDiffusionSampler):
-#     short_name = SamplerName.K_DPM_ADAPTIVE
+# class DPMAdaptiveSampler(KDiffusionSolver):
+#     short_name = SolverName.K_DPM_ADAPTIVE
 #     name = "Diffusion probabilistic models - adaptive"
 #     default_steps = 40
 #     sampler_func = staticmethod(sample_dpm_adaptive)
 #
 #
-# class DPM2Sampler(KDiffusionSampler):
-#     short_name = SamplerName.K_DPM_2
+# class DPM2Sampler(KDiffusionSolver):
+#     short_name = SolverName.K_DPM_2
 #     name = "Diffusion probabilistic models - 2"
 #     default_steps = 40
 #     sampler_func = staticmethod(k_sampling.sample_dpm_2)
 #
 #
-# class DPM2AncestralSampler(KDiffusionSampler):
-#     short_name = SamplerName.K_DPM_2_ANCESTRAL
+# class DPM2AncestralSampler(KDiffusionSolver):
+#     short_name = SolverName.K_DPM_2_ANCESTRAL
 #     name = "Diffusion probabilistic models - 2 ancestral"
 #     default_steps = 40
 #     sampler_func = staticmethod(k_sampling.sample_dpm_2_ancestral)
 #
 
 
-class DPMPP2MSampler(KDiffusionSampler):
-    short_name = SamplerName.K_DPMPP_2M
+class DPMPP2MSampler(KDiffusionSolver):
+    short_name = SolverName.K_DPMPP_2M
     name = "Diffusion probabilistic models - 2m"
     default_steps = 15
     sampler_func = staticmethod(k_sampling.sample_dpmpp_2m)
 
 
 #
-# class DPMPP2SAncestralSampler(KDiffusionSampler):
-#     short_name = SamplerName.K_DPMPP_2S_ANCESTRAL
+# class DPMPP2SAncestralSampler(KDiffusionSolver):
+#     short_name = SolverName.K_DPMPP_2S_ANCESTRAL
 #     name = "Ancestral sampling with DPM-Solver++(2S) second-order steps."
 #     default_steps = 15
 #     sampler_func = staticmethod(k_sampling.sample_dpmpp_2s_ancestral)
 #
 #
-# class EulerSampler(KDiffusionSampler):
-#     short_name = SamplerName.K_EULER
+# class EulerSampler(KDiffusionSolver):
+#     short_name = SolverName.K_EULER
 #     name = "Algorithm 2 (Euler steps) from Karras et al. (2022)"
 #     default_steps = 40
 #     sampler_func = staticmethod(k_sampling.sample_euler)
 #
 #
-# class EulerAncestralSampler(KDiffusionSampler):
-#     short_name = SamplerName.K_EULER_ANCESTRAL
+# class EulerAncestralSampler(KDiffusionSolver):
+#     short_name = SolverName.K_EULER_ANCESTRAL
 #     name = "Euler ancestral"
 #     default_steps = 40
 #     sampler_func = staticmethod(k_sampling.sample_euler_ancestral)
 #
 #
-# class HeunSampler(KDiffusionSampler):
-#     short_name = SamplerName.K_HEUN
+# class HeunSampler(KDiffusionSolver):
+#     short_name = SolverName.K_HEUN
 #     name = "Algorithm 2 (Heun steps) from Karras et al. (2022)."
 #     default_steps = 40
 #     sampler_func = staticmethod(k_sampling.sample_heun)
 #
 #
-# class LMSSampler(KDiffusionSampler):
-#     short_name = SamplerName.K_LMS
+# class LMSSampler(KDiffusionSolver):
+#     short_name = SolverName.K_LMS
 #     name = "LMS"
 #     default_steps = 40
 #     sampler_func = staticmethod(k_sampling.sample_lms)
