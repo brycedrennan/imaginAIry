@@ -13,7 +13,7 @@ from huggingface_hub import (
     try_to_load_from_cache,
 )
 from omegaconf import OmegaConf
-from refiners.foundationals.latent_diffusion import SD1ControlnetAdapter, SD1UNet
+from refiners.foundationals.latent_diffusion import SD1UNet
 from safetensors.torch import load_file
 
 from imaginairy import config as iconfig
@@ -22,7 +22,6 @@ from imaginairy.modules import attention
 from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
 from imaginairy.utils.model_cache import memory_managed_model
-from imaginairy.weight_management.conversion import cast_weights
 
 logger = logging.getLogger(__name__)
 
@@ -361,32 +360,6 @@ def _load_diffusion_model(config_path, weights_location, half_mode):
         half_mode=half_mode,
     )
     return model
-
-
-def load_controlnet_adapter(
-    name,
-    control_weights_location,
-    target_unet,
-    scale=1.0,
-):
-    controlnet_state_dict = load_state_dict(control_weights_location, half_mode=False)
-    controlnet_state_dict = cast_weights(
-        source_weights=controlnet_state_dict,
-        source_model_name="controlnet-1-1",
-        source_component_name="all",
-        source_format="diffusers",
-        dest_format="refiners",
-    )
-
-    for key in controlnet_state_dict:
-        controlnet_state_dict[key] = controlnet_state_dict[key].to(
-            device=target_unet.device, dtype=target_unet.dtype
-        )
-    adapter = SD1ControlnetAdapter(
-        target=target_unet, name=name, scale=scale, weights=controlnet_state_dict
-    )
-
-    return adapter
 
 
 @memory_managed_model("controlnet")

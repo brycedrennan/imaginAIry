@@ -2,7 +2,6 @@ import logging
 from typing import List, Optional
 
 from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
-from imaginairy.model_manager import load_controlnet_adapter
 from imaginairy.schema import ImaginePrompt, MaskMode, WeightedPrompt
 
 logger = logging.getLogger(__name__)
@@ -251,13 +250,14 @@ def _generate_single_image(
                 if not control_config:
                     msg = f"Unknown control mode: {control_input.mode}"
                     raise ValueError(msg)
+                from refiners.foundationals.latent_diffusion import SD1ControlnetAdapter
 
-                controlnet = load_controlnet_adapter(
+                controlnet = SD1ControlnetAdapter(
                     name=control_input.mode,
-                    control_weights_location=control_config.weights_location,
-                    target_unet=sd.unet,
-                    scale=control_input.strength,
+                    target=sd.unet,
+                    weights_location=control_config.weights_location,
                 )
+
                 controlnets.append((controlnet, control_image_t))
 
         if prompt.allow_compose_phase:
