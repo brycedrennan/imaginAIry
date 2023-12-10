@@ -2,12 +2,13 @@ import pytest
 from PIL import Image
 from pytorch_lightning import seed_everything
 
-from imaginairy import ImaginePrompt, imagine
+from imaginairy.api import imagine
 from imaginairy.enhancers.bool_masker import MASK_PROMPT
 from imaginairy.enhancers.clip_masking import get_img_mask
 from imaginairy.enhancers.describe_image_blip import generate_caption
 from imaginairy.enhancers.describe_image_clip import find_img_text_similarity
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
+from imaginairy.schema import ImaginePrompt
 from imaginairy.utils import get_device
 from tests import TESTS_FOLDER
 from tests.utils import assert_image_similar_to_expectation

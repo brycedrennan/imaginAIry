@@ -2,11 +2,10 @@ import os.path
 
 import pytest
 
-from imaginairy import LazyLoadingImage
 from imaginairy.api import imagine, imagine_image_files
 from imaginairy.img_processors.control_modes import CONTROL_MODES
 from imaginairy.img_utils import pillow_fit_image_within
-from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode
+from imaginairy.schema import ControlInput, ImaginePrompt, LazyLoadingImage, MaskMode
 from imaginairy.utils import get_device
 
 from . import TESTS_FOLDER

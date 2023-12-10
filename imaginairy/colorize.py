@@ -2,9 +2,9 @@ import logging
 
 from PIL import Image, ImageEnhance, ImageStat
 
-from imaginairy import ImaginePrompt, imagine
+from imaginairy.api import imagine
 from imaginairy.enhancers.describe_image_blip import generate_caption
-from imaginairy.schema import ControlInput
+from imaginairy.schema import ControlInput, ImaginePrompt
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,7 @@ def colorize_img(img, max_width=1024, max_height=1024, caption=None):
         init_image=img,
         init_image_strength=0.0,
         control_inputs=control_inputs,
-        width=min(img.width, max_width),
-        height=min(img.height, max_height),
+        size=(min(img.width, max_width), min(img.height, max_height)),
         steps=30,
         prompt_strength=12,
     )
