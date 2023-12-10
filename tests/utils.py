@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 from PIL import Image
 
@@ -23,3 +25,21 @@ def calc_norm_sum_sq_diff(img, img2):
     )
     norm_sum_sq_diff = sum_sq_diff / np.sqrt(sum_sq_diff)
     return norm_sum_sq_diff
+
+
+class Timer:
+    def __init__(self, name):
+        self.name = name
+        self.start = None
+        self.elapsed = None
+        self.end = None
+
+    def __enter__(self):
+        self.start = time.perf_counter()
+        return self
+
+    def __exit__(self, *args):
+        self.end = time.perf_counter()
+        self.elapsed = self.end - self.start
+
+        print(f"{self.name} took {self.elapsed*1000:.2f} ms")

@@ -110,7 +110,8 @@ def _imagine_cmd(
         f"Received {len(prompt_texts)} prompt(s) and {len(init_images)} input image(s). Will repeat the generations {repeats} times to create {total_image_count} images."
     )
 
-    from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
+    from imaginairy.api import imagine_image_files
+    from imaginairy.schema import ImaginePrompt, LazyLoadingImage
 
     new_init_images = []
     for _init_image in init_images:

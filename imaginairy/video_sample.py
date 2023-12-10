@@ -16,9 +16,10 @@ from omegaconf import OmegaConf
 from PIL import Image
 from torchvision.transforms import ToTensor
 
-from imaginairy import LazyLoadingImage, config
+from imaginairy import config
 from imaginairy.model_manager import get_cached_url_path
 from imaginairy.paths import PKG_ROOT
+from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import (
     default,
     get_device,

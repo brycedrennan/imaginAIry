@@ -1,10 +1,9 @@
 import logging
 from typing import List, Optional
 
-from imaginairy import ImaginePrompt, WeightedPrompt
 from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
 from imaginairy.model_manager import load_controlnet_adapter
-from imaginairy.schema import MaskMode
+from imaginairy.schema import ImaginePrompt, MaskMode, WeightedPrompt
 
 logger = logging.getLogger(__name__)
 

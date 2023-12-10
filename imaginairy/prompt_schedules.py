@@ -2,7 +2,7 @@ import csv
 import re
 from copy import copy
 
-from imaginairy import ImaginePrompt
+from imaginairy.schema import ImaginePrompt
 from imaginairy.utils import frange
 
 

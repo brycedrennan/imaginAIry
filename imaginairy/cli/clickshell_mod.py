@@ -88,6 +88,9 @@ class ImagineColorsCommand(HelpColorsCommand):
         super().__init__(*args, **kwargs)
         self.help_headers_color = "yellow"
         self.help_options_color = "green"
+        from imaginairy.cli.unslow_the_cli import unslowify_scripts_safe
+
+        unslowify_scripts_safe()
 
     def parse_args(self, ctx, args):
         # run the parser for ourselves to preserve the passed order

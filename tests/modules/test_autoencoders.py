@@ -3,7 +3,6 @@ import pytest
 from PIL import Image
 from torch.nn.functional import interpolate
 
-from imaginairy import LazyLoadingImage
 from imaginairy.enhancers.upscale_riverwing import upscale_latent
 from imaginairy.img_utils import (
     pillow_fit_image_within,
@@ -11,6 +10,7 @@ from imaginairy.img_utils import (
     torch_img_to_pillow_img,
 )
 from imaginairy.model_manager import get_diffusion_model
+from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import get_device
 from tests import TESTS_FOLDER
 

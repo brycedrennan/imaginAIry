@@ -1,15 +1,37 @@
+import subprocess
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner
 
-from imaginairy import ImaginePrompt, LazyLoadingImage, surprise_me
+from imaginairy import surprise_me
 from imaginairy.cli.edit import edit_cmd
 from imaginairy.cli.edit_demo import edit_demo_cmd
 from imaginairy.cli.imagine import imagine_cmd
 from imaginairy.cli.main import aimg
 from imaginairy.cli.upscale import upscale_cmd
+from imaginairy.schema import ImaginePrompt, LazyLoadingImage
 from imaginairy.utils.model_cache import GPUModelCache
-from tests import TESTS_FOLDER
+from tests import PROJECT_FOLDER, TESTS_FOLDER
+from tests.utils import Timer
+
+
+@pytest.mark.parametrize("subcommand_name", aimg.commands.keys())
+def test_cmd_help_time(subcommand_name):
+    cmd_parts = [
+        "python",
+        "-X",
+        "importtime",
+        "imaginairy/cli/main.py",
+        subcommand_name,
+        "--help",
+    ]
+    with Timer(f"{subcommand_name} --help") as t:
+        result = subprocess.run(
+            cmd_parts, check=False, capture_output=True, cwd=PROJECT_FOLDER
+        )
+    assert result.returncode == 0, result.stderr
+    assert t.elapsed < 1.0, f"{t.elapsed} > 1.0"
 
 
 def test_imagine_cmd(monkeypatch):

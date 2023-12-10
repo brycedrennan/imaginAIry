@@ -29,9 +29,9 @@ def upscale_cmd(image_filepaths, outdir, fix_faces, fix_faces_fidelity):
 
     from tqdm import tqdm
 
-    from imaginairy import LazyLoadingImage
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
+    from imaginairy.schema import LazyLoadingImage
     from imaginairy.utils import glob_expand_paths
 
     os.makedirs(outdir, exist_ok=True)

@@ -1,23 +1,7 @@
-import time
-
 import torch
 
 from imaginairy.utils import get_device
-
-
-class Timer:
-    def __init__(self, name):
-        self.name = name
-        self.start = None
-
-    def __enter__(self):
-        self.start = time.perf_counter()
-        return self
-
-    def __exit__(self, *args):
-        elapsed = time.perf_counter() - self.start
-
-        print(f"{self.name} took {elapsed*1000:.2f} ms")
+from tests.utils import Timer
 
 
 def test_nonlinearity():
