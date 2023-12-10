@@ -55,7 +55,7 @@ class StableStudioInput(BaseModel, extra=Extra.forbid):
     style: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
-    solver: Optional[StableStudioSolver] = None
+    solver: Optional[StableStudioSolver] = Field(None, alias="sampler")
     cfg_scale: Optional[float] = Field(None, alias="cfgScale")
     steps: Optional[int] = None
     seed: Optional[int] = None
@@ -94,12 +94,11 @@ class StableStudioInput(BaseModel, extra=Extra.forbid):
             prompt=positive_prompt,
             prompt_strength=self.cfg_scale,
             negative_prompt=negative_prompt,
-            model=self.model,
+            model_weights=self.model,
             solver_type=solver_type,
             seed=self.seed,
             steps=self.steps,
-            height=self.height,
-            width=self.width,
+            size=(self.width, self.height),
             init_image=Image.open(BytesIO(init_image)) if init_image else None,
             init_image_strength=init_image_strength,
             mask_image=Image.open(BytesIO(mask_image)) if mask_image else None,

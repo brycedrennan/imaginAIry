@@ -365,7 +365,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
                 return []
 
             case str():
-                if value:
+                if value is not None:
                     return [WeightedPrompt(text=value)]
                 else:
                     return []
@@ -395,10 +395,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
 
     @model_validator(mode="after")
     def validate_negative_prompt(self):
-        if (
-            self.negative_prompt == [WeightedPrompt(text="")]
-            or self.negative_prompt == []
-        ):
+        if self.negative_prompt == []:
             model_weight_config = config.MODEL_WEIGHT_CONFIG_LOOKUP.get(
                 self.model_weights, None
             )
@@ -411,7 +408,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             self.negative_prompt = [WeightedPrompt(text=default_negative_prompt)]
         return self
 
-    @field_validator("prompt_strength")
+    @field_validator("prompt_strength", mode="before")
     def validate_prompt_strength(cls, v):
         return 7.5 if v is None else v
 

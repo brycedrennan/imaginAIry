@@ -14,10 +14,13 @@ from tests import TESTS_FOLDER
 
 def test_imagine_prompt_default():
     prompt = ImaginePrompt()
-    assert prompt.prompt == []
+    assert prompt.prompt == [WeightedPrompt(text="")]
     assert prompt.negative_prompt == [
         WeightedPrompt(text=config.DEFAULT_NEGATIVE_PROMPT)
     ]
+
+    prompt = ImaginePrompt(negative_prompt="")
+    assert prompt.negative_prompt == [WeightedPrompt(text="")]
 
 
 def test_imagine_prompt_has_default_negative():

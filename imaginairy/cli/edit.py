@@ -96,13 +96,7 @@ def edit_cmd(
     from imaginairy.schema import ControlInput
 
     allow_compose_phase = False
-    control_inputs = [
-        ControlInput(
-            image=None,
-            image_raw=None,
-            mode="edit",
-        )
-    ]
+    control_inputs = [ControlInput(image=None, image_raw=None, mode="edit", strength=1)]
 
     return _imagine_cmd(
         ctx,

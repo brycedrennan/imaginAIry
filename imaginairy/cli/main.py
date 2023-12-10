@@ -82,17 +82,16 @@ def model_list_cmd():
     """Print list of available models."""
     from imaginairy import config
 
-    print(f"{'ALIAS': <10} {'NAME': <18} {'DESCRIPTION'}")
+    print("\nWEIGHT NAMES")
+    print(f"{'ALIAS': <25} {'NAME': <25} ")
     for model_config in config.MODEL_WEIGHT_CONFIGS:
-        print(
-            f"{model_config.alias: <10} {model_config.short_name: <18} {model_config.description}"
-        )
+        print(f"{model_config.aliases[0]: <25} {model_config.name: <25}")
 
-    print("\nCONTROL MODES:")
-    print(f"{'ALIAS': <10} {'NAME': <18} {'CONTROL TYPE'}")
+    print("\nCONTROL MODES")
+    print(f"{'ALIAS': <14} {'NAME': <35} {'CONTROL TYPE'}")
     for control_mode in config.CONTROL_CONFIGS:
         print(
-            f"{control_mode.alias: <10} {control_mode.short_name: <18} {control_mode.control_type}"
+            f"{control_mode.aliases[0]: <14} {control_mode.name: <35} {control_mode.control_type}"
         )
 
 

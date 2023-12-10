@@ -56,12 +56,14 @@ async def list_models():
 
     model_objs = []
     for model_config in MODEL_WEIGHT_CONFIGS:
-        if "inpaint" in model_config.description.lower():
+        if "inpaint" in model_config.name.lower():
+            continue
+        if model_config.architecture.output_modality != "image":
             continue
         model_obj = StableStudioModel(
-            id=model_config.short_name,
-            name=model_config.description,
-            description=model_config.description,
+            id=model_config.aliases[0],
+            name=model_config.name,
+            description=model_config.name,
         )
         model_objs.append(model_obj)
 

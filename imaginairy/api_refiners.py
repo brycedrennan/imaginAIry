@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional
 
 from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
-from imaginairy.schema import ImaginePrompt, MaskMode, WeightedPrompt
+from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode, WeightedPrompt
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +20,6 @@ def _generate_single_image(
     dtype=None,
     half_mode=None,
 ):
-    import gc
-
     import torch.nn
     from PIL import ImageOps
     from pytorch_lightning import seed_everything
@@ -62,8 +60,7 @@ def _generate_single_image(
         dtype = torch.float16 if half_mode else torch.float32
 
     get_device()
-    gc.collect()
-    torch.cuda.empty_cache()
+    clear_gpu_cache()
     prompt = prompt.make_concrete_copy()
 
     control_modes = []
@@ -178,11 +175,11 @@ def _generate_single_image(
                 pillow_mask_to_latent_mask(
                     mask_image, downsampling_factor=downsampling_factor
                 ).to(get_device())
-                # if inpaint_method == "controlnet":
-                #     result_images["control-inpaint"] = mask_image
-                #     control_inputs.append(
-                #         ControlInput(mode="inpaint", image=mask_image)
-                #     )
+                if inpaint_method == "controlnet":
+                    result_images["control-inpaint"] = mask_image
+                    control_inputs.append(
+                        ControlInput(mode="inpaint", image=mask_image)
+                    )
 
         seed_everything(prompt.seed)
 
@@ -257,26 +254,30 @@ def _generate_single_image(
                     target=sd.unet,
                     weights_location=control_config.weights_location,
                 )
+                controlnet.set_scale(control_input.strength)
 
                 controlnets.append((controlnet, control_image_t))
 
         if prompt.allow_compose_phase:
+            compose_kwargs = {
+                "prompt": prompt,
+                "target_height": prompt.height,
+                "target_width": prompt.width,
+                "cutoff": get_model_default_image_size(prompt.model_architecture),
+                "dtype": dtype,
+            }
+
             if prompt.init_image:
-                comp_image, comp_img_orig = _generate_composition_image(
-                    prompt=prompt,
-                    target_height=init_image.height,
-                    target_width=init_image.width,
-                    cutoff=get_model_default_image_size(prompt.model_architecture),
-                    dtype=dtype,
+                compose_kwargs.update(
+                    {
+                        "target_height": init_image.height,
+                        "target_width": init_image.width,
+                    }
                 )
-            else:
                 comp_image, comp_img_orig = _generate_composition_image(
-                    prompt=prompt,
-                    target_height=prompt.height,
-                    target_width=prompt.width,
-                    cutoff=get_model_default_image_size(prompt.model_architecture),
-                    dtype=dtype,
+                    **compose_kwargs
                 )
+
             if comp_image is not None:
                 result_images["composition"] = comp_img_orig
                 result_images["composition-upscaled"] = comp_image
@@ -325,8 +326,7 @@ def _generate_single_image(
 
         # if "cuda" in str(sd.lda.device):
         #     sd.lda.to("cpu")
-        gc.collect()
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
         # print(f"moving unet to {sd.device}")
         # sd.unet.to(device=sd.device, dtype=sd.dtype)
         for step in tqdm(sd.steps[first_step:], bar_format="    {l_bar}{bar}{r_bar}"):
@@ -338,26 +338,12 @@ def _generate_single_image(
                 condition_scale=prompt.prompt_strength,
             )
 
-        # z = sd(
-        #     randn_seeded(seed=prompt.seed, size=[1, 4, 8, 8]).to(
-        #         device=sd.device, dtype=sd.dtype
-        #     ),
-        #     step=step,
-        #     clip_text_embedding=clip_text_embedding,
-        #     condition_scale=prompt.prompt_strength,
-        # )
-
-        if "cuda" in str(sd.unet.device):
-            # print("moving unet to cpu")
-            # sd.unet.to("cpu")
-            gc.collect()
-            torch.cuda.empty_cache()
+        clear_gpu_cache()
 
         logger.debug("Decoding image")
         if x.device != sd.lda.device:
             sd.lda.to(x.device)
-        gc.collect()
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
         gen_img = sd.lda.decode_latents(x)
 
         if mask_image_orig and init_image:
@@ -428,7 +414,7 @@ def _generate_single_image(
             is_nsfw=safety_score.is_nsfw,
             safety_score=safety_score,
             result_images=result_images,
-            timings={},  # todo
+            timings=lc.get_timings(),
             progress_latents=[],  # todo
         )
 
@@ -437,8 +423,7 @@ def _generate_single_image(
             logger.info(f"Image Generated. Timings: {result.timings_str()}")
         for controlnet, _ in controlnets:
             controlnet.eject()
-        gc.collect()
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
         return result
 
 
@@ -480,3 +465,13 @@ def _calc_conditioning(
         tensors=(neutral_conditioning, positive_conditioning), dim=0
     )
     return clip_text_embedding
+
+
+def clear_gpu_cache():
+    import gc
+
+    import torch
+
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()

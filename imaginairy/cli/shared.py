@@ -15,13 +15,12 @@ def imaginairy_click_context(log_level="INFO"):
 
     from imaginairy.log_utils import configure_logging
 
-    errors_to_catch = (FileNotFoundError, ValidationError)
+    errors_to_catch = (FileNotFoundError, ValidationError, ValueError)
     configure_logging(level=log_level)
     try:
         yield
     except errors_to_catch as e:
         logger.error(e)
-        exit(1)
 
 
 def _imagine_cmd(

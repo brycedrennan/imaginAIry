@@ -1,7 +1,12 @@
 import click
 
 from imaginairy.cli.clickshell_mod import ImagineColorsCommand
-from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
+from imaginairy.cli.shared import (
+    _imagine_cmd,
+    add_options,
+    common_options,
+    imaginairy_click_context,
+)
 
 
 @click.command(
@@ -67,6 +72,7 @@ from imaginairy.cli.shared import _imagine_cmd, add_options, common_options
     help="Turns the generated photo into video",
 )
 @click.pass_context
+@imaginairy_click_context()
 def imagine_cmd(
     ctx,
     prompt_texts,

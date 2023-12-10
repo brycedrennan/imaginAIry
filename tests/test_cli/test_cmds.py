@@ -19,10 +19,7 @@ from tests.utils import Timer
 @pytest.mark.parametrize("subcommand_name", aimg.commands.keys())
 def test_cmd_help_time(subcommand_name):
     cmd_parts = [
-        "python",
-        "-X",
-        "importtime",
-        "imaginairy/cli/main.py",
+        "aimg",
         subcommand_name,
         "--help",
     ]
@@ -32,6 +29,41 @@ def test_cmd_help_time(subcommand_name):
         )
     assert result.returncode == 0, result.stderr
     assert t.elapsed < 1.0, f"{t.elapsed} > 1.0"
+
+
+def test_model_info_cmd():
+    runner = CliRunner()
+    result = runner.invoke(
+        aimg,
+        [
+            "model-list",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+
+
+def test_describe_cmd():
+    runner = CliRunner()
+    result = runner.invoke(
+        aimg,
+        [
+            "describe",
+            f"{TESTS_FOLDER}/data/dog.jpg",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+
+
+def test_colorize_cmd():
+    runner = CliRunner()
+    result = runner.invoke(
+        aimg,
+        [
+            "colorize",
+            f"{TESTS_FOLDER}/data/dog.jpg",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
 
 
 def test_imagine_cmd(monkeypatch):
@@ -47,8 +79,6 @@ def test_imagine_cmd(monkeypatch):
             f"{TESTS_FOLDER}/test_output",
             "--seed",
             "703425280",
-            # "--model",
-            # "empty",
             "--outdir",
             f"{TESTS_FOLDER}/test_output",
         ],
