@@ -40,6 +40,9 @@ lint:  ## Run the code linter.
 	@ruff check --config tests/ruff.toml .
 	@echo -e "No linting errors - well done! ✨ 🍰 ✨"
 
+type-check: ## Run the type checker.
+	@mypy --config-file tox.ini .
+
 deploy:  ## Deploy the package to pypi.org
 	pip install twine wheel
 	-git tag $$(python setup.py -V)

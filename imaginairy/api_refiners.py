@@ -305,7 +305,7 @@ def _generate_single_image(
         sd.scheduler.to(device=sd.device, dtype=sd.dtype)
         sd.set_num_inference_steps(prompt.steps)
 
-        if hasattr(sd, "mask_latents"):
+        if hasattr(sd, "mask_latents") and mask_image is not None:
             sd.set_inpainting_conditions(
                 target_image=init_image,
                 mask=ImageOps.invert(mask_image),

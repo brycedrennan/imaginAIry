@@ -175,9 +175,9 @@ MODEL_WEIGHT_CONFIGS = [
 ]
 
 MODEL_WEIGHT_CONFIG_LOOKUP = {}
-for m in MODEL_WEIGHT_CONFIGS:
-    for a in m.aliases:
-        MODEL_WEIGHT_CONFIG_LOOKUP[a] = m
+for mw in MODEL_WEIGHT_CONFIGS:
+    for a in mw.aliases:
+        MODEL_WEIGHT_CONFIG_LOOKUP[a] = mw
 
 
 IMAGE_WEIGHTS_SHORT_NAMES = [
@@ -272,9 +272,9 @@ CONTROL_CONFIGS = [
 ]
 
 CONTROL_CONFIG_SHORTCUTS: dict[str, ControlConfig] = {}
-for m in CONTROL_CONFIGS:
-    for a in m.aliases:
-        CONTROL_CONFIG_SHORTCUTS[a] = m
+for cc in CONTROL_CONFIGS:
+    for ca in cc.aliases:
+        CONTROL_CONFIG_SHORTCUTS[ca] = cc
 
 
 @dataclass
