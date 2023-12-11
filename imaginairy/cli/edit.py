@@ -33,7 +33,7 @@ remove_option(edit_options, "allow_compose_phase")
     "--model",
     help=f"Model to use. Should be one of {', '.join(config.IMAGE_WEIGHTS_SHORT_NAMES)}, or a path to custom weights.",
     show_default=True,
-    default="SD-1.5",
+    default="sd15",
 )
 @click.option(
     "--negative-prompt",

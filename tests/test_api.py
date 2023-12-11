@@ -55,11 +55,11 @@ def test_model_versions(filename_base_for_orig_outputs, model_version):
     threshold = 35000
     results = list(imagine(prompts))
     for i, result in enumerate(results):
-        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model_weights}.png"
+        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model_weights.aliases[0]}.png"
         result.img.save(img_path)
 
     for i, result in enumerate(results):
-        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model_weights}.png"
+        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model_weights.aliases[0]}.png"
         assert_image_similar_to_expectation(
             result.img, img_path=img_path, threshold=threshold
         )
