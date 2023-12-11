@@ -1,4 +1,6 @@
 import contextlib
+import csv
+import gc
 import logging
 import os
 import sys
@@ -7,6 +9,7 @@ from shutil import rmtree
 
 import pytest
 import responses
+import torch.cuda
 from tqdm import tqdm
 from urllib3 import HTTPConnectionPool
 
@@ -128,13 +131,42 @@ def default_model_loaded():
     next(imagine(prompt))
 
 
+cuda_tests_node_ids = []
+cuda_test_tracker_filepath = f"{TESTS_FOLDER}/data/cuda-tests.csv"
+
+
+@pytest.fixture(autouse=True)
+def detect_cuda_tests(request):
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+        start_memory = torch.cuda.max_memory_allocated()
+    yield
+    if torch.cuda.is_available():
+        end_memory = torch.cuda.max_memory_allocated()
+        memory_diff = end_memory - start_memory
+        if memory_diff > 0:
+            test_name = request.node.name
+            print(f"Test {test_name} used {memory_diff} bytes of GPU memory")
+            cuda_tests_node_ids.append(test_name)
+
+        torch.cuda.empty_cache()
+        gc.collect()
+
+
 @pytest.hookimpl()
 def pytest_collection_modifyitems(config, items):
     """Only select a subset of tests to run, based on the --subset option."""
+
+    node_ids_to_mark = read_stored_cuda_test_nodes()
+    for item in items:
+        if item.nodeid in node_ids_to_mark:
+            item.add_marker(pytest.mark.gputest)
+
     filtered_node_ids = set()
     node_ids = [f.nodeid for f in items]
     node_ids.sort()
     subset = config.getoption("--subset")
+
     if subset:
         partition_no, total_partitions = subset.split("/")
         partition_no, total_partitions = int(partition_no), int(total_partitions)
@@ -168,3 +200,26 @@ def pytest_sessionstart(session):
 
     if "nvidia_smi" in debug_info:
         print(debug_info["nvidia_smi"])
+
+
+def pytest_sessionfinish(session, exitstatus):
+    existing_node_ids = read_stored_cuda_test_nodes()
+    updated_node_ids = existing_node_ids.union(set(cuda_tests_node_ids))
+
+    # Write updated, sorted list of node IDs to file
+    with open(cuda_test_tracker_filepath, "w", newline="") as file:
+        writer = csv.writer(file)
+        for node_id in sorted(updated_node_ids):
+            writer.writerow([node_id])
+
+
+def read_stored_cuda_test_nodes():
+    node_ids = set()
+    try:
+        with open(cuda_test_tracker_filepath, newline="") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                node_ids.add(row[0])
+    except FileNotFoundError:
+        pass  # File does not exist yet
+    return node_ids
