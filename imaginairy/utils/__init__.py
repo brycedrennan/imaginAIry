@@ -70,7 +70,6 @@ def instantiate_from_config(config: dict) -> Any:
         if config == "__is_unconditional__":
             return None
         raise KeyError("Expected key `target` to instantiate.")
-    assert isinstance(config, dict)
     params = config.get("params", {})
     _cls = get_obj_from_str(config["target"])
     start = time.perf_counter()

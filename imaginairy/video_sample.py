@@ -70,15 +70,15 @@ def generate_video(
     seed = default(seed, random.randint(0, 1000000))
     output_fps = default(output_fps, fps_id)
 
-    video_model_config = config.video_models.get(model_name, None)
+    video_model_config = config.MODEL_WEIGHT_CONFIG_LOOKUP.get(model_name, None)
     if video_model_config is None:
         msg = f"Version {model_name} does not exist."
         raise ValueError(msg)
 
-    num_frames = default(num_frames, video_model_config["default_frames"])
-    num_steps = default(num_steps, video_model_config["default_steps"])
+    num_frames = default(num_frames, video_model_config.defaults.get("frames", 12))
+    num_steps = default(num_steps, video_model_config.defaults.get("steps", 30))
     output_folder = default(output_folder, "outputs/video/")
-    video_config_path = f"{PKG_ROOT}/{video_model_config['config_path']}"
+    video_config_path = f"{PKG_ROOT}/{video_model_config.architecture.config_path}"
 
     logger.info(
         f"Generating a {num_frames} frame video from {input_path}. Device:{device} seed:{seed}"
@@ -88,7 +88,7 @@ def generate_video(
         device="cpu",
         num_frames=num_frames,
         num_steps=num_steps,
-        weights_url=video_model_config["weights_location"],
+        weights_url=video_model_config.weights_location,
     )
     torch.manual_seed(seed)
 

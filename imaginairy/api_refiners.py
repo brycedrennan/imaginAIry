@@ -274,9 +274,7 @@ def _generate_single_image(
                         "target_width": init_image.width,
                     }
                 )
-                comp_image, comp_img_orig = _generate_composition_image(
-                    **compose_kwargs
-                )
+            comp_image, comp_img_orig = _generate_composition_image(**compose_kwargs)
 
             if comp_image is not None:
                 result_images["composition"] = comp_img_orig

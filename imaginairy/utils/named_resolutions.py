@@ -47,6 +47,14 @@ _NAMED_RESOLUTIONS = {k.upper(): v for k, v in _NAMED_RESOLUTIONS.items()}
 
 
 def normalize_image_size(resolution: str | int | tuple[int, int]) -> tuple[int, int]:
+    size = _normalize_image_size(resolution)
+    if any(s <= 0 for s in size):
+        msg = f"Invalid resolution: {resolution!r}"
+        raise ValueError(msg)
+    return size
+
+
+def _normalize_image_size(resolution: str | int | tuple[int, int]) -> tuple[int, int]:
     match resolution:
         case (int(), int()):
             return resolution  # type: ignore

@@ -541,7 +541,10 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         if v is None:
             v = steps_lookup[info.data["solver_type"]]
 
-        return int(v)
+        try:
+            return int(v)
+        except (OverflowError, TypeError) as e:
+            raise ValueError("Steps must be an integer") from e
 
     @model_validator(mode="after")
     def validate_init_image_strength(self):
