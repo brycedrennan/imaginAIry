@@ -14,6 +14,7 @@ from huggingface_hub import (
 )
 from omegaconf import OmegaConf
 from refiners.foundationals.latent_diffusion import SD1UNet
+from refiners.foundationals.latent_diffusion.model import LatentDiffusionModel
 from safetensors.torch import load_file
 
 from imaginairy import config as iconfig
@@ -22,6 +23,7 @@ from imaginairy.modules import attention
 from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
 from imaginairy.utils.model_cache import memory_managed_model
+from imaginairy.utils.named_resolutions import normalize_image_size
 
 logger = logging.getLogger(__name__)
 
@@ -224,73 +226,25 @@ def _get_diffusion_model(
 
 
 def get_diffusion_model_refiners(
-    weights_location=iconfig.DEFAULT_MODEL_WEIGHTS,
-    model_architecture=None,
-    control_weights_locations=None,
+    weights_config: iconfig.ModelWeightsConfig,
+    for_inpainting=False,
     dtype=None,
-    for_inpainting=False,
-):
-    """
-    Load a diffusion model.
-
-    Weights location may also be shortcut name, e.g. "SD-1.5"
-    """
-    try:
-        return _get_diffusion_model_refiners(
-            weights_location,
-            model_architecture=model_architecture,
-            for_inpainting=for_inpainting,
-            dtype=dtype,
-            control_weights_locations=control_weights_locations,
-        )
-    except HuggingFaceAuthorizationError as e:
-        if for_inpainting:
-            logger.warning(
-                f"Failed to load inpainting model. Attempting to fall-back to standard model.   {e!s}"
-            )
-            return _get_diffusion_model_refiners(
-                iconfig.DEFAULT_MODEL_WEIGHTS,
-                model_architecture=model_architecture,
-                dtype=dtype,
-                for_inpainting=False,
-                control_weights_locations=control_weights_locations,
-            )
-        raise
-
-
-def _get_diffusion_model_refiners(
-    weights_location=iconfig.DEFAULT_MODEL_WEIGHTS,
-    model_architecture=None,
-    for_inpainting=False,
-    control_weights_locations=None,
-    device=None,
-    dtype=torch.float16,
-):
-    """
-    Load a diffusion model.
-
-    Weights location may also be shortcut name, e.g. "SD-1.5"
-    """
-
-    sd = _get_diffusion_model_refiners_only(
-        weights_location=weights_location,
-        model_architecture=model_architecture,
+) -> LatentDiffusionModel:
+    """Load a diffusion model."""
+    return _get_diffusion_model_refiners(
+        weights_location=weights_config.weights_location,
         for_inpainting=for_inpainting,
-        device=device,
         dtype=dtype,
     )
 
-    return sd
-
 
 @lru_cache(maxsize=1)
-def _get_diffusion_model_refiners_only(
-    weights_location=iconfig.DEFAULT_MODEL_WEIGHTS,
-    model_architecture=None,
-    for_inpainting=False,
+def _get_diffusion_model_refiners(
+    weights_location: str,
+    for_inpainting: bool = False,
     device=None,
     dtype=torch.float16,
-):
+) -> LatentDiffusionModel:
     """
     Load a diffusion model.
 
@@ -306,17 +260,11 @@ def _get_diffusion_model_refiners_only(
 
     device = device or get_device()
 
-    model_weights_config = resolve_model_weights_config(
-        model_weights=weights_location,
-        default_model_architecture=model_architecture,
-        for_inpainting=for_inpainting,
-    )
-
     (
         vae_weights,
         unet_weights,
         text_encoder_weights,
-    ) = load_stable_diffusion_compvis_weights(model_weights_config.weights_location)
+    ) = load_stable_diffusion_compvis_weights(weights_location)
 
     if for_inpainting:
         unet = SD1UNet(in_channels=9)
@@ -380,11 +328,23 @@ def load_controlnet(control_weights_location, half_mode):
 
 
 def resolve_model_weights_config(
-    model_weights: str,
+    model_weights: str | iconfig.ModelWeightsConfig,
     default_model_architecture: str | None = None,
     for_inpainting: bool = False,
 ) -> iconfig.ModelWeightsConfig:
     """Resolve weight and config path if they happen to be shortcuts."""
+    if isinstance(model_weights, iconfig.ModelWeightsConfig):
+        return model_weights
+
+    if not isinstance(model_weights, str):
+        msg = f"Invalid model weights: {model_weights}"
+        raise ValueError(msg)  # noqa
+
+    if default_model_architecture is not None and not isinstance(
+        default_model_architecture, str
+    ):
+        msg = f"Invalid model architecture: {default_model_architecture}"
+        raise ValueError(msg)
 
     if for_inpainting:
         model_weights_config = iconfig.MODEL_WEIGHT_CONFIG_LOOKUP.get(
@@ -441,6 +401,7 @@ def get_model_default_image_size(model_architecture: str | ModelArchitecture):
 
     if default_size is None:
         default_size = 512
+    default_size = normalize_image_size(default_size)
     return default_size
 
 
@@ -648,7 +609,6 @@ def open_weights(filepath, device=None):
     return state_dict
 
 
-@lru_cache
 def load_stable_diffusion_compvis_weights(weights_url):
     from imaginairy.model_manager import get_cached_url_path
     from imaginairy.utils import get_device

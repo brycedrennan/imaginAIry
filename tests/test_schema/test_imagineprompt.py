@@ -22,9 +22,20 @@ def test_imagine_prompt_default():
     prompt = ImaginePrompt(negative_prompt="")
     assert prompt.negative_prompt == [WeightedPrompt(text="")]
 
+    assert prompt.width == 512
+
 
 def test_imagine_prompt_has_default_negative():
-    prompt = ImaginePrompt("fruit salad", model_weights="foobar")
+    prompt = ImaginePrompt(
+        "fruit salad",
+        model_weights=config.ModelWeightsConfig(
+            name="foobar",
+            aliases=["foobar"],
+            weights_location="foobar",
+            architecture="sd15",
+            defaults={},
+        ),
+    )
     assert isinstance(prompt.prompt[0], WeightedPrompt)
     assert isinstance(prompt.negative_prompt[0], WeightedPrompt)
 
@@ -153,7 +164,7 @@ def test_imagine_prompt_mask_params():
 
 def test_imagine_prompt_default_model():
     prompt = ImaginePrompt("fruit", model_weights=None)
-    assert prompt.model_weights == config.DEFAULT_MODEL_WEIGHTS
+    assert config.DEFAULT_MODEL_WEIGHTS in prompt.model_weights.aliases
 
 
 def test_imagine_prompt_default_negative():

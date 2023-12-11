@@ -26,15 +26,6 @@ class ModelArchitecture:
     config_path: str | None = None
 
 
-@dataclass
-class ModelWeightsConfig:
-    name: str
-    aliases: List[str]
-    architecture: ModelArchitecture
-    defaults: dict[str, Any]
-    weights_location: str
-
-
 MODEL_ARCHITECTURES = [
     ModelArchitecture(
         name="Stable Diffusion 1.5",
@@ -105,6 +96,22 @@ MODEL_ARCHITECTURE_LOOKUP = {}
 for m in MODEL_ARCHITECTURES:
     for a in m.aliases:
         MODEL_ARCHITECTURE_LOOKUP[a] = m
+
+
+@dataclass
+class ModelWeightsConfig:
+    name: str
+    aliases: List[str]
+    architecture: ModelArchitecture
+    defaults: dict[str, Any]
+    weights_location: str
+
+    def __post_init__(self):
+        if isinstance(self.architecture, str):
+            self.architecture = MODEL_ARCHITECTURE_LOOKUP[self.architecture]
+        if not isinstance(self.architecture, ModelArchitecture):
+            msg = f"You must specify an architecture {self.architecture}"
+            raise ValueError(msg)  # noqa
 
 
 MODEL_WEIGHT_CONFIGS = [

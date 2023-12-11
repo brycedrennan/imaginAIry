@@ -3,6 +3,8 @@ import os
 import re
 from typing import TYPE_CHECKING, Callable
 
+from imaginairy.utils.named_resolutions import normalize_image_size
+
 if TYPE_CHECKING:
     from imaginairy.schema import ImaginePrompt
 
@@ -543,21 +545,22 @@ def _generate_single_image_compvis(
             and not is_controlnet_model
             and model.cond_stage_key != "edit"
         ):
+            default_size = get_model_default_image_size(
+                prompt.model_weights.architecture
+            )
             if prompt.init_image:
                 comp_image = _generate_composition_image(
                     prompt=prompt,
                     target_height=init_image.height,
                     target_width=init_image.width,
-                    cutoff=get_model_default_image_size(
-                        prompt.model_weights.model_architecture
-                    ),
+                    cutoff=default_size,
                 )
             else:
                 comp_image = _generate_composition_image(
                     prompt=prompt,
                     target_height=prompt.height,
                     target_width=prompt.width,
-                    cutoff=get_model_default_image_size(prompt.model_architecture),
+                    cutoff=default_size,
                 )
             if comp_image is not None:
                 result_images["composition"] = comp_image
@@ -668,18 +671,15 @@ def _prompts_to_embeddings(prompts, model):
     return conditioning
 
 
-def calc_scale_to_fit_within(
-    height,
-    width,
-    max_size,
-):
-    if max(height, width) < max_size:
+def calc_scale_to_fit_within(height: int, width: int, max_size) -> float:
+    max_width, max_height = normalize_image_size(max_size)
+    if width <= max_width and height <= max_height:
         return 1
 
-    if width > height:
-        return max_size / width
+    width_ratio = max_width / width
+    height_ratio = max_height / height
 
-    return max_size / height
+    return min(width_ratio, height_ratio)
 
 
 def _scale_latent(
@@ -698,14 +698,19 @@ def _scale_latent(
 
 
 def _generate_composition_image(
-    prompt, target_height, target_width, cutoff=512, dtype=None
+    prompt,
+    target_height,
+    target_width,
+    cutoff: tuple[int, int] = (512, 512),
+    dtype=None,
 ):
     from PIL import Image
 
     from imaginairy.api_refiners import _generate_single_image
     from imaginairy.utils import default, get_default_dtype
 
-    if prompt.width <= cutoff and prompt.height <= cutoff:
+    cutoff = normalize_image_size(cutoff)
+    if prompt.width <= cutoff[0] and prompt.height <= cutoff[1]:
         return None, None
 
     dtype = default(dtype, get_default_dtype)
@@ -727,6 +732,7 @@ def _generate_composition_image(
             "upscale": False,
             "fix_faces": False,
             "mask_modify_original": False,
+            "allow_compose_phase": False,
         },
     )
 

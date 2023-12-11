@@ -14,8 +14,6 @@ def _generate_single_image(
     progress_img_interval_steps=3,
     progress_img_interval_min_s=0.1,
     add_caption=False,
-    # controlnet, finetune, naive, auto
-    inpaint_method="finetune",
     return_latent=False,
     dtype=None,
     half_mode=None,
@@ -63,20 +61,11 @@ def _generate_single_image(
     clear_gpu_cache()
     prompt = prompt.make_concrete_copy()
 
-    control_modes = []
-    control_inputs = prompt.control_inputs or []
-    control_inputs = control_inputs.copy()
-    for_inpainting = bool(prompt.mask_image or prompt.mask_prompt or prompt.outpaint)
-
-    if control_inputs:
-        control_modes = [c.mode for c in prompt.control_inputs]
-
     sd = get_diffusion_model_refiners(
-        weights_location=prompt.model_weights,
-        model_architecture=prompt.model_architecture,
-        control_weights_locations=tuple(control_modes),
+        weights_config=prompt.model_weights,
+        for_inpainting=prompt.should_use_inpainting
+        and prompt.inpaint_method == "finetune",
         dtype=dtype,
-        for_inpainting=for_inpainting and inpaint_method == "finetune",
     )
 
     seed_everything(prompt.seed)
@@ -126,6 +115,14 @@ def _generate_single_image(
 
         init_latent = None
         noise_step = None
+
+        control_modes = []
+        control_inputs = prompt.control_inputs or []
+        control_inputs = control_inputs.copy()
+
+        if control_inputs:
+            control_modes = [c.mode for c in prompt.control_inputs]
+
         if prompt.init_image:
             starting_image = prompt.init_image
             first_step = int((prompt.steps) * prompt.init_image_strength)
@@ -175,7 +172,7 @@ def _generate_single_image(
                 pillow_mask_to_latent_mask(
                     mask_image, downsampling_factor=downsampling_factor
                 ).to(get_device())
-                if inpaint_method == "controlnet":
+                if prompt.inpaint_method == "controlnet":
                     result_images["control-inpaint"] = mask_image
                     control_inputs.append(
                         ControlInput(mode="inpaint", image=mask_image)

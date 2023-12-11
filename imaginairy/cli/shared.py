@@ -133,6 +133,15 @@ def _imagine_cmd(
     prompt_expanding_iterators = {}
     from imaginairy.enhancers.prompt_expansion import expand_prompts
 
+    if model_weights_path.lower() not in config.MODEL_WEIGHT_CONFIG_LOOKUP:
+        model_weights_path = config.ModelWeightsConfig(
+            name="custom weights",
+            aliases=["custom"],
+            weights_location=model_weights_path,
+            architecture=model_architecture,
+            defaults={"negative_prompt": config.DEFAULT_NEGATIVE_PROMPT},
+        )
+
     for _ in range(repeats):
         for prompt_text in prompt_texts:
             if prompt_text not in prompt_expanding_iterators:
@@ -174,7 +183,6 @@ def _imagine_cmd(
                     tile_mode=_tile_mode,
                     allow_compose_phase=allow_compose_phase,
                     model_weights=model_weights_path,
-                    model_architecture=model_architecture,
                     caption_text=caption_text,
                 )
                 from imaginairy.prompt_schedules import (
