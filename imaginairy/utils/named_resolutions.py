@@ -49,31 +49,28 @@ _NAMED_RESOLUTIONS = {k.upper(): v for k, v in _NAMED_RESOLUTIONS.items()}
 def normalize_image_size(resolution: str | int | tuple[int, int]) -> tuple[int, int]:
     match resolution:
         case (int(), int()):
-            size = resolution
+            return resolution  # type: ignore
         case int():
-            size = resolution, resolution
+            return resolution, resolution
         case str():
             resolution = resolution.strip().upper()
             resolution = resolution.replace(" ", "").replace("X", ",").replace("*", ",")
-            size = _NAMED_RESOLUTIONS.get(resolution.upper())
-            if size is None:
-                # is it WIDTH,HEIGHT format?
-                try:
-                    width, height = resolution.split(",")
-                    size = int(width), int(height)
-                except ValueError:
-                    pass
-            if size is None:
-                # is it just a single number?
-                with contextlib.suppress(ValueError):
-                    size = (int(resolution), int(resolution))
-            if size is None:
-                msg = f"Invalid resolution: '{resolution}'"
-                raise ValueError(msg)
+            if resolution.upper() in _NAMED_RESOLUTIONS:
+                return _NAMED_RESOLUTIONS[resolution.upper()]
+
+            # is it WIDTH,HEIGHT format?
+            try:
+                width, height = resolution.split(",")
+                return int(width), int(height)
+            except ValueError:
+                pass
+
+            # is it just a single number?
+            with contextlib.suppress(ValueError):
+                return int(resolution), int(resolution)
+
+            msg = f"Invalid resolution: '{resolution}'"
+            raise ValueError(msg)
         case _:
             msg = f"Invalid resolution: {resolution!r}"
             raise ValueError(msg)
-    if size[0] <= 0 or size[1] <= 0:
-        msg = f"Invalid resolution: {resolution!r}"
-        raise ValueError(msg)
-    return size

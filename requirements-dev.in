@@ -1,10 +1,15 @@
 black
 coverage
+mypy
 ruff
 pytest
 pytest-randomly
 pytest-sugar
 responses
+types-pillow
+types-psutil
+types-requests
+types-tqdm
 wheel
 
 -c tests/constraints.txt

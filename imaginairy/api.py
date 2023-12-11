@@ -279,7 +279,7 @@ def _generate_single_image_compvis(
     if control_inputs:
         control_modes = [c.mode for c in prompt.control_inputs]
     if inpaint_method == "auto":
-        if prompt.model in {"SD-1.5", "SD-2.0"}:
+        if prompt.model_weights in {"SD-1.5", "SD-2.0"}:
             inpaint_method = "finetune"
         else:
             inpaint_method = "controlnet"
@@ -287,8 +287,8 @@ def _generate_single_image_compvis(
     if for_inpainting and inpaint_method == "controlnet":
         control_modes.append("inpaint")
     model = get_diffusion_model(
-        weights_location=prompt.model,
-        config_path=prompt.model_config_path,
+        weights_location=prompt.model_weights,
+        config_path=prompt.model_architecture,
         control_weights_locations=control_modes,
         half_mode=half_mode,
         for_inpainting=for_inpainting and inpaint_method == "finetune",
@@ -548,14 +548,16 @@ def _generate_single_image_compvis(
                     prompt=prompt,
                     target_height=init_image.height,
                     target_width=init_image.width,
-                    cutoff=get_model_default_image_size(prompt.model_architecture),
+                    cutoff=get_model_default_image_size(
+                        prompt.model_weights.model_architecture
+                    ),
                 )
             else:
                 comp_image = _generate_composition_image(
                     prompt=prompt,
                     target_height=prompt.height,
                     target_width=prompt.width,
-                    cutoff=get_model_default_image_size(prompt.model),
+                    cutoff=get_model_default_image_size(prompt.model_architecture),
                 )
             if comp_image is not None:
                 result_images["composition"] = comp_image
@@ -637,15 +639,16 @@ def _generate_single_image_compvis(
                 caption_text = prompt.caption_text.format(prompt=prompt.prompt_text)
                 add_caption_to_image(gen_img, caption_text)
 
+        result_images["upscaled"] = upscaled_img
+        result_images["modified_original"] = rebuilt_orig_img
+        result_images["mask_binary"] = mask_image_orig
+        result_images["mask_grayscale"] = mask_grayscale
+
         result = ImagineResult(
             img=gen_img,
             prompt=prompt,
-            upscaled_img=upscaled_img,
             is_nsfw=safety_score.is_nsfw,
             safety_score=safety_score,
-            modified_original=rebuilt_orig_img,
-            mask_binary=mask_image_orig,
-            mask_grayscale=mask_grayscale,
             result_images=result_images,
             timings=lc.get_timings(),
             progress_latents=progress_latents.copy(),

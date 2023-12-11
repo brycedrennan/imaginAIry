@@ -48,11 +48,11 @@ def pillow_fit_image_within(
 def pillow_img_to_torch_image(img: PIL.Image.Image, convert="RGB"):
     if convert:
         img = img.convert(convert)
-    img = np.array(img).astype(np.float32) / 255.0
+    img_np = np.array(img).astype(np.float32) / 255.0
     # b, h, w, c => b, c, h, w
-    img = img[None].transpose(0, 3, 1, 2)
-    img = torch.from_numpy(img)
-    return 2.0 * img - 1.0
+    img_np = img_np[None].transpose(0, 3, 1, 2)
+    img_t = torch.from_numpy(img_np)
+    return 2.0 * img_t - 1.0
 
 
 def pillow_mask_to_latent_mask(mask_img: PIL.Image.Image, downsampling_factor):
@@ -77,17 +77,17 @@ def pillow_img_to_opencv_img(img: PIL.Image.Image):
     return open_cv_image
 
 
-def torch_image_to_openvcv_img(img: torch.Tensor):
+def torch_image_to_openvcv_img(img: torch.Tensor) -> np.ndarray:
     img = (img + 1) / 2
-    img = img.detach().cpu().numpy()
+    img_np = img.detach().cpu().numpy()
     # assert there is only one image
-    assert img.shape[0] == 1
-    img = img[0]
-    img = img.transpose(1, 2, 0)
-    img = (img * 255).astype(np.uint8)
+    assert img_np.shape[0] == 1
+    img_np = img_np[0]
+    img_np = img_np.transpose(1, 2, 0)
+    img_np = (img_np * 255).astype(np.uint8)
     # RGB to BGR
-    img = img[:, :, ::-1]
-    return img
+    img_np = img_np[:, :, ::-1]
+    return img_np
 
 
 def torch_img_to_pillow_img(img_t: torch.Tensor):

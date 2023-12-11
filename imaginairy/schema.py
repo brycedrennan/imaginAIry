@@ -9,7 +9,7 @@ import random
 from datetime import datetime, timezone
 from enum import Enum
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, List, cast
 
 from pydantic import (
     BaseModel,
@@ -43,9 +43,9 @@ class LazyLoadingImage:
     def __init__(
         self,
         *,
-        filepath=None,
-        url=None,
-        img: "Image.Image" = None,
+        filepath: str | None = None,
+        url: str | None = None,
+        img: "Image.Image | None" = None,
         b64: str | None = None,
     ):
         if not filepath and not url and not img and not b64:
@@ -255,8 +255,10 @@ PromptInput = str | WeightedPrompt | list[WeightedPrompt] | list[str] | None
 class ImaginePrompt(BaseModel, protected_namespaces=()):
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
-    prompt: List[WeightedPrompt] = Field(default=None, validate_default=True)
-    negative_prompt: List[WeightedPrompt] = Field(default=None, validate_default=True)
+    prompt: List[WeightedPrompt] = Field(default=None, validate_default=True)  # type: ignore
+    negative_prompt: List[WeightedPrompt] = Field(
+        default_factory=list, validate_default=True
+    )
     prompt_strength: float = Field(default=7.5, le=50, ge=-50, validate_default=True)
     init_image: LazyLoadingImage | None = Field(
         None, description="base64 encoded image", validate_default=True
@@ -282,8 +284,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     )
     solver_type: str = Field(default=config.DEFAULT_SOLVER, validate_default=True)
     seed: int | None = Field(default=None, validate_default=True)
-    steps: int | None = Field(default=None, validate_default=True)
-    size: tuple[int, int] | None = Field(default=None, validate_default=True)
+    steps: int = Field(validate_default=True)
+    size: tuple[int, int] = Field(validate_default=True)
     upscale: bool = False
     fix_faces: bool = False
     fix_faces_fidelity: float | None = Field(0.2, ge=0, le=1, validate_default=True)
@@ -373,9 +375,9 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
                 return [value]
             case list():
                 if all(isinstance(item, str) for item in value):
-                    return [WeightedPrompt(text=p) for p in value]
+                    return [WeightedPrompt(text=str(p)) for p in value]
                 elif all(isinstance(item, WeightedPrompt) for item in value):
-                    return value
+                    return cast(List[WeightedPrompt], value)
         raise ValueError("Invalid prompt input")
 
     @field_validator("prompt", "negative_prompt", mode="after")
@@ -532,7 +534,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             raise ValueError(msg)
         return v
 
-    @field_validator("steps")
+    @field_validator("steps", mode="before")
     def validate_steps(cls, v, info: core_schema.FieldValidationInfo):
         steps_lookup = {"ddim": 50, "dpmpp": 20}
 

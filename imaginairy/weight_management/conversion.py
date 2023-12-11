@@ -89,7 +89,7 @@ class WeightMap:
 
 
 @lru_cache(maxsize=None)
-def load_state_dict_conversion_maps():
+def load_state_dict_conversion_maps() -> dict[str, dict]:
     import json
 
     conversion_maps = {}
@@ -102,7 +102,11 @@ def load_state_dict_conversion_maps():
 
 
 def cast_weights(
-    source_weights, source_model_name, source_component_name, source_format, dest_format
+    source_weights,
+    source_model_name: str,
+    source_component_name: str,
+    source_format: str,
+    dest_format: str,
 ):
     weight_map = WeightMap(
         model_name=source_model_name,

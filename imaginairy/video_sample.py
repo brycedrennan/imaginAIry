@@ -330,20 +330,20 @@ def get_batch(keys, value_dict, N, T, device):
 def load_model(
     config: str, device: str, num_frames: int, num_steps: int, weights_url: str
 ):
-    config = OmegaConf.load(config)
+    oconfig = OmegaConf.load(config)
     ckpt_path = get_cached_url_path(weights_url)
-    config["model"]["params"]["ckpt_path"] = ckpt_path
+    oconfig["model"]["params"]["ckpt_path"] = ckpt_path
     if device == "cuda":
-        config.model.params.conditioner_config.params.emb_models[
+        oconfig.model.params.conditioner_config.params.emb_models[
             0
         ].params.open_clip_embedding_config.params.init_device = device
 
-    config.model.params.sampler_config.params.num_steps = num_steps
-    config.model.params.sampler_config.params.guider_config.params.num_frames = (
+    oconfig.model.params.sampler_config.params.num_steps = num_steps
+    oconfig.model.params.sampler_config.params.guider_config.params.num_frames = (
         num_frames
     )
 
-    model = instantiate_from_config(config.model).to(device).half().eval()
+    model = instantiate_from_config(oconfig.model).to(device).half().eval()
 
     # safety_filter = DeepFloydDataFiltering(verbose=False, device=device)
     def safety_filter(x):
