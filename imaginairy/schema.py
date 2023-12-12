@@ -182,7 +182,7 @@ class LazyLoadingImage:
 
     def as_base64(self):
         self._load_img()
-        return self.save_image_as_base64(self._img)  # type: ignore
+        return self.save_image_as_base64(self._img)
 
     def as_pillow(self):
         self._load_img()
