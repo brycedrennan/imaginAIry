@@ -62,13 +62,13 @@ class TileModeMixin(nn.Module):
             if isinstance(m, nn.Conv2d):
                 if not hasattr(m, "_orig_conv_forward"):
                     # patch with a function that can handle tiling in a single direction
-                    m._initial_padding_mode = m.padding_mode
-                    m._orig_conv_forward = m._conv_forward
-                    m._conv_forward = _tile_mode_conv2d_conv_forward.__get__(
+                    m._initial_padding_mode = m.padding_mode  # type: ignore
+                    m._orig_conv_forward = m._conv_forward  # type: ignore
+                    m._conv_forward = _tile_mode_conv2d_conv_forward.__get__(  # type: ignore
                         m, nn.Conv2d
                     )
-                m.padding_modeX = "circular" if tile_x else "constant"
-                m.padding_modeY = "circular" if tile_y else "constant"
+                m.padding_modeX = "circular" if tile_x else "constant"  # type: ignore
+                m.padding_modeY = "circular" if tile_y else "constant"  # type: ignore
                 if m.padding_modeY == m.padding_modeX:
                     m.padding_mode = m.padding_modeX
                 m.paddingX = (
@@ -76,13 +76,13 @@ class TileModeMixin(nn.Module):
                     m._reversed_padding_repeated_twice[1],
                     0,
                     0,
-                )
+                )  # type: ignore
                 m.paddingY = (
                     0,
                     0,
                     m._reversed_padding_repeated_twice[2],
                     m._reversed_padding_repeated_twice[3],
-                )
+                )  # type: ignore
 
 
 class StableDiffusion_1(TileModeMixin, RefinerStableDiffusion_1):
@@ -291,7 +291,9 @@ def monkeypatch_sd1controlnetadapter():
             dtype=target.dtype,
         )
 
-        self._controlnet: list[Controlnet] = [controlnet]  # not registered by PyTorch
+        self._controlnet: list[Controlnet] = [  # type: ignore
+            controlnet
+        ]  # not registered by PyTorch
 
         with self.setup_adapter(target):
             super(SD1ControlnetAdapter, self).__init__(target)

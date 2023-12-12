@@ -1,7 +1,12 @@
 """Functions to create hint images for controlnet."""
+from typing import TYPE_CHECKING, Callable, Dict, Union
+
+if TYPE_CHECKING:
+    import numpy as np
+    from torch import Tensor  # noqa
 
 
-def create_canny_edges(img):
+def create_canny_edges(img: "Tensor") -> "Tensor":
     import cv2
     import numpy as np
     import torch
@@ -33,7 +38,7 @@ def create_canny_edges(img):
     return canny_image
 
 
-def create_depth_map(img):
+def create_depth_map(img: "Tensor") -> "Tensor":
     import torch
 
     orig_size = img.shape[2:]
@@ -56,7 +61,7 @@ def create_depth_map(img):
     return depth_pt
 
 
-def _create_depth_map_raw(img):
+def _create_depth_map_raw(img: "Tensor") -> "Tensor":
     import torch
 
     from imaginairy.modules.midas.api import MiDaSInference, midas_device
@@ -83,7 +88,7 @@ def _create_depth_map_raw(img):
     return depth_pt
 
 
-def create_normal_map(img):
+def create_normal_map(img: "Tensor") -> "Tensor":
     import torch
 
     from imaginairy.vendored.imaginairy_normal_map.model import (
@@ -97,7 +102,7 @@ def create_normal_map(img):
     return normal_img_t
 
 
-def create_hed_edges(img_t):
+def create_hed_edges(img_t: "Tensor") -> "Tensor":
     import torch
 
     from imaginairy.img_processors.hed_boundary import create_hed_map
@@ -120,7 +125,7 @@ def create_hed_edges(img_t):
     return hint_t
 
 
-def create_pose_map(img_t):
+def create_pose_map(img_t: "Tensor"):
     from imaginairy.img_processors.openpose import create_body_pose_img
     from imaginairy.utils import get_device
 
@@ -130,7 +135,7 @@ def create_pose_map(img_t):
     return pose_t
 
 
-def make_noise_disk(H, W, C, F):
+def make_noise_disk(H: int, W: int, C: int, F: int) -> "np.ndarray":
     import cv2
     import numpy as np
 
@@ -144,7 +149,7 @@ def make_noise_disk(H, W, C, F):
     return noise
 
 
-def shuffle_map_np(img, h=None, w=None, f=256):
+def shuffle_map_np(img: "np.ndarray", h=None, w=None, f=256) -> "np.ndarray":
     import cv2
     import numpy as np
 
@@ -160,7 +165,7 @@ def shuffle_map_np(img, h=None, w=None, f=256):
     return cv2.remap(img, flow, None, cv2.INTER_LINEAR)
 
 
-def shuffle_map_torch(tensor, h=None, w=None, f=256):
+def shuffle_map_torch(tensor: "Tensor", h=None, w=None, f=256) -> "Tensor":
     import torch
 
     # Assuming the input tensor is in shape (B, C, H, W)
@@ -187,7 +192,7 @@ def shuffle_map_torch(tensor, h=None, w=None, f=256):
     return shuffled_tensor.to(device)
 
 
-def inpaint_prep(mask_image_t, target_image_t):
+def inpaint_prep(mask_image_t: "Tensor", target_image_t: "Tensor") -> "Tensor":
     """
     Combines the masked image and target image into a single tensor.
 
@@ -207,7 +212,7 @@ def inpaint_prep(mask_image_t, target_image_t):
     return output_image_t
 
 
-def to_grayscale(img):
+def to_grayscale(img: "Tensor") -> "Tensor":
     # The dimensions of input should be (batch_size, channels, height, width)
     if img.dim() != 4:
         raise ValueError("Input should be a 4d tensor")
@@ -228,11 +233,13 @@ def to_grayscale(img):
     return (gray_3_channels + 1.0) / 2.0
 
 
-def noop(img):
+def noop(img: "Tensor") -> "Tensor":
     return (img + 1.0) / 2.0
 
 
-CONTROL_MODES = {
+FunctionType = Union["Callable[[Tensor, Tensor], Tensor]", "Callable[[Tensor], Tensor]"]
+
+CONTROL_MODES: Dict[str, FunctionType] = {
     "canny": create_canny_edges,
     "depth": create_depth_map,
     "normal": create_normal_map,

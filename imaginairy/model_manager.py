@@ -266,6 +266,7 @@ def _get_diffusion_model_refiners(
         text_encoder_weights,
     ) = load_stable_diffusion_compvis_weights(weights_location)
 
+    StableDiffusionCls: type[LatentDiffusionModel]
     if for_inpainting:
         unet = SD1UNet(in_channels=9)
         StableDiffusionCls = StableDiffusion_1_Inpainting
@@ -390,9 +391,9 @@ def resolve_model_weights_config(
     return model_weights_config
 
 
-def get_model_default_image_size(model_architecture: str | ModelArchitecture):
+def get_model_default_image_size(model_architecture: str | ModelArchitecture | None):
     if isinstance(model_architecture, str):
-        model_architecture = iconfig.MODEL_WEIGHT_CONFIG_LOOKUP.get(
+        model_architecture = iconfig.MODEL_ARCHITECTURE_LOOKUP.get(
             model_architecture, None
         )
     default_size = None

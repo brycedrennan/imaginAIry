@@ -279,7 +279,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     mask_mode: MaskMode = MaskMode.REPLACE
     mask_modify_original: bool = True
     outpaint: str | None = ""
-    model_weights: config.ModelWeightsConfig = Field(
+    model_weights: config.ModelWeightsConfig = Field(  # type: ignore
         default=config.DEFAULT_MODEL_WEIGHTS, validate_default=True
     )
     solver_type: str = Field(default=config.DEFAULT_SOLVER, validate_default=True)
@@ -504,7 +504,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             model_weights = config.DEFAULT_MODEL_WEIGHTS
         from imaginairy.model_manager import resolve_model_weights_config
 
-        should_use_inpainting = (
+        should_use_inpainting = bool(
             data.get("mask_image") or data.get("mask_prompt") or data.get("outpaint")
         )
         should_use_inpainting_weights = (

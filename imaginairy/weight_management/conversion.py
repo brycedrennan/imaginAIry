@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from imaginairy.weight_management import utils
 
 if TYPE_CHECKING:
-    from torch import Tensor
+    from torch import Tensor  # noqa
 
 
 @dataclass
@@ -69,8 +69,8 @@ class WeightMap:
         source_keys = set(source_weights.keys())
         return source_keys.issubset(self.all_valid_prefixes)
 
-    def cast_weights(self, source_weights):
-        converted_state_dict: dict[str, Tensor] = {}
+    def cast_weights(self, source_weights) -> dict[str, "Tensor"]:
+        converted_state_dict: dict[str, "Tensor"] = {}
         for source_key in source_weights:
             source_prefix, suffix = source_key.rsplit(sep=".", maxsplit=1)
             # handle aliases
@@ -96,7 +96,7 @@ def load_state_dict_conversion_maps() -> dict[str, dict]:
     from importlib.resources import files
 
     for file in files("imaginairy").joinpath("weight_conversion/maps").iterdir():
-        if file.is_file() and file.suffix == ".json":
+        if file.is_file() and file.suffix == ".json":  # type: ignore
             conversion_maps[file.name] = json.loads(file.read_text())
     return conversion_maps
 
