@@ -8,7 +8,7 @@ is_for_windows = len(sys.argv) >= 3 and sys.argv[2].startswith("--plat-name=win"
 
 if is_for_windows:
     scripts = None
-    entry_points = {
+    entry_points: dict | None = {
         "console_scripts": [
             "imagine=imaginairy.cli.main:imagine_cmd",
             "aimg=imaginairy.cli.main:aimg",

@@ -23,8 +23,12 @@ from imaginairy.utils import get_device
 
 
 def pillow_fit_image_within(
-    image: PIL.Image.Image, max_height=512, max_width=512, convert="RGB", snap_size=8
-):
+    image: PIL.Image.Image | LazyLoadingImage,
+    max_height=512,
+    max_width=512,
+    convert="RGB",
+    snap_size=8,
+) -> PIL.Image.Image:
     image = image.convert(convert)
     w, h = image.size
     resize_ratio = 1
@@ -45,7 +49,9 @@ def pillow_fit_image_within(
     return image
 
 
-def pillow_img_to_torch_image(img: PIL.Image.Image, convert="RGB"):
+def pillow_img_to_torch_image(
+    img: PIL.Image.Image | LazyLoadingImage, convert="RGB"
+) -> torch.Tensor:
     if convert:
         img = img.convert(convert)
     img_np = np.array(img).astype(np.float32) / 255.0
@@ -55,7 +61,9 @@ def pillow_img_to_torch_image(img: PIL.Image.Image, convert="RGB"):
     return 2.0 * img_t - 1.0
 
 
-def pillow_mask_to_latent_mask(mask_img: PIL.Image.Image, downsampling_factor):
+def pillow_mask_to_latent_mask(
+    mask_img: PIL.Image.Image | LazyLoadingImage, downsampling_factor
+) -> torch.Tensor:
     mask_img = mask_img.resize(
         (
             mask_img.width // downsampling_factor,
@@ -66,11 +74,11 @@ def pillow_mask_to_latent_mask(mask_img: PIL.Image.Image, downsampling_factor):
 
     mask = np.array(mask_img).astype(np.float32) / 255.0
     mask = mask[None, None]
-    mask = torch.from_numpy(mask)
-    return mask
+    mask_t = torch.from_numpy(mask)
+    return mask_t
 
 
-def pillow_img_to_opencv_img(img: PIL.Image.Image):
+def pillow_img_to_opencv_img(img: PIL.Image.Image | LazyLoadingImage):
     open_cv_image = np.array(img)
     # Convert RGB to BGR
     open_cv_image = open_cv_image[:, :, ::-1].copy()
@@ -90,7 +98,7 @@ def torch_image_to_openvcv_img(img: torch.Tensor) -> np.ndarray:
     return img_np
 
 
-def torch_img_to_pillow_img(img_t: torch.Tensor):
+def torch_img_to_pillow_img(img_t: torch.Tensor) -> PIL.Image.Image:
     img_t = img_t.to(torch.float32).detach().cpu()
     if len(img_t.shape) == 3:
         img_t = img_t.unsqueeze(0)
@@ -129,7 +137,9 @@ def model_latents_to_pillow_imgs(latents: torch.Tensor) -> Sequence[PIL.Image.Im
     return [model_latent_to_pillow_img(latent) for latent in latents]
 
 
-def pillow_img_to_model_latent(model, img, batch_size=1, half=True):
+def pillow_img_to_model_latent(
+    model, img: PIL.Image.Image | LazyLoadingImage, batch_size=1, half=True
+):
     init_image = pillow_img_to_torch_image(img).to(get_device())
     init_image = repeat(init_image, "1 ... -> b ...", b=batch_size)
     if half:
@@ -152,14 +162,18 @@ def imgpaths_to_imgs(imgpaths):
 
 
 def add_caption_to_image(
-    img, caption, font_size=16, font_path=f"{PKG_ROOT}/data/DejaVuSans.ttf"
+    img: PIL.Image.Image | LazyLoadingImage,
+    caption,
+    font_size=16,
+    font_path=f"{PKG_ROOT}/data/DejaVuSans.ttf",
 ):
-    draw = ImageDraw.Draw(img)
+    img_pil = img.as_pillow() if isinstance(img, LazyLoadingImage) else img
+    draw = ImageDraw.Draw(img_pil)
 
     font = ImageFont.truetype(font_path, font_size)
 
     x = 15
-    y = img.height - 15 - font_size
+    y = img_pil.height - 15 - font_size
 
     draw.text(
         (x, y),

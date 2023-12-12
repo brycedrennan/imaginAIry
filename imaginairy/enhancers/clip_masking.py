@@ -9,6 +9,7 @@ from torchvision import transforms
 
 from imaginairy.img_utils import pillow_fit_image_within
 from imaginairy.log_utils import log_img
+from imaginairy.schema import LazyLoadingImage
 from imaginairy.vendored.clipseg import CLIPDensePredT
 
 weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth"
@@ -32,7 +33,7 @@ def clip_mask_model():
 
 
 def get_img_mask(
-    img: PIL.Image.Image,
+    img: PIL.Image.Image | LazyLoadingImage,
     mask_description_statement: str,
     threshold: Optional[float] = None,
 ):

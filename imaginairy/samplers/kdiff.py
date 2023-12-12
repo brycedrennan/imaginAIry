@@ -1,5 +1,6 @@
 # pylama:ignore=W0613
 from abc import ABC
+from typing import Callable
 
 import torch
 from torch import nn
@@ -58,7 +59,7 @@ def sample_dpm_fast(model, x, sigmas, extra_args=None, disable=False, callback=N
 
 
 class KDiffusionSolver(ImageSolver, ABC):
-    sampler_func: callable
+    sampler_func: Callable
 
     def __init__(self, model):
         super().__init__(model)

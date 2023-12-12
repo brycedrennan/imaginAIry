@@ -19,7 +19,7 @@ try:
 except ImportError:
     # let's not break all of imaginairy just because a training import doesn't exist in an older version of PL
     # Use >= 1.6.0 to make this work
-    DDPStrategy = None
+    DDPStrategy = None  # type: ignore
 import contextlib
 
 from pytorch_lightning.trainer import Trainer

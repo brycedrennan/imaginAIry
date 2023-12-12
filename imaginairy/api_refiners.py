@@ -19,7 +19,7 @@ def _generate_single_image(
     half_mode=None,
 ):
     import torch.nn
-    from PIL import ImageOps
+    from PIL import Image, ImageOps
     from pytorch_lightning import seed_everything
     from refiners.foundationals.latent_diffusion.schedulers import DDIM, DPMSolver
     from tqdm import tqdm
@@ -51,7 +51,7 @@ def _generate_single_image(
     from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
     from imaginairy.safety import create_safety_score
     from imaginairy.samplers import SolverName
-    from imaginairy.schema import ImaginePrompt, ImagineResult
+    from imaginairy.schema import ImagineResult
     from imaginairy.utils import get_device, randn_seeded
 
     if dtype is None:
@@ -75,7 +75,6 @@ def _generate_single_image(
 
     mask_image = None
     mask_image_orig = None
-    prompt: ImaginePrompt = prompt.make_concrete_copy()
 
     def latent_logger(latents):
         progress_latents.append(latents)
@@ -101,8 +100,8 @@ def _generate_single_image(
         )
         clip_text_embedding = clip_text_embedding.to(device=sd.device, dtype=sd.dtype)
 
-        result_images = {}
-        progress_latents = []
+        result_images: dict[str, torch.Tensor | None | Image.Image] = {}
+        progress_latents: list[torch.Tensor] = []
         first_step = 0
         mask_grayscale = None
 
@@ -125,7 +124,8 @@ def _generate_single_image(
 
         if prompt.init_image:
             starting_image = prompt.init_image
-            first_step = int((prompt.steps) * prompt.init_image_strength)
+            assert prompt.init_image_strength is not None
+            first_step = int(prompt.steps * prompt.init_image_strength)
             # noise_step = int((prompt.steps - 1) * prompt.init_image_strength)
 
             if prompt.mask_prompt:
@@ -150,7 +150,7 @@ def _generate_single_image(
             init_image_t = init_image_t.to(device=sd.device, dtype=sd.dtype)
             init_latent = sd.lda.encode(init_image_t)
 
-            shape = init_latent.shape
+            shape = list(init_latent.shape)
 
             log_latent(init_latent, "init_latent")
 
@@ -179,6 +179,7 @@ def _generate_single_image(
                     )
 
         seed_everything(prompt.seed)
+        assert prompt.seed is not None
 
         noise = randn_seeded(seed=prompt.seed, size=shape).to(
             get_device(), dtype=sd.dtype
@@ -210,11 +211,11 @@ def _generate_single_image(
                 if control_input.image_raw is None:
                     control_prep_function = CONTROL_MODES[control_input.mode]
                     if control_input.mode == "inpaint":
-                        control_image_t = control_prep_function(
+                        control_image_t = control_prep_function(  # type: ignore
                             control_image_input_t, init_image_t
                         )
                     else:
-                        control_image_t = control_prep_function(control_image_input_t)
+                        control_image_t = control_prep_function(control_image_input_t)  # type: ignore
                 else:
                     control_image_t = (control_image_input_t + 1) / 2
 
@@ -246,9 +247,9 @@ def _generate_single_image(
                     raise ValueError(msg)
                 from refiners.foundationals.latent_diffusion import SD1ControlnetAdapter
 
-                controlnet = SD1ControlnetAdapter(
+                controlnet = SD1ControlnetAdapter(  # type: ignore
                     name=control_input.mode,
-                    target=sd.unet,
+                    target=sd.unet,  # type: ignore
                     weights_location=control_config.weights_location,
                 )
                 controlnet.set_scale(control_input.strength)
