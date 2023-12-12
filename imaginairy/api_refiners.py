@@ -256,11 +256,13 @@ def _generate_single_image(
                 controlnets.append((controlnet, control_image_t))
 
         if prompt.allow_compose_phase:
+            cutoff_size = get_model_default_image_size(prompt.model_architecture)
+            cutoff_size = (int(cutoff_size[0] * 1.30), int(cutoff_size[1] * 1.30))
             compose_kwargs = {
                 "prompt": prompt,
                 "target_height": prompt.height,
                 "target_width": prompt.width,
-                "cutoff": get_model_default_image_size(prompt.model_architecture),
+                "cutoff": cutoff_size,
                 "dtype": dtype,
             }
 
