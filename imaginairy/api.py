@@ -1,35 +1,39 @@
 import logging
 import os
 import re
+from typing import TYPE_CHECKING, Any, Callable
 
-from imaginairy.schema import ControlNetInput, SafetyMode
+from imaginairy.utils.named_resolutions import normalize_image_size
+
+if TYPE_CHECKING:
+    from imaginairy.schema import ImaginePrompt, LazyLoadingImage
 
 logger = logging.getLogger(__name__)
 
 # leave undocumented. I'd ask that no one publicize this flag. Just want a
 # slight barrier to entry. Please don't use this is any way that's gonna cause
 # the media or politicians to freak out about AI...
-IMAGINAIRY_SAFETY_MODE = os.getenv("IMAGINAIRY_SAFETY_MODE", SafetyMode.STRICT)
+IMAGINAIRY_SAFETY_MODE = os.getenv("IMAGINAIRY_SAFETY_MODE", "strict")
 if IMAGINAIRY_SAFETY_MODE in {"disabled", "classify"}:
-    IMAGINAIRY_SAFETY_MODE = SafetyMode.RELAXED
+    IMAGINAIRY_SAFETY_MODE = "relaxed"
 elif IMAGINAIRY_SAFETY_MODE == "filter":
-    IMAGINAIRY_SAFETY_MODE = SafetyMode.STRICT
+    IMAGINAIRY_SAFETY_MODE = "strict"
 
 # we put this in the global scope so it can be used in the interactive shell
 _most_recent_result = None
 
 
 def imagine_image_files(
-    prompts,
-    outdir,
-    precision="autocast",
-    record_step_images=False,
-    output_file_extension="jpg",
-    print_caption=False,
-    make_gif=False,
-    make_compare_gif=False,
-    return_filename_type="generated",
-    videogen=False,
+    prompts: "list[ImaginePrompt] | ImaginePrompt",
+    outdir: str,
+    precision: str = "autocast",
+    record_step_images: bool = False,
+    output_file_extension: str = "jpg",
+    print_caption: bool = False,
+    make_gif: bool = False,
+    make_compare_gif: bool = False,
+    return_filename_type: str = "generated",
+    videogen: bool = False,
     composition_strength=0.5,
 ):
     from PIL import ImageDraw
@@ -46,6 +50,9 @@ def imagine_image_files(
     output_file_extension = output_file_extension.lower()
     if output_file_extension not in {"jpg", "png"}:
         raise ValueError("Must output a png or jpg")
+
+    if not isinstance(prompts, list):
+        prompts = [prompts]
 
     def _record_step(img, description, image_count, step_count, prompt):
         steps_path = os.path.join(outdir, "steps", f"{base_count:08}_S{prompt.seed}")
@@ -76,7 +83,7 @@ def imagine_image_files(
         if prompt.init_image:
             img_str = f"_img2img-{prompt.init_image_strength}"
         basefilename = (
-            f"{base_count:06}_{prompt.seed}_{prompt.sampler_type.replace('_', '')}{prompt.steps}_"
+            f"{base_count:06}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
             f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
         )
 
@@ -141,15 +148,15 @@ def imagine_image_files(
 
 
 def imagine(
-    prompts,
-    precision="autocast",
-    debug_img_callback=None,
-    progress_img_callback=None,
-    progress_img_interval_steps=3,
+    prompts: "list[ImaginePrompt] | str | ImaginePrompt",
+    precision: str = "autocast",
+    debug_img_callback: Callable | None = None,
+    progress_img_callback: Callable | None = None,
+    progress_img_interval_steps: int = 3,
     progress_img_interval_min_s=0.1,
     half_mode=None,
-    add_caption=False,
-    unsafe_retry_count=1,
+    add_caption: bool = False,
+    unsafe_retry_count: int = 1,
     composition_strength=0.5,
 ):
     import torch.nn
@@ -213,7 +220,7 @@ def imagine(
 
 
 def _generate_single_image_compvis(
-    prompt,
+    prompt: "ImaginePrompt",
     debug_img_callback=None,
     progress_img_callback=None,
     progress_img_interval_steps=3,
@@ -253,9 +260,9 @@ def _generate_single_image_compvis(
     from imaginairy.modules.midas.api import torch_image_to_depth_map
     from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
     from imaginairy.safety import create_safety_score
-    from imaginairy.samplers import SAMPLER_LOOKUP
+    from imaginairy.samplers import SOLVER_LOOKUP
     from imaginairy.samplers.editing import CFGEditingDenoiser
-    from imaginairy.schema import ImaginePrompt, ImagineResult
+    from imaginairy.schema import ControlInput, ImagineResult, MaskMode
     from imaginairy.utils import get_device, randn_seeded
 
     latent_channels = 4
@@ -279,7 +286,7 @@ def _generate_single_image_compvis(
     if control_inputs:
         control_modes = [c.mode for c in prompt.control_inputs]
     if inpaint_method == "auto":
-        if prompt.model in {"SD-1.5", "SD-2.0"}:
+        if prompt.model_weights in {"SD-1.5", "SD-2.0"}:
             inpaint_method = "finetune"
         else:
             inpaint_method = "controlnet"
@@ -287,8 +294,8 @@ def _generate_single_image_compvis(
     if for_inpainting and inpaint_method == "controlnet":
         control_modes.append("inpaint")
     model = get_diffusion_model(
-        weights_location=prompt.model,
-        config_path=prompt.model_config_path,
+        weights_location=prompt.model_weights,
+        config_path=prompt.model_architecture,
         control_weights_locations=control_modes,
         half_mode=half_mode,
         for_inpainting=for_inpainting and inpaint_method == "finetune",
@@ -331,22 +338,26 @@ def _generate_single_image_compvis(
             prompt.height // downsampling_factor,
             prompt.width // downsampling_factor,
         ]
-        SamplerCls = SAMPLER_LOOKUP[prompt.sampler_type.lower()]
-        sampler = SamplerCls(model)
-        mask_latent = mask_image = mask_image_orig = mask_grayscale = None
-        t_enc = init_latent = control_image = None
+        SolverCls = SOLVER_LOOKUP[prompt.solver_type.lower()]
+        solver = SolverCls(model)
+        mask_image: Image.Image | LazyLoadingImage | None = None
+        mask_latent = mask_image_orig = mask_grayscale = None
+        init_latent: torch.Tensor | None = None
+        t_enc = None
         starting_image = None
         denoiser_cls = None
 
         c_cat = []
         c_cat_neutral = None
-        result_images = {}
+        result_images: dict[str, torch.Tensor | Image.Image | None] = {}
+        assert prompt.seed is not None
         seed_everything(prompt.seed)
         noise = randn_seeded(seed=prompt.seed, size=shape).to(get_device())
         control_strengths = []
 
         if prompt.init_image:
             starting_image = prompt.init_image
+            assert prompt.init_image_strength is not None
             generation_strength = 1 - prompt.init_image_strength
 
             if model.cond_stage_key == "edit" or generation_strength >= 1:
@@ -365,18 +376,18 @@ def _generate_single_image_compvis(
                 starting_image, mask_image = prepare_image_for_outpaint(
                     starting_image, mask_image, **outpaint_kwargs
                 )
-
+            assert starting_image is not None
             init_image = pillow_fit_image_within(
                 starting_image,
                 max_height=prompt.height,
                 max_width=prompt.width,
             )
-            init_image_t = pillow_img_to_torch_image(init_image)
-            init_image_t = init_image_t.to(get_device())
+            init_image_t = pillow_img_to_torch_image(init_image).to(get_device())
             init_latent = model.get_first_stage_encoding(
                 model.encode_first_stage(init_image_t)
             )
-            shape = init_latent.shape
+            assert init_latent is not None
+            shape = list(init_latent.shape)
 
             log_latent(init_latent, "init_latent")
 
@@ -390,7 +401,7 @@ def _generate_single_image_compvis(
 
                 log_img(mask_image, "init mask")
 
-                if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
+                if prompt.mask_mode == MaskMode.REPLACE:
                     mask_image = ImageOps.invert(mask_image)
 
                 mask_image_orig = mask_image
@@ -401,11 +412,11 @@ def _generate_single_image_compvis(
                 if inpaint_method == "controlnet":
                     result_images["control-inpaint"] = mask_image
                     control_inputs.append(
-                        ControlNetInput(mode="inpaint", image=mask_image)
+                        ControlInput(mode="inpaint", image=mask_image)
                     )
-
+            assert prompt.seed is not None
             seed_everything(prompt.seed)
-            noise = randn_seeded(seed=prompt.seed, size=init_latent.shape).to(
+            noise = randn_seeded(seed=prompt.seed, size=list(init_latent.shape)).to(
                 get_device()
             )
             # noise = noise[:, :, : init_latent.shape[2], : init_latent.shape[3]]
@@ -449,8 +460,13 @@ def _generate_single_image_compvis(
                     control_image = control_input.image_raw
                 elif control_input.image is not None:
                     control_image = control_input.image
+                else:
+                    raise RuntimeError("Control image must be provided")
+                assert control_image is not None
                 control_image = control_image.convert("RGB")
                 log_img(control_image, "control_image_input")
+                assert control_image is not None
+
                 control_image_input = pillow_fit_image_within(
                     control_image,
                     max_height=prompt.height,
@@ -462,11 +478,11 @@ def _generate_single_image_compvis(
                 if control_input.image_raw is None:
                     control_prep_function = CONTROL_MODES[control_input.mode]
                     if control_input.mode == "inpaint":
-                        control_image_t = control_prep_function(
+                        control_image_t = control_prep_function(  # type: ignore
                             control_image_input_t, init_image_t
                         )
                     else:
-                        control_image_t = control_prep_function(control_image_input_t)
+                        control_image_t = control_prep_function(control_image_input_t)  # type: ignore
                 else:
                     control_image_t = (control_image_input_t + 1) / 2
 
@@ -497,6 +513,8 @@ def _generate_single_image_compvis(
 
         elif hasattr(model, "masked_image_key"):
             # inpainting model
+            assert mask_image_orig is not None
+            assert mask_latent is not None
             mask_t = pillow_img_to_torch_image(ImageOps.invert(mask_image_orig)).to(
                 get_device()
             )
@@ -517,6 +535,7 @@ def _generate_single_image_compvis(
         elif model.cond_stage_key == "edit":
             # pix2pix model
             c_cat = [model.encode_first_stage(init_image_t)]
+            assert init_latent is not None
             c_cat_neutral = [torch.zeros_like(init_latent)]
             denoiser_cls = CFGEditingDenoiser
         if c_cat:
@@ -525,30 +544,39 @@ def _generate_single_image_compvis(
         if c_cat_neutral is None:
             c_cat_neutral = c_cat
 
-        positive_conditioning = {
+        positive_conditioning_d: dict[str, Any] = {
             "c_concat": c_cat,
             "c_crossattn": [positive_conditioning],
         }
-        neutral_conditioning = {
+        neutral_conditioning_d: dict[str, Any] = {
             "c_concat": c_cat_neutral,
             "c_crossattn": [neutral_conditioning],
         }
+        del neutral_conditioning
+        del positive_conditioning
 
         if control_strengths and is_controlnet_model:
-            positive_conditioning["control_strengths"] = torch.Tensor(control_strengths)
-            neutral_conditioning["control_strengths"] = torch.Tensor(control_strengths)
+            positive_conditioning_d["control_strengths"] = torch.Tensor(
+                control_strengths
+            )
+            neutral_conditioning_d["control_strengths"] = torch.Tensor(
+                control_strengths
+            )
 
         if (
             prompt.allow_compose_phase
             and not is_controlnet_model
             and model.cond_stage_key != "edit"
         ):
+            default_size = get_model_default_image_size(
+                prompt.model_weights.architecture
+            )
             if prompt.init_image:
                 comp_image = _generate_composition_image(
                     prompt=prompt,
                     target_height=init_image.height,
                     target_width=init_image.width,
-                    cutoff=get_model_default_image_size(prompt.model),
+                    cutoff=default_size,
                     composition_strength=composition_strength,
                 )
             else:
@@ -556,7 +584,7 @@ def _generate_single_image_compvis(
                     prompt=prompt,
                     target_height=prompt.height,
                     target_width=prompt.width,
-                    cutoff=get_model_default_image_size(prompt.model),
+                    cutoff=default_size,
                     composition_strength=composition_strength,
                 )
             if comp_image is not None:
@@ -570,10 +598,10 @@ def _generate_single_image_compvis(
                     model.encode_first_stage(comp_image_t)
                 )
         with lc.timing("sampling"):
-            samples = sampler.sample(
+            samples = solver.sample(
                 num_steps=prompt.steps,
-                positive_conditioning=positive_conditioning,
-                neutral_conditioning=neutral_conditioning,
+                positive_conditioning=positive_conditioning_d,
+                neutral_conditioning=neutral_conditioning_d,
                 guidance_scale=prompt.prompt_strength,
                 t_start=t_enc,
                 mask=mask_latent,
@@ -639,15 +667,16 @@ def _generate_single_image_compvis(
                 caption_text = prompt.caption_text.format(prompt=prompt.prompt_text)
                 add_caption_to_image(gen_img, caption_text)
 
+        result_images["upscaled"] = upscaled_img
+        result_images["modified_original"] = rebuilt_orig_img
+        result_images["mask_binary"] = mask_image_orig
+        result_images["mask_grayscale"] = mask_grayscale
+
         result = ImagineResult(
             img=gen_img,
             prompt=prompt,
-            upscaled_img=upscaled_img,
             is_nsfw=safety_score.is_nsfw,
             safety_score=safety_score,
-            modified_original=rebuilt_orig_img,
-            mask_binary=mask_image_orig,
-            mask_grayscale=mask_grayscale,
             result_images=result_images,
             timings=lc.get_timings(),
             progress_latents=progress_latents.copy(),
@@ -667,18 +696,15 @@ def _prompts_to_embeddings(prompts, model):
     return conditioning
 
 
-def calc_scale_to_fit_within(
-    height,
-    width,
-    max_size,
-):
-    if max(height, width) < max_size:
+def calc_scale_to_fit_within(height: int, width: int, max_size) -> float:
+    max_width, max_height = normalize_image_size(max_size)
+    if width <= max_width and height <= max_height:
         return 1
 
-    if width > height:
-        return max_size / width
+    width_ratio = max_width / width
+    height_ratio = max_height / height
 
-    return max_size / height
+    return min(width_ratio, height_ratio)
 
 
 def _scale_latent(
@@ -697,14 +723,20 @@ def _scale_latent(
 
 
 def _generate_composition_image(
-    prompt, target_height, target_width, cutoff=512, dtype=None, composition_strength=0.5
+    prompt,
+    target_height,
+    target_width,
+    cutoff: tuple[int, int] = (512, 512),
+    dtype=None,
+    composition_strength=0.5
 ):
     from PIL import Image
 
     from imaginairy.api_refiners import _generate_single_image
     from imaginairy.utils import default, get_default_dtype
 
-    if prompt.width <= cutoff and prompt.height <= cutoff:
+    cutoff = normalize_image_size(cutoff)
+    if prompt.width <= cutoff[0] and prompt.height <= cutoff[1]:
         return None, None
 
     dtype = default(dtype, get_default_dtype)
@@ -718,12 +750,15 @@ def _generate_composition_image(
     composition_prompt = prompt.full_copy(
         deep=True,
         update={
-            "width": int(prompt.width * shrink_scale),
-            "height": int(prompt.height * shrink_scale),
+            "size": (
+                int(prompt.width * shrink_scale),
+                int(prompt.height * shrink_scale),
+            ),
             "steps": None,
             "upscale": False,
             "fix_faces": False,
             "mask_modify_original": False,
+            "allow_compose_phase": False,
         },
     )
 

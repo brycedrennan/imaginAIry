@@ -6,10 +6,11 @@ import re
 from PIL import Image
 from tqdm import tqdm
 
-from imaginairy import ImaginePrompt, LazyLoadingImage, imagine
+from imaginairy.api import imagine
 from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 from imaginairy.enhancers.facecrop import detect_faces, generate_face_crops
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
+from imaginairy.schema import ImaginePrompt, LazyLoadingImage
 from imaginairy.vendored.smart_crop import SmartCrop
 
 logger = logging.getLogger(__name__)

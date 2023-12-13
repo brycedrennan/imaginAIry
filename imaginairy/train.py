@@ -19,7 +19,7 @@ try:
 except ImportError:
     # let's not break all of imaginairy just because a training import doesn't exist in an older version of PL
     # Use >= 1.6.0 to make this work
-    DDPStrategy = None
+    DDPStrategy = None  # type: ignore
 import contextlib
 
 from pytorch_lightning.trainer import Trainer
@@ -383,7 +383,7 @@ def train_diffusion_model(
     concept_images_dir,
     class_label,
     class_images_dir,
-    weights_location=config.DEFAULT_MODEL,
+    weights_location=config.DEFAULT_MODEL_WEIGHTS,
     logdir="logs",
     learning_rate=1e-6,
     accumulate_grad_batches=32,

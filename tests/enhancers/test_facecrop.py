@@ -1,7 +1,7 @@
 import logging
 
-from imaginairy import LazyLoadingImage
 from imaginairy.enhancers.facecrop import generate_face_crops
+from imaginairy.schema import LazyLoadingImage
 from tests import TESTS_FOLDER
 
 logger = logging.getLogger(__name__)

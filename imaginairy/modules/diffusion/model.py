@@ -1,7 +1,6 @@
 # pytorch_diffusion + derived encoder decoder
 import gc
 import math
-from typing import Any, Optional
 
 import numpy as np
 import torch
@@ -300,7 +299,7 @@ class MemoryEfficientAttnBlock(nn.Module):
         self.proj_out = torch.nn.Conv2d(
             in_channels, in_channels, kernel_size=1, stride=1, padding=0
         )
-        self.attention_op: Optional[Any] = None
+        self.attention_op = None
 
     def forward(self, x):
         h_ = x

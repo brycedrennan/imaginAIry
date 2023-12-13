@@ -7,8 +7,8 @@ def describe_cmd(image_filepaths):
     """Generate text descriptions of images."""
     import os
 
-    from imaginairy import LazyLoadingImage
     from imaginairy.enhancers.describe_image_blip import generate_caption
+    from imaginairy.schema import LazyLoadingImage
 
     imgs = []
     for p in image_filepaths:

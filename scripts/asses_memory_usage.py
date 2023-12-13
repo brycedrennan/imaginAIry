@@ -1,22 +1,22 @@
 import torch
 from torch.cuda import OutOfMemoryError
 
-from imaginairy import ImaginePrompt, imagine_image_files
+from imaginairy.api import imagine_image_files
+from imaginairy.schema import ImaginePrompt
 from imaginairy.utils import get_device
 
 
 def assess_memory_usage():
     assert get_device() == "cuda"
     img_size = 3048
-    prompt = ImaginePrompt("strawberries", width=64, height=64, seed=1)
+    prompt = ImaginePrompt("strawberries", size=64, seed=1)
     imagine_image_files([prompt], outdir="outputs")
     datalog = []
     while True:
         torch.cuda.reset_peak_memory_stats()
         prompt = ImaginePrompt(
             "beautiful landscape, Unreal Engine 5, RTX, AAA Game, Detailed 3D Render, Cinema4D",
-            width=img_size,
-            height=img_size,
+            size=img_size,
             seed=1,
             steps=2,
         )

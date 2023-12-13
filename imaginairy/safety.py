@@ -21,7 +21,7 @@ class SafetyResult:
         self.special_care_scores = {}
         self.is_filtered = False
 
-    def add_special_care_score(self, concept_idx, abs_score, threshold):
+    def add_special_care_score(self, concept_idx: int, abs_score, threshold):
         adjustment = self._default_adjustment
         adjusted_score = round(abs_score - threshold + adjustment, 3)
         try:
@@ -138,8 +138,8 @@ def monkeypatch_safety_cosine_distance():
     safety_checker_mod.cosine_distance = cosine_distance_float32
 
 
-_CONCEPT_DESCRIPTIONS = []
-_SPECIAL_CARE_DESCRIPTIONS = []
+_CONCEPT_DESCRIPTIONS: list[str] = []
+_SPECIAL_CARE_DESCRIPTIONS: list[str] = []
 
 
 def create_safety_score(img, safety_mode=SafetyMode.STRICT):

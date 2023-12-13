@@ -1,4 +1,6 @@
 import contextlib
+import csv
+import gc
 import logging
 import os
 import sys
@@ -7,12 +9,14 @@ from shutil import rmtree
 
 import pytest
 import responses
+import torch.cuda
 from tqdm import tqdm
 from urllib3 import HTTPConnectionPool
 
-from imaginairy import ImaginePrompt, api, imagine
+from imaginairy import api
+from imaginairy.api import imagine
 from imaginairy.log_utils import configure_logging, suppress_annoying_logs_and_warnings
-from imaginairy.samplers import SAMPLER_TYPE_OPTIONS
+from imaginairy.schema import ImaginePrompt
 from imaginairy.utils import (
     fix_torch_group_norm,
     fix_torch_nn_layer_norm,
@@ -26,13 +30,13 @@ if "pytest" in str(sys.argv):
 
 logger = logging.getLogger(__name__)
 
-SAMPLERS_FOR_TESTING = SAMPLER_TYPE_OPTIONS
-if get_device() == "mps:0":
-    SAMPLERS_FOR_TESTING = ["plms", "k_euler_a"]
-elif get_device() == "cpu":
-    SAMPLERS_FOR_TESTING = []
+# SOLVERS_FOR_TESTING = SOLVER_TYPE_OPTIONS
+# if get_device() == "mps:0":
+#     SOLVERS_FOR_TESTING = ["plms", "k_euler_a"]
+# elif get_device() == "cpu":
+#     SOLVERS_FOR_TESTING = []
 
-SAMPLERS_FOR_TESTING = ["ddim", "k_dpmpp_2m"]
+SOLVERS_FOR_TESTING = ["ddim", "dpmpp"]
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -90,8 +94,8 @@ def filename_base_for_orig_outputs(request):
     return filename_base
 
 
-@pytest.fixture(params=SAMPLERS_FOR_TESTING)
-def sampler_type(request):
+@pytest.fixture(params=SOLVERS_FOR_TESTING)
+def solver_type(request):
     return request.param
 
 
@@ -118,23 +122,51 @@ def default_model_loaded():
     """
     prompt = ImaginePrompt(
         "dogs lying on a hot pink couch",
-        width=64,
-        height=64,
+        size=64,
         steps=2,
         seed=1,
-        sampler_type="ddim",
+        solver_type="ddim",
     )
 
     next(imagine(prompt))
 
 
+cuda_tests_node_ids = []
+cuda_test_tracker_filepath = f"{TESTS_FOLDER}/data/cuda-tests.csv"
+
+
+@pytest.fixture(autouse=True)
+def detect_cuda_tests(request):
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+        start_memory = torch.cuda.max_memory_allocated()
+    yield
+    if torch.cuda.is_available():
+        end_memory = torch.cuda.max_memory_allocated()
+        memory_diff = end_memory - start_memory
+        if memory_diff > 0:
+            test_name = request.node.name
+            print(f"Test {test_name} used {memory_diff} bytes of GPU memory")
+            cuda_tests_node_ids.append(test_name)
+
+        torch.cuda.empty_cache()
+        gc.collect()
+
+
 @pytest.hookimpl()
 def pytest_collection_modifyitems(config, items):
     """Only select a subset of tests to run, based on the --subset option."""
+
+    node_ids_to_mark = read_stored_cuda_test_nodes()
+    for item in items:
+        if item.nodeid in node_ids_to_mark:
+            item.add_marker(pytest.mark.gputest)
+
     filtered_node_ids = set()
     node_ids = [f.nodeid for f in items]
     node_ids.sort()
     subset = config.getoption("--subset")
+
     if subset:
         partition_no, total_partitions = subset.split("/")
         partition_no, total_partitions = int(partition_no), int(total_partitions)
@@ -168,3 +200,26 @@ def pytest_sessionstart(session):
 
     if "nvidia_smi" in debug_info:
         print(debug_info["nvidia_smi"])
+
+
+def pytest_sessionfinish(session, exitstatus):
+    existing_node_ids = read_stored_cuda_test_nodes()
+    updated_node_ids = existing_node_ids.union(set(cuda_tests_node_ids))
+
+    # Write updated, sorted list of node IDs to file
+    with open(cuda_test_tracker_filepath, "w", newline="") as file:
+        writer = csv.writer(file)
+        for node_id in sorted(updated_node_ids):
+            writer.writerow([node_id])
+
+
+def read_stored_cuda_test_nodes():
+    node_ids = set()
+    try:
+        with open(cuda_test_tracker_filepath, newline="") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                node_ids.add(row[0])
+    except FileNotFoundError:
+        pass  # File does not exist yet
+    return node_ids

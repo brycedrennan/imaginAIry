@@ -1,9 +1,9 @@
 import pytest
 from lightning_fabric import seed_everything
 
-from imaginairy import LazyLoadingImage
 from imaginairy.img_processors.control_modes import CONTROL_MODES
 from imaginairy.img_utils import pillow_img_to_torch_image, torch_img_to_pillow_img
+from imaginairy.schema import LazyLoadingImage
 from tests import TESTS_FOLDER
 from tests.utils import assert_image_similar_to_expectation
 

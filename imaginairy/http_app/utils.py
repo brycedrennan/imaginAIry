@@ -1,7 +1,7 @@
 import base64
 from io import BytesIO
 
-from imaginairy import imagine
+from imaginairy.api import imagine
 
 
 def generate_image(prompt):

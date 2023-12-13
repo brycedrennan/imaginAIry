@@ -26,7 +26,7 @@ class StableStudioStyle(BaseModel):
     image: Optional[HttpUrl] = None
 
 
-class StableStudioSampler(BaseModel):
+class StableStudioSolver(BaseModel):
     id: str
     name: Optional[str] = None
 
@@ -55,7 +55,7 @@ class StableStudioInput(BaseModel, extra=Extra.forbid):
     style: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
-    sampler: Optional[StableStudioSampler] = None
+    solver: Optional[StableStudioSolver] = Field(None, alias="sampler")
     cfg_scale: Optional[float] = Field(None, alias="cfgScale")
     steps: Optional[int] = None
     seed: Optional[int] = None
@@ -88,18 +88,17 @@ class StableStudioInput(BaseModel, extra=Extra.forbid):
 
         mask_image = self.mask_image.blob if self.mask_image else None
 
-        sampler_type = self.sampler.id if self.sampler else None
+        solver_type = self.solver.id if self.solver else None
 
         return ImaginePrompt(
             prompt=positive_prompt,
             prompt_strength=self.cfg_scale,
             negative_prompt=negative_prompt,
-            model=self.model,
-            sampler_type=sampler_type,
+            model_weights=self.model,
+            solver_type=solver_type,
             seed=self.seed,
             steps=self.steps,
-            height=self.height,
-            width=self.width,
+            size=(self.width, self.height),
             init_image=Image.open(BytesIO(init_image)) if init_image else None,
             init_image_strength=init_image_strength,
             mask_image=Image.open(BytesIO(mask_image)) if mask_image else None,

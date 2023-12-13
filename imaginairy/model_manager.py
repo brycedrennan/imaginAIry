@@ -13,16 +13,17 @@ from huggingface_hub import (
     try_to_load_from_cache,
 )
 from omegaconf import OmegaConf
-from refiners.foundationals.latent_diffusion import SD1ControlnetAdapter, SD1UNet
+from refiners.foundationals.latent_diffusion import SD1UNet
+from refiners.foundationals.latent_diffusion.model import LatentDiffusionModel
 from safetensors.torch import load_file
 
 from imaginairy import config as iconfig
-from imaginairy.config import MODEL_SHORT_NAMES
+from imaginairy.config import IMAGE_WEIGHTS_SHORT_NAMES, ModelArchitecture
 from imaginairy.modules import attention
 from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
 from imaginairy.utils.model_cache import memory_managed_model
-from imaginairy.weight_management.conversion import cast_weights
+from imaginairy.utils.named_resolutions import normalize_image_size
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ def load_state_dict(weights_location, half_mode=False, device=None):
     except FileNotFoundError as e:
         if e.errno == 2:
             logger.error(
-                f'Error: "{ckpt_path}" not a valid path to model weights.\nPreconfigured models you can use: {MODEL_SHORT_NAMES}.'
+                f'Error: "{ckpt_path}" not a valid path to model weights.\nPreconfigured models you can use: {IMAGE_WEIGHTS_SHORT_NAMES}.'
             )
             sys.exit(1)
         raise
@@ -149,12 +150,11 @@ def add_controlnet(base_state_dict, controlnet_state_dict):
 
 
 def get_diffusion_model(
-    weights_location=iconfig.DEFAULT_MODEL,
+    weights_location=iconfig.DEFAULT_MODEL_WEIGHTS,
     config_path="configs/stable-diffusion-v1.yaml",
     control_weights_locations=None,
     half_mode=None,
     for_inpainting=False,
-    for_training=False,
 ):
     """
     Load a diffusion model.
@@ -168,7 +168,6 @@ def get_diffusion_model(
             half_mode,
             for_inpainting,
             control_weights_locations=control_weights_locations,
-            for_training=for_training,
         )
     except HuggingFaceAuthorizationError as e:
         if for_inpainting:
@@ -176,22 +175,20 @@ def get_diffusion_model(
                 f"Failed to load inpainting model. Attempting to fall-back to standard model.   {e!s}"
             )
             return _get_diffusion_model(
-                iconfig.DEFAULT_MODEL,
+                iconfig.DEFAULT_MODEL_WEIGHTS,
                 config_path,
                 half_mode,
                 for_inpainting=False,
-                for_training=for_training,
                 control_weights_locations=control_weights_locations,
             )
         raise
 
 
 def _get_diffusion_model(
-    weights_location=iconfig.DEFAULT_MODEL,
-    config_path="configs/stable-diffusion-v1.yaml",
+    weights_location=iconfig.DEFAULT_MODEL_WEIGHTS,
+    model_architecture="configs/stable-diffusion-v1.yaml",
     half_mode=None,
     for_inpainting=False,
-    for_training=False,
     control_weights_locations=None,
 ):
     """
@@ -201,28 +198,22 @@ def _get_diffusion_model(
     """
     global MOST_RECENTLY_LOADED_MODEL
 
-    (
-        model_config,
-        weights_location,
-        config_path,
-        control_weights_locations,
-    ) = resolve_model_paths(
-        weights_path=weights_location,
-        config_path=config_path,
-        control_weights_paths=control_weights_locations,
+    model_weights_config = resolve_model_weights_config(
+        model_weights=weights_location,
+        default_model_architecture=model_architecture,
         for_inpainting=for_inpainting,
-        for_training=for_training,
     )
     # some models need the attention calculated in float32
-    if model_config is not None:
-        attention.ATTENTION_PRECISION_OVERRIDE = model_config.forced_attn_precision
+    if model_weights_config is not None:
+        attention.ATTENTION_PRECISION_OVERRIDE = (
+            model_weights_config.forced_attn_precision
+        )
     else:
         attention.ATTENTION_PRECISION_OVERRIDE = "default"
     diffusion_model = _load_diffusion_model(
-        config_path=config_path,
+        config_path=model_weights_config.architecture.config_path,
         weights_location=weights_location,
         half_mode=half_mode,
-        for_training=for_training,
     )
     MOST_RECENTLY_LOADED_MODEL = diffusion_model
     if control_weights_locations:
@@ -235,80 +226,25 @@ def _get_diffusion_model(
 
 
 def get_diffusion_model_refiners(
-    weights_location=iconfig.DEFAULT_MODEL,
-    config_path="configs/stable-diffusion-v1.yaml",
-    control_weights_locations=None,
+    weights_config: iconfig.ModelWeightsConfig,
+    for_inpainting=False,
     dtype=None,
-    for_inpainting=False,
-    for_training=False,
-):
-    """
-    Load a diffusion model.
-
-    Weights location may also be shortcut name, e.g. "SD-1.5"
-    """
-    try:
-        return _get_diffusion_model_refiners(
-            weights_location,
-            config_path,
-            for_inpainting,
-            dtype=dtype,
-            control_weights_locations=control_weights_locations,
-            for_training=for_training,
-        )
-    except HuggingFaceAuthorizationError as e:
-        if for_inpainting:
-            logger.warning(
-                f"Failed to load inpainting model. Attempting to fall-back to standard model.   {e!s}"
-            )
-            return _get_diffusion_model_refiners(
-                iconfig.DEFAULT_MODEL,
-                config_path,
-                dtype=dtype,
-                for_inpainting=False,
-                for_training=for_training,
-                control_weights_locations=control_weights_locations,
-            )
-        raise
-
-
-def _get_diffusion_model_refiners(
-    weights_location=iconfig.DEFAULT_MODEL,
-    config_path="configs/stable-diffusion-v1.yaml",
-    for_inpainting=False,
-    for_training=False,
-    control_weights_locations=None,
-    device=None,
-    dtype=torch.float16,
-):
-    """
-    Load a diffusion model.
-
-    Weights location may also be shortcut name, e.g. "SD-1.5"
-    """
-
-    sd = _get_diffusion_model_refiners_only(
-        weights_location=weights_location,
-        config_path=config_path,
+) -> LatentDiffusionModel:
+    """Load a diffusion model."""
+    return _get_diffusion_model_refiners(
+        weights_location=weights_config.weights_location,
         for_inpainting=for_inpainting,
-        for_training=for_training,
-        device=device,
         dtype=dtype,
     )
 
-    return sd
-
 
 @lru_cache(maxsize=1)
-def _get_diffusion_model_refiners_only(
-    weights_location=iconfig.DEFAULT_MODEL,
-    config_path="configs/stable-diffusion-v1.yaml",
-    for_inpainting=False,
-    for_training=False,
-    control_weights_locations=None,
+def _get_diffusion_model_refiners(
+    weights_location: str,
+    for_inpainting: bool = False,
     device=None,
     dtype=torch.float16,
-):
+) -> LatentDiffusionModel:
     """
     Load a diffusion model.
 
@@ -325,29 +261,12 @@ def _get_diffusion_model_refiners_only(
     device = device or get_device()
 
     (
-        model_config,
-        weights_location,
-        config_path,
-        control_weights_locations,
-    ) = resolve_model_paths(
-        weights_path=weights_location,
-        config_path=config_path,
-        control_weights_paths=control_weights_locations,
-        for_inpainting=for_inpainting,
-        for_training=for_training,
-    )
-    # some models need the attention calculated in float32
-    if model_config is not None:
-        attention.ATTENTION_PRECISION_OVERRIDE = model_config.forced_attn_precision
-    else:
-        attention.ATTENTION_PRECISION_OVERRIDE = "default"
-
-    (
         vae_weights,
         unet_weights,
         text_encoder_weights,
     ) = load_stable_diffusion_compvis_weights(weights_location)
 
+    StableDiffusionCls: type[LatentDiffusionModel]
     if for_inpainting:
         unet = SD1UNet(in_channels=9)
         StableDiffusionCls = StableDiffusion_1_Inpainting
@@ -378,11 +297,8 @@ def _get_diffusion_model_refiners_only(
 
 
 @memory_managed_model("stable-diffusion", memory_usage_mb=1951)
-def _load_diffusion_model(config_path, weights_location, half_mode, for_training):
+def _load_diffusion_model(config_path, weights_location, half_mode):
     model_config = OmegaConf.load(f"{PKG_ROOT}/{config_path}")
-    if for_training:
-        model_config.use_ema = True
-        # model_config.use_scheduler = True
 
     # only run half-mode on cuda. run it by default
     half_mode = half_mode is None and get_device() == "cuda"
@@ -393,32 +309,6 @@ def _load_diffusion_model(config_path, weights_location, half_mode, for_training
         half_mode=half_mode,
     )
     return model
-
-
-def load_controlnet_adapter(
-    name,
-    control_weights_location,
-    target_unet,
-    scale=1.0,
-):
-    controlnet_state_dict = load_state_dict(control_weights_location, half_mode=False)
-    controlnet_state_dict = cast_weights(
-        source_weights=controlnet_state_dict,
-        source_model_name="controlnet-1-1",
-        source_component_name="all",
-        source_format="diffusers",
-        dest_format="refiners",
-    )
-
-    for key in controlnet_state_dict:
-        controlnet_state_dict[key] = controlnet_state_dict[key].to(
-            device=target_unet.device, dtype=target_unet.dtype
-        )
-    adapter = SD1ControlnetAdapter(
-        target=target_unet, name=name, scale=scale, weights=controlnet_state_dict
-    )
-
-    return adapter
 
 
 @memory_managed_model("controlnet")
@@ -438,64 +328,82 @@ def load_controlnet(control_weights_location, half_mode):
     return controlnet
 
 
-def resolve_model_paths(
-    weights_path=iconfig.DEFAULT_MODEL,
-    config_path=None,
-    control_weights_paths=None,
-    for_inpainting=False,
-    for_training=False,
-):
+def resolve_model_weights_config(
+    model_weights: str | iconfig.ModelWeightsConfig,
+    default_model_architecture: str | None = None,
+    for_inpainting: bool = False,
+) -> iconfig.ModelWeightsConfig:
     """Resolve weight and config path if they happen to be shortcuts."""
-    model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(weights_path, None)
-    model_metadata_c = iconfig.MODEL_CONFIG_SHORTCUTS.get(config_path, None)
+    if isinstance(model_weights, iconfig.ModelWeightsConfig):
+        return model_weights
 
-    control_weights_paths = control_weights_paths or []
-    control_net_metadatas = [
-        iconfig.CONTROLNET_CONFIG_SHORTCUTS.get(control_weights_path, None)
-        for control_weights_path in control_weights_paths
-    ]
+    if not isinstance(model_weights, str):
+        msg = f"Invalid model weights: {model_weights}"
+        raise ValueError(msg)  # noqa
 
-    if not control_net_metadatas and for_inpainting:
-        model_metadata_w = iconfig.MODEL_CONFIG_SHORTCUTS.get(
-            f"{weights_path}-inpaint", model_metadata_w
+    if default_model_architecture is not None and not isinstance(
+        default_model_architecture, str
+    ):
+        msg = f"Invalid model architecture: {default_model_architecture}"
+        raise ValueError(msg)
+
+    if for_inpainting:
+        model_weights_config = iconfig.MODEL_WEIGHT_CONFIG_LOOKUP.get(
+            f"{model_weights.lower()}-inpaint", None
         )
-        model_metadata_c = iconfig.MODEL_CONFIG_SHORTCUTS.get(
-            f"{config_path}-inpaint", model_metadata_c
+        if model_weights_config:
+            return model_weights_config
+
+    model_weights_config = iconfig.MODEL_WEIGHT_CONFIG_LOOKUP.get(
+        model_weights.lower(), None
+    )
+    if model_weights_config:
+        return model_weights_config
+
+    if not default_model_architecture:
+        msg = "You must specify the model architecture when loading custom weights."
+        raise ValueError(msg)
+
+    default_model_architecture = default_model_architecture.lower()
+    model_architecture_config = None
+    if for_inpainting:
+        model_architecture_config = iconfig.MODEL_ARCHITECTURE_LOOKUP.get(
+            f"{default_model_architecture}-inpaint", None
         )
 
-    if model_metadata_w:
-        if config_path is None:
-            config_path = model_metadata_w.config_path
-        if for_training:
-            weights_path = model_metadata_w.weights_url_full
-            if weights_path is None:
-                msg = "No full training weights configured for this model. Edit the code or subimt a github issue."
-                raise ValueError(msg)
-        else:
-            weights_path = model_metadata_w.weights_url
+    if not model_architecture_config:
+        model_architecture_config = iconfig.MODEL_ARCHITECTURE_LOOKUP.get(
+            default_model_architecture, None
+        )
 
-    if model_metadata_c:
-        config_path = model_metadata_c.config_path
+    if model_architecture_config is None:
+        msg = f"Invalid model architecture: {default_model_architecture}"
+        raise ValueError(msg)
 
-    if config_path is None:
-        config_path = iconfig.MODEL_CONFIG_SHORTCUTS[iconfig.DEFAULT_MODEL].config_path
-    if control_net_metadatas:
-        if "stable-diffusion-v1" not in config_path:
-            msg = "Control net is only supported for stable diffusion v1. Please use a different model."
-            raise ValueError(msg)
-        control_weights_paths = [cnm.weights_url for cnm in control_net_metadatas]
-        config_path = control_net_metadatas[0].config_path
-    model_metadata = model_metadata_w or model_metadata_c
-    logger.debug(f"Loading model weights from: {weights_path}")
-    logger.debug(f"Loading model config from:  {config_path}")
-    return model_metadata, weights_path, config_path, control_weights_paths
+    model_weights_config = iconfig.ModelWeightsConfig(
+        name="Custom Loaded",
+        aliases=[],
+        architecture=model_architecture_config,
+        weights_location=model_weights,
+        defaults={},
+    )
+
+    return model_weights_config
 
 
-def get_model_default_image_size(weights_location):
-    model_config = iconfig.MODEL_CONFIG_SHORTCUTS.get(weights_location, None)
-    if model_config:
-        return model_config.default_image_size
-    return 512
+def get_model_default_image_size(model_architecture: str | ModelArchitecture | None):
+    if isinstance(model_architecture, str):
+        model_architecture = iconfig.MODEL_ARCHITECTURE_LOOKUP.get(
+            model_architecture, None
+        )
+    default_size = None
+    if model_architecture:
+        default_size = model_architecture.defaults.get("size")
+
+    if default_size is None:
+        default_size = 512
+    default_size = normalize_image_size(default_size)
+    return default_size
 
 
 def get_current_diffusion_model():
@@ -702,7 +610,6 @@ def open_weights(filepath, device=None):
     return state_dict
 
 
-@lru_cache
 def load_stable_diffusion_compvis_weights(weights_url):
     from imaginairy.model_manager import get_cached_url_path
     from imaginairy.utils import get_device

@@ -1,3 +1,5 @@
+# type: ignore
+
 """
 wild mixture of
 https://github.com/lucidrains/denoising-diffusion-pytorch/blob/7706bdfc6f527f58d33f84b7b522e61e6e3164b3/denoising_diffusion_pytorch/denoising_diffusion_pytorch.py
@@ -888,7 +890,7 @@ class LatentDiffusion(DDPM):
         denoise_grid = make_grid(denoise_grid, nrow=n_imgs_per_row)
         return denoise_grid
 
-    def get_first_stage_encoding(self, encoder_posterior):
+    def get_first_stage_encoding(self, encoder_posterior) -> torch.Tensor:
         if isinstance(encoder_posterior, DiagonalGaussianDistribution):
             z = encoder_posterior.mode()
         elif isinstance(encoder_posterior, torch.Tensor):

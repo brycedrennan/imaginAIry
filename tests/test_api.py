@@ -2,26 +2,25 @@ import os.path
 
 import pytest
 
-from imaginairy import LazyLoadingImage
 from imaginairy.api import imagine, imagine_image_files
 from imaginairy.img_processors.control_modes import CONTROL_MODES
 from imaginairy.img_utils import pillow_fit_image_within
-from imaginairy.schema import ControlNetInput, ImaginePrompt
+from imaginairy.schema import ControlInput, ImaginePrompt, LazyLoadingImage, MaskMode
 from imaginairy.utils import get_device
 
 from . import TESTS_FOLDER
 from .utils import assert_image_similar_to_expectation
 
 
-def test_imagine(sampler_type, filename_base_for_outputs):
+def test_imagine(solver_type, filename_base_for_outputs):
     prompt_text = "a scenic old-growth forest with diffuse light poking through the canopy. high resolution nature photography"
     prompt = ImaginePrompt(
-        prompt_text, width=512, height=512, steps=20, seed=1, sampler_type=sampler_type
+        prompt_text, size=512, steps=20, seed=1, solver_type=solver_type
     )
     result = next(imagine(prompt))
 
     threshold_lookup = {"k_dpm_2_a": 26000}
-    threshold = threshold_lookup.get(sampler_type, 10000)
+    threshold = threshold_lookup.get(solver_type, 10000)
 
     img_path = f"{filename_base_for_outputs}.png"
     assert_image_similar_to_expectation(
@@ -49,25 +48,25 @@ def test_model_versions(filename_base_for_orig_outputs, model_version):
             ImaginePrompt(
                 prompt_text,
                 seed=1,
-                model=model_version,
+                model_weights=model_version,
             )
         )
 
     threshold = 35000
-
-    for i, result in enumerate(imagine(prompts)):
-        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model}.png"
+    results = list(imagine(prompts))
+    for i, result in enumerate(results):
+        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model_weights.aliases[0]}.png"
         result.img.save(img_path)
 
-    for i, result in enumerate(imagine(prompts)):
-        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model}.png"
+    for i, result in enumerate(results):
+        img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model_weights.aliases[0]}.png"
         assert_image_similar_to_expectation(
             result.img, img_path=img_path, threshold=threshold
         )
 
 
 def test_img2img_beach_to_sunset(
-    sampler_type, filename_base_for_outputs, filename_base_for_orig_outputs
+    solver_type, filename_base_for_outputs, filename_base_for_orig_outputs
 ):
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/beach_at_sainte_adresse.jpg")
     prompt = ImaginePrompt(
@@ -77,11 +76,10 @@ def test_img2img_beach_to_sunset(
         prompt_strength=15,
         mask_prompt="(sky|clouds) AND !(buildings|trees)",
         mask_mode="replace",
-        width=512,
-        height=512,
+        size=512,
         steps=40 * 2,
         seed=1,
-        sampler_type=sampler_type,
+        solver_type=solver_type,
     )
     result = next(imagine(prompt))
 
@@ -91,7 +89,7 @@ def test_img2img_beach_to_sunset(
 
 
 def test_img_to_img_from_url_cats(
-    sampler_type,
+    solver_type,
     filename_base_for_outputs,
     mocked_responses,
     filename_base_for_orig_outputs,
@@ -113,11 +111,10 @@ def test_img_to_img_from_url_cats(
         "dogs lying on a hot pink couch",
         init_image=img,
         init_image_strength=0.5,
-        width=512,
-        height=512,
+        size=512,
         steps=50,
         seed=1,
-        sampler_type=sampler_type,
+        solver_type=solver_type,
     )
 
     result = next(imagine(prompt))
@@ -130,7 +127,7 @@ def test_img_to_img_from_url_cats(
 
 def test_img2img_low_noise(
     filename_base_for_outputs,
-    sampler_type,
+    solver_type,
 ):
     fruit_path = os.path.join(TESTS_FOLDER, "data", "bowl_of_fruit.jpg")
     img = LazyLoadingImage(filepath=fruit_path)
@@ -144,17 +141,18 @@ def test_img2img_low_noise(
         mask_mode="replace",
         # steps=40,
         seed=1,
-        sampler_type=sampler_type,
+        solver_type=solver_type,
     )
 
     result = next(imagine(prompt))
 
     threshold_lookup = {
+        "dpmpp": 26000,
         "k_dpm_2_a": 26000,
         "k_euler_a": 18000,
         "k_dpm_adaptive": 13000,
     }
-    threshold = threshold_lookup.get(sampler_type, 14000)
+    threshold = threshold_lookup.get(solver_type, 14000)
 
     img_path = f"{filename_base_for_outputs}.png"
     assert_image_similar_to_expectation(
@@ -165,7 +163,7 @@ def test_img2img_low_noise(
 @pytest.mark.parametrize("init_strength", [0, 0.05, 0.2, 1])
 def test_img_to_img_fruit_2_gold(
     filename_base_for_outputs,
-    sampler_type,
+    solver_type,
     init_strength,
     filename_base_for_orig_outputs,
 ):
@@ -183,7 +181,7 @@ def test_img_to_img_fruit_2_gold(
         mask_mode="replace",
         steps=needed_steps,
         seed=1,
-        sampler_type=sampler_type,
+        solver_type=solver_type,
     )
 
     result = next(imagine(prompt))
@@ -194,7 +192,7 @@ def test_img_to_img_fruit_2_gold(
         "k_dpm_adaptive": 13000,
         "k_dpmpp_2s": 16000,
     }
-    threshold = threshold_lookup.get(sampler_type, 16000)
+    threshold = threshold_lookup.get(solver_type, 16000)
 
     pillow_fit_image_within(img).save(f"{filename_base_for_orig_outputs}__orig.jpg")
     img_path = f"{filename_base_for_outputs}.png"
@@ -227,7 +225,7 @@ def test_img_to_img_fruit_2_gold_repeat():
     ]
     for result in imagine(prompts, debug_img_callback=None):
         result.img.save(
-            f"{TESTS_FOLDER}/test_output/img2img_fruit_2_gold_{result.prompt.sampler_type}_{get_device()}_run-{run_count:02}.jpg"
+            f"{TESTS_FOLDER}/test_output/img2img_fruit_2_gold_{result.prompt.solver_type}_{get_device()}_run-{run_count:02}.jpg"
         )
         run_count += 1
 
@@ -236,9 +234,8 @@ def test_img_to_img_fruit_2_gold_repeat():
 def test_img_to_file():
     prompt = ImaginePrompt(
         "an old growth forest, diffuse light poking through the canopy. high-resolution, nature photography, nat geo photo",
-        width=512 + 64,
-        height=512 - 64,
-        steps=20,
+        size=(512 + 64, 512 - 64),
+        steps=2,
         seed=2,
         upscale=True,
     )
@@ -254,8 +251,7 @@ def test_inpainting_bench(filename_base_for_outputs, filename_base_for_orig_outp
         init_image=img,
         init_image_strength=0.4,
         mask_image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2_mask.png"),
-        width=512,
-        height=512,
+        size=512,
         steps=40,
         seed=1,
     )
@@ -279,9 +275,8 @@ def test_cliptext_inpainting_pearl_doctor(
         init_image=img,
         init_image_strength=0.2,
         mask_prompt="face AND NOT (bandana OR hair OR blue fabric){*5}",
-        mask_mode=ImaginePrompt.MaskMode.KEEP,
-        width=512,
-        height=512,
+        mask_mode=MaskMode.KEEP,
+        size=512,
         steps=40,
         seed=181509347,
     )
@@ -297,8 +292,7 @@ def test_tile_mode(filename_base_for_outputs):
     prompt_text = "gold coins"
     prompt = ImaginePrompt(
         prompt_text,
-        width=400,
-        height=400,
+        size=400,
         steps=15,
         seed=1,
         tile_mode="xy",
@@ -317,7 +311,7 @@ control_modes = list(CONTROL_MODES.keys())
 def test_controlnet(filename_base_for_outputs, control_mode):
     prompt_text = "a photo of a woman sitting on a bench"
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png")
-    control_input = ControlNetInput(
+    control_input = ControlInput(
         mode=control_mode,
         image=img,
     )
@@ -327,30 +321,27 @@ def test_controlnet(filename_base_for_outputs, control_mode):
         prompt_text = "a wise old man"
         seed = 1
         mask_image = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2_mask.png")
-        control_input = ControlNetInput(
+        control_input = ControlInput(
             mode=control_mode,
             image=mask_image,
         )
 
     prompt = ImaginePrompt(
         prompt_text,
-        width=512,
-        height=512,
+        size=512,
         steps=45,
         seed=seed,
         init_image=img,
         init_image_strength=0,
         control_inputs=[control_input],
         fix_faces=True,
-        sampler="ddim",
+        solver_type="ddim",
     )
     prompt.steps = 1
-    prompt.width = 256
-    prompt.height = 256
+    prompt.size = 256
     result = next(imagine(prompt))
     prompt.steps = 15
-    prompt.width = 512
-    prompt.height = 512
+    prompt.size = 512
     result = next(imagine(prompt))
 
     img_path = f"{filename_base_for_outputs}.png"
@@ -365,8 +356,7 @@ def test_large_image(filename_base_for_outputs):
     prompt_text = "a stormy ocean. oil painting"
     prompt = ImaginePrompt(
         prompt_text,
-        width=1920,
-        height=1080,
+        size="1080p",
         steps=30,
         seed=0,
     )

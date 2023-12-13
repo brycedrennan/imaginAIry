@@ -3,19 +3,25 @@
 ### v14 todo
 
  - configurable composition cutoff
- - rename model parameter weights 
- - rename model_config parameter to architecture and make it case insensitive
- - add --size parameter that accepts strings (e.g. 256x256, 4k, uhd, 8k, etc)
- - detect if cuda torch missing and give better error message
- - add method to install correct torch version
+ - ✅ rename model parameter weights 
+ - ✅ rename model_config parameter to architecture and make it case insensitive
+ - ✅ add --size parameter that accepts strings (e.g. 256x256, 4k, uhd, 8k, etc)
+ - ✅ detect if cuda torch missing and give better error message
+ - ✅ add method to install correct torch version
+ - ✅ make cli run faster again
+ - ✅ add tests for cli commands
+ - add type checker
+ - only output the main image unless some flag is set
  - allow selection of output video format
  - chain multiple operations together imggen => videogen
+   - https://github.com/pallets/click/tree/main/examples/imagepipe 
+
+ - add interface for loading diffusers weights
+ - https://huggingface.co/playgroundai/playground-v2-1024px-aesthetic
  - make sure terminal output on windows doesn't suck
- - add karras schedule to refiners
  - add method to show cache size
  - add method to clear model cache
  - add method to clear cached items not recently used (does diffusers have one?)
-
 ### Old Todo
 
  - Inference Performance Optimizations

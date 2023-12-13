@@ -31,9 +31,9 @@ remove_option(edit_options, "allow_compose_phase")
 @click.option(
     "--model-weights-path",
     "--model",
-    help=f"Model to use. Should be one of {', '.join(config.MODEL_SHORT_NAMES)}, or a path to custom weights.",
+    help=f"Model to use. Should be one of {', '.join(config.IMAGE_WEIGHTS_SHORT_NAMES)}, or a path to custom weights.",
     show_default=True,
-    default="SD-1.5",
+    default="sd15",
 )
 @click.option(
     "--negative-prompt",
@@ -53,15 +53,13 @@ def edit_cmd(
     outdir,
     output_file_extension,
     repeats,
-    height,
-    width,
     size,
     steps,
     seed,
     upscale,
     fix_faces,
     fix_faces_fidelity,
-    sampler_type,
+    solver,
     log_level,
     quiet,
     show_work,
@@ -76,7 +74,7 @@ def edit_cmd(
     caption,
     precision,
     model_weights_path,
-    model_config_path,
+    model_architecture,
     prompt_library_path,
     version,
     make_gif,
@@ -95,16 +93,10 @@ def edit_cmd(
     Same as calling `aimg imagine --model edit --init-image my-dog.jpg --init-image-strength 1` except this command
     can batch edit images.
     """
-    from imaginairy.schema import ControlNetInput
+    from imaginairy.schema import ControlInput
 
     allow_compose_phase = False
-    control_inputs = [
-        ControlNetInput(
-            image=None,
-            image_raw=None,
-            mode="edit",
-        )
-    ]
+    control_inputs = [ControlInput(image=None, image_raw=None, mode="edit", strength=1)]
 
     return _imagine_cmd(
         ctx,
@@ -116,15 +108,13 @@ def edit_cmd(
         outdir,
         output_file_extension,
         repeats,
-        height,
-        width,
         size,
         steps,
         seed,
         upscale,
         fix_faces,
         fix_faces_fidelity,
-        sampler_type,
+        solver,
         log_level,
         quiet,
         show_work,
@@ -140,7 +130,7 @@ def edit_cmd(
         caption,
         precision,
         model_weights_path,
-        model_config_path,
+        model_architecture,
         prompt_library_path,
         version,
         make_gif,

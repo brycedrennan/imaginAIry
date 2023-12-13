@@ -43,27 +43,42 @@ _NAMED_RESOLUTIONS = {
     "SVD": (1024, 576),  # stable video diffusion
 }
 
+_NAMED_RESOLUTIONS = {k.upper(): v for k, v in _NAMED_RESOLUTIONS.items()}
 
-def get_named_resolution(resolution: str):
-    resolution = resolution.upper()
 
-    size = _NAMED_RESOLUTIONS.get(resolution)
-
-    if size is None:
-        # is it WIDTHxHEIGHT format?
-        try:
-            width, height = resolution.split("X")
-            size = (int(width), int(height))
-        except ValueError:
-            pass
-
-    if size is None:
-        # is it just a single number?
-        with contextlib.suppress(ValueError):
-            size = (int(resolution), int(resolution))
-
-    if size is None:
-        msg = f"Unknown resolution: {resolution}"
+def normalize_image_size(resolution: str | int | tuple[int, int]) -> tuple[int, int]:
+    size = _normalize_image_size(resolution)
+    if any(s <= 0 for s in size):
+        msg = f"Invalid resolution: {resolution!r}"
         raise ValueError(msg)
-
     return size
+
+
+def _normalize_image_size(resolution: str | int | tuple[int, int]) -> tuple[int, int]:
+    match resolution:
+        case (int(), int()):
+            return resolution  # type: ignore
+        case int():
+            return resolution, resolution
+        case str():
+            resolution = resolution.strip().upper()
+            resolution = resolution.replace(" ", "").replace("X", ",").replace("*", ",")
+            if resolution.upper() in _NAMED_RESOLUTIONS:
+                return _NAMED_RESOLUTIONS[resolution.upper()]
+
+            # is it WIDTH,HEIGHT format?
+            try:
+                width, height = resolution.split(",")
+                return int(width), int(height)
+            except ValueError:
+                pass
+
+            # is it just a single number?
+            with contextlib.suppress(ValueError):
+                return int(resolution), int(resolution)
+
+            msg = f"Invalid resolution: '{resolution}'"
+            raise ValueError(msg)
+        case _:
+            msg = f"Invalid resolution: {resolution!r}"
+            raise ValueError(msg)

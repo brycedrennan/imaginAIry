@@ -1,7 +1,8 @@
 import pytest
 from torch import nn
 
-from imaginairy import ImaginePrompt, imagine
+from imaginairy.api import imagine
+from imaginairy.schema import ImaginePrompt
 from imaginairy.utils import get_device
 from imaginairy.utils.model_cache import GPUModelCache
 
@@ -40,7 +41,9 @@ def create_model_of_n_bytes(n):
 def test_memory_usage(filename_base_for_orig_outputs, model_version):
     """Test that we can switch between model versions."""
     prompt_text = "valley, fairytale treehouse village covered, , matte painting, highly detailed, dynamic lighting, cinematic, realism, realistic, photo real, sunset, detailed, high contrast, denoised, centered, michael whelan"
-    prompts = [ImaginePrompt(prompt_text, model=model_version, seed=1, steps=30)]
+    prompts = [
+        ImaginePrompt(prompt_text, model_weights=model_version, seed=1, steps=30)
+    ]
 
     for i, result in enumerate(imagine(prompts)):
         img_path = f"{filename_base_for_orig_outputs}_{result.prompt.prompt_text}_{result.prompt.model}.png"

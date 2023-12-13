@@ -4,7 +4,7 @@ import platform
 import time
 from contextlib import contextmanager, nullcontext
 from functools import lru_cache
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 import torch
 from torch import Tensor, autocast
@@ -62,7 +62,7 @@ def get_obj_from_str(import_path: str, reload=False) -> Any:
     return getattr(module, obj_name)
 
 
-def instantiate_from_config(config: Union[dict, str]) -> Any:
+def instantiate_from_config(config: dict) -> Any:
     """Instantiate an object from a config dict."""
     if "target" not in config:
         if config == "__is_first_stage__":

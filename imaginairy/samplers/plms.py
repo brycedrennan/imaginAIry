@@ -8,9 +8,9 @@ from tqdm import tqdm
 from imaginairy.log_utils import increment_step, log_latent
 from imaginairy.modules.diffusion.util import extract_into_tensor, noise_like
 from imaginairy.samplers.base import (
-    ImageSampler,
+    ImageSolver,
     NoiseSchedule,
-    SamplerName,
+    SolverName,
     get_noise_prediction,
     mask_blend,
 )
@@ -19,7 +19,7 @@ from imaginairy.utils import get_device
 logger = logging.getLogger(__name__)
 
 
-class PLMSSampler(ImageSampler):
+class PLMSSolver(ImageSolver):
     """
     probabilistic least-mean-squares.
 
@@ -29,7 +29,7 @@ class PLMSSampler(ImageSampler):
     https://github.com/luping-liu/PNDM
     """
 
-    short_name = SamplerName.PLMS
+    short_name = SolverName.PLMS
     name = "probabilistic least-mean-squares sampler"
     default_steps = 40
 

@@ -1,4 +1,5 @@
-from imaginairy import ImaginePrompt, LazyLoadingImage, imagine_image_files
+from imaginairy.api import imagine_image_files
+from imaginairy.schema import ImaginePrompt, LazyLoadingImage
 
 
 def main():

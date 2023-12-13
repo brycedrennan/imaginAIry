@@ -1,15 +1,69 @@
+import subprocess
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner
 
-from imaginairy import ImaginePrompt, LazyLoadingImage, surprise_me
+from imaginairy import surprise_me
 from imaginairy.cli.edit import edit_cmd
 from imaginairy.cli.edit_demo import edit_demo_cmd
 from imaginairy.cli.imagine import imagine_cmd
 from imaginairy.cli.main import aimg
 from imaginairy.cli.upscale import upscale_cmd
+from imaginairy.schema import ImaginePrompt, LazyLoadingImage
 from imaginairy.utils.model_cache import GPUModelCache
-from tests import TESTS_FOLDER
+from tests import PROJECT_FOLDER, TESTS_FOLDER
+from tests.utils import Timer
+
+
+@pytest.mark.parametrize("subcommand_name", aimg.commands.keys())
+def test_cmd_help_time(subcommand_name):
+    cmd_parts = [
+        "aimg",
+        subcommand_name,
+        "--help",
+    ]
+    with Timer(f"{subcommand_name} --help") as t:
+        result = subprocess.run(
+            cmd_parts, check=False, capture_output=True, cwd=PROJECT_FOLDER
+        )
+    assert result.returncode == 0, result.stderr
+    assert t.elapsed < 1.0, f"{t.elapsed} > 1.0"
+
+
+def test_model_info_cmd():
+    runner = CliRunner()
+    result = runner.invoke(
+        aimg,
+        [
+            "model-list",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+
+
+def test_describe_cmd():
+    runner = CliRunner()
+    result = runner.invoke(
+        aimg,
+        [
+            "describe",
+            f"{TESTS_FOLDER}/data/dog.jpg",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+
+
+def test_colorize_cmd():
+    runner = CliRunner()
+    result = runner.invoke(
+        aimg,
+        [
+            "colorize",
+            f"{TESTS_FOLDER}/data/dog.jpg",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
 
 
 def test_imagine_cmd(monkeypatch):
@@ -25,8 +79,6 @@ def test_imagine_cmd(monkeypatch):
             f"{TESTS_FOLDER}/test_output",
             "--seed",
             "703425280",
-            # "--model",
-            # "empty",
             "--outdir",
             f"{TESTS_FOLDER}/test_output",
         ],
@@ -72,8 +124,7 @@ def test_edit_demo(monkeypatch):
             ImaginePrompt(
                 "",
                 steps=1,
-                width=256,
-                height=256,
+                size=256,
                 # model="empty",
             )
         ]
@@ -89,7 +140,7 @@ def test_edit_demo(monkeypatch):
             f"{TESTS_FOLDER}/test_output",
         ],
     )
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
 
 
 def test_upscale(monkeypatch):

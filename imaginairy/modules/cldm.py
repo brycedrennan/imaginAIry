@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 from imaginairy.modules.attention import SpatialTransformer
-from imaginairy.modules.diffusion.ddpm import LatentDiffusion
+from imaginairy.modules.diffusion.ddpm import LatentDiffusion  # type: ignore
 from imaginairy.modules.diffusion.openaimodel import (
     AttentionBlock,
     Downsample,

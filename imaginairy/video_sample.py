@@ -6,7 +6,7 @@ import re
 import time
 from glob import glob
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import cv2
 import numpy as np
@@ -16,9 +16,10 @@ from omegaconf import OmegaConf
 from PIL import Image
 from torchvision.transforms import ToTensor
 
-from imaginairy import LazyLoadingImage, config
+from imaginairy import config
 from imaginairy.model_manager import get_cached_url_path
 from imaginairy.paths import PKG_ROOT
+from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import (
     default,
     get_device,
@@ -30,9 +31,10 @@ logger = logging.getLogger(__name__)
 
 
 def generate_video(
-    input_path: str = "other/images/sound-music.jpg",  # Can either be image file or folder with image files
-    num_frames: Optional[int] = None,
-    num_steps: Optional[int] = None,
+    input_path: str,  # Can either be image file or folder with image files
+    output_folder: str | None = None,
+    num_frames: int = 6,
+    num_steps: int = 30,
     model_name: str = "svd_xt",
     fps_id: int = 6,
     output_fps: int = 6,
@@ -41,7 +43,6 @@ def generate_video(
     seed: Optional[int] = None,
     decoding_t: int = 1,  # Number of frames decoded at a time! This eats most VRAM. Reduce if necessary.
     device: Optional[str] = None,
-    output_folder: Optional[str] = None,
     repetitions=1,
 ):
     """
@@ -69,15 +70,16 @@ def generate_video(
     seed = default(seed, random.randint(0, 1000000))
     output_fps = default(output_fps, fps_id)
 
-    video_model_config = config.video_models.get(model_name, None)
+    video_model_config = config.MODEL_WEIGHT_CONFIG_LOOKUP.get(model_name, None)
     if video_model_config is None:
         msg = f"Version {model_name} does not exist."
         raise ValueError(msg)
 
-    num_frames = default(num_frames, video_model_config["default_frames"])
-    num_steps = default(num_steps, video_model_config["default_steps"])
-    output_folder = default(output_folder, "outputs/video/")
-    video_config_path = f"{PKG_ROOT}/{video_model_config['config_path']}"
+    num_frames = default(num_frames, video_model_config.defaults.get("frames", 12))
+    num_steps = default(num_steps, video_model_config.defaults.get("steps", 30))
+    output_folder_str = default(output_folder, "outputs/video/")
+    del output_folder
+    video_config_path = f"{PKG_ROOT}/{video_model_config.architecture.config_path}"
 
     logger.info(
         f"Generating a {num_frames} frame video from {input_path}. Device:{device} seed:{seed}"
@@ -87,7 +89,7 @@ def generate_video(
         device="cpu",
         num_frames=num_frames,
         num_steps=num_steps,
-        weights_url=video_model_config["weights_url"],
+        weights_url=video_model_config.weights_location,
     )
     torch.manual_seed(seed)
 
@@ -118,11 +120,10 @@ def generate_video(
     for _ in range(repetitions):
         for input_path in all_img_paths:
             if input_path.startswith("http"):
-                image = LazyLoadingImage(url=input_path)
+                image = LazyLoadingImage(url=input_path).as_pillow()
             else:
-                image = LazyLoadingImage(filepath=input_path)
+                image = LazyLoadingImage(filepath=input_path).as_pillow()
             crop_coords = None
-            image = image.as_pillow()
             if image.mode == "RGBA":
                 image = image.convert("RGB")
             if image.size != expected_size:
@@ -179,7 +180,7 @@ def generate_video(
                     "Large fps value! This may lead to suboptimal performance."
                 )
 
-            value_dict = {}
+            value_dict: dict[str, Any] = {}
             value_dict["motion_bucket_id"] = motion_bucket_id
             value_dict["fps_id"] = fps_id
             value_dict["cond_aug"] = cond_aug
@@ -249,14 +250,14 @@ def generate_video(
                     left, upper, right, lower = crop_coords
                     samples = samples[:, :, upper:lower, left:right]
 
-                os.makedirs(output_folder, exist_ok=True)
-                base_count = len(glob(os.path.join(output_folder, "*.mp4"))) + 1
+                os.makedirs(output_folder_str, exist_ok=True)
+                base_count = len(glob(os.path.join(output_folder_str, "*.mp4"))) + 1
                 source_slug = make_safe_filename(input_path)
                 video_filename = f"{base_count:06d}_{model_name}_{seed}_{fps_id}fps_{source_slug}.mp4"
-                video_path = os.path.join(output_folder, video_filename)
+                video_path = os.path.join(output_folder_str, video_filename)
                 writer = cv2.VideoWriter(
                     video_path,
-                    cv2.VideoWriter_fourcc(*"MP4V"),
+                    cv2.VideoWriter_fourcc(*"MP4V"),  # type: ignore
                     output_fps,
                     (samples.shape[-1], samples.shape[-2]),
                 )
@@ -329,20 +330,20 @@ def get_batch(keys, value_dict, N, T, device):
 def load_model(
     config: str, device: str, num_frames: int, num_steps: int, weights_url: str
 ):
-    config = OmegaConf.load(config)
+    oconfig = OmegaConf.load(config)
     ckpt_path = get_cached_url_path(weights_url)
-    config["model"]["params"]["ckpt_path"] = ckpt_path
+    oconfig["model"]["params"]["ckpt_path"] = ckpt_path  # type: ignore
     if device == "cuda":
-        config.model.params.conditioner_config.params.emb_models[
+        oconfig.model.params.conditioner_config.params.emb_models[
             0
         ].params.open_clip_embedding_config.params.init_device = device
 
-    config.model.params.sampler_config.params.num_steps = num_steps
-    config.model.params.sampler_config.params.guider_config.params.num_frames = (
+    oconfig.model.params.sampler_config.params.num_steps = num_steps
+    oconfig.model.params.sampler_config.params.guider_config.params.num_frames = (
         num_frames
     )
 
-    model = instantiate_from_config(config.model).to(device).half().eval()
+    model = instantiate_from_config(oconfig.model).to(device).half().eval()
 
     # safety_filter = DeepFloydDataFiltering(verbose=False, device=device)
     def safety_filter(x):
@@ -406,13 +407,3 @@ def make_safe_filename(input_string):
     safe_name = re.sub(r"[^a-zA-Z0-9\-]", "", name_without_extension)
 
     return safe_name
-
-
-if __name__ == "__main__":
-    # configure logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    generate_video()

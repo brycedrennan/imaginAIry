@@ -1,14 +1,41 @@
 import pytest
 from pydantic import ValidationError
 
-from imaginairy import LazyLoadingImage, config
-from imaginairy.schema import ControlNetInput, ImaginePrompt, WeightedPrompt
+from imaginairy import config
+from imaginairy.schema import (
+    ControlInput,
+    ImaginePrompt,
+    LazyLoadingImage,
+    WeightedPrompt,
+)
 from imaginairy.utils.data_distorter import DataDistorter
 from tests import TESTS_FOLDER
 
 
+def test_imagine_prompt_default():
+    prompt = ImaginePrompt()
+    assert prompt.prompt == [WeightedPrompt(text="")]
+    assert prompt.negative_prompt == [
+        WeightedPrompt(text=config.DEFAULT_NEGATIVE_PROMPT)
+    ]
+
+    prompt = ImaginePrompt(negative_prompt="")
+    assert prompt.negative_prompt == [WeightedPrompt(text="")]
+
+    assert prompt.width == 512
+
+
 def test_imagine_prompt_has_default_negative():
-    prompt = ImaginePrompt("fruit salad", model="foobar")
+    prompt = ImaginePrompt(
+        "fruit salad",
+        model_weights=config.ModelWeightsConfig(
+            name="foobar",
+            aliases=["foobar"],
+            weights_location="foobar",
+            architecture="sd15",
+            defaults={},
+        ),
+    )
     assert isinstance(prompt.prompt[0], WeightedPrompt)
     assert isinstance(prompt.negative_prompt[0], WeightedPrompt)
 
@@ -21,10 +48,10 @@ def test_imagine_prompt_custom_negative_prompt():
 
 
 def test_imagine_prompt_model_specific_negative_prompt():
-    prompt = ImaginePrompt("fruit salad", model="openjourney-v1")
+    prompt = ImaginePrompt("fruit salad", model_weights="openjourney-v1")
     assert isinstance(prompt.prompt[0], WeightedPrompt)
     assert isinstance(prompt.negative_prompt[0], WeightedPrompt)
-    assert prompt.negative_prompt[0].text == ""
+    assert prompt.negative_prompt[0].text == "poor quality"
 
 
 def test_imagine_prompt_weighted_prompts():
@@ -84,7 +111,7 @@ def test_imagine_prompt_control_inputs():
     prompt = ImaginePrompt(
         "fruit",
         control_inputs=[
-            ControlNetInput(mode="depth", image=img),
+            ControlInput(mode="depth", image=img),
         ],
     )
     prompt.control_inputs[0].image.convert("RGB")
@@ -98,7 +125,7 @@ def test_imagine_prompt_control_inputs():
         "fruit",
         init_image=img,
         control_inputs=[
-            ControlNetInput(mode="depth"),
+            ControlInput(mode="depth"),
         ],
     )
     assert prompt.control_inputs[0].image is not None
@@ -107,7 +134,7 @@ def test_imagine_prompt_control_inputs():
     prompt = ImaginePrompt(
         "fruit",
         control_inputs=[
-            ControlNetInput(mode="depth"),
+            ControlInput(mode="depth"),
         ],
     )
     assert prompt.control_inputs[0].image is None
@@ -136,8 +163,8 @@ def test_imagine_prompt_mask_params():
 
 
 def test_imagine_prompt_default_model():
-    prompt = ImaginePrompt("fruit", model=None)
-    assert prompt.model == config.DEFAULT_MODEL
+    prompt = ImaginePrompt("fruit", model_weights=None)
+    assert config.DEFAULT_MODEL_WEIGHTS in prompt.model_weights.aliases
 
 
 def test_imagine_prompt_default_negative():
@@ -152,7 +179,7 @@ def test_imagine_prompt_fix_faces_fidelity():
 def test_imagine_prompt_init_strength_zero():
     lazy_img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/red.png")
     prompt = ImaginePrompt(
-        "fruit", control_inputs=[ControlNetInput(mode="depth", image=lazy_img)]
+        "fruit", control_inputs=[ControlInput(mode="depth", image=lazy_img)]
     )
     assert prompt.init_image_strength == 0.0
 
@@ -171,12 +198,12 @@ def test_distorted_prompts():
         init_image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/red.png"),
         init_image_strength=0.5,
         control_inputs=[
-            ControlNetInput(
+            ControlInput(
                 mode="details",
                 image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/red.png"),
                 strength=2,
             ),
-            ControlNetInput(
+            ControlInput(
                 mode="depth",
                 image_raw=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/red.png"),
                 strength=3,
@@ -187,13 +214,11 @@ def test_distorted_prompts():
         mask_mode="replace",
         mask_modify_original=False,
         outpaint="all5,up0,down20",
-        model=config.DEFAULT_MODEL,
-        model_config_path=None,
-        sampler_type=config.DEFAULT_SAMPLER,
+        model_weights=config.DEFAULT_MODEL_WEIGHTS,
+        solver_type=config.DEFAULT_SOLVER,
         seed=42,
         steps=10,
-        height=256,
-        width=256,
+        size=256,
         upscale=True,
         fix_faces=True,
         fix_faces_fidelity=0.7,

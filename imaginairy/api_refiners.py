@@ -1,31 +1,26 @@
 import logging
 from typing import List, Optional
 
-from imaginairy import WeightedPrompt
-from imaginairy.config import CONTROLNET_CONFIG_SHORTCUTS
-from imaginairy.model_manager import load_controlnet_adapter
+from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
+from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode, WeightedPrompt
 
 logger = logging.getLogger(__name__)
 
 
 def _generate_single_image(
-    prompt,
+    prompt: ImaginePrompt,
     debug_img_callback=None,
     progress_img_callback=None,
     progress_img_interval_steps=3,
     progress_img_interval_min_s=0.1,
     add_caption=False,
-    # controlnet, finetune, naive, auto
-    inpaint_method="finetune",
     return_latent=False,
     composition_strength=0.5,
     dtype=None,
     half_mode=None,
 ):
-    import gc
-
     import torch.nn
-    from PIL import ImageOps
+    from PIL import Image, ImageOps
     from pytorch_lightning import seed_everything
     from refiners.foundationals.latent_diffusion.schedulers import DDIM, DPMSolver
     from tqdm import tqdm
@@ -56,32 +51,22 @@ def _generate_single_image(
     )
     from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
     from imaginairy.safety import create_safety_score
-    from imaginairy.samplers import SamplerName
-    from imaginairy.schema import ImaginePrompt, ImagineResult
+    from imaginairy.samplers import SolverName
+    from imaginairy.schema import ImagineResult
     from imaginairy.utils import get_device, randn_seeded
 
     if dtype is None:
         dtype = torch.float16 if half_mode else torch.float32
 
     get_device()
-    gc.collect()
-    torch.cuda.empty_cache()
+    clear_gpu_cache()
     prompt = prompt.make_concrete_copy()
 
-    control_modes = []
-    control_inputs = prompt.control_inputs or []
-    control_inputs = control_inputs.copy()
-    for_inpainting = bool(prompt.mask_image or prompt.mask_prompt or prompt.outpaint)
-
-    if control_inputs:
-        control_modes = [c.mode for c in prompt.control_inputs]
-
     sd = get_diffusion_model_refiners(
-        weights_location=prompt.model,
-        config_path=prompt.model_config_path,
-        control_weights_locations=tuple(control_modes),
+        weights_config=prompt.model_weights,
+        for_inpainting=prompt.should_use_inpainting
+        and prompt.inpaint_method == "finetune",
         dtype=dtype,
-        for_inpainting=for_inpainting and inpaint_method == "finetune",
     )
 
     seed_everything(prompt.seed)
@@ -91,7 +76,6 @@ def _generate_single_image(
 
     mask_image = None
     mask_image_orig = None
-    prompt = prompt.make_concrete_copy()
 
     def latent_logger(latents):
         progress_latents.append(latents)
@@ -117,8 +101,8 @@ def _generate_single_image(
         )
         clip_text_embedding = clip_text_embedding.to(device=sd.device, dtype=sd.dtype)
 
-        result_images = {}
-        progress_latents = []
+        result_images: dict[str, torch.Tensor | None | Image.Image] = {}
+        progress_latents: list[torch.Tensor] = []
         first_step = 0
         mask_grayscale = None
 
@@ -131,9 +115,18 @@ def _generate_single_image(
 
         init_latent = None
         noise_step = None
+
+        control_modes = []
+        control_inputs = prompt.control_inputs or []
+        control_inputs = control_inputs.copy()
+
+        if control_inputs:
+            control_modes = [c.mode for c in prompt.control_inputs]
+
         if prompt.init_image:
             starting_image = prompt.init_image
-            first_step = int((prompt.steps) * prompt.init_image_strength)
+            assert prompt.init_image_strength is not None
+            first_step = int(prompt.steps * prompt.init_image_strength)
             # noise_step = int((prompt.steps - 1) * prompt.init_image_strength)
 
             if prompt.mask_prompt:
@@ -158,7 +151,7 @@ def _generate_single_image(
             init_image_t = init_image_t.to(device=sd.device, dtype=sd.dtype)
             init_latent = sd.lda.encode(init_image_t)
 
-            shape = init_latent.shape
+            shape = list(init_latent.shape)
 
             log_latent(init_latent, "init_latent")
 
@@ -172,7 +165,7 @@ def _generate_single_image(
 
                 log_img(mask_image, "init mask")
 
-                if prompt.mask_mode == ImaginePrompt.MaskMode.REPLACE:
+                if prompt.mask_mode == MaskMode.REPLACE:
                     mask_image = ImageOps.invert(mask_image)
 
                 mask_image_orig = mask_image
@@ -180,13 +173,14 @@ def _generate_single_image(
                 pillow_mask_to_latent_mask(
                     mask_image, downsampling_factor=downsampling_factor
                 ).to(get_device())
-                # if inpaint_method == "controlnet":
-                #     result_images["control-inpaint"] = mask_image
-                #     control_inputs.append(
-                #         ControlNetInput(mode="inpaint", image=mask_image)
-                #     )
+                if prompt.inpaint_method == "controlnet":
+                    result_images["control-inpaint"] = mask_image
+                    control_inputs.append(
+                        ControlInput(mode="inpaint", image=mask_image)
+                    )
 
         seed_everything(prompt.seed)
+        assert prompt.seed is not None
 
         noise = randn_seeded(seed=prompt.seed, size=shape).to(
             get_device(), dtype=sd.dtype
@@ -195,7 +189,6 @@ def _generate_single_image(
         controlnets = []
 
         if control_modes:
-            control_strengths = []
             from imaginairy.img_processors.control_modes import CONTROL_MODES
 
             for control_input in control_inputs:
@@ -219,11 +212,11 @@ def _generate_single_image(
                 if control_input.image_raw is None:
                     control_prep_function = CONTROL_MODES[control_input.mode]
                     if control_input.mode == "inpaint":
-                        control_image_t = control_prep_function(
+                        control_image_t = control_prep_function(  # type: ignore
                             control_image_input_t, init_image_t
                         )
                     else:
-                        control_image_t = control_prep_function(control_image_input_t)
+                        control_image_t = control_prep_function(control_image_input_t)  # type: ignore
                 else:
                     control_image_t = (control_image_input_t + 1) / 2
 
@@ -232,10 +225,10 @@ def _generate_single_image(
                 log_img(control_image_disp, "control_image")
 
                 if len(control_image_t.shape) == 3:
-                    raise RuntimeError("Control image must be 4D")
+                    raise ValueError("Control image must be 4D")
 
                 if control_image_t.shape[1] != 3:
-                    raise RuntimeError("Control image must have 3 channels")
+                    raise ValueError("Control image must have 3 channels")
 
                 if (
                     control_input.mode != "inpaint"
@@ -243,45 +236,48 @@ def _generate_single_image(
                     or control_image_t.max() > 1
                 ):
                     msg = f"Control image must be in [0, 1] but we received {control_image_t.min()} and {control_image_t.max()}"
-                    raise RuntimeError(msg)
+                    raise ValueError(msg)
 
                 if control_image_t.max() == control_image_t.min():
                     msg = f"No control signal found in control image {control_input.mode}."
-                    raise RuntimeError(msg)
+                    raise ValueError(msg)
 
-                control_strengths.append(control_input.strength)
+                control_config = CONTROL_CONFIG_SHORTCUTS.get(control_input.mode, None)
+                if not control_config:
+                    msg = f"Unknown control mode: {control_input.mode}"
+                    raise ValueError(msg)
+                from refiners.foundationals.latent_diffusion import SD1ControlnetAdapter
 
-                control_weights_path = CONTROLNET_CONFIG_SHORTCUTS.get(
-                    control_input.mode, None
-                ).weights_url
-
-                controlnet = load_controlnet_adapter(
+                controlnet = SD1ControlnetAdapter(  # type: ignore
                     name=control_input.mode,
-                    control_weights_location=control_weights_path,
-                    target_unet=sd.unet,
-                    scale=control_input.strength,
+                    target=sd.unet,  # type: ignore
+                    weights_location=control_config.weights_location,
                 )
+                controlnet.set_scale(control_input.strength)
+
                 controlnets.append((controlnet, control_image_t))
 
         if prompt.allow_compose_phase:
+            cutoff_size = get_model_default_image_size(prompt.model_architecture)
+            cutoff_size = (int(cutoff_size[0] * 1.30), int(cutoff_size[1] * 1.30))
+            compose_kwargs = {
+                "prompt": prompt,
+                "target_height": prompt.height,
+                "target_width": prompt.width,
+                "cutoff": cutoff_size,
+                "composition_strength": composition_strength,
+                "dtype": dtype,
+            }
+
             if prompt.init_image:
-                comp_image, comp_img_orig = _generate_composition_image(
-                    prompt=prompt,
-                    target_height=init_image.height,
-                    target_width=init_image.width,
-                    cutoff=get_model_default_image_size(prompt.model),
-                    composition_strength=composition_strength,
-                    dtype=dtype,
+                compose_kwargs.update(
+                    {
+                        "target_height": init_image.height,
+                        "target_width": init_image.width,
+                    }
                 )
-            else:
-                comp_image, comp_img_orig = _generate_composition_image(
-                    prompt=prompt,
-                    target_height=prompt.height,
-                    target_width=prompt.width,
-                    cutoff=get_model_default_image_size(prompt.model),
-                    composition_strength=composition_strength,
-                    dtype=dtype,
-                )
+            comp_image, comp_img_orig = _generate_composition_image(**compose_kwargs)
+
             if comp_image is not None:
                 result_images["composition"] = comp_img_orig
                 result_images["composition-upscaled"] = comp_image
@@ -299,17 +295,17 @@ def _generate_single_image(
                 control_image_t.to(device=sd.device, dtype=sd.dtype)
             )
             controlnet.inject()
-        if prompt.sampler_type.lower() == SamplerName.K_DPMPP_2M:
+        if prompt.solver_type.lower() == SolverName.DPMPP:
             sd.scheduler = DPMSolver(num_inference_steps=prompt.steps)
-        elif prompt.sampler_type.lower() == SamplerName.DDIM:
+        elif prompt.solver_type.lower() == SolverName.DDIM:
             sd.scheduler = DDIM(num_inference_steps=prompt.steps)
         else:
-            msg = f"Unknown sampler type: {prompt.sampler_type}"
+            msg = f"Unknown solver type: {prompt.solver_type}"
             raise ValueError(msg)
         sd.scheduler.to(device=sd.device, dtype=sd.dtype)
         sd.set_num_inference_steps(prompt.steps)
 
-        if hasattr(sd, "mask_latents"):
+        if hasattr(sd, "mask_latents") and mask_image is not None:
             sd.set_inpainting_conditions(
                 target_image=init_image,
                 mask=ImageOps.invert(mask_image),
@@ -330,8 +326,7 @@ def _generate_single_image(
 
         # if "cuda" in str(sd.lda.device):
         #     sd.lda.to("cpu")
-        gc.collect()
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
         # print(f"moving unet to {sd.device}")
         # sd.unet.to(device=sd.device, dtype=sd.dtype)
         for step in tqdm(sd.steps[first_step:], bar_format="    {l_bar}{bar}{r_bar}"):
@@ -343,26 +338,12 @@ def _generate_single_image(
                 condition_scale=prompt.prompt_strength,
             )
 
-        # z = sd(
-        #     randn_seeded(seed=prompt.seed, size=[1, 4, 8, 8]).to(
-        #         device=sd.device, dtype=sd.dtype
-        #     ),
-        #     step=step,
-        #     clip_text_embedding=clip_text_embedding,
-        #     condition_scale=prompt.prompt_strength,
-        # )
-
-        if "cuda" in str(sd.unet.device):
-            # print("moving unet to cpu")
-            # sd.unet.to("cpu")
-            gc.collect()
-            torch.cuda.empty_cache()
+        clear_gpu_cache()
 
         logger.debug("Decoding image")
         if x.device != sd.lda.device:
             sd.lda.to(x.device)
-        gc.collect()
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
         gen_img = sd.lda.decode_latents(x)
 
         if mask_image_orig and init_image:
@@ -417,18 +398,24 @@ def _generate_single_image(
                 caption_text = prompt.caption_text.format(prompt=prompt.prompt_text)
                 add_caption_to_image(gen_img, caption_text)
 
+        # todo: do something smarter
+        result_images.update(
+            {
+                "upscaled": upscaled_img,
+                "modified_original": rebuilt_orig_img,
+                "mask_binary": mask_image_orig,
+                "mask_grayscale": mask_grayscale,
+            }
+        )
+
         result = ImagineResult(
             img=gen_img,
             prompt=prompt,
-            upscaled_img=upscaled_img,
             is_nsfw=safety_score.is_nsfw,
             safety_score=safety_score,
-            modified_original=rebuilt_orig_img,
-            mask_binary=mask_image_orig,
-            mask_grayscale=mask_grayscale,
             result_images=result_images,
-            timings={},
-            progress_latents=[],
+            timings=lc.get_timings(),
+            progress_latents=[],  # todo
         )
 
         _most_recent_result = result
@@ -436,13 +423,15 @@ def _generate_single_image(
             logger.info(f"Image Generated. Timings: {result.timings_str()}")
         for controlnet, _ in controlnets:
             controlnet.eject()
-        gc.collect()
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
         return result
 
 
 def _prompts_to_embeddings(prompts, text_encoder):
     import torch
+
+    if not prompts:
+        prompts = [WeightedPrompt(text="")]
 
     total_weight = sum(wp.weight for wp in prompts)
     if str(text_encoder.device) == "cpu":
@@ -476,3 +465,13 @@ def _calc_conditioning(
         tensors=(neutral_conditioning, positive_conditioning), dim=0
     )
     return clip_text_embedding
+
+
+def clear_gpu_cache():
+    import gc
+
+    import torch
+
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
