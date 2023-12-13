@@ -208,7 +208,7 @@ def pytest_sessionfinish(session, exitstatus):
 
     # Write updated, sorted list of node IDs to file
     with open(cuda_test_tracker_filepath, "w", newline="") as file:
-        writer = csv.writer(file)
+        writer = csv.writer(file, lineterminator="\n")
         for node_id in sorted(updated_node_ids):
             writer.writerow([node_id])
 
