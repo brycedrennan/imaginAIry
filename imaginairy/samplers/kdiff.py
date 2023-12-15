@@ -1,3 +1,5 @@
+"""Classes and functions for image generation with diffusion models"""
+
 # pylama:ignore=W0613
 from abc import ABC
 from typing import Callable

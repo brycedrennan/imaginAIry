@@ -1,3 +1,5 @@
+"""Functions for generating refined images"""
+
 import logging
 from typing import List, Optional
 

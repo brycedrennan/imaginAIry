@@ -1,3 +1,5 @@
+"""FastAPI application for image generation"""
+
 import logging
 import os.path
 import sys

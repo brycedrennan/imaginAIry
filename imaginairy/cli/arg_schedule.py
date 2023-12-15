@@ -1,3 +1,5 @@
+"""Decorator and parsers for command scheduling"""
+
 from typing import Iterable
 
 from imaginairy.utils import frange

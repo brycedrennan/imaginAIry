@@ -1,3 +1,4 @@
+"""Functions for creating animations from images."""
 import os.path
 
 import cv2

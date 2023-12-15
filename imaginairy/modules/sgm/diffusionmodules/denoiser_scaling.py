@@ -1,3 +1,5 @@
+"""Classes for denoiser scaling calculations"""
+
 from abc import ABC, abstractmethod
 from typing import Tuple
 

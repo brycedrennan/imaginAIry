@@ -1,3 +1,5 @@
+"""Classes for enhanced super-resolution networks"""
+
 # from https://github.com/XPixelGroup/BasicSR/commit/44672b0c6a607fc2a5aaeea70b9f565d1f3f095b
 # with slight modifications
 import torch

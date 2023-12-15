@@ -1,3 +1,5 @@
+"""Functions for discriminator loss calculation"""
+
 import torch
 import torch.nn.functional as F
 

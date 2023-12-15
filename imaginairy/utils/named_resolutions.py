@@ -1,3 +1,5 @@
+"""Functions for normalizing image resolutions"""
+
 import contextlib
 
 _NAMED_RESOLUTIONS = {

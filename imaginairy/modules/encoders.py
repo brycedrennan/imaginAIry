@@ -1,3 +1,5 @@
+"""Classes for text encoding transformations"""
+
 import open_clip
 import torch
 from torch import nn

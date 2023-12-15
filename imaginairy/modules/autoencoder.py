@@ -1,3 +1,5 @@
+"""Classes for image autoencoding and manipulation"""
+
 # pylama:ignore=W0613
 import logging
 import math

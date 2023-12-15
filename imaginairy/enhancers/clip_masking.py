@@ -1,3 +1,5 @@
+"""Functions for generating and processing image masks"""
+
 from functools import lru_cache
 from typing import Optional, Sequence
 

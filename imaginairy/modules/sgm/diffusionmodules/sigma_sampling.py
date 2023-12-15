@@ -1,3 +1,5 @@
+"""Classes for stochastic sampling strategies"""
+
 import torch
 
 from imaginairy.utils import default, instantiate_from_config

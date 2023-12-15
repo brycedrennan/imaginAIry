@@ -1,3 +1,5 @@
+"""Functions for image tiling and reconstruction"""
+
 # inspired by https://github.com/ProGamerGov/neural-dream/blob/master/neural_dream/dream_tile.py
 # but with all the bugs fixed and lots of simplifications
 # MIT License

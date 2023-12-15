@@ -1,3 +1,5 @@
+"""Classes and functions for Vision Transformer processing"""
+
 import math
 import types
 

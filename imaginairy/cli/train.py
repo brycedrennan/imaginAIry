@@ -1,3 +1,5 @@
+"""CLI commands for model training and image preparation"""
+
 import logging
 
 import click

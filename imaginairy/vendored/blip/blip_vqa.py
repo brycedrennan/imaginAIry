@@ -1,3 +1,5 @@
+"""Classes for visual question answering"""
+
 import numpy as np
 import torch
 import torch.nn.functional as F

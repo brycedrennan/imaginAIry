@@ -1,3 +1,5 @@
+"""Classes for guiding diffusion models"""
+
 import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union

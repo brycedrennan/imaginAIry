@@ -1,3 +1,5 @@
+"""API routes for image generation service"""
+
 import uuid
 
 from fastapi import APIRouter

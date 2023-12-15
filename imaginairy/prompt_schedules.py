@@ -1,3 +1,5 @@
+"""Functions for managing prompt schedules"""
+
 import csv
 import re
 from copy import copy

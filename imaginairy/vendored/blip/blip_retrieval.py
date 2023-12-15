@@ -1,3 +1,5 @@
+"""Classes for image-text retrieval learning"""
+
 import torch
 import torch.nn.functional as F
 from models.blip import create_vit, init_tokenizer, load_checkpoint

@@ -1,3 +1,5 @@
+"""Classes for image denoising operations"""
+
 from typing import TYPE_CHECKING, Dict, Union
 
 import torch

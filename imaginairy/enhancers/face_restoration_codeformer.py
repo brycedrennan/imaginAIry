@@ -1,3 +1,5 @@
+"""Code for enhancing facial images"""
+
 import logging
 from functools import lru_cache
 

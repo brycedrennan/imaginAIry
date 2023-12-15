@@ -1,3 +1,5 @@
+"""Classes for managing model weight conversions"""
+
 import os.path
 from dataclasses import dataclass
 from functools import lru_cache

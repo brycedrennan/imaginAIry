@@ -1,3 +1,5 @@
+"""Classes and functions for image generation"""
+
 # pylama:ignore=W0613
 import logging
 from abc import ABC

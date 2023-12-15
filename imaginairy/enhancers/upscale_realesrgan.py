@@ -1,3 +1,5 @@
+"""Functions for image upscaling using RealESRGAN"""
+
 import numpy as np
 import torch
 from PIL import Image

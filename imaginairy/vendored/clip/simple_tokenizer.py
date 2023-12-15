@@ -1,3 +1,5 @@
+"""Tokenizer for byte-pair encoding operations"""
+
 import gzip
 import html
 import os

@@ -1,3 +1,5 @@
+"""Utilities for image generation logging"""
+
 import logging
 import logging.config
 import re

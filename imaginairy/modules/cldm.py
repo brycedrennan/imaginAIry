@@ -1,3 +1,5 @@
+"""Classes for controlled image generation"""
+
 import torch
 from torch import nn
 

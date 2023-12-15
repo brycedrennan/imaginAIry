@@ -1,3 +1,5 @@
+"""Classes and constants for AI model configuration"""
+
 from dataclasses import dataclass
 from typing import Any, List
 

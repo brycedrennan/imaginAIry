@@ -1,3 +1,5 @@
+"""Command for upscaling images with AI"""
+
 import logging
 
 import click

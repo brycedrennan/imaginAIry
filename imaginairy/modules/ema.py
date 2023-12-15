@@ -1,3 +1,5 @@
+"""Classes for exponential moving average tracking"""
+
 import torch
 from torch import nn
 

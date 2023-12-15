@@ -1,3 +1,5 @@
+"""Classes and functions for image feature transformation and synthesis"""
+
 import math
 from typing import Optional
 

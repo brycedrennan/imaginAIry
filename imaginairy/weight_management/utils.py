@@ -1,3 +1,5 @@
+"""Utilities for managing AI model weights"""
+
 import os.path
 
 _base_dir = os.path.dirname(os.path.realpath(__file__))

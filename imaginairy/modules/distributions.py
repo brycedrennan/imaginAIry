@@ -1,3 +1,5 @@
+"""Classes for parametric Gaussian distributions"""
+
 import numpy as np
 import torch
 

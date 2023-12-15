@@ -1,3 +1,5 @@
+"""Classes for probabilistic distributions handling"""
+
 import numpy as np
 import torch
 

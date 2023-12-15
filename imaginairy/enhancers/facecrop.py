@@ -1,3 +1,5 @@
+"""Functions for detecting and cropping faces"""
+
 import numpy as np
 
 from imaginairy.enhancers.face_restoration_codeformer import face_restore_helper

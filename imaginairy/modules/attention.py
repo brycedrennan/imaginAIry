@@ -1,3 +1,5 @@
+"""Classes and functions for attention mechanisms in neural networks"""
+
 import math
 from functools import lru_cache
 

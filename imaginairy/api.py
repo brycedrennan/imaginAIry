@@ -1,3 +1,5 @@
+"""Functions for generating and processing images"""
+
 import logging
 import os
 import re

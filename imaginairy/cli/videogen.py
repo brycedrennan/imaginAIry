@@ -1,3 +1,5 @@
+"""Command for generating AI-powered videos"""
+
 import logging
 
 import click

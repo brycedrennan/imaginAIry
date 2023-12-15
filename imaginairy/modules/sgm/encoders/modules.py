@@ -1,3 +1,5 @@
+"""Classes for image and text encoding"""
+
 import math
 from contextlib import nullcontext
 from functools import partial

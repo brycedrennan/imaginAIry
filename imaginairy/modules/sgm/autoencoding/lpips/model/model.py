@@ -1,3 +1,5 @@
+"""Classes for image discrimination"""
+
 import functools
 
 import torch.nn as nn

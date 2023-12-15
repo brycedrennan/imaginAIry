@@ -1,3 +1,5 @@
+"""Utilities for model checkpoint management and normalization layers"""
+
 import hashlib
 import os
 

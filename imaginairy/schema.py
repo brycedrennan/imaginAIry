@@ -1,3 +1,5 @@
+"""Classes for image generation and manipulation"""
+
 # pylint: disable=E0213
 import base64
 import hashlib

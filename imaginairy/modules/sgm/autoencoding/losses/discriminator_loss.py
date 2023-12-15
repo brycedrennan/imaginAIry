@@ -1,3 +1,5 @@
+"""Classes for discriminator loss computation"""
+
 from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np

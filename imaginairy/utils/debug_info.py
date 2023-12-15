@@ -1,3 +1,5 @@
+"""Functions for gathering system debug information"""
+
 from functools import lru_cache
 
 

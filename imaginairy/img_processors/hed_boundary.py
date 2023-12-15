@@ -1,3 +1,5 @@
+"""Classes and functions for edge detection in images"""
+
 from functools import lru_cache
 
 import cv2

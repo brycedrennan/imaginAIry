@@ -1,3 +1,5 @@
+"""Classes for video generation models"""
+
 from typing import List, Optional, Union
 
 import torch as th

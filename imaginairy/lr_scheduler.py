@@ -1,3 +1,5 @@
+"""Classes for learning rate scheduling"""
+
 import numpy as np
 
 

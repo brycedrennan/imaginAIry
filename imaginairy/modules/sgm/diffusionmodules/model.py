@@ -1,3 +1,5 @@
+"""Classes for diffusion-based image generation"""
+
 # pytorch_diffusion + derived encoder decoder
 import logging
 import math
