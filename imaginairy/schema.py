@@ -541,9 +541,6 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
 
         v = v.lower()
 
-        if info.data.get("model") == "SD-2.0-v" and v == SolverName.PLMS:
-            raise ValueError("PLMS solvers is not supported for SD-2.0-v model.")
-
         if info.data.get("model") == "edit" and v in (
             SolverName.PLMS,
             SolverName.DDIM,

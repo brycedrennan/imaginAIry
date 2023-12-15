@@ -366,7 +366,7 @@ imagine --tile-x -w 1024 -h 512 "360 degree equirectangular panorama photograph 
 Use depth maps for amazing "translations" of existing images.
 
 ```bash
->> imagine --model SD-2.0-depth --init-image girl_with_a_pearl_earring_large.jpg --init-image-strength 0.05  "professional headshot photo of a woman with a pearl earring" -r 4 -w 1024 -h 1024 --steps 50
+>> imagine --init-image girl_with_a_pearl_earring_large.jpg --init-image-strength 0.05  "professional headshot photo of a woman with a pearl earring" -r 4 -w 1024 -h 1024 --steps 50
 ```
 <p float="left">
 <img src="tests/data/girl_with_a_pearl_earring.jpg" width="256"> ➡️ 

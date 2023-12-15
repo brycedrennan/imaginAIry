@@ -286,7 +286,7 @@ def _generate_single_image_compvis(
     if control_inputs:
         control_modes = [c.mode for c in prompt.control_inputs]
     if inpaint_method == "auto":
-        if prompt.model_weights in {"SD-1.5", "SD-2.0"}:
+        if prompt.model_weights in {"SD-1.5"}:
             inpaint_method = "finetune"
         else:
             inpaint_method = "controlnet"
