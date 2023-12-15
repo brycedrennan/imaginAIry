@@ -1,8 +1,10 @@
 black
 coverage
+httpx
 mypy
 ruff
 pytest
+pytest-asyncio
 pytest-randomly
 pytest-sugar
 responses
