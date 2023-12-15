@@ -70,8 +70,8 @@ def videogen_cmd(
         aimg videogen --start-image assets/rocket-wide.png
 
     """
+    from imaginairy.api.video_sample import generate_video
     from imaginairy.utils.log_utils import configure_logging
-    from imaginairy.video_sample import generate_video
 
     configure_logging()
 
