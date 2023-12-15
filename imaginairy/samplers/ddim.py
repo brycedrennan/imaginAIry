@@ -1,3 +1,5 @@
+"""Classes for diffusion-based image generation"""
+
 # pylama:ignore=W0613
 import logging
 

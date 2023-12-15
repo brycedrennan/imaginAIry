@@ -1,3 +1,5 @@
+"""Classes for attention-based neural networks"""
+
 import logging
 import math
 from inspect import isfunction

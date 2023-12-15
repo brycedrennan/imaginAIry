@@ -1,3 +1,5 @@
+"""Classes for generative diffusion models"""
+
 import math
 from abc import abstractmethod
 from typing import Optional

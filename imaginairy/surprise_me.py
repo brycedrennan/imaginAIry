@@ -1,3 +1,5 @@
+"""Functions for generating surprise image edits"""
+
 import logging
 import os.path
 

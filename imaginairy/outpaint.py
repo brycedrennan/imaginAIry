@@ -1,3 +1,5 @@
+"""Functions for image outpainting preparation"""
+
 import re
 
 import torch

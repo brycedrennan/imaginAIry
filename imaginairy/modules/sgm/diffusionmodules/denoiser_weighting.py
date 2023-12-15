@@ -1,3 +1,5 @@
+"""Classes for denoiser weighting strategies"""
+
 import torch
 
 

@@ -1,3 +1,5 @@
+"""Classes for spatio-temporal video processing"""
+
 import logging
 from typing import Callable, Iterable, Union
 

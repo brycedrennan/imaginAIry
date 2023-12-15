@@ -1,3 +1,5 @@
+"""Classes for latent space perceptual loss"""
+
 import torch
 import torch.nn as nn
 

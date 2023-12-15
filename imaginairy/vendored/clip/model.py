@@ -1,3 +1,5 @@
+"""Classes for constructing CLIP models"""
+
 from collections import OrderedDict
 from typing import Tuple, Union
 

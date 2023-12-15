@@ -1,3 +1,5 @@
+"""Functions for image-text similarity assessment"""
+
 from functools import lru_cache
 from typing import Sequence
 

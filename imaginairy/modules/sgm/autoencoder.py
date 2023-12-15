@@ -1,3 +1,5 @@
+"""Classes for autoencoder-based image generation"""
+
 import logging
 import math
 import re

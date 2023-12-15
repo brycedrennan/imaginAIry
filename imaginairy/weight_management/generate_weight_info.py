@@ -1,3 +1,5 @@
+"""Functions for managing model weights information"""
+
 import safetensors
 
 from imaginairy.model_manager import (

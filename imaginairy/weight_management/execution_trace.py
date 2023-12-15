@@ -1,3 +1,5 @@
+"""Functions for tracing model execution order"""
+
 import torch
 from transformers import CLIPTextModelWithProjection
 

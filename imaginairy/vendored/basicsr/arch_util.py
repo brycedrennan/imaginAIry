@@ -1,3 +1,5 @@
+"""Functions for neural network weight initialization and layer creation"""
+
 # from https://github.com/XPixelGroup/BasicSR/blob/b0ee3c8414bd39da34f0216cd6bfd8110b85da60/basicsr/archs/arch_util.py
 # with removals and slightmodifications
 import logging

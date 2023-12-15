@@ -1,3 +1,5 @@
+"""Utilities for diffusion model operations"""
+
 # adopted from
 # https://github.com/openai/improved-diffusion/blob/main/improved_diffusion/gaussian_diffusion.py
 # and

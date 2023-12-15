@@ -1,3 +1,5 @@
+"""Classes and functions for image upscaling"""
+
 from functools import lru_cache
 
 import numpy as np

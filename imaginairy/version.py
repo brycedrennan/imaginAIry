@@ -1,3 +1,6 @@
+"""Function for retrieving package version"""
+
+
 def get_version():
     from importlib.metadata import PackageNotFoundError, version
 

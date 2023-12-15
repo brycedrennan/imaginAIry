@@ -1,3 +1,5 @@
+"""Classes for vector quantization regularization"""
+
 import logging
 from abc import abstractmethod
 from typing import Dict, Iterator, Literal, Optional, Tuple, Union

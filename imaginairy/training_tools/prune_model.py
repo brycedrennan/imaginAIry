@@ -1,3 +1,5 @@
+"""Functions for pruning diffusion models"""
+
 import logging
 import os
 

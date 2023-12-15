@@ -1,3 +1,5 @@
+"""Classes for text and image encoding"""
+
 import kornia
 import torch
 from einops import repeat

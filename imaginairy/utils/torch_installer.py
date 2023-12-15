@@ -1,3 +1,5 @@
+"""Functions for managing PyTorch installation"""
+
 import logging
 import subprocess
 

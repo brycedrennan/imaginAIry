@@ -1,3 +1,5 @@
+"""Classes for depth estimation from images"""
+
 import torch
 from torch import nn
 

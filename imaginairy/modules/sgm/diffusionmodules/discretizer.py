@@ -1,3 +1,5 @@
+"""Classes for discretizing diffusion steps"""
+
 from abc import abstractmethod
 from functools import partial
 

@@ -1,3 +1,5 @@
+"""Functions and classes for image preprocessing"""
+
 import math
 
 import cv2

@@ -1,3 +1,5 @@
+"""Classes for image generation sampling"""
+
 # pylama:ignore=W0613
 import logging
 

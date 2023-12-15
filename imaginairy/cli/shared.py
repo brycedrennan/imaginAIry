@@ -1,3 +1,5 @@
+"""Context managers and functions for image generation CLI"""
+
 import logging
 import math
 from contextlib import contextmanager

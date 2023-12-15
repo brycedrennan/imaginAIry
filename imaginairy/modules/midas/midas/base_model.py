@@ -1,3 +1,5 @@
+"""Classes for loading model weights"""
+
 import torch
 
 from imaginairy import config

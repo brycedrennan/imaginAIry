@@ -1,3 +1,5 @@
+"""Command-line interface for AI-driven image generation"""
+
 import click
 
 from imaginairy.cli.clickshell_mod import ImagineColorsCommand

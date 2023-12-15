@@ -1,3 +1,5 @@
+"""Code for depth estimation with MiDaS models"""
+
 # based on https://github.com/isl-org/MiDaS
 from functools import lru_cache
 

@@ -1,3 +1,5 @@
+"""Functions for assessing image blurriness"""
+
 import cv2
 
 from imaginairy.img_utils import pillow_img_to_opencv_img

@@ -1,3 +1,5 @@
+"""Command for applying preset image edits"""
+
 import click
 
 

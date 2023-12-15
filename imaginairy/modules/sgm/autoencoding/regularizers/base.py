@@ -1,3 +1,5 @@
+"""Classes and functions for tensor regularization"""
+
 from abc import abstractmethod
 from typing import Any, Tuple
 

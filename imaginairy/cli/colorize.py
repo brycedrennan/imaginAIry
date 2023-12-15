@@ -1,3 +1,5 @@
+"""Command for colorizing images with AI"""
+
 import logging
 
 import click

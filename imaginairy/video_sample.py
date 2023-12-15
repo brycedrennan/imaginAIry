@@ -1,3 +1,5 @@
+"""Functions for generating synthetic videos"""
+
 import logging
 import math
 import os

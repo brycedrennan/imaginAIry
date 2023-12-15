@@ -1,3 +1,5 @@
+"""Classes for generative image modeling"""
+
 import logging
 import math
 from abc import abstractmethod

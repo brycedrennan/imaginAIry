@@ -1,3 +1,6 @@
+"""Functions for collapsing state_dict key patterns"""
+
+
 def find_state_dict_key_patterns(patterns):
     """Given a list of state_dict keys, collapse similar keys into patterns.
 

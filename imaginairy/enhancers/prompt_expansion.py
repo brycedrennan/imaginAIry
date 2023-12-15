@@ -1,3 +1,5 @@
+"""Functions for expanding text prompts with phraselists"""
+
 import gzip
 import os.path
 import random

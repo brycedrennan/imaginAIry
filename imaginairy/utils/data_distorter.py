@@ -1,3 +1,5 @@
+"""Classes for data distortion testing"""
+
 import contextlib
 import math
 import sys

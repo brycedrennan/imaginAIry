@@ -1,3 +1,5 @@
+"""Functions for managing image regions of interest"""
+
 import logging
 
 logger = logging.getLogger(__name__)

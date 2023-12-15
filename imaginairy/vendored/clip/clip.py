@@ -1,3 +1,5 @@
+"""Code for interfacing with CLIP models"""
+
 import hashlib
 import os
 import urllib

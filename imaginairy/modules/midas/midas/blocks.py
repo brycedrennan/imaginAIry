@@ -1,3 +1,5 @@
+"""Functions and classes for neural network construction"""
+
 import torch
 from torch import nn
 

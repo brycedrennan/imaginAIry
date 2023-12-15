@@ -1,3 +1,5 @@
+"""Classes for diffusion model loss calculation"""
+
 from typing import Dict, List, Optional, Tuple, Union
 
 import torch

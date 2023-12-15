@@ -1,3 +1,5 @@
+"""Classes for stochastic diffusion models"""
+
 import logging
 import math
 from contextlib import contextmanager

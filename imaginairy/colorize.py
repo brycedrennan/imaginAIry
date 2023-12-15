@@ -1,3 +1,5 @@
+"""Functions for colorizing black and white images"""
+
 import logging
 
 from PIL import Image, ImageEnhance, ImageStat

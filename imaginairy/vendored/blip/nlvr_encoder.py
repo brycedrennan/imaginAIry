@@ -1,3 +1,5 @@
+"""Classes for transformer-based language modeling"""
+
 import math
 from typing import Tuple
 

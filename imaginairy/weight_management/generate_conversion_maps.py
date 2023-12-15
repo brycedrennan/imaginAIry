@@ -1,3 +1,5 @@
+"""Code for generating model weight conversion maps"""
+
 import itertools
 import json
 import os

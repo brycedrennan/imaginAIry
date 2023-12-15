@@ -1,3 +1,5 @@
+"""CLI for AI-powered image generation"""
+
 import logging
 
 import click

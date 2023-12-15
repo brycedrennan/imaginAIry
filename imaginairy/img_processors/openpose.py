@@ -1,3 +1,5 @@
+"""Functions for human pose estimation"""
+
 import math
 from collections import OrderedDict
 from functools import lru_cache

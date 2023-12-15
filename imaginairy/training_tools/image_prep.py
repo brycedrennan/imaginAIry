@@ -1,3 +1,5 @@
+"""Functions for image preprocessing and generation"""
+
 import logging
 import os
 import os.path

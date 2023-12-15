@@ -1,3 +1,5 @@
+"""Functions for diffusion sampling calculations"""
+
 import torch
 from scipy import integrate
 

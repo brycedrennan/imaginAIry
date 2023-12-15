@@ -1,3 +1,5 @@
+"""Classes for image content safety evaluation"""
+
 import logging
 from functools import lru_cache
 

@@ -1,3 +1,5 @@
+"""Code for training diffusion models"""
+
 import datetime
 import logging
 import os

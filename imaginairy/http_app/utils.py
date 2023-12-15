@@ -1,3 +1,5 @@
+"""Functions and class for image generation and encoding"""
+
 import base64
 from io import BytesIO
 

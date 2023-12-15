@@ -1,3 +1,5 @@
+"""Code for starting an HTTP API server"""
+
 import logging
 
 import click

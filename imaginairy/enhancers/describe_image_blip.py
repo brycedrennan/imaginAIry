@@ -1,3 +1,5 @@
+"""Functions for generating image captions"""
+
 import os
 import os.path
 from functools import lru_cache

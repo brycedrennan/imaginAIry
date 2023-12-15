@@ -1,3 +1,5 @@
+"""Classes for image upscaling diffusion models"""
+
 from functools import partial
 
 import numpy as np

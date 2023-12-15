@@ -1,3 +1,5 @@
+"""Classes for diffusion loss weighting"""
+
 from abc import ABC, abstractmethod
 
 import torch

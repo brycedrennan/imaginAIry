@@ -1,3 +1,5 @@
+"""Command for AI-powered image editing"""
+
 import click
 
 from imaginairy import config

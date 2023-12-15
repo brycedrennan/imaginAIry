@@ -1,3 +1,4 @@
+"""Pythonic AI generation of images and videos"""
 import os
 
 # tells pytorch to allow MPS usage (for Mac M1 compatibility)

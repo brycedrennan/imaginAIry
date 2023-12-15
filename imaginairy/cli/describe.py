@@ -1,3 +1,5 @@
+"""Command for generating image descriptions"""
+
 import click
 
 

@@ -1,3 +1,5 @@
+"""Functions for image format conversion"""
+
 # from https://github.com/XPixelGroup/BasicSR/blob/b0ee3c8414bd39da34f0216cd6bfd8110b85da60/basicsr/utils/img_util.py
 import math
 import os
