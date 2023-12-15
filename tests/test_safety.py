@@ -1,8 +1,8 @@
 import pytest
 from PIL import Image
 
-from imaginairy.safety import create_safety_score
 from imaginairy.utils import get_device
+from imaginairy.utils.safety import create_safety_score
 from tests import TESTS_FOLDER
 
 

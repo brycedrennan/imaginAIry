@@ -35,7 +35,6 @@ def _generate_single_image(
     from imaginairy.enhancers.describe_image_blip import generate_caption
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
-    from imaginairy.safety import create_safety_score
     from imaginairy.samplers import SolverName
     from imaginairy.schema import ImagineResult
     from imaginairy.utils import get_device, randn_seeded
@@ -58,6 +57,7 @@ def _generate_single_image(
         outpaint_arg_str_parse,
         prepare_image_for_outpaint,
     )
+    from imaginairy.utils.safety import create_safety_score
 
     if dtype is None:
         dtype = torch.float16 if half_mode else torch.float32
