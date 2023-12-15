@@ -39,10 +39,10 @@ def imagine_image_files(
 ):
     from PIL import ImageDraw
 
+    from imaginairy.api.video_sample import generate_video
     from imaginairy.utils import get_next_filenumber
     from imaginairy.utils.animations import make_bounce_animation
     from imaginairy.utils.img_utils import pillow_fit_image_within
-    from imaginairy.video_sample import generate_video
 
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
