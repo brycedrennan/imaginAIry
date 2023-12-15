@@ -26,7 +26,7 @@ def _generate_single_image(
     from refiners.foundationals.latent_diffusion.schedulers import DDIM, DPMSolver
     from tqdm import tqdm
 
-    from imaginairy.api import (
+    from imaginairy.api.generate import (
         IMAGINAIRY_SAFETY_MODE,
         _generate_composition_image,
         combine_image,

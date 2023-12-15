@@ -160,7 +160,7 @@ def imagine(
 ):
     import torch.nn
 
-    from imaginairy.api_refiners import _generate_single_image
+    from imaginairy.api.generate_refiners import _generate_single_image
     from imaginairy.schema import ImaginePrompt
     from imaginairy.utils import (
         check_torch_version,
@@ -729,7 +729,7 @@ def _generate_composition_image(
 ):
     from PIL import Image
 
-    from imaginairy.api_refiners import _generate_single_image
+    from imaginairy.api.generate_refiners import _generate_single_image
     from imaginairy.utils import default, get_default_dtype
 
     cutoff = normalize_image_size(cutoff)
