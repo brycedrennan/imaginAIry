@@ -22,10 +22,10 @@ from safetensors.torch import load_file
 from imaginairy import config as iconfig
 from imaginairy.config import IMAGE_WEIGHTS_SHORT_NAMES, ModelArchitecture
 from imaginairy.modules import attention
-from imaginairy.paths import PKG_ROOT
 from imaginairy.utils import get_device, instantiate_from_config
 from imaginairy.utils.model_cache import memory_managed_model
 from imaginairy.utils.named_resolutions import normalize_image_size
+from imaginairy.utils.paths import PKG_ROOT
 
 logger = logging.getLogger(__name__)
 

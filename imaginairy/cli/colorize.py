@@ -39,8 +39,8 @@ def colorize_cmd(image_filepaths, outdir, repeats, caption):
     from tqdm import tqdm
 
     from imaginairy.colorize import colorize_img
-    from imaginairy.log_utils import configure_logging
     from imaginairy.schema import LazyLoadingImage
+    from imaginairy.utils.log_utils import configure_logging
 
     configure_logging()
 

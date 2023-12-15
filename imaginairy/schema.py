@@ -435,7 +435,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
 
     @field_validator("outpaint", mode="after")
     def validate_outpaint(cls, v):
-        from imaginairy.outpaint import outpaint_arg_str_parse
+        from imaginairy.utils.outpaint import outpaint_arg_str_parse
 
         outpaint_arg_str_parse(v)
         return v
@@ -712,11 +712,11 @@ class ImagineResult:
     ):
         import torch
 
-        from imaginairy.img_utils import (
+        from imaginairy.utils import get_device, get_hardware_description
+        from imaginairy.utils.img_utils import (
             model_latent_to_pillow_img,
             torch_img_to_pillow_img,
         )
-        from imaginairy.utils import get_device, get_hardware_description
 
         self.prompt = prompt
 

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def imaginairy_click_context(log_level="INFO"):
     from pydantic import ValidationError
 
-    from imaginairy.log_utils import configure_logging
+    from imaginairy.utils.log_utils import configure_logging
 
     errors_to_catch = (FileNotFoundError, ValidationError, ValueError)
     configure_logging(level=log_level)
@@ -91,7 +91,7 @@ def _imagine_cmd(
         )
         print(msg)
 
-    from imaginairy.log_utils import configure_logging
+    from imaginairy.utils.log_utils import configure_logging
 
     configure_logging(log_level)
 
@@ -187,7 +187,7 @@ def _imagine_cmd(
                     model_weights=model_weights_path,
                     caption_text=caption_text,
                 )
-                from imaginairy.prompt_schedules import (
+                from imaginairy.utils.prompt_schedules import (
                     parse_schedule_strs,
                     prompt_mutator,
                 )
@@ -224,7 +224,7 @@ def _imagine_cmd(
         comp_imgs = [LazyLoadingImage(filepath=f) for f in filenames]
         comp_imgs.reverse()
 
-        from imaginairy.animations import make_slideshow_animation
+        from imaginairy.utils.animations import make_slideshow_animation
 
         make_slideshow_animation(
             outpath=new_filename,

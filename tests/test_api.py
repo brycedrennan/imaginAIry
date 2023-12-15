@@ -4,9 +4,9 @@ import pytest
 
 from imaginairy.api import imagine, imagine_image_files
 from imaginairy.img_processors.control_modes import CONTROL_MODES
-from imaginairy.img_utils import pillow_fit_image_within
 from imaginairy.schema import ControlInput, ImaginePrompt, LazyLoadingImage, MaskMode
 from imaginairy.utils import get_device
+from imaginairy.utils.img_utils import pillow_fit_image_within
 
 from . import TESTS_FOLDER
 from .utils import assert_image_similar_to_expectation

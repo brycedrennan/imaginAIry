@@ -6,7 +6,7 @@ from torch import nn
 from torchdiffeq import odeint
 from tqdm.auto import tqdm, trange
 
-from imaginairy.log_utils import log_latent
+from imaginairy.utils.log_utils import log_latent
 
 
 def append_zero(x):

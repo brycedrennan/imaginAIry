@@ -35,9 +35,9 @@ from imaginairy.modules.diffusion.util import (
 )
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.modules.ema import LitEma
-from imaginairy.paths import PKG_ROOT
 from imaginairy.samplers.kdiff import DPMPP2MSampler
 from imaginairy.utils import instantiate_from_config
+from imaginairy.utils.paths import PKG_ROOT
 
 logger = logging.getLogger(__name__)
 __conditioning_keys__ = {"concat": "c_concat", "crossattn": "c_crossattn", "adm": "y"}

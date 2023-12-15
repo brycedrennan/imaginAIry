@@ -3,7 +3,7 @@
 import numpy as np
 
 from imaginairy.enhancers.face_restoration_codeformer import face_restore_helper
-from imaginairy.roi_utils import resize_roi_coordinates, square_roi_coordinate
+from imaginairy.utils.roi_utils import resize_roi_coordinates, square_roi_coordinate
 
 
 def detect_faces(img):

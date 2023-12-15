@@ -7,7 +7,6 @@ from typing import Callable
 import torch
 from torch import nn
 
-from imaginairy.log_utils import increment_step, log_latent
 from imaginairy.samplers.base import (
     ImageSolver,
     SolverName,
@@ -15,6 +14,7 @@ from imaginairy.samplers.base import (
     mask_blend,
 )
 from imaginairy.utils import get_device
+from imaginairy.utils.log_utils import increment_step, log_latent
 from imaginairy.vendored.k_diffusion import sampling as k_sampling
 from imaginairy.vendored.k_diffusion.external import CompVisDenoiser, CompVisVDenoiser
 
