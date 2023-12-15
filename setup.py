@@ -15,7 +15,7 @@ if is_for_windows:
         ],
     }
 else:
-    scripts = ["imaginairy/bin/aimg", "imaginairy/bin/imagine"]
+    scripts = ["imaginairy/cli/bin/aimg", "imaginairy/cli/bin/imagine"]
     entry_points = None
 
 
@@ -60,7 +60,7 @@ setup(
             "configs/*.yaml",
             "weight_management/maps/*.json",
             "data/*.*",
-            "bin/*.*",
+            "cli/bin/*.*",
             "http_app/stablestudio/dist/*.*",
             "http_app/stablestudio/dist/assets/*.*",
             "http_app/stablestudio/dist/LICENSE",
