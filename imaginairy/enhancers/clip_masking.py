@@ -9,9 +9,9 @@ import PIL.Image
 import torch
 from torchvision import transforms
 
-from imaginairy.img_utils import pillow_fit_image_within
-from imaginairy.log_utils import log_img
 from imaginairy.schema import LazyLoadingImage
+from imaginairy.utils.img_utils import pillow_fit_image_within
+from imaginairy.utils.log_utils import log_img
 from imaginairy.vendored.clipseg import CLIPDensePredT
 
 weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth"
@@ -19,7 +19,7 @@ weights_url = "https://github.com/timojl/clipseg/raw/master/weights/rd64-uni.pth
 
 @lru_cache
 def clip_mask_model():
-    from imaginairy.paths import PKG_ROOT
+    from imaginairy.utils.paths import PKG_ROOT
 
     model = CLIPDensePredT(version="ViT-B/16", reduce_dim=64, complex_trans_conv=True)
     model.eval()

@@ -15,13 +15,16 @@ from urllib3 import HTTPConnectionPool
 
 from imaginairy import api
 from imaginairy.api import imagine
-from imaginairy.log_utils import configure_logging, suppress_annoying_logs_and_warnings
 from imaginairy.schema import ImaginePrompt
 from imaginairy.utils import (
     fix_torch_group_norm,
     fix_torch_nn_layer_norm,
     get_device,
     platform_appropriate_autocast,
+)
+from imaginairy.utils.log_utils import (
+    configure_logging,
+    suppress_annoying_logs_and_warnings,
 )
 from tests import TESTS_FOLDER
 

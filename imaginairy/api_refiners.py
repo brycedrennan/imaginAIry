@@ -35,26 +35,29 @@ def _generate_single_image(
     from imaginairy.enhancers.describe_image_blip import generate_caption
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
-    from imaginairy.img_utils import (
+    from imaginairy.model_manager import (
+        get_diffusion_model_refiners,
+        get_model_default_image_size,
+    )
+    from imaginairy.safety import create_safety_score
+    from imaginairy.samplers import SolverName
+    from imaginairy.schema import ImagineResult
+    from imaginairy.utils import get_device, randn_seeded
+    from imaginairy.utils.img_utils import (
         add_caption_to_image,
         pillow_fit_image_within,
         pillow_img_to_torch_image,
         pillow_mask_to_latent_mask,
     )
-    from imaginairy.log_utils import (
+    from imaginairy.utils.log_utils import (
         ImageLoggingContext,
         log_img,
         log_latent,
     )
-    from imaginairy.model_manager import (
-        get_diffusion_model_refiners,
-        get_model_default_image_size,
+    from imaginairy.utils.outpaint import (
+        outpaint_arg_str_parse,
+        prepare_image_for_outpaint,
     )
-    from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
-    from imaginairy.safety import create_safety_score
-    from imaginairy.samplers import SolverName
-    from imaginairy.schema import ImagineResult
-    from imaginairy.utils import get_device, randn_seeded
 
     if dtype is None:
         dtype = torch.float16 if half_mode else torch.float32
@@ -451,7 +454,7 @@ def _calc_conditioning(
 ):
     import torch
 
-    from imaginairy.log_utils import log_conditioning
+    from imaginairy.utils.log_utils import log_conditioning
 
     # need to expand if doing batches
     neutral_conditioning = _prompts_to_embeddings(negative_prompts, text_encoder)

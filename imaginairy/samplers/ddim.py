@@ -7,7 +7,6 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from imaginairy.log_utils import increment_step, log_latent
 from imaginairy.modules.diffusion.util import extract_into_tensor, noise_like
 from imaginairy.samplers.base import (
     ImageSolver,
@@ -17,6 +16,7 @@ from imaginairy.samplers.base import (
     mask_blend,
 )
 from imaginairy.utils import get_device
+from imaginairy.utils.log_utils import increment_step, log_latent
 
 logger = logging.getLogger(__name__)
 

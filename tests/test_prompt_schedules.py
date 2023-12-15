@@ -1,7 +1,7 @@
 import pytest
 
-from imaginairy.prompt_schedules import parse_schedule_str
 from imaginairy.utils import frange
+from imaginairy.utils.prompt_schedules import parse_schedule_str
 
 
 @pytest.mark.parametrize(

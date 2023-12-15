@@ -4,7 +4,7 @@ import torch
 from safetensors.torch import load_file, save_file
 
 from imaginairy.model_manager import get_cached_url_path
-from imaginairy.paths import PKG_ROOT
+from imaginairy.utils.paths import PKG_ROOT
 
 sd15_url = "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/889b629140e71758e1e0006e355c331a5744b4bf/v1-5-pruned-emaonly.ckpt"
 

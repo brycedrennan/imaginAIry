@@ -2,9 +2,12 @@ import itertools
 
 import pytest
 
-from imaginairy.feather_tile import rebuild_image, tile_image, tile_setup
-from imaginairy.img_utils import pillow_img_to_torch_image, torch_img_to_pillow_img
 from imaginairy.schema import LazyLoadingImage
+from imaginairy.utils.feather_tile import rebuild_image, tile_image, tile_setup
+from imaginairy.utils.img_utils import (
+    pillow_img_to_torch_image,
+    torch_img_to_pillow_img,
+)
 from tests import TESTS_FOLDER
 
 img_ratios = [0.2, 0.242, 0.3, 0.33333333, 0.5, 0.75, 1, 4 / 3.0, 16 / 9.0, 2, 21 / 9.0]

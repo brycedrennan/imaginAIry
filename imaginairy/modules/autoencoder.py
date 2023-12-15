@@ -9,11 +9,11 @@ import pytorch_lightning as pl
 import torch
 from torch.cuda import OutOfMemoryError
 
-from imaginairy.feather_tile import rebuild_image, tile_image
 from imaginairy.modules.diffusion.model import Decoder, Encoder
 from imaginairy.modules.distributions import DiagonalGaussianDistribution
 from imaginairy.modules.ema import LitEma
 from imaginairy.utils import instantiate_from_config
+from imaginairy.utils.feather_tile import rebuild_image, tile_image
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,9 @@
 import pytest
 
 from imaginairy.api import imagine
-from imaginairy.outpaint import outpaint_arg_str_parse
 from imaginairy.schema import ImaginePrompt, LazyLoadingImage
 from imaginairy.utils import get_device
+from imaginairy.utils.outpaint import outpaint_arg_str_parse
 from tests import TESTS_FOLDER
 from tests.utils import assert_image_similar_to_expectation
 

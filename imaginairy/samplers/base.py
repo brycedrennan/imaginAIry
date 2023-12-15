@@ -7,13 +7,13 @@ from abc import ABC
 import numpy as np
 import torch
 
-from imaginairy.log_utils import log_latent
 from imaginairy.modules.diffusion.util import (
     extract_into_tensor,
     make_ddim_sampling_parameters,
     make_ddim_timesteps,
 )
 from imaginairy.utils import get_device
+from imaginairy.utils.log_utils import log_latent
 
 logger = logging.getLogger(__name__)
 

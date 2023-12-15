@@ -7,9 +7,9 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from imaginairy.log_utils import log_latent
 from imaginairy.model_manager import hf_hub_download
 from imaginairy.utils import get_device, platform_appropriate_autocast
+from imaginairy.utils.log_utils import log_latent
 from imaginairy.vendored import k_diffusion as K
 from imaginairy.vendored.k_diffusion import layers
 from imaginairy.vendored.k_diffusion.models.image_v1 import ImageDenoiserModelV1

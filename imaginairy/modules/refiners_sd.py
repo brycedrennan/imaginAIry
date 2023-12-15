@@ -24,7 +24,7 @@ from torch import Tensor, nn
 from torch.nn import functional as F
 from torch.nn.modules.utils import _pair
 
-from imaginairy.feather_tile import rebuild_image, tile_image
+from imaginairy.utils.feather_tile import rebuild_image, tile_image
 from imaginairy.weight_management.conversion import cast_weights
 
 logger = logging.getLogger(__name__)

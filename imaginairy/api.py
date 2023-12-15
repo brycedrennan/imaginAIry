@@ -39,9 +39,9 @@ def imagine_image_files(
 ):
     from PIL import ImageDraw
 
-    from imaginairy.animations import make_bounce_animation
-    from imaginairy.img_utils import pillow_fit_image_within
     from imaginairy.utils import get_next_filenumber
+    from imaginairy.utils.animations import make_bounce_animation
+    from imaginairy.utils.img_utils import pillow_fit_image_within
     from imaginairy.video_sample import generate_video
 
     generated_imgs_path = os.path.join(outdir, "generated")
@@ -237,30 +237,33 @@ def _generate_single_image_compvis(
     from imaginairy.enhancers.describe_image_blip import generate_caption
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
-    from imaginairy.img_utils import (
+    from imaginairy.model_manager import (
+        get_diffusion_model,
+        get_model_default_image_size,
+    )
+    from imaginairy.modules.midas.api import torch_image_to_depth_map
+    from imaginairy.safety import create_safety_score
+    from imaginairy.samplers import SOLVER_LOOKUP
+    from imaginairy.samplers.editing import CFGEditingDenoiser
+    from imaginairy.schema import ControlInput, ImagineResult, MaskMode
+    from imaginairy.utils import get_device, randn_seeded
+    from imaginairy.utils.img_utils import (
         add_caption_to_image,
         pillow_fit_image_within,
         pillow_img_to_torch_image,
         pillow_mask_to_latent_mask,
         torch_img_to_pillow_img,
     )
-    from imaginairy.log_utils import (
+    from imaginairy.utils.log_utils import (
         ImageLoggingContext,
         log_conditioning,
         log_img,
         log_latent,
     )
-    from imaginairy.model_manager import (
-        get_diffusion_model,
-        get_model_default_image_size,
+    from imaginairy.utils.outpaint import (
+        outpaint_arg_str_parse,
+        prepare_image_for_outpaint,
     )
-    from imaginairy.modules.midas.api import torch_image_to_depth_map
-    from imaginairy.outpaint import outpaint_arg_str_parse, prepare_image_for_outpaint
-    from imaginairy.safety import create_safety_score
-    from imaginairy.samplers import SOLVER_LOOKUP
-    from imaginairy.samplers.editing import CFGEditingDenoiser
-    from imaginairy.schema import ControlInput, ImagineResult, MaskMode
-    from imaginairy.utils import get_device, randn_seeded
 
     latent_channels = 4
     downsampling_factor = 8
@@ -785,7 +788,7 @@ def combine_image(original_img, generated_img, mask_img):
     """Combine the generated image with the original image using the mask image."""
     from PIL import Image
 
-    from imaginairy.log_utils import log_img
+    from imaginairy.utils.log_utils import log_img
 
     generated_img = generated_img.resize(
         original_img.size,

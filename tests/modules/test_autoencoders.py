@@ -4,14 +4,14 @@ from PIL import Image
 from torch.nn.functional import interpolate
 
 from imaginairy.enhancers.upscale_riverwing import upscale_latent
-from imaginairy.img_utils import (
+from imaginairy.model_manager import get_diffusion_model
+from imaginairy.schema import LazyLoadingImage
+from imaginairy.utils import get_device
+from imaginairy.utils.img_utils import (
     pillow_fit_image_within,
     pillow_img_to_torch_image,
     torch_img_to_pillow_img,
 )
-from imaginairy.model_manager import get_diffusion_model
-from imaginairy.schema import LazyLoadingImage
-from imaginairy.utils import get_device
 from tests import TESTS_FOLDER
 
 strat_combos = [

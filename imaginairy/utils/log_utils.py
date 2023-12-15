@@ -122,7 +122,7 @@ class ImageLoggingContext:
         )
 
     def log_latents(self, latents, description):
-        from imaginairy.img_utils import model_latents_to_pillow_imgs
+        from imaginairy.utils.img_utils import model_latents_to_pillow_imgs
 
         if "predicted_latent" in description:
             if self.progress_latent_callback is not None:
@@ -169,7 +169,7 @@ class ImageLoggingContext:
         )
 
     def log_progress_latent(self, latent):
-        from imaginairy.img_utils import model_latents_to_pillow_imgs
+        from imaginairy.utils.img_utils import model_latents_to_pillow_imgs
 
         if not self.progress_img_callback:
             return
@@ -244,7 +244,7 @@ def configure_logging(level="INFO"):
         "formatters": {
             "standard": {
                 "format": fmt,
-                "class": "imaginairy.log_utils.ColorIndentingFormatter",
+                "class": "imaginairy.utils.log_utils.ColorIndentingFormatter",
             },
         },
         "handlers": {

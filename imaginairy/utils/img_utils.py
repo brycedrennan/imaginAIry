@@ -17,9 +17,9 @@ import torch
 from einops import rearrange, repeat
 from PIL import Image, ImageDraw, ImageFont
 
-from imaginairy.paths import PKG_ROOT
 from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import get_device
+from imaginairy.utils.paths import PKG_ROOT
 
 
 def pillow_fit_image_within(

@@ -5,8 +5,8 @@ from PIL import ImageDraw, ImageFont
 from tqdm import tqdm
 
 from imaginairy.api import imagine
-from imaginairy.log_utils import configure_logging
 from imaginairy.schema import ImaginePrompt, LazyLoadingImage, WeightedPrompt
+from imaginairy.utils.log_utils import configure_logging
 
 
 def generate_image_morph_video():

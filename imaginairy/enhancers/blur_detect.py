@@ -2,7 +2,7 @@
 
 import cv2
 
-from imaginairy.img_utils import pillow_img_to_opencv_img
+from imaginairy.utils.img_utils import pillow_img_to_opencv_img
 
 
 def calculate_blurriness_level(img):

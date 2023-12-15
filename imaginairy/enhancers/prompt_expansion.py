@@ -7,7 +7,7 @@ import re
 from functools import lru_cache
 from string import Formatter
 
-from imaginairy.paths import PKG_ROOT
+from imaginairy.utils.paths import PKG_ROOT
 
 DEFAULT_PROMPT_LIBRARY_PATHS = [
     os.path.join(PKG_ROOT, "vendored", "noodle_soup_prompts"),

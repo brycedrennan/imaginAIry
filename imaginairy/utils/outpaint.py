@@ -6,7 +6,7 @@ import torch
 from PIL import Image, ImageDraw
 from torch import nn
 
-from imaginairy.img_utils import torch_img_to_pillow_img
+from imaginairy.utils.img_utils import torch_img_to_pillow_img
 
 
 def outpaint_calculations(

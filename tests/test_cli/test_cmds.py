@@ -4,13 +4,13 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 
-from imaginairy import surprise_me
 from imaginairy.cli.edit import edit_cmd
 from imaginairy.cli.edit_demo import edit_demo_cmd
 from imaginairy.cli.imagine import imagine_cmd
 from imaginairy.cli.main import aimg
 from imaginairy.cli.upscale import upscale_cmd
 from imaginairy.schema import ImaginePrompt, LazyLoadingImage
+from imaginairy.utils import surprise_me
 from imaginairy.utils.model_cache import GPUModelCache
 from tests import PROJECT_FOLDER, TESTS_FOLDER
 from tests.utils import Timer
