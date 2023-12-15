@@ -30,9 +30,9 @@ from pytorch_lightning.utilities.distributed import rank_zero_only
 from torch.utils.data import DataLoader, Dataset
 
 from imaginairy import config
-from imaginairy.model_manager import get_diffusion_model
 from imaginairy.training_tools.single_concept import SingleConceptDataset
 from imaginairy.utils import get_device, instantiate_from_config
+from imaginairy.utils.model_manager import get_diffusion_model
 
 mod_logger = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
-from imaginairy.model_manager import get_cached_url_path
+from imaginairy.utils.model_manager import get_cached_url_path
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

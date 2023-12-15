@@ -3,7 +3,7 @@
 import torch
 
 from imaginairy import config
-from imaginairy.model_manager import get_cached_url_path
+from imaginairy.utils.model_manager import get_cached_url_path
 
 
 class BaseModel(torch.nn.Module):

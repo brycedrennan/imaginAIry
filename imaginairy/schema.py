@@ -27,7 +27,7 @@ from typing_extensions import Self
 from imaginairy import config
 
 if TYPE_CHECKING:
-    from pathlib import Path
+    from pathlib import Path  # noqa
 
     from PIL import Image
 
@@ -504,7 +504,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         model_weights = data.get("model_weights")
         if model_weights is None:
             model_weights = config.DEFAULT_MODEL_WEIGHTS
-        from imaginairy.model_manager import resolve_model_weights_config
+        from imaginairy.utils.model_manager import resolve_model_weights_config
 
         should_use_inpainting = bool(
             data.get("mask_image") or data.get("mask_prompt") or data.get("outpaint")
@@ -578,7 +578,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
 
     @field_validator("size", mode="before")
     def validate_image_size(cls, v, info: core_schema.FieldValidationInfo):
-        from imaginairy.model_manager import get_model_default_image_size
+        from imaginairy.utils.model_manager import get_model_default_image_size
         from imaginairy.utils.named_resolutions import normalize_image_size
 
         if v is None:
