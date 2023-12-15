@@ -141,12 +141,12 @@ def train_concept_cmd(
 
     import os.path
 
-    from imaginairy.train import train_diffusion_model
     from imaginairy.training_tools.image_prep import (
         create_class_images,
         get_image_filenames,
         prep_images,
     )
+    from imaginairy.training_tools.train import train_diffusion_model
 
     target_size = 512
     # Step 1. Crop and enhance the training images
