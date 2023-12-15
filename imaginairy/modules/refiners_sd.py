@@ -308,7 +308,7 @@ monkeypatch_sd1controlnetadapter()
 
 @lru_cache(maxsize=4)
 def get_controlnet(name, weights_location, device, dtype):
-    from imaginairy.model_manager import load_state_dict
+    from imaginairy.utils.model_manager import load_state_dict
 
     controlnet_state_dict = load_state_dict(weights_location, half_mode=False)
     controlnet_state_dict = cast_weights(

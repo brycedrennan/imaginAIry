@@ -531,7 +531,7 @@ def extract_huggingface_repo_commit_file_from_url(url):
 
 
 def download_diffusers_weights(repo, sub, filename):
-    from imaginairy.model_manager import get_cached_url_path
+    from imaginairy.utils.model_manager import get_cached_url_path
 
     url = f"https://huggingface.co/{repo}/resolve/main/{sub}/{filename}"
     return get_cached_url_path(url, category="weights")
@@ -613,8 +613,8 @@ def open_weights(filepath, device=None):
 
 
 def load_stable_diffusion_compvis_weights(weights_url):
-    from imaginairy.model_manager import get_cached_url_path
     from imaginairy.utils import get_device
+    from imaginairy.utils.model_manager import get_cached_url_path
     from imaginairy.weight_management.conversion import cast_weights
     from imaginairy.weight_management.utils import (
         COMPONENT_NAMES,

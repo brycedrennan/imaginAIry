@@ -122,7 +122,7 @@ def torch_img_to_pillow_img(img_t: torch.Tensor) -> PIL.Image.Image:
 
 
 def model_latent_to_pillow_img(latent: torch.Tensor) -> PIL.Image.Image:
-    from imaginairy.model_manager import get_current_diffusion_model
+    from imaginairy.utils.model_manager import get_current_diffusion_model
 
     if len(latent.shape) == 3:
         latent = latent.unsqueeze(0)

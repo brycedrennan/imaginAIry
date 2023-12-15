@@ -35,10 +35,6 @@ def _generate_single_image(
     from imaginairy.enhancers.describe_image_blip import generate_caption
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
-    from imaginairy.model_manager import (
-        get_diffusion_model_refiners,
-        get_model_default_image_size,
-    )
     from imaginairy.safety import create_safety_score
     from imaginairy.samplers import SolverName
     from imaginairy.schema import ImagineResult
@@ -53,6 +49,10 @@ def _generate_single_image(
         ImageLoggingContext,
         log_img,
         log_latent,
+    )
+    from imaginairy.utils.model_manager import (
+        get_diffusion_model_refiners,
+        get_model_default_image_size,
     )
     from imaginairy.utils.outpaint import (
         outpaint_arg_str_parse,

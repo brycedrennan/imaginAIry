@@ -1,5 +1,5 @@
 from imaginairy import config
-from imaginairy.model_manager import resolve_model_weights_config
+from imaginairy.utils.model_manager import resolve_model_weights_config
 
 
 def test_resolved_paths():

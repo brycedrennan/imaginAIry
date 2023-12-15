@@ -3,8 +3,8 @@
 import torch
 from transformers import CLIPTextModelWithProjection
 
-from imaginairy.model_manager import get_diffusion_model
 from imaginairy.utils import get_device
+from imaginairy.utils.model_manager import get_diffusion_model
 from imaginairy.weight_management import utils
 
 

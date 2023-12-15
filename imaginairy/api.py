@@ -237,10 +237,6 @@ def _generate_single_image_compvis(
     from imaginairy.enhancers.describe_image_blip import generate_caption
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale_realesrgan import upscale_image
-    from imaginairy.model_manager import (
-        get_diffusion_model,
-        get_model_default_image_size,
-    )
     from imaginairy.modules.midas.api import torch_image_to_depth_map
     from imaginairy.safety import create_safety_score
     from imaginairy.samplers import SOLVER_LOOKUP
@@ -259,6 +255,10 @@ def _generate_single_image_compvis(
         log_conditioning,
         log_img,
         log_latent,
+    )
+    from imaginairy.utils.model_manager import (
+        get_diffusion_model,
+        get_model_default_image_size,
     )
     from imaginairy.utils.outpaint import (
         outpaint_arg_str_parse,
