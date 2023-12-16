@@ -299,6 +299,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     caption_text: str = Field(
         "", description="text to be overlaid on the image", validate_default=True
     )
+    composition_strength: float = Field(default=0.5, ge=0, le=1, validate_default=True)
     inpaint_method: InpaintMethod = "finetune"
 
     def __init__(
@@ -329,6 +330,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         is_intermediate: bool = False,
         collect_progress_latents: bool = False,
         caption_text: str = "",
+        composition_strength: float | None = 0.5,
         inpaint_method: InpaintMethod = "finetune",
     ):
         super().__init__(
@@ -357,6 +359,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             is_intermediate=is_intermediate,
             collect_progress_latents=collect_progress_latents,
             caption_text=caption_text,
+            composition_strength=composition_strength,
             inpaint_method=inpaint_method,
         )
 

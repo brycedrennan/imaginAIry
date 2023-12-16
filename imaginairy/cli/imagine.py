@@ -116,6 +116,7 @@ def imagine_cmd(
     arg_schedules,
     make_compilation_animation,
     caption_text,
+    composition_strength,
     control_image,
     control_image_raw,
     control_strength,
@@ -209,6 +210,7 @@ def imagine_cmd(
         arg_schedules,
         make_compilation_animation,
         caption_text,
+        composition_strength,
         control_inputs=control_inputs,
         videogen=videogen,
     )

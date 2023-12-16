@@ -84,6 +84,7 @@ def edit_cmd(
     arg_schedules,
     make_compilation_animation,
     caption_text,
+    composition_strength,
 ):
     """
     Edit an image via AI.
@@ -140,5 +141,6 @@ def edit_cmd(
         arg_schedules,
         make_compilation_animation,
         caption_text,
+        composition_strength,
         control_inputs=control_inputs,
     )
