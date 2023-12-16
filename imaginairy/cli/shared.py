@@ -59,6 +59,7 @@ def _imagine_cmd(
     model_weights_path,
     model_architecture,
     prompt_library_path,
+    composition_strength,
     version=False,
     make_gif=False,
     make_compare_gif=False,
@@ -186,6 +187,7 @@ def _imagine_cmd(
                     allow_compose_phase=allow_compose_phase,
                     model_weights=model_weights_path,
                     caption_text=caption_text,
+                    composition_strength=composition_strength,
                 )
                 from imaginairy.utils.prompt_schedules import (
                     parse_schedule_strs,
@@ -501,7 +503,14 @@ common_options = [
         "--caption-text",
         "caption_text",
         default=None,
-        help="Specify the text to write onto the image",
+        help="Specify the text to write onto the image.",
         type=str,
+    ),
+    click.option(
+        "--composition-strength",
+        default=None,
+        show_default=False,
+        type=float,
+        help=("Strength of the composition phase."),
     ),
 ]

@@ -284,9 +284,9 @@ def _generate_single_image(
             if comp_image is not None:
                 result_images["composition"] = comp_img_orig
                 result_images["composition-upscaled"] = comp_image
-                comp_cutoff = 0.50
-                first_step = int((prompt.steps) * comp_cutoff)
-                noise_step = int((prompt.steps - 1) * comp_cutoff)
+                composition_strength = prompt.composition_strength
+                first_step = int((prompt.steps) * composition_strength)
+                noise_step = int((prompt.steps - 1) * composition_strength)
                 log_img(comp_img_orig, "comp_image")
                 log_img(comp_image, "comp_image_upscaled")
                 comp_image_t = pillow_img_to_torch_image(comp_image)
