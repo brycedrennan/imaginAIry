@@ -119,6 +119,16 @@ def _imagine_cmd(
     for _init_image in init_images:
         if _init_image and _init_image.startswith("http"):
             _init_image = LazyLoadingImage(url=_init_image)
+        elif _init_image.startswith("textimg="):
+            from imaginairy.utils import named_resolutions
+            from imaginairy.utils.text_image import image_from_textimg_str
+
+            resolved_width, resolved_height = named_resolutions.normalize_image_size(
+                size
+            )
+            _init_image = image_from_textimg_str(
+                _init_image, resolved_width, resolved_height
+            )
         else:
             _init_image = LazyLoadingImage(filepath=_init_image)
         new_init_images.append(_init_image)

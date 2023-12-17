@@ -59,7 +59,6 @@ from imaginairy.cli.shared import (
             "shuffle",
             "edit",
             "inpaint",
-            "details",
             "colorize",
             "qrcode",
         ]
@@ -129,6 +128,8 @@ def imagine_cmd(
     Can be invoked via either `aimg imagine` or just `imagine`.
     """
     from imaginairy.schema import ControlInput, LazyLoadingImage
+    from imaginairy.utils import named_resolutions
+    from imaginairy.utils.text_image import image_from_textimg_str
 
     # hacky method of getting order of control images (mixing raw and normal images)
     control_images = [
@@ -143,6 +144,7 @@ def imagine_cmd(
     ]
 
     control_inputs = []
+    resolved_width, resolved_height = named_resolutions.normalize_image_size(size)
     if control_mode:
         for i, cm in enumerate(control_mode):
             option = index_default(control_images, i, None)
@@ -154,8 +156,13 @@ def imagine_cmd(
             elif option[0].name == "control_image":
                 control_image = option[1]
                 control_image_raw = None
-                if control_image and control_image.startswith("http"):
-                    control_image = LazyLoadingImage(url=control_image)
+                if control_image:
+                    if control_image.startswith("http"):
+                        control_image = LazyLoadingImage(url=control_image)
+                    elif control_image.startswith("textimg="):
+                        control_image = image_from_textimg_str(
+                            control_image, resolved_width, resolved_height
+                        )
             else:
                 control_image = None
                 control_image_raw = option[1]
