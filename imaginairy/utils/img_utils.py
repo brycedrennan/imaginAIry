@@ -183,3 +183,41 @@ def add_caption_to_image(
         stroke_width=3,
         stroke_fill=(0, 0, 0),
     )
+
+
+def create_halo_effect(
+    bw_image: PIL.Image.Image, background_color: tuple
+) -> PIL.Image.Image:
+    from PIL import Image, ImageFilter
+
+    # Step 1: Make white portion of the image transparent
+    transparent_image = bw_image.convert("RGBA")
+    datas = transparent_image.getdata()
+    new_data = []
+    for item in datas:
+        # Change all white (also shades of whites)
+        # to transparent
+        if item[0] > 200 and item[1] > 200 and item[2] > 200:
+            new_data.append((255, 255, 255, 0))
+        else:
+            new_data.append(item)
+    transparent_image.putdata(new_data)  # type: ignore
+
+    # Step 2: Make a copy of the image
+    eroded_image = transparent_image.copy()
+
+    # Step 3: Erode and blur the copy
+    # eroded_image = ImageOps.invert(eroded_image.convert("L")).convert("1")
+    # eroded_image = eroded_image.filter(ImageFilter.MinFilter(3))  # Erode
+    eroded_image = eroded_image.filter(ImageFilter.GaussianBlur(radius=25))
+
+    # Step 4: Create new canvas
+    new_canvas = Image.new("RGBA", bw_image.size, color=background_color)
+
+    # Step 5: Paste the blurred copy on the new canvas
+    new_canvas.paste(eroded_image, (0, 0), eroded_image)
+
+    # Step 6: Paste the original sharp image on the new canvas
+    new_canvas.paste(transparent_image, (0, 0), transparent_image)
+
+    return new_canvas

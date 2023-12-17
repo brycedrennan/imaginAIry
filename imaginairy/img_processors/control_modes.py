@@ -253,9 +253,6 @@ def adaptive_threshold_binarize(img: "Tensor") -> "Tensor":
 
     from imaginairy.utils import get_device
 
-    # img = img.to("cpu")
-    # img = img.to(get_device())
-
     if img.dim() != 4:
         raise ValueError("Input should be a 4d tensor")
     if img.size(1) != 3:
@@ -276,7 +273,7 @@ def adaptive_threshold_binarize(img: "Tensor") -> "Tensor":
     grayscale = to_grayscale(img)
     grayscale = grayscale[:, 0:1, :, :]
 
-    grayscale_np = grayscale.squeeze(1).numpy()
+    grayscale_np = grayscale.squeeze(1).to("cpu").numpy()
 
     blockSize = 129
     C = 2
