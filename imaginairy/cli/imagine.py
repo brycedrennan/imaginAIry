@@ -144,7 +144,6 @@ def imagine_cmd(
     ]
 
     control_inputs = []
-    resolved_width, resolved_height = named_resolutions.normalize_image_size(size)
     if control_mode:
         for i, cm in enumerate(control_mode):
             option = index_default(control_images, i, None)
@@ -160,6 +159,13 @@ def imagine_cmd(
                     if control_image.startswith("http"):
                         control_image = LazyLoadingImage(url=control_image)
                     elif control_image.startswith("textimg="):
+                        (
+                            resolved_width,
+                            resolved_height,
+                        ) = named_resolutions.normalize_image_size(
+                            size if size else 512
+                        )
+
                         control_image = image_from_textimg_str(
                             control_image, resolved_width, resolved_height
                         )
