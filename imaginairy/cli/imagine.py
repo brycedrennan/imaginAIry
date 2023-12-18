@@ -53,6 +53,7 @@ from imaginairy.cli.shared import (
             "",
             "canny",
             "depth",
+            "details",
             "normal",
             "hed",
             "openpose",
