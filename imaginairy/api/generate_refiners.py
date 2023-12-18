@@ -228,6 +228,8 @@ def _generate_single_image(
                 result_images["composition"] = comp_img_orig
                 result_images["composition-upscaled"] = comp_image
                 composition_strength = prompt.composition_strength
+                # work around until bug is fixed in cli
+                composition_strength = 0.5
                 first_step = int((prompt.steps) * composition_strength)
                 noise_step = int((prompt.steps - 1) * composition_strength)
                 log_img(comp_img_orig, "comp_image")
@@ -235,9 +237,9 @@ def _generate_single_image(
                 comp_image_t = pillow_img_to_torch_image(comp_image)
                 comp_image_t = comp_image_t.to(sd.device, dtype=sd.dtype)
                 init_latent = sd.lda.encode(comp_image_t)
+
                 compose_control_inputs: list[ControlInput] = [
-                    # ControlInput(mode="depth", image=comp_image, strength=1),
-                    # ControlInput(mode="hed", image=comp_image, strength=1),
+                    ControlInput(mode="details", image=comp_image, strength=1),
                 ]
                 for control_input in compose_control_inputs:
                     (

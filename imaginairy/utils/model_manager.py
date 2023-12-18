@@ -114,7 +114,6 @@ def load_model_from_config_old(
     config, weights_location, control_weights_locations=None, half_mode=False
 ):
     model = instantiate_from_config(config.model)
-    print("instantiated")
     base_model_dict = load_state_dict(weights_location, half_mode=half_mode)
     model.init_from_state_dict(base_model_dict)
 
@@ -233,8 +232,6 @@ def get_diffusion_model_refiners(
     dtype=None,
 ) -> LatentDiffusionModel:
     """Load a diffusion model."""
-    print(weights_config)
-    print(f"for inpainting: {for_inpainting}")
     return _get_diffusion_model_refiners(
         weights_location=weights_config.weights_location,
         for_inpainting=for_inpainting,
