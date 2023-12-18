@@ -233,6 +233,8 @@ def get_diffusion_model_refiners(
     dtype=None,
 ) -> LatentDiffusionModel:
     """Load a diffusion model."""
+    print(weights_config)
+    print(f"for inpainting: {for_inpainting}")
     return _get_diffusion_model_refiners(
         weights_location=weights_config.weights_location,
         for_inpainting=for_inpainting,

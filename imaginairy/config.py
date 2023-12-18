@@ -16,8 +16,6 @@ DEFAULT_NEGATIVE_PROMPT = (
     "grainy, blurred, blurry, writing, calligraphy, signature, text, watermark, bad art,"
 )
 
-midas_url = "https://github.com/intel-isl/DPT/releases/download/1_0/dpt_hybrid-midas-501f0c75.pt"
-
 
 @dataclass
 class ModelArchitecture:
