@@ -38,12 +38,14 @@ def create_canny_edges(img: "Tensor") -> "Tensor":
     return canny_image
 
 
-def create_depth_map(img: "Tensor") -> "Tensor":
+def create_depth_map(
+    img: "Tensor", model_type="dpt_hybrid_384", max_size=512
+) -> "Tensor":
     import torch
 
     orig_size = img.shape[2:]
 
-    depth_pt = _create_depth_map_raw(img, max_size=1024)
+    depth_pt = _create_depth_map_raw(img, max_size=max_size, model_type=model_type)
     # copy the depth map to the other channels
     depth_pt = torch.cat([depth_pt, depth_pt, depth_pt], dim=0)
 
@@ -61,12 +63,14 @@ def create_depth_map(img: "Tensor") -> "Tensor":
     return depth_pt
 
 
-def _create_depth_map_raw(img: "Tensor", max_size=512) -> "Tensor":
+def _create_depth_map_raw(
+    img: "Tensor", max_size=512, model_type="dpt_large_384"
+) -> "Tensor":
     import torch
 
     from imaginairy.modules.midas.api import MiDaSInference, midas_device
 
-    model = MiDaSInference(model_type="dpt_hybrid").to(midas_device())
+    model = MiDaSInference(model_type=model_type).to(midas_device())
     img = img.to(midas_device())
 
     # calculate new size such that image fits within 512x512 but keeps aspect ratio

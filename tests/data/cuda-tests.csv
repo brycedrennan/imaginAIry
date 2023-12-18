@@ -3,6 +3,7 @@ test_clip_masking
 test_clip_text_comparison
 test_cliptext_inpainting_pearl_doctor
 test_colorize_cmd
+test_compare_depth_maps
 test_control_images[depth-create_depth_map]
 test_control_images[hed-create_hed_edges]
 test_control_images[normal-create_normal_map]
@@ -18,6 +19,7 @@ test_controlnet[normal]
 test_controlnet[openpose]
 test_controlnet[qrcode]
 test_controlnet[shuffle]
+test_create_depth_map
 test_describe_cmd
 test_describe_picture
 test_edit_cmd

@@ -2,7 +2,6 @@
 
 import torch
 
-from imaginairy import config
 from imaginairy.utils.model_manager import get_cached_url_path
 
 
@@ -14,9 +13,11 @@ class BaseModel(torch.nn.Module):
         Args:
             path (str): file path
         """
-        ckpt_path = get_cached_url_path(config.midas_url, category="weights")
+        ckpt_path = get_cached_url_path(path, category="weights")
         parameters = torch.load(ckpt_path, map_location=torch.device("cpu"))
-
+        parameters = {
+            k: v for k, v in parameters.items() if "relative_position_index" not in k
+        }
         if "optimizer" in parameters:
             parameters = parameters["model"]
 

@@ -1,12 +1,17 @@
-"""Functions and classes for neural network construction"""
-
 import torch
-from torch import nn
+import torch.nn as nn
 
-from .vit import (
+from .backbones.beit import (
+    _make_pretrained_beitb16_384,
+    _make_pretrained_beitl16_384,
+    _make_pretrained_beitl16_512,
+    forward_beit,  # noqa
+)
+from .backbones.vit import (
     _make_pretrained_vitb16_384,
     _make_pretrained_vitb_rn50_384,
     _make_pretrained_vitl16_384,
+    forward_vit,  # noqa
 )
 
 
@@ -20,8 +25,62 @@ def _make_encoder(
     hooks=None,
     use_vit_only=False,
     use_readout="ignore",
+    in_features=[96, 256, 512, 1024],
 ):
-    if backbone == "vitl16_384":
+    if backbone == "beitl16_512":
+        pretrained = _make_pretrained_beitl16_512(
+            use_pretrained, hooks=hooks, use_readout=use_readout
+        )
+        scratch = _make_scratch(
+            [256, 512, 1024, 1024], features, groups=groups, expand=expand
+        )  # BEiT_512-L (backbone)
+    elif backbone == "beitl16_384":
+        pretrained = _make_pretrained_beitl16_384(
+            use_pretrained, hooks=hooks, use_readout=use_readout
+        )
+        scratch = _make_scratch(
+            [256, 512, 1024, 1024], features, groups=groups, expand=expand
+        )  # BEiT_384-L (backbone)
+    elif backbone == "beitb16_384":
+        pretrained = _make_pretrained_beitb16_384(
+            use_pretrained, hooks=hooks, use_readout=use_readout
+        )
+        scratch = _make_scratch(
+            [96, 192, 384, 768], features, groups=groups, expand=expand
+        )  # BEiT_384-B (backbone)
+    # elif backbone == "swin2l24_384":
+    #     pretrained = _make_pretrained_swin2l24_384(use_pretrained, hooks=hooks)
+    #     scratch = _make_scratch(
+    #         [192, 384, 768, 1536], features, groups=groups, expand=expand
+    #     )  # Swin2-L/12to24 (backbone)
+    # elif backbone == "swin2b24_384":
+    #     pretrained = _make_pretrained_swin2b24_384(use_pretrained, hooks=hooks)
+    #     scratch = _make_scratch(
+    #         [128, 256, 512, 1024], features, groups=groups, expand=expand
+    #     )  # Swin2-B/12to24 (backbone)
+    # elif backbone == "swin2t16_256":
+    #     pretrained = _make_pretrained_swin2t16_256(use_pretrained, hooks=hooks)
+    #     scratch = _make_scratch(
+    #         [96, 192, 384, 768], features, groups=groups, expand=expand
+    #     )  # Swin2-T/16 (backbone)
+    # elif backbone == "swinl12_384":
+    #     pretrained = _make_pretrained_swinl12_384(use_pretrained, hooks=hooks)
+    #     scratch = _make_scratch(
+    #         [192, 384, 768, 1536], features, groups=groups, expand=expand
+    #     )  # Swin-L/12 (backbone)
+    # elif backbone == "next_vit_large_6m":
+    #     from .backbones.next_vit import _make_pretrained_next_vit_large_6m
+    #
+    #     pretrained = _make_pretrained_next_vit_large_6m(hooks=hooks)
+    #     scratch = _make_scratch(
+    #         in_features, features, groups=groups, expand=expand
+    #     )  # Next-ViT-L on ImageNet-1K-6M (backbone)
+    # elif backbone == "levit_384":
+    #     pretrained = _make_pretrained_levit_384(use_pretrained, hooks=hooks)
+    #     scratch = _make_scratch(
+    #         [384, 512, 768], features, groups=groups, expand=expand
+    #     )  # LeViT 384 (backbone)
+    elif backbone == "vitl16_384":
         pretrained = _make_pretrained_vitl16_384(
             use_pretrained, hooks=hooks, use_readout=use_readout
         )
@@ -70,12 +129,15 @@ def _make_scratch(in_shape, out_shape, groups=1, expand=False):
     out_shape1 = out_shape
     out_shape2 = out_shape
     out_shape3 = out_shape
-    out_shape4 = out_shape
-    if expand is True:
+    if len(in_shape) >= 4:
+        out_shape4 = out_shape
+
+    if expand:
         out_shape1 = out_shape
         out_shape2 = out_shape * 2
         out_shape3 = out_shape * 4
-        out_shape4 = out_shape * 8
+        if len(in_shape) >= 4:
+            out_shape4 = out_shape * 8
 
     scratch.layer1_rn = nn.Conv2d(
         in_shape[0],
@@ -104,15 +166,16 @@ def _make_scratch(in_shape, out_shape, groups=1, expand=False):
         bias=False,
         groups=groups,
     )
-    scratch.layer4_rn = nn.Conv2d(
-        in_shape[3],
-        out_shape4,
-        kernel_size=3,
-        stride=1,
-        padding=1,
-        bias=False,
-        groups=groups,
-    )
+    if len(in_shape) >= 4:
+        scratch.layer4_rn = nn.Conv2d(
+            in_shape[3],
+            out_shape4,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+            bias=False,
+            groups=groups,
+        )
 
     return scratch
 
@@ -162,8 +225,7 @@ class Interpolate(nn.Module):
     """Interpolation module."""
 
     def __init__(self, scale_factor, mode, align_corners=False):
-        """
-        Init.
+        """Init.
 
         Args:
             scale_factor (float): scaling
@@ -177,8 +239,7 @@ class Interpolate(nn.Module):
         self.align_corners = align_corners
 
     def forward(self, x):
-        """
-        Forward pass.
+        """Forward pass.
 
         Args:
             x (tensor): input
@@ -201,8 +262,7 @@ class ResidualConvUnit(nn.Module):
     """Residual convolution module."""
 
     def __init__(self, features):
-        """
-        Init.
+        """Init.
 
         Args:
             features (int): number of features
@@ -220,8 +280,7 @@ class ResidualConvUnit(nn.Module):
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        """
-        Forward pass.
+        """Forward pass.
 
         Args:
             x (tensor): input
@@ -241,8 +300,7 @@ class FeatureFusionBlock(nn.Module):
     """Feature fusion block."""
 
     def __init__(self, features):
-        """
-        Init.
+        """Init.
 
         Args:
             features (int): number of features
@@ -253,8 +311,7 @@ class FeatureFusionBlock(nn.Module):
         self.resConfUnit2 = ResidualConvUnit(features)
 
     def forward(self, *xs):
-        """
-        Forward pass.
+        """Forward pass.
 
         Returns:
             tensor: output
@@ -277,8 +334,7 @@ class ResidualConvUnit_custom(nn.Module):
     """Residual convolution module."""
 
     def __init__(self, features, activation, bn):
-        """
-        Init.
+        """Init.
 
         Args:
             features (int): number of features
@@ -318,8 +374,7 @@ class ResidualConvUnit_custom(nn.Module):
         self.skip_add = nn.quantized.FloatFunctional()
 
     def forward(self, x):
-        """
-        Forward pass.
+        """Forward pass.
 
         Args:
             x (tensor): input
@@ -357,9 +412,9 @@ class FeatureFusionBlock_custom(nn.Module):
         bn=False,
         expand=False,
         align_corners=True,
+        size=None,
     ):
-        """
-        Init.
+        """Init.
 
         Args:
             features (int): number of features
@@ -391,9 +446,10 @@ class FeatureFusionBlock_custom(nn.Module):
 
         self.skip_add = nn.quantized.FloatFunctional()
 
-    def forward(self, *xs):
-        """
-        Forward pass.
+        self.size = size
+
+    def forward(self, *xs, size=None):
+        """Forward pass.
 
         Returns:
             tensor: output
@@ -407,8 +463,15 @@ class FeatureFusionBlock_custom(nn.Module):
 
         output = self.resConfUnit2(output)
 
+        if (size is None) and (self.size is None):
+            modifier = {"scale_factor": 2}
+        elif size is None:
+            modifier = {"size": self.size}
+        else:
+            modifier = {"size": size}
+
         output = nn.functional.interpolate(
-            output, scale_factor=2, mode="bilinear", align_corners=self.align_corners
+            output, **modifier, mode="bilinear", align_corners=self.align_corners
         )
 
         output = self.out_conv(output)
