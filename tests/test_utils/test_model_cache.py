@@ -65,10 +65,14 @@ def test_set_cpu_full():
 
 @pytest.mark.skipif(get_device() == "cpu", reason="GPU not available")
 def test_set_gpu_full():
+    device = get_device()
     cache = GPUModelCache(
-        max_cpu_memory_gb=1, max_gpu_memory_gb=0.0000001, device=get_device()
+        max_cpu_memory_gb=1, max_gpu_memory_gb=0.0000001, device=device
     )
-    assert cache.max_cpu_memory == 1073741824
+    if device in ("cpu", "mps"):
+        assert cache.max_cpu_memory == 0
+    else:
+        assert cache.max_cpu_memory == 1073741824
     model = create_model_of_n_bytes(100_000)
     with pytest.raises(RuntimeError):
         cache.set("key1", model)
