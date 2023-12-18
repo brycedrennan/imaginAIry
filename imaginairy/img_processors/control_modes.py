@@ -308,7 +308,7 @@ CONTROL_MODES: Dict[str, FunctionType] = {
     "shuffle": shuffle_map_torch,
     "edit": noop,
     "inpaint": inpaint_prep,
-    # "details": noop,
+    "details": noop,
     "colorize": to_grayscale,
     "qrcode": adaptive_threshold_binarize,
 }

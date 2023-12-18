@@ -40,7 +40,7 @@ def load_tensors(tensorfile, map_location=None):
     if tensorfile == "empty":
         # used for testing
         return {}
-    if tensorfile.endswith((".ckpt", ".pth")):
+    if tensorfile.endswith((".ckpt", ".pth", ".bin")):
         return torch.load(tensorfile, map_location=map_location)
     if tensorfile.endswith(".safetensors"):
         return load_file(tensorfile, device=map_location)
