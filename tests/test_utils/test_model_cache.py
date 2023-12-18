@@ -69,10 +69,10 @@ def test_set_gpu_full():
     cache = GPUModelCache(
         max_cpu_memory_gb=1, max_gpu_memory_gb=0.0000001, device=device
     )
-    if device is None:
-        assert cache.max_cpu_memory == 1073741824
-    else:
+    if device in ("cpu", "mps"):
         assert cache.max_cpu_memory == 0
+    else:
+        assert cache.max_cpu_memory == 1073741824
 
     model = create_model_of_n_bytes(100_000)
     with pytest.raises(RuntimeError):
@@ -125,7 +125,7 @@ def test_cache_ordering():
     )
 
     cache.set("key-2", create_model_of_n_bytes(4_000_000))
-    if device is None:
+    if device in ("cpu", "mps"):
         assert list(cache.cpu_cache.keys()) == ["key-0"]
     else:
         assert not list(cache.cpu_cache.keys())
