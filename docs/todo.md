@@ -22,6 +22,17 @@
  - add method to show cache size
  - add method to clear model cache
  - add method to clear cached items not recently used (does diffusers have one?)
+ - create actual documentation
+ - SDXL Support
+
+#### Investigate
+
+ - Scalecrafter https://yingqinghe.github.io/scalecrafter/
+ - Fast diffusion with LCM Lora https://huggingface.co/latent-consistency/lcm-lora-sdv1-5/tree/main
+ - 3d diffusion https://huggingface.co/stabilityai/stable-zero123
+ - magic animate
+ - consistency decoder
+
 ### Old Todo
 
  - Inference Performance Optimizations
