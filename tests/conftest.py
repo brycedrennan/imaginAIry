@@ -148,9 +148,9 @@ def detect_cuda_tests(request):
         end_memory = torch.cuda.max_memory_allocated()
         memory_diff = end_memory - start_memory
         if memory_diff > 0:
-            test_name = request.node.name
-            print(f"Test {test_name} used {memory_diff} bytes of GPU memory")
-            cuda_tests_node_ids.append(test_name)
+            test_id = request.node.nodeid
+            print(f"Test {test_id} used {memory_diff} bytes of GPU memory")
+            cuda_tests_node_ids.append(test_id)
 
         torch.cuda.empty_cache()
         gc.collect()
@@ -162,7 +162,9 @@ def pytest_collection_modifyitems(config, items):
 
     node_ids_to_mark = read_stored_cuda_test_nodes()
     for item in items:
+        print(item.nodeid)
         if item.nodeid in node_ids_to_mark:
+            print(f"Marking {item.nodeid} as gputest")
             item.add_marker(pytest.mark.gputest)
 
     filtered_node_ids = set()
