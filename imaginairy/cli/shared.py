@@ -26,6 +26,7 @@ def imaginairy_click_context(log_level="INFO"):
 
 
 def _imagine_cmd(
+        *,
     ctx,
     prompt_texts,
     negative_prompt,
@@ -55,11 +56,11 @@ def _imagine_cmd(
     mask_modify_original,
     outpaint,
     caption,
+    composition_strength,
     precision,
     model_weights_path,
     model_architecture,
     prompt_library_path,
-    composition_strength,
     version=False,
     make_gif=False,
     make_compare_gif=False,
@@ -518,7 +519,7 @@ common_options = [
     ),
     click.option(
         "--composition-strength",
-        default=None,
+        default=0.5,
         show_default=False,
         type=float,
         help=("Strength of the composition phase."),

@@ -228,8 +228,6 @@ def _generate_single_image(
                 result_images["composition"] = comp_img_orig
                 result_images["composition-upscaled"] = comp_image
                 composition_strength = prompt.composition_strength
-                # work around until bug is fixed in cli
-                composition_strength = 0.5
                 first_step = int((prompt.steps) * composition_strength)
                 noise_step = int((prompt.steps - 1) * composition_strength)
                 log_img(comp_img_orig, "comp_image")
