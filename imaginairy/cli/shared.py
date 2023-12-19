@@ -26,7 +26,7 @@ def imaginairy_click_context(log_level="INFO"):
 
 
 def _imagine_cmd(
-        *,
+    *,
     ctx,
     prompt_texts,
     negative_prompt,
