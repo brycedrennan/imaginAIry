@@ -189,7 +189,7 @@ def imagine_cmd(
         prompt_texts=prompt_texts,
         negative_prompt=negative_prompt,
         prompt_strength=prompt_strength,
-        init_image= init_image,
+        init_image=init_image,
         init_image_strength=init_image_strength,
         outdir=outdir,
         output_file_extension=output_file_extension,

@@ -112,7 +112,7 @@ def edit_cmd(
         output_file_extension=output_file_extension,
         repeats=repeats,
         size=size,
-        steps= steps,
+        steps=steps,
         seed=seed,
         upscale=upscale,
         fix_faces=fix_faces,
