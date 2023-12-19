@@ -8,6 +8,10 @@ on:
 env:
   PIP_DISABLE_PIP_VERSION_CHECK: 1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -48,19 +52,14 @@ jobs:
       - name: Lint
         run: |
           black --diff --fast .
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10"]
-        os: ["nvidia-4090"]
+  test-gpu:
+    runs-on: nvidia-4090
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.10"
 #        cache: pip
 #        cache-dependency-path: requirements-dev.txt
     - name: Install dependencies
@@ -72,7 +71,31 @@ jobs:
       env:
         CUDA_LAUNCH_BLOCKING: 1
       run: |
-        pytest --durations=10 -v
+        pytest --durations=10 -v -m "gputest"
+  test-non-gpu:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10"]
+        os: ["ubuntu-latest"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+        cache: pip
+        cache-dependency-path: requirements-dev.txt
+    - name: Install dependencies
+      run: |
+        python -m pip install -r requirements-dev.in . --upgrade
+    - name: Test with pytest
+      timeout-minutes: 30
+      env:
+        CUDA_LAUNCH_BLOCKING: 1
+      run: |
+        pytest --durations=10 -v -m "not gputest"
   type-check:
     runs-on: ubuntu-latest
     steps:

@@ -78,6 +78,9 @@ def test_feather_tile_simple(img_ratio, tile_size, overlap_pct):
     assert diff < 1
 
 
+@pytest.mark.skip(
+    reason="takes too long. runs 5000 scenarios. if you mess with feather_tile, run this test"
+)
 def test_feather_tile_brute():
     source_img = pillow_img_to_torch_image(
         LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bowl_of_fruit.jpg")

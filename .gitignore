@@ -31,3 +31,5 @@ tests/vastai_cli.py
 /img_size_memory_usage.csv
 /tests/test_cluster_output/
 /.env
+*.ipynb
+.ipynb_checkpoints
