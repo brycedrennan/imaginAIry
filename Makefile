@@ -31,10 +31,13 @@ autoformat:  ## Run the autoformatter.
 	@-ruff check --config tests/ruff.toml . --fix-only
 	@black .
 
-
 test:  ## Run the tests.
 	@pytest
 	@echo -e "The tests pass! ✨ 🍰 ✨"
+
+test-fast:  ## Run the fast tests.
+	@pytest -m "not gputest"
+	@echo -e "The non-gpu tests pass! ✨ 🍰 ✨"
 
 lint:  ## Run the code linter.
 	@ruff check --config tests/ruff.toml .
@@ -42,6 +45,12 @@ lint:  ## Run the code linter.
 
 type-check: ## Run the type checker.
 	@mypy --config-file tox.ini .
+
+check-fast:  ## Run autoformatter, linter, typechecker, and fast tests
+	@make autoformat
+	@make lint
+	@make type-check
+	@make test-fast
 
 deploy:  ## Deploy the package to pypi.org
 	pip install twine wheel
