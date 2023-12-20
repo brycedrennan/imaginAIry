@@ -32,6 +32,7 @@
  - 3d diffusion https://huggingface.co/stabilityai/stable-zero123
  - magic animate
  - consistency decoder
+ - https://github.com/XPixelGroup/HAT
 
 ### Old Todo
 
