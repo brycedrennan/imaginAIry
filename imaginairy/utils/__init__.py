@@ -1,6 +1,7 @@
 import importlib
 import logging
 import platform
+import re
 import time
 from contextlib import contextmanager, nullcontext
 from functools import lru_cache
@@ -315,3 +316,7 @@ def get_nested_attribute(obj, attribute_path, depth=None, return_key=False):
             current_attribute = getattr(current_attribute, attribute)
 
     return (current_attribute, current_key) if return_key else current_attribute
+
+
+def prompt_normalized(prompt, length=130):
+    return re.sub(r"[^a-zA-Z0-9.,\[\]-]+", "_", prompt)[:length]

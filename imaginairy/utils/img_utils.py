@@ -19,6 +19,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import get_device
+from imaginairy.utils.named_resolutions import normalize_image_size
 from imaginairy.utils.paths import PKG_ROOT
 
 
@@ -221,3 +222,39 @@ def create_halo_effect(
     new_canvas.paste(transparent_image, (0, 0), transparent_image)
 
     return new_canvas
+
+
+def combine_image(original_img, generated_img, mask_img):
+    """Combine the generated image with the original image using the mask image."""
+    from PIL import Image
+
+    from imaginairy.utils.log_utils import log_img
+
+    generated_img = generated_img.resize(
+        original_img.size,
+        resample=Image.Resampling.LANCZOS,
+    )
+
+    mask_for_orig_size = mask_img.resize(
+        original_img.size,
+        resample=Image.Resampling.LANCZOS,
+    )
+    log_img(mask_for_orig_size, "mask for original image size")
+
+    rebuilt_orig_img = Image.composite(
+        original_img,
+        generated_img,
+        mask_for_orig_size,
+    )
+    return rebuilt_orig_img
+
+
+def calc_scale_to_fit_within(height: int, width: int, max_size) -> float:
+    max_width, max_height = normalize_image_size(max_size)
+    if width <= max_width and height <= max_height:
+        return 1
+
+    width_ratio = max_width / width
+    height_ratio = max_height / height
+
+    return min(width_ratio, height_ratio)
