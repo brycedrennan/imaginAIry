@@ -2,7 +2,7 @@
 
 import contextlib
 
-_NAMED_RESOLUTIONS = {
+NAMED_RESOLUTIONS = {
     "HD": (1280, 720),
     "FHD": (1920, 1080),
     "HALF-FHD": (960, 540),
@@ -46,7 +46,7 @@ _NAMED_RESOLUTIONS = {
     "SVD": (1024, 576),  # stable video diffusion
 }
 
-_NAMED_RESOLUTIONS = {k.upper(): v for k, v in _NAMED_RESOLUTIONS.items()}
+NAMED_RESOLUTIONS = {k.upper(): v for k, v in NAMED_RESOLUTIONS.items()}
 
 
 def normalize_image_size(resolution: str | int | tuple[int, int]) -> tuple[int, int]:
@@ -66,8 +66,8 @@ def _normalize_image_size(resolution: str | int | tuple[int, int]) -> tuple[int,
         case str():
             resolution = resolution.strip().upper()
             resolution = resolution.replace(" ", "").replace("X", ",").replace("*", ",")
-            if resolution.upper() in _NAMED_RESOLUTIONS:
-                return _NAMED_RESOLUTIONS[resolution.upper()]
+            if resolution.upper() in NAMED_RESOLUTIONS:
+                return NAMED_RESOLUTIONS[resolution.upper()]
 
             # is it WIDTH,HEIGHT format?
             try:

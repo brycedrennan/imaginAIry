@@ -5,11 +5,13 @@ from typing import List, Optional
 
 from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
 from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode, WeightedPrompt
+from imaginairy.utils.img_utils import calc_scale_to_fit_within
+from imaginairy.utils.named_resolutions import normalize_image_size
 
 logger = logging.getLogger(__name__)
 
 
-def _generate_single_image(
+def generate_single_image(
     prompt: ImaginePrompt,
     debug_img_callback=None,
     progress_img_callback=None,
@@ -28,8 +30,6 @@ def _generate_single_image(
 
     from imaginairy.api.generate import (
         IMAGINAIRY_SAFETY_MODE,
-        _generate_composition_image,
-        combine_image,
     )
     from imaginairy.enhancers.clip_masking import get_img_mask
     from imaginairy.enhancers.describe_image_blip import generate_caption
@@ -40,6 +40,7 @@ def _generate_single_image(
     from imaginairy.utils import get_device, randn_seeded
     from imaginairy.utils.img_utils import (
         add_caption_to_image,
+        combine_image,
         pillow_fit_image_within,
         pillow_img_to_torch_image,
         pillow_mask_to_latent_mask,
@@ -523,3 +524,64 @@ def prep_control_input(
     )
     controlnet.set_scale(control_input.strength)
     return controlnet, control_image_t, control_image_disp
+
+
+def _generate_composition_image(
+    prompt,
+    target_height,
+    target_width,
+    cutoff: tuple[int, int] = (512, 512),
+    dtype=None,
+):
+    from PIL import Image
+
+    from imaginairy.api.generate_refiners import generate_single_image
+    from imaginairy.utils import default, get_default_dtype
+
+    cutoff = normalize_image_size(cutoff)
+    if prompt.width <= cutoff[0] and prompt.height <= cutoff[1]:
+        return None, None
+
+    dtype = default(dtype, get_default_dtype)
+
+    shrink_scale = calc_scale_to_fit_within(
+        height=prompt.height,
+        width=prompt.width,
+        max_size=cutoff,
+    )
+
+    composition_prompt = prompt.full_copy(
+        deep=True,
+        update={
+            "size": (
+                int(prompt.width * shrink_scale),
+                int(prompt.height * shrink_scale),
+            ),
+            "steps": None,
+            "upscale": False,
+            "fix_faces": False,
+            "mask_modify_original": False,
+            "allow_compose_phase": False,
+            "caption_text": None,
+        },
+    )
+
+    result = generate_single_image(composition_prompt, dtype=dtype)
+    img = result.images["generated"]
+    while img.width < target_width:
+        from imaginairy.enhancers.upscale_realesrgan import upscale_image
+
+        img = upscale_image(img)
+
+    # samples = generate_single_image(composition_prompt, return_latent=True)
+    # while samples.shape[-1] * 8 < target_width:
+    #     samples = upscale_latent(samples)
+    #
+    # img = model_latent_to_pillow_img(samples)
+
+    img = img.resize(
+        (target_width, target_height),
+        resample=Image.Resampling.LANCZOS,
+    )
+
+    return img, result.images["generated"]
