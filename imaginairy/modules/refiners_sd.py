@@ -127,7 +127,7 @@ class SD1AutoencoderSliced(SD1Autoencoder):
         """
         b, c, h, w = x.size()
         final_tensor = torch.zeros(
-            [1, 4, math.ceil(h / 8), math.ceil(w / 8)], device=x.device
+            [1, 4, math.floor(h / 8), math.floor(w / 8)], device=x.device
         )
         overlap_pct = 0.5
 
