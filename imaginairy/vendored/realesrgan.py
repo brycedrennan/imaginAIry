@@ -77,9 +77,13 @@ class RealESRGANer:
         # prefer to use params_ema
         if "params_ema" in loadnet:
             keyname = "params_ema"
-        else:
+            loadnet = loadnet[keyname]
+        elif "params" in loadnet:
             keyname = "params"
-        model.load_state_dict(loadnet[keyname], strict=True)
+            loadnet = loadnet[keyname]
+        else:
+            loadnet = convert_realesrgan_state_dict(loadnet)
+        model.load_state_dict(loadnet, strict=True)
 
         model.eval()
         self.model = model.to(self.device)
@@ -347,3 +351,32 @@ class IOConsumer(threading.Thread):
             save_path = msg["save_path"]
             cv2.imwrite(save_path, output)
         print(f"IO worker {self.qid} is done.")
+
+
+def convert_realesrgan_state_dict(state_dict):
+    new_state_dict = {}
+
+    new_state_dict["conv_first.weight"] = state_dict.pop("model.0.weight")
+    new_state_dict["conv_first.bias"] = state_dict.pop("model.0.bias")
+    #    "model.1.sub.21.RDB3.conv5.0.weight => body.21.rdb1.conv3.weight"
+
+    for k, v in list(state_dict.items()):
+        parts = k.split(".")
+        if len(parts) == 8 and parts[0] == "model":
+            new_parts = ["body", parts[3], parts[4].lower(), parts[5], parts[7]]
+            new_k = ".".join(new_parts)
+            new_state_dict[new_k] = state_dict.pop(k)
+
+    new_state_dict["conv_body.weight"] = state_dict.pop("model.1.sub.23.weight")
+    new_state_dict["conv_body.bias"] = state_dict.pop("model.1.sub.23.bias")
+    new_state_dict["conv_up1.weight"] = state_dict.pop("model.3.weight")
+    new_state_dict["conv_up1.bias"] = state_dict.pop("model.3.bias")
+    new_state_dict["conv_up2.weight"] = state_dict.pop("model.6.weight")
+    new_state_dict["conv_up2.bias"] = state_dict.pop("model.6.bias")
+    new_state_dict["conv_hr.weight"] = state_dict.pop("model.8.weight")
+    new_state_dict["conv_hr.bias"] = state_dict.pop("model.8.bias")
+
+    new_state_dict["conv_last.weight"] = state_dict.pop("model.10.weight")
+    new_state_dict["conv_last.bias"] = state_dict.pop("model.10.bias")
+
+    return new_state_dict

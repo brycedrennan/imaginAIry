@@ -79,7 +79,18 @@ def enhance_faces(img, fidelity=0):
     face_helper.align_warp_face()
 
     # face restoration for each cropped face
-    for cropped_face in face_helper.cropped_faces:
+    for face_box, cropped_face in zip(face_helper.det_faces, face_helper.cropped_faces):
+        x1, y1, x2, y2, scaling = face_box
+        face_width = x2 - x1
+        face_height = y2 - y1
+        logger.debug(f"Face detected. size: {face_width:1f}x{face_height:.1f}")
+        if face_width > 512 or face_height > 512:
+            logger.debug(
+                f"Face too large: ({face_width:.1f}x{face_height:.1f}). skipping enhancement"
+            )
+            face_helper.add_restored_face(cropped_face)
+            continue
+
         # prepare data
         cropped_face_t = img2tensor(cropped_face / 255.0, bgr2rgb=True, float32=True)
         normalize(cropped_face_t, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)

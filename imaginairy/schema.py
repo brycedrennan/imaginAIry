@@ -290,7 +290,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     size: tuple[int, int] = Field(validate_default=True)
     upscale: bool = False
     fix_faces: bool = False
-    fix_faces_fidelity: float | None = Field(0.2, ge=0, le=1, validate_default=True)
+    fix_faces_fidelity: float | None = Field(0.5, ge=0, le=1, validate_default=True)
     conditioning: str | None = None
     tile_mode: str = ""
     allow_compose_phase: bool = True
@@ -531,7 +531,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     @field_validator("fix_faces_fidelity", mode="before")
     def validate_fix_faces_fidelity(cls, v):
         if v is None:
-            return 0.2
+            return 0.5
 
         return v
 
