@@ -2,9 +2,10 @@
 
 import logging
 import os
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
-from imaginairy.utils import prompt_normalized
+if TYPE_CHECKING:
+    from imaginairy.schema import ImaginePrompt
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ def imagine_image_files(
     from PIL import ImageDraw
 
     from imaginairy.api.video_sample import generate_video
-    from imaginairy.utils import get_next_filenumber
+    from imaginairy.utils import get_next_filenumber, prompt_normalized
     from imaginairy.utils.animations import make_bounce_animation
     from imaginairy.utils.img_utils import pillow_fit_image_within
 
@@ -78,6 +79,7 @@ def imagine_image_files(
         img_str = ""
         if prompt.init_image:
             img_str = f"_img2img-{prompt.init_image_strength}"
+
         basefilename = (
             f"{base_count:06}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
             f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"

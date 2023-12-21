@@ -1,13 +1,14 @@
-from typing import Any
+import logging
+from typing import TYPE_CHECKING, Any
 
-from imaginairy.api.generate import (
-    IMAGINAIRY_SAFETY_MODE,
-    logger,
-)
-from imaginairy.api.generate_refiners import _generate_composition_image
-from imaginairy.schema import ImaginePrompt, LazyLoadingImage
+from imaginairy.api.generate import IMAGINAIRY_SAFETY_MODE
 from imaginairy.utils.img_utils import calc_scale_to_fit_within, combine_image
 from imaginairy.utils.named_resolutions import normalize_image_size
+
+if TYPE_CHECKING:
+    from imaginairy.schema import ImaginePrompt
+
+logger = logging.getLogger(__name__)
 
 
 def _generate_single_image_compvis(
@@ -33,7 +34,12 @@ def _generate_single_image_compvis(
     from imaginairy.modules.midas.api import torch_image_to_depth_map
     from imaginairy.samplers import SOLVER_LOOKUP
     from imaginairy.samplers.editing import CFGEditingDenoiser
-    from imaginairy.schema import ControlInput, ImagineResult, MaskMode
+    from imaginairy.schema import (
+        ControlInput,
+        ImagineResult,
+        LazyLoadingImage,
+        MaskMode,
+    )
     from imaginairy.utils import get_device, randn_seeded
     from imaginairy.utils.img_utils import (
         add_caption_to_image,
@@ -61,7 +67,7 @@ def _generate_single_image_compvis(
     latent_channels = 4
     downsampling_factor = 8
     batch_size = 1
-    global _most_recent_result
+    # global _most_recent_result
     # handle prompt pulling in previous values
     # if isinstance(prompt.init_image, str) and prompt.init_image.startswith("*prev"):
     #     _, img_type = prompt.init_image.strip("*").split(".")
@@ -473,7 +479,7 @@ def _generate_single_image_compvis(
             progress_latents=progress_latents.copy(),
         )
 
-        _most_recent_result = result
+        # _most_recent_result = result
         logger.info(f"Image Generated. Timings: {result.timings_str()}")
         return result
 

@@ -48,6 +48,11 @@ tests/test_enhancers.py::test_clip_masking
 tests/test_enhancers.py::test_clip_text_comparison
 tests/test_enhancers.py::test_describe_picture
 tests/test_enhancers.py::test_fix_faces
+tests/test_enhancers/test_clip_masking.py::test_clip_masking
+tests/test_enhancers/test_describe_image_blip.py::test_describe_picture
+tests/test_enhancers/test_describe_image_clip.py::test_clip_text_comparison
+tests/test_enhancers/test_face_restoration_codeformer.py::test_fix_faces
+tests/test_enhancers/test_upscale_realesrgan.py::test_upscale_textured_image
 tests/test_outpaint.py::test_outpainting_outpaint
 tests/test_safety.py::test_is_nsfw
 tests/test_utils/test_model_cache.py::test_cache_ordering
