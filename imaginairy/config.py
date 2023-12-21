@@ -150,6 +150,20 @@ MODEL_WEIGHT_CONFIGS = [
         weights_location="https://huggingface.co/prompthero/openjourney/resolve/e291118e93d5423dc88ac1ed93c02362b17d698f/mdjrny-v4.safetensors",
         defaults={"negative_prompt": "poor quality"},
     ),
+    ModelWeightsConfig(
+        name="Modern Disney",
+        aliases=["modern-disney", "modi", "modi15", "modern-disney-15"],
+        architecture=MODEL_ARCHITECTURE_LOOKUP["sd15"],
+        weights_location="https://huggingface.co/nitrosocke/mo-di-diffusion/tree/e3106d24aa8c37bf856257daea2ae789eabc4d70/",
+        defaults={"negative_prompt": DEFAULT_NEGATIVE_PROMPT},
+    ),
+    ModelWeightsConfig(
+        name="Modern Disney",
+        aliases=["redshift-diffusion", "red", "redshift-diffusion-15", "red15"],
+        architecture=MODEL_ARCHITECTURE_LOOKUP["sd15"],
+        weights_location="https://huggingface.co/nitrosocke/redshift-diffusion/tree/80837fe18df05807861ab91c3bad3693c9342e4c/",
+        defaults={"negative_prompt": DEFAULT_NEGATIVE_PROMPT},
+    ),
     # Video Weights
     ModelWeightsConfig(
         name="Stable Video Diffusion",

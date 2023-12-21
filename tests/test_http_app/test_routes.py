@@ -56,6 +56,13 @@ async def test_list_models():
     response = client.get("/api/stablestudio/models")
     assert response.status_code == 200
 
-    expected_model_ids = {"sd15", "openjourney-v1", "openjourney-v2", "openjourney-v4"}
+    expected_model_ids = {
+        "sd15",
+        "openjourney-v1",
+        "openjourney-v2",
+        "openjourney-v4",
+        "modern-disney",
+        "redshift-diffusion",
+    }
     model_ids = {m["id"] for m in response.json()}
     assert model_ids == expected_model_ids
