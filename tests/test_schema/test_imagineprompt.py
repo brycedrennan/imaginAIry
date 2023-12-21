@@ -173,7 +173,7 @@ def test_imagine_prompt_default_negative():
 
 
 def test_imagine_prompt_fix_faces_fidelity():
-    assert ImaginePrompt("fruit", fix_faces_fidelity=None).fix_faces_fidelity == 0.2
+    assert ImaginePrompt("fruit", fix_faces_fidelity=None).fix_faces_fidelity == 0.5
 
 
 def test_imagine_prompt_init_strength_zero():

@@ -5,8 +5,6 @@ from typing import List, Optional
 
 from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
 from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode, WeightedPrompt
-from imaginairy.utils.img_utils import calc_scale_to_fit_within
-from imaginairy.utils.named_resolutions import normalize_image_size
 
 logger = logging.getLogger(__name__)
 
@@ -226,6 +224,7 @@ def generate_single_image(
             comp_image, comp_img_orig = _generate_composition_image(**compose_kwargs)
 
             if comp_image is not None:
+                prompt.fix_faces = False  # done in composition
                 result_images["composition"] = comp_img_orig
                 result_images["composition-upscaled"] = comp_image
                 composition_strength = prompt.composition_strength
@@ -535,8 +534,9 @@ def _generate_composition_image(
 ):
     from PIL import Image
 
-    from imaginairy.api.generate_refiners import generate_single_image
     from imaginairy.utils import default, get_default_dtype
+    from imaginairy.utils.img_utils import calc_scale_to_fit_within
+    from imaginairy.utils.named_resolutions import normalize_image_size
 
     cutoff = normalize_image_size(cutoff)
     if prompt.width <= cutoff[0] and prompt.height <= cutoff[1]:
@@ -571,13 +571,12 @@ def _generate_composition_image(
     while img.width < target_width:
         from imaginairy.enhancers.upscale_realesrgan import upscale_image
 
-        img = upscale_image(img)
+        if prompt.fix_faces:
+            from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
 
-    # samples = generate_single_image(composition_prompt, return_latent=True)
-    # while samples.shape[-1] * 8 < target_width:
-    #     samples = upscale_latent(samples)
-    #
-    # img = model_latent_to_pillow_img(samples)
+            img = enhance_faces(img, fidelity=prompt.fix_faces_fidelity)
+
+        img = upscale_image(img, ultrasharp=True)
 
     img = img.resize(
         (target_width, target_height),
