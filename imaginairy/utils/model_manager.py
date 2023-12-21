@@ -10,6 +10,7 @@ from functools import lru_cache, wraps
 import requests
 import torch
 from huggingface_hub import (
+    HfFileSystem,
     HfFolder,
     hf_hub_download as _hf_hub_download,
     try_to_load_from_cache,
@@ -239,6 +240,29 @@ def get_diffusion_model_refiners(
     )
 
 
+hf_repo_url_pattern = re.compile(
+    r"https://huggingface\.co/(?P<author>[^/]+)/(?P<repo>[^/]+)(/tree/(?P<ref>[a-z0-9]+))?/?$"
+)
+
+
+def parse_diffusers_repo_url(url: str) -> dict[str, str]:
+    match = hf_repo_url_pattern.match(url)
+    return match.groupdict() if match else {}
+
+
+def is_diffusers_repo_url(url: str) -> bool:
+    return bool(parse_diffusers_repo_url(url))
+
+
+def normalize_diffusers_repo_url(url: str) -> str:
+    data = parse_diffusers_repo_url(url)
+    ref = data["ref"] or "main"
+    normalized_url = (
+        f"https://huggingface.co/{data['author']}/{data['repo']}/tree/{ref}/"
+    )
+    return normalized_url
+
+
 @lru_cache(maxsize=1)
 def _get_diffusion_model_refiners(
     weights_location: str,
@@ -260,12 +284,18 @@ def _get_diffusion_model_refiners(
     global MOST_RECENTLY_LOADED_MODEL
 
     device = device or get_device()
-
-    (
-        vae_weights,
-        unet_weights,
-        text_encoder_weights,
-    ) = load_stable_diffusion_compvis_weights(weights_location)
+    if is_diffusers_repo_url(weights_location):
+        (
+            vae_weights,
+            unet_weights,
+            text_encoder_weights,
+        ) = load_stable_diffusion_diffusers_weights(weights_location)
+    else:
+        (
+            vae_weights,
+            unet_weights,
+            text_encoder_weights,
+        ) = load_stable_diffusion_compvis_weights(weights_location)
 
     StableDiffusionCls: type[LatentDiffusionModel]
     if for_inpainting:
@@ -529,15 +559,40 @@ def extract_huggingface_repo_commit_file_from_url(url):
     return repo, commit_hash, filepath
 
 
-def download_diffusers_weights(repo, sub, filename):
-    from imaginairy.utils.model_manager import get_cached_url_path
+def download_diffusers_weights(base_url, sub, filename=None):
+    if filename is None:
+        # select which weights to download. prefer fp16 safetensors
+        data = parse_diffusers_repo_url(base_url)
+        fs = HfFileSystem()
+        filepaths = fs.ls(
+            f"{data['author']}/{data['repo']}/{sub}", revision=data["ref"], detail=False
+        )
+        filepath = choose_diffusers_weights(filepaths)
+        if not filepath:
+            msg = f"Could not find any weights in {base_url}/{sub}"
+            raise ValueError(msg)
+        filename = filepath.split("/")[-1]
+    url = f"{base_url}{sub}/{filename}".replace("/tree/", "/resolve/")
+    new_path = get_cached_url_path(url, category="weights")
+    return new_path
 
-    url = f"https://huggingface.co/{repo}/resolve/main/{sub}/{filename}"
-    return get_cached_url_path(url, category="weights")
+
+def choose_diffusers_weights(filenames):
+    extension_priority = (".safetensors", ".bin", ".pth", ".pt")
+    # filter out any files that don't have a valid extension
+    filenames = [f for f in filenames if any(f.endswith(e) for e in extension_priority)]
+    filenames_and_extension = [(f, os.path.splitext(f)[1]) for f in filenames]
+    # sort by priority
+    filenames_and_extension.sort(
+        key=lambda x: ("fp16" not in x[0], extension_priority.index(x[1]))
+    )
+    if filenames_and_extension:
+        return filenames_and_extension[0][0]
+    return None
 
 
 @lru_cache
-def load_stable_diffusion_diffusers_weights(diffusers_repo, device=None):
+def load_stable_diffusion_diffusers_weights(base_url: str, device=None):
     from imaginairy.utils import get_device
     from imaginairy.weight_management.conversion import cast_weights
     from imaginairy.weight_management.utils import (
@@ -546,11 +601,10 @@ def load_stable_diffusion_diffusers_weights(diffusers_repo, device=None):
         MODEL_NAMES,
     )
 
+    base_url = normalize_diffusers_repo_url(base_url)
     if device is None:
         device = get_device()
-    vae_weights_path = download_diffusers_weights(
-        repo=diffusers_repo, sub="vae", filename="diffusion_pytorch_model.safetensors"
-    )
+    vae_weights_path = download_diffusers_weights(base_url=base_url, sub="vae")
     vae_weights = open_weights(vae_weights_path, device=device)
     vae_weights = cast_weights(
         source_weights=vae_weights,
@@ -560,9 +614,7 @@ def load_stable_diffusion_diffusers_weights(diffusers_repo, device=None):
         dest_format=FORMAT_NAMES.REFINERS,
     )
 
-    unet_weights_path = download_diffusers_weights(
-        repo=diffusers_repo, sub="unet", filename="diffusion_pytorch_model.safetensors"
-    )
+    unet_weights_path = download_diffusers_weights(base_url=base_url, sub="unet")
     unet_weights = open_weights(unet_weights_path, device=device)
     unet_weights = cast_weights(
         source_weights=unet_weights,
@@ -573,7 +625,7 @@ def load_stable_diffusion_diffusers_weights(diffusers_repo, device=None):
     )
 
     text_encoder_weights_path = download_diffusers_weights(
-        repo=diffusers_repo, sub="text_encoder", filename="model.safetensors"
+        base_url=base_url, sub="text_encoder"
     )
     text_encoder_weights = open_weights(text_encoder_weights_path, device=device)
     text_encoder_weights = cast_weights(
@@ -613,7 +665,6 @@ def open_weights(filepath, device=None):
 
 def load_stable_diffusion_compvis_weights(weights_url):
     from imaginairy.utils import get_device
-    from imaginairy.utils.model_manager import get_cached_url_path
     from imaginairy.weight_management.conversion import cast_weights
     from imaginairy.weight_management.utils import (
         COMPONENT_NAMES,
