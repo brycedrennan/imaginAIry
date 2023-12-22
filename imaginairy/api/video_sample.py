@@ -48,8 +48,27 @@ def generate_video(
     repetitions=1,
 ):
     """
-    Simple script to generate a single sample conditioned on an image `input_path` or multiple images, one for each
-    image file in folder `input_path`. If you run out of VRAM, try decreasing `decoding_t`.
+    Generates a video from a single image or multiple images, conditioned on the provided input_path.
+
+    Args:
+        input_path (str): Path to an image file or a directory containing image files.
+        output_folder (str | None, optional): Directory where the generated video will be saved.
+            Defaults to "outputs/video/" if None.
+        num_frames (int, optional): Number of frames in the generated video. Defaults to 6.
+        num_steps (int, optional): Number of steps for the generation process. Defaults to 30.
+        model_name (str, optional): Name of the model to use for generation. Defaults to "svd_xt".
+        fps_id (int, optional): Frame rate identifier used in generation. Defaults to 6.
+        output_fps (int, optional): Frame rate of the output video. Defaults to 6.
+        motion_bucket_id (int, optional): Identifier for motion bucket. Defaults to 127.
+        cond_aug (float, optional): Conditional augmentation value. Defaults to 0.02.
+        seed (Optional[int], optional): Random seed for generation. If None, a random seed is chosen.
+        decoding_t (int, optional): Number of frames decoded at a time, affecting VRAM usage.
+            Reduce if necessary. Defaults to 1.
+        device (Optional[str], optional): Device to run the generation on. Defaults to the detected device.
+        repetitions (int, optional): Number of times to repeat the video generation process. Defaults to 1.
+
+    Returns:
+        None: The function saves the generated video(s) to the specified output folder.
     """
     device = default(device, get_device)
 

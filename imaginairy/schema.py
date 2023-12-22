@@ -40,7 +40,29 @@ class InvalidUrlError(ValueError):
 
 
 class LazyLoadingImage:
-    """Image file encoded as base64 string."""
+    """
+    A class representing an image that can be lazily loaded from various sources.
+
+    This class supports loading an image from a filepath, URL, a PIL Image object,
+    or a base64 encoded string. The image is only loaded into memory when it's
+    accessed, not at the time of object creation. If multiple sources are provided,
+    an error is raised. The class also provides functionality to convert the image
+    to a base64 string and to access it as a PIL Image object.
+
+    Attributes:
+        _lazy_filepath (str): Path to the image file, if provided.
+        _lazy_url (str): URL of the image, if provided.
+        _img (Image.Image): PIL Image object, if provided.
+
+    Methods:
+        _load_img: Lazily loads the image from the specified source.
+        as_base64: Returns the image encoded as a base64 string.
+        as_pillow: Returns the image as a PIL Image object.
+        save_image_as_base64: Static method to convert a PIL Image to a base64 string.
+        load_image_from_base64: Static method to load an image from a base64 string.
+        __get_pydantic_core_schema__: Class method for Pydantic schema generation.
+
+    """
 
     def __init__(
         self,
@@ -205,6 +227,35 @@ class LazyLoadingImage:
 
 
 class ControlInput(BaseModel):
+    """
+    A Pydantic model representing the input control parameters for an operation,
+    typically involving image processing.
+
+    This model includes parameters such as the operation mode, the image to be processed,
+    an alternative raw image, and a strength parameter. It validates these parameters to
+    ensure they meet specific criteria, such as the mode being one of the predefined valid modes
+    and ensuring that both 'image' and 'image_raw' are not provided simultaneously.
+
+    Attributes:
+        mode (str): The operation mode, which must be one of the predefined valid modes.
+        image (LazyLoadingImage, optional): An instance of LazyLoadingImage to be processed.
+                                            Defaults to None.
+        image_raw (LazyLoadingImage, optional): An alternative raw image instance of
+                                                LazyLoadingImage. Defaults to None.
+        strength (float): A float value representing the strength of the operation, must be
+                          between 0 and 1000 (inclusive). Defaults to 1.
+
+    Methods:
+        image_raw_validate: Validates that either 'image' or 'image_raw' is provided,
+                            but not both.
+        mode_validate: Validates that the 'mode' attribute is one of the predefined valid
+                       modes in the configuration.
+
+    Raises:
+        ValueError: Raised if both 'image' and 'image_raw' are specified, or if the
+                    'mode' is not a valid mode.
+    """
+
     mode: str
     image: LazyLoadingImage | None = None
     image_raw: LazyLoadingImage | None = None
@@ -238,6 +289,23 @@ class ControlInput(BaseModel):
 
 
 class WeightedPrompt(BaseModel):
+    """
+    Represents a prompt with an associated weight.
+
+    This class is used to define a text prompt with a corresponding numerical weight,
+    indicating the significance or influence of the prompt in a given context, such as
+    in image generation or text processing tasks.
+
+    Attributes:
+        text (str): The textual content of the prompt.
+        weight (float): A numerical weight associated with the prompt. Defaults to 1.
+                        The weight must be greater than or equal to 0.
+
+    Methods:
+        __repr__: Returns a string representation of the WeightedPrompt instance,
+                  formatted as 'weight*(text)'.
+    """
+
     text: str
     weight: float = Field(1, ge=0)
 
@@ -256,6 +324,39 @@ InpaintMethod = Literal["finetune", "control"]
 
 
 class ImaginePrompt(BaseModel, protected_namespaces=()):
+    """
+    The ImaginePrompt class is used for configuring and generating image prompts.
+
+    Attributes:
+            prompt (str | WeightedPrompt | list[WeightedPrompt] | list[str] | None, optional): Primary prompt for the image generation.
+            negative_prompt (str | WeightedPrompt | list[WeightedPrompt] | list[str] | None, optional): Prompt specifying what to avoid in the image.
+            prompt_strength (float, optional): Strength of the influence of the prompt on the output.
+            init_image (LazyLoadingImage, optional): Initial image to base the generation on.
+            init_image_strength (float, optional): Strength of the influence of the initial image.
+            control_inputs (List[ControlInput], optional): Additional control inputs for image generation.
+            mask_prompt (str, optional): Mask prompt for selective area generation.
+            mask_image (LazyLoadingImage, optional): Image used for masking.
+            mask_mode (MaskMode | str): Mode of masking operation.
+            mask_modify_original (bool): Flag to modify the original image with mask.
+            outpaint (str, optional): Outpainting string for extending image boundaries.
+            model_weights (str): Weights configuration for the generation model.
+            solver_type (str): Type of solver used for image generation.
+            seed (int, optional): Seed for random number generator.
+            steps (int, optional): Number of steps for the generation process.
+            size (int | str | tuple[int, int], optional): Size of the generated image.
+            upscale (bool): Flag to enable upscaling of the generated image.
+            fix_faces (bool): Flag to apply face fixing in the generation.
+            fix_faces_fidelity (float, optional): Fidelity of face fixing.
+            conditioning (str, optional): Additional conditioning string.
+            tile_mode (str): Mode of tiling for the image.
+            allow_compose_phase (bool): Flag to allow composition phase in generation.
+            is_intermediate (bool): Flag for intermediate image processing.
+            collect_progress_latents (bool): Flag to collect progress latents.
+            caption_text (str): Caption text for the image.
+            composition_strength (float, optional): Strength of the composition effect.
+            inpaint_method (InpaintMethod): Method used for inpainting.
+    """
+
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     prompt: List[WeightedPrompt] = Field(default=None, validate_default=True)  # type: ignore

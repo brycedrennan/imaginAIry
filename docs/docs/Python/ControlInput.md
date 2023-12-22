@@ -1,0 +1,2 @@
+
+::: imaginairy.schema.ControlInput

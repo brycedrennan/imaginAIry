@@ -12,6 +12,8 @@ anyio==4.2.0
     # via
     #   httpx
     #   starlette
+babel==2.14.0
+    # via mkdocs-material
 certifi==2023.11.17
     # via
     #   httpcore
@@ -24,11 +26,18 @@ click==8.1.7
     #   click-help-colors
     #   click-shell
     #   imaginAIry (setup.py)
+    #   mkdocs
+    #   mkdocs-click
+    #   mkdocstrings
     #   uvicorn
 click-help-colors==0.9.4
     # via imaginAIry (setup.py)
 click-shell==2.1
     # via imaginAIry (setup.py)
+colorama==0.4.6
+    # via
+    #   griffe
+    #   mkdocs-material
 contourpy==1.2.0
     # via matplotlib
 coverage==7.4.0
@@ -67,6 +76,10 @@ ftfy==6.1.3
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
+ghp-import==2.1.0
+    # via mkdocs
+griffe==0.38.1
+    # via mkdocstrings-python
 h11==0.14.0
     # via
     #   httpcore
@@ -96,19 +109,55 @@ iniconfig==2.0.0
 jaxtyping==0.2.25
     # via imaginAIry (setup.py)
 jinja2==3.1.2
-    # via torch
+    # via
+    #   mkdocs
+    #   mkdocs-material
+    #   mkdocstrings
+    #   torch
 kiwisolver==1.4.5
     # via matplotlib
 kornia==0.7.1
     # via imaginAIry (setup.py)
 llvmlite==0.41.1
     # via numba
+markdown==3.5.1
+    # via
+    #   mkdocs
+    #   mkdocs-autorefs
+    #   mkdocs-click
+    #   mkdocs-material
+    #   mkdocstrings
+    #   pymdown-extensions
 markupsafe==2.1.3
-    # via jinja2
+    # via
+    #   jinja2
+    #   mkdocs
+    #   mkdocstrings
 matplotlib==3.7.4
     # via
     #   -c tests/constraints.txt
     #   filterpy
+mergedeep==1.3.4
+    # via mkdocs
+mkdocs==1.5.3
+    # via
+    #   mkdocs-autorefs
+    #   mkdocs-material
+    #   mkdocstrings
+mkdocs-autorefs==0.5.0
+    # via mkdocstrings
+mkdocs-click==0.8.1
+    # via -r requirements-dev.in
+mkdocs-material==9.5.3
+    # via -r requirements-dev.in
+mkdocs-material-extensions==1.3.1
+    # via mkdocs-material
+mkdocstrings[python]==0.24.0
+    # via
+    #   -r requirements-dev.in
+    #   mkdocstrings-python
+mkdocstrings-python==1.7.5
+    # via mkdocstrings
 mpmath==1.3.0
     # via sympy
 mypy==1.8.0
@@ -149,9 +198,14 @@ packaging==23.2
     #   huggingface-hub
     #   kornia
     #   matplotlib
+    #   mkdocs
     #   pytest
     #   pytest-sugar
     #   transformers
+paginate==0.5.6
+    # via mkdocs-material
+pathspec==0.12.1
+    # via mkdocs
 pillow==10.2.0
     # via
     #   diffusers
@@ -160,6 +214,10 @@ pillow==10.2.0
     #   imaginAIry (setup.py)
     #   matplotlib
     #   torchvision
+platformdirs==4.1.0
+    # via
+    #   mkdocs
+    #   mkdocstrings
 pluggy==1.3.0
     # via pytest
 protobuf==4.25.1
@@ -174,6 +232,12 @@ pydantic==2.5.3
     #   imaginAIry (setup.py)
 pydantic-core==2.14.6
     # via pydantic
+pygments==2.17.2
+    # via mkdocs-material
+pymdown-extensions==10.7
+    # via
+    #   mkdocs-material
+    #   mkdocstrings
 pyparsing==3.1.1
     # via matplotlib
 pytest==7.4.4
@@ -189,17 +253,25 @@ pytest-randomly==3.15.0
 pytest-sugar==0.9.7
     # via -r requirements-dev.in
 python-dateutil==2.8.2
-    # via matplotlib
+    # via
+    #   ghp-import
+    #   matplotlib
 pyyaml==6.0.1
     # via
     #   huggingface-hub
+    #   mkdocs
     #   omegaconf
+    #   pymdown-extensions
+    #   pyyaml-env-tag
     #   responses
     #   timm
     #   transformers
+pyyaml-env-tag==0.1
+    # via mkdocs
 regex==2023.12.25
     # via
     #   diffusers
+    #   mkdocs-material
     #   open-clip-torch
     #   transformers
 requests==2.31.0
@@ -207,6 +279,7 @@ requests==2.31.0
     #   diffusers
     #   huggingface-hub
     #   imaginAIry (setup.py)
+    #   mkdocs-material
     #   responses
     #   torchvision
     #   transformers
@@ -305,6 +378,8 @@ urllib3==2.1.0
     #   types-requests
 uvicorn==0.25.0
     # via imaginAIry (setup.py)
+watchdog==3.0.0
+    # via mkdocs
 wcwidth==0.2.12
     # via ftfy
 wheel==0.42.0

@@ -1,4 +1,4 @@
-"""Functions for colorizing black and white images"""
+"""Functions for colorizing images"""
 
 import logging
 
@@ -12,6 +12,19 @@ logger = logging.getLogger(__name__)
 
 
 def colorize_img(img, max_width=1024, max_height=1024, caption=None):
+    """
+    Colorizes black and white images or re-colors existing images. Optionally adds a caption.
+
+    Args:
+        img (Image): The image to be colorized.
+        max_width (int, optional): The maximum width of the output image, defaults to 1024.
+        max_height (int, optional): The maximum height of the output image, defaults to 1024.
+        caption (str, optional): A caption for the image. If None, a caption is generated and modified.
+
+    Returns:
+        Image: The colorized version of the input image.
+
+    """
     if not caption:
         caption = generate_caption(img, min_length=10)
         caption = caption.replace("black and white", "color")

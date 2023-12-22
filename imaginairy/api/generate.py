@@ -34,6 +34,27 @@ def imagine_image_files(
     return_filename_type: str = "generated",
     videogen: bool = False,
 ):
+    """
+    Generates and saves image files based on given prompts, with options for animations and videos.
+
+    Args:
+        prompts (list[ImaginePrompt] | ImaginePrompt): A prompt or list of prompts for image generation.
+        outdir (str): Directory path where the generated images and other files will be saved.
+        precision (str, optional): Precision mode for image generation, defaults to 'autocast'.
+        record_step_images (bool, optional): If True, saves step-by-step images of the generation process, defaults to False.
+        output_file_extension (str, optional): File extension for output images, must be 'jpg' or 'png', defaults to 'jpg'.
+        print_caption (bool, optional): If True, prints captions on the generated images, defaults to False.
+        make_gif (bool, optional): If True, creates a GIF from the generation steps, defaults to False.
+        make_compare_gif (bool, optional): If True, creates a comparison GIF with initial and generated images, defaults to False.
+        return_filename_type (str, optional): Type of filenames to return, defaults to 'generated'.
+        videogen (bool, optional): If True, generates a video from the generated images, defaults to False.
+
+    Returns:
+        list[str]: A list of filenames of the generated images.
+
+    Raises:
+        ValueError: If the output file extension is not 'jpg' or 'png'.
+    """
     from PIL import ImageDraw
 
     from imaginairy.api.video_sample import generate_video
@@ -157,6 +178,24 @@ def imagine(
     add_caption: bool = False,
     unsafe_retry_count: int = 1,
 ):
+    """
+    Generates images based on the provided prompts using the ImaginAIry API.
+
+    Args:
+        prompts (list[ImaginePrompt] | str | ImaginePrompt): A prompt or list of prompts for image generation.
+            Can be a string, a single ImaginePrompt instance, or a list of ImaginePrompt instances.
+        precision (str, optional): The precision mode for image generation, defaults to 'autocast'.
+        debug_img_callback (Callable, optional): Callback function for debugging images, defaults to None.
+        progress_img_callback (Callable, optional): Callback function called at intervals with progress images, defaults to None.
+        progress_img_interval_steps (int, optional): Number of steps between each progress image callback, defaults to 3.
+        progress_img_interval_min_s (float, optional): Minimum seconds between each progress image callback, defaults to 0.1.
+        half_mode: If set, determines whether to use half precision mode for image generation, defaults to None.
+        add_caption (bool, optional): Flag to add captions to the generated images, defaults to False.
+        unsafe_retry_count (int, optional): Number of retries for generating an image if it is deemed unsafe, defaults to 1.
+
+    Yields:
+        The generated image(s) based on the provided prompts.
+    """
     import torch.nn
 
     from imaginairy.api.generate_refiners import generate_single_image
