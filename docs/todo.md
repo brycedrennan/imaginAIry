@@ -11,22 +11,27 @@
  - ✅ make cli run faster again
  - ✅ add tests for cli commands
  - ✅ add type checker
+ - ✅ add interface for loading diffusers weights
+ - ✅ SDXL support
+ - sdxl inpainting 
+ - t2i adapters
+ - 
  - only output the main image unless some flag is set
  - allow selection of output video format
  - chain multiple operations together imggen => videogen
    - https://github.com/pallets/click/tree/main/examples/imagepipe 
 
- - add interface for loading diffusers weights
+ 
  - https://huggingface.co/playgroundai/playground-v2-1024px-aesthetic
  - make sure terminal output on windows doesn't suck
  - add method to show cache size
  - add method to clear model cache
  - add method to clear cached items not recently used (does diffusers have one?)
  - create actual documentation
- - SDXL Support
+ 
 
 #### Investigate
-
+ - textdiffusers https://jingyechen.github.io/textdiffuser2/
  - Scalecrafter https://yingqinghe.github.io/scalecrafter/
  - Fast diffusion with LCM Lora https://huggingface.co/latent-consistency/lcm-lora-sdv1-5/tree/main
  - 3d diffusion https://huggingface.co/stabilityai/stable-zero123

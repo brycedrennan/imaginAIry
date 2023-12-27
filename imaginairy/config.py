@@ -3,8 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, List
 
-DEFAULT_MODEL_WEIGHTS = "sd15"
-DEFAULT_MODEL_ARCHITECTURE = "sd15"
+DEFAULT_MODEL_WEIGHTS = "opendalle"
 DEFAULT_SOLVER = "ddim"
 
 DEFAULT_NEGATIVE_PROMPT = (
@@ -24,6 +23,11 @@ class ModelArchitecture:
     output_modality: str
     defaults: dict[str, Any]
     config_path: str | None = None
+
+    @property
+    def primary_alias(self):
+        if self.aliases:
+            return self.aliases[0]
 
 
 MODEL_ARCHITECTURES = [
@@ -52,7 +56,7 @@ MODEL_ARCHITECTURES = [
         name="Stable Diffusion XL",
         aliases=["sdxl", "sd-xl"],
         output_modality="image",
-        defaults={"size": "512"},
+        defaults={"size": "1024"},
     ),
     ModelArchitecture(
         name="Stable Video Diffusion",
@@ -110,7 +114,8 @@ class ModelWeightsConfig:
         if isinstance(self.architecture, str):
             self.architecture = MODEL_ARCHITECTURE_LOOKUP[self.architecture]
         if not isinstance(self.architecture, ModelArchitecture):
-            msg = f"You must specify an architecture {self.architecture}"
+            msg = f"zYou must specify an architecture {self.architecture}"
+            raise Exception(msg)
             raise ValueError(msg)  # noqa
 
 
@@ -163,6 +168,27 @@ MODEL_WEIGHT_CONFIGS = [
         architecture=MODEL_ARCHITECTURE_LOOKUP["sd15"],
         weights_location="https://huggingface.co/nitrosocke/redshift-diffusion/tree/80837fe18df05807861ab91c3bad3693c9342e4c/",
         defaults={"negative_prompt": DEFAULT_NEGATIVE_PROMPT},
+    ),
+    # SDXL Weights
+    ModelWeightsConfig(
+        name="Stable Diffusion XL",
+        aliases=MODEL_ARCHITECTURE_LOOKUP["sdxl"].aliases,
+        architecture=MODEL_ARCHITECTURE_LOOKUP["sdxl"],
+        defaults={
+            "negative_prompt": DEFAULT_NEGATIVE_PROMPT,
+            "composition_strength": 0.6,
+        },
+        weights_location="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/tree/462165984030d82259a11f4367a4eed129e94a7b/",
+    ),
+    ModelWeightsConfig(
+        name="OpenDalle V1.1",
+        aliases=["opendalle11", "odv11", "opendalle11", "opendalle", "od"],
+        architecture=MODEL_ARCHITECTURE_LOOKUP["sdxl"],
+        defaults={
+            "negative_prompt": DEFAULT_NEGATIVE_PROMPT,
+            "composition_strength": 0.6,
+        },
+        weights_location="https://huggingface.co/dataautogpt3/OpenDalleV1.1/tree/33dc6acd722cd7a956bf676011609e41665d4c4e/",
     ),
     # Video Weights
     ModelWeightsConfig(

@@ -6,23 +6,30 @@ from functools import lru_cache
 from typing import Literal
 
 import torch
+from black import List
 from refiners.fluxion.layers.attentions import ScaledDotProductAttention
 from refiners.fluxion.layers.chain import ChainError
-from refiners.foundationals.latent_diffusion import (
+from refiners.foundationals.latent_diffusion.self_attention_guidance import (
+    SelfAttentionMap,
+)
+from refiners.foundationals.latent_diffusion.stable_diffusion_1.controlnet import (
+    Controlnet,
     SD1ControlnetAdapter,
+)
+from refiners.foundationals.latent_diffusion.stable_diffusion_1.model import (
+    SD1Autoencoder,
     SD1UNet,
     StableDiffusion_1 as RefinerStableDiffusion_1,
     StableDiffusion_1_Inpainting as RefinerStableDiffusion_1_Inpainting,
 )
-from refiners.foundationals.latent_diffusion.stable_diffusion_1.controlnet import (
-    Controlnet,
-)
-from refiners.foundationals.latent_diffusion.stable_diffusion_1.model import (
-    SD1Autoencoder,
+from refiners.foundationals.latent_diffusion.stable_diffusion_xl.model import (
+    SDXLAutoencoder,
+    StableDiffusion_XL as RefinerStableDiffusion_XL,
 )
 from torch import Tensor, nn
 from torch.nn import functional as F
 
+from imaginairy.schema import WeightedPrompt
 from imaginairy.utils.feather_tile import rebuild_image, tile_image
 from imaginairy.weight_management.conversion import cast_weights
 
@@ -77,7 +84,124 @@ class TileModeMixin(nn.Module):
 
 
 class StableDiffusion_1(TileModeMixin, RefinerStableDiffusion_1):
-    pass
+    def calculate_text_conditioning_kwargs(
+        self,
+        positive_prompts: List[WeightedPrompt],
+        negative_prompts: List[WeightedPrompt],
+        positive_conditioning_override: Tensor | None = None,
+    ):
+        import torch
+
+        from imaginairy.utils.log_utils import log_conditioning
+
+        neutral_conditioning = self.prompts_to_embeddings(negative_prompts)
+        log_conditioning(neutral_conditioning, "neutral conditioning")
+
+        if positive_conditioning_override is None:
+            positive_conditioning = self.prompts_to_embeddings(positive_prompts)
+        else:
+            positive_conditioning = positive_conditioning_override
+        log_conditioning(positive_conditioning, "positive conditioning")
+
+        clip_text_embedding = torch.cat(
+            tensors=(neutral_conditioning, positive_conditioning), dim=0
+        )
+        return {"clip_text_embedding": clip_text_embedding}
+
+    def prompts_to_embeddings(self, prompts: List[WeightedPrompt]) -> Tensor:
+        import torch
+
+        total_weight = sum(wp.weight for wp in prompts)
+        if str(self.clip_text_encoder.device) == "cpu":
+            self.clip_text_encoder = self.clip_text_encoder.to(dtype=torch.float32)
+        conditioning = sum(
+            self.clip_text_encoder(wp.text) * (wp.weight / total_weight)
+            for wp in prompts
+        )
+
+        return conditioning
+
+
+class StableDiffusion_XL(TileModeMixin, RefinerStableDiffusion_XL):
+    def forward(  # type: ignore
+        self,
+        x: Tensor,
+        step: int,
+        *,
+        clip_text_embedding: Tensor,
+        pooled_text_embedding: Tensor,
+        time_ids: Tensor | None = None,
+        condition_scale: float = 5.0,
+        **kwargs: Tensor,
+    ) -> Tensor:
+        time_ids = time_ids or self.default_time_ids
+        return super().forward(
+            x=x,
+            step=step,
+            clip_text_embedding=clip_text_embedding,
+            pooled_text_embedding=pooled_text_embedding,
+            time_ids=time_ids,
+            condition_scale=condition_scale,
+            **kwargs,
+        )
+
+    def calculate_text_conditioning_kwargs(
+        self,
+        positive_prompts: List[WeightedPrompt],
+        negative_prompts: List[WeightedPrompt],
+        positive_conditioning_override: Tensor | None = None,
+    ):
+        import torch
+
+        from imaginairy.utils.log_utils import log_conditioning
+
+        (
+            neutral_clip_text_embedding,
+            neutral_pooled_text_embedding,
+        ) = self.prompts_to_embeddings(negative_prompts)
+        log_conditioning(neutral_clip_text_embedding, "neutral_clip_text_embedding")
+        log_conditioning(neutral_pooled_text_embedding, "neutral_pooled_text_embedding")
+
+        (
+            positive_clip_text_embedding,
+            positive_pooled_text_embedding,
+        ) = self.prompts_to_embeddings(positive_prompts)
+        log_conditioning(positive_clip_text_embedding, "positive_clip_text_embedding")
+        log_conditioning(
+            positive_pooled_text_embedding, "positive_pooled_text_embedding"
+        )
+
+        return {
+            "clip_text_embedding": torch.cat(
+                tensors=(neutral_clip_text_embedding, positive_clip_text_embedding),
+                dim=0,
+            ),
+            "pooled_text_embedding": torch.cat(
+                tensors=(neutral_pooled_text_embedding, positive_pooled_text_embedding),
+                dim=0,
+            ),
+        }
+
+    def prompts_to_embeddings(
+        self, prompts: List[WeightedPrompt]
+    ) -> tuple[Tensor, Tensor]:
+        import torch
+
+        total_weight = sum(wp.weight for wp in prompts)
+        if str(self.clip_text_encoder.device) == "cpu":
+            self.clip_text_encoder = self.clip_text_encoder.to(dtype=torch.float32)
+
+        embeddings = [self.clip_text_encoder(wp.text) for wp in prompts]
+        clip_text_embedding = (
+            sum(emb[0] * wp.weight for emb, wp in zip(embeddings, prompts))
+            / total_weight
+        )
+        pooled_text_embedding = (
+            sum(emb[1] * wp.weight for emb, wp in zip(embeddings, prompts))
+            / total_weight
+        )
+
+        return clip_text_embedding, pooled_text_embedding  # type: ignore
 
 
 class StableDiffusion_1_Inpainting(TileModeMixin, RefinerStableDiffusion_1_Inpainting):
@@ -116,10 +240,47 @@ class StableDiffusion_1_Inpainting(TileModeMixin, RefinerStableDiffusion_1_Inpai
 
         return sag.scale * (noise - degraded_noise)
 
+    def calculate_text_conditioning_kwargs(
+        self,
+        positive_prompts: List[WeightedPrompt],
+        negative_prompts: List[WeightedPrompt],
+        positive_conditioning_override: Tensor | None = None,
+    ):
+        import torch
 
-class SD1AutoencoderSliced(SD1Autoencoder):
+        from imaginairy.utils.log_utils import log_conditioning
+
+        neutral_conditioning = self.prompts_to_embeddings(negative_prompts)
+        log_conditioning(neutral_conditioning, "neutral conditioning")
+
+        if positive_conditioning_override is None:
+            positive_conditioning = self.prompts_to_embeddings(positive_prompts)
+        else:
+            positive_conditioning = positive_conditioning_override
+        log_conditioning(positive_conditioning, "positive conditioning")
+
+        clip_text_embedding = torch.cat(
+            tensors=(neutral_conditioning, positive_conditioning), dim=0
+        )
+        return {"clip_text_embedding": clip_text_embedding}
+
+    def prompts_to_embeddings(self, prompts: List[WeightedPrompt]) -> Tensor:
+        import torch
+
+        total_weight = sum(wp.weight for wp in prompts)
+        if str(self.clip_text_encoder.device) == "cpu":
+            self.clip_text_encoder = self.clip_text_encoder.to(dtype=torch.float32)
+        conditioning = sum(
+            self.clip_text_encoder(wp.text) * (wp.weight / total_weight)
+            for wp in prompts
+        )
+
+        return conditioning
+
+
+class SlicedEncoderMixin(nn.Module):
     max_chunk_size = 2048
-    min_chunk_size = 64
+    min_chunk_size = 32
 
     def encode(self, x: Tensor) -> Tensor:
         return self.sliced_encode(x)
@@ -133,12 +294,12 @@ class SD1AutoencoderSliced(SD1Autoencoder):
             [1, 4, math.floor(h / 8), math.floor(w / 8)], device=x.device
         )
         overlap_pct = 0.5
-
+        encoder = self[0]  # type: ignore
         for x_img in x.split(1):
             chunks = tile_image(
                 x_img, tile_size=chunk_size, overlap_percent=overlap_pct
             )
-            encoded_chunks = [super(SD1Autoencoder, self).encode(ic) for ic in chunks]
+            encoded_chunks = [encoder(ic) * self.encoder_scale for ic in chunks]
 
             final_tensor = rebuild_image(
                 encoded_chunks,
@@ -157,9 +318,10 @@ class SD1AutoencoderSliced(SD1Autoencoder):
                 except ChainError as e:
                     if "OutOfMemoryError" not in str(e):
                         raise
-                    self.__class__.max_chunk_size = (
-                        int(math.sqrt(x.shape[2] * x.shape[3])) // 2
-                    )
+                    new_size = int(math.sqrt(x.shape[2] * x.shape[3])) // 2
+                    # make sure it's an even number
+                    new_size = new_size - (new_size % 2)
+                    self.__class__.max_chunk_size = new_size
                     logger.info(
                         f"Ran out of memory. Trying tiled decode with chunk size {self.__class__.max_chunk_size}"
                     )
@@ -170,6 +332,8 @@ class SD1AutoencoderSliced(SD1Autoencoder):
                     if "OutOfMemoryError" not in str(e):
                         raise
                     self.__class__.max_chunk_size = self.max_chunk_size // 2
+                    # make sure it's an even number
+                    self.__class__.max_chunk_size -= self.__class__.max_chunk_size % 2
                     self.__class__.max_chunk_size = max(
                         self.__class__.max_chunk_size, self.__class__.min_chunk_size
                     )
@@ -179,7 +343,7 @@ class SD1AutoencoderSliced(SD1Autoencoder):
         raise RuntimeError("Could not decode image")
 
     def decode_all_at_once(self, x: Tensor) -> Tensor:
-        decoder = self[1]
+        decoder = self[1]  # type: ignore
         x = decoder(x / self.encoder_scale)
         return x
 
@@ -211,6 +375,14 @@ class SD1AutoencoderSliced(SD1Autoencoder):
             )
 
             return final_tensor
+
+
+class SD1AutoencoderSliced(SlicedEncoderMixin, SD1Autoencoder):
+    pass
+
+
+class SDXLAutoencoderSliced(SlicedEncoderMixin, SDXLAutoencoder):
+    pass
 
 
 def add_sliced_attention_to_scaled_dot_product_attention(cls):
@@ -281,6 +453,9 @@ def monkeypatch_sd1controlnetadapter():
             device=target.device,
             dtype=target.dtype,
         )
+        print(
+            f"controlnet: {name} loaded to device {target.device} and type {target.dtype}"
+        )
 
         self._controlnet: list[Controlnet] = [  # type: ignore
             controlnet
@@ -295,7 +470,55 @@ def monkeypatch_sd1controlnetadapter():
 monkeypatch_sd1controlnetadapter()
 
 
-@lru_cache(maxsize=4)
+@lru_cache
+def monkeypatch_self_attention_guidance():
+    def new_compute_attention_scores(
+        self, query: Tensor, key: Tensor, value: Tensor, slice_size=2048
+    ) -> Tensor:
+        query, key = self.split_to_multi_head(query), self.split_to_multi_head(key)
+        batch_size, num_heads, num_queries, dim = query.shape
+
+        output = torch.zeros(
+            batch_size,
+            num_heads,
+            num_queries,
+            num_queries,
+            device=query.device,
+            dtype=query.dtype,
+        )
+        for start_idx in range(0, num_queries, slice_size):
+            end_idx = min(start_idx + slice_size, num_queries)
+            sliced_query = query[:, :, start_idx:end_idx, :]
+            attention_slice = sliced_query @ key.permute(0, 1, 3, 2)
+            attention_slice = attention_slice / math.sqrt(dim)
+            output_slice = torch.softmax(input=attention_slice, dim=-1)
+            output[:, :, start_idx:end_idx, :] = output_slice
+
+        return output
+
+    def compute_attention_scores_logged(
+        self, query: Tensor, key: Tensor, value: Tensor
+    ) -> Tensor:
+        print(f"query.shape: {query.shape}")
+        print(f"key.shape: {key.shape}")
+        query, key = self.split_to_multi_head(query), self.split_to_multi_head(key)
+        print(f"mh query.shape: {query.shape}")
+        print(f"mh key.shape: {key.shape}")
+        _, _, _, dim = query.shape
+        attention = query @ key.permute(0, 1, 3, 2)
+        attention = attention / math.sqrt(dim)
+        print(f"attention shape: {attention.shape}")
+        result = torch.softmax(input=attention, dim=-1)
+        print(f"result.shape: {result.shape}")
+        return result
+
+    SelfAttentionMap.compute_attention_scores = new_compute_attention_scores
+
+
+monkeypatch_self_attention_guidance()
+
+
+@lru_cache(maxsize=1)
 def get_controlnet(name, weights_location, device, dtype):
     from imaginairy.utils.model_manager import load_state_dict
 

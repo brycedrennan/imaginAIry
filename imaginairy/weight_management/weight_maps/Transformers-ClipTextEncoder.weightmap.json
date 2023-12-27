@@ -1,0 +1,19 @@
+{
+    "name_map": {
+        "text_model.embeddings.token_embedding": "Sum.TokenEncoder",
+        "text_model.embeddings.position_embedding": "Sum.PositionalEncoder.Embedding",
+        "text_model.final_layer_norm": "LayerNorm",
+        "text_projection": "Linear"
+    },
+    "regex_map": {
+        "text_model\\.encoder\\.layers\\.(?P<layer>\\d+)\\.layer_norm(?P<norm>\\d+)": "TransformerLayer_{int(layer) + 1}.Residual_{norm}.LayerNorm",
+        "text_model\\.encoder\\.layers\\.(?P<layer_number>\\d+)\\.self_attn\\.q_proj": "TransformerLayer_{int(layer_number) + 1}.Residual_1.SelfAttention.Distribute.Linear_1",
+        "text_model\\.encoder\\.layers\\.(?P<layer_number>\\d+)\\.self_attn\\.k_proj": "TransformerLayer_{int(layer_number) + 1}.Residual_1.SelfAttention.Distribute.Linear_2",
+        "text_model\\.encoder\\.layers\\.(?P<layer_number>\\d+)\\.self_attn\\.v_proj": "TransformerLayer_{int(layer_number) + 1}.Residual_1.SelfAttention.Distribute.Linear_3",
+        "text_model\\.encoder\\.layers\\.(?P<layer_number>\\d+)\\.self_attn\\.out_proj": "TransformerLayer_{int(layer_number) + 1}.Residual_1.SelfAttention.Linear",
+        "text_model\\.encoder\\.layers\\.(?P<layer_number>\\d+)\\.mlp\\.fc(?P<fc_num>\\d+)": "TransformerLayer_{int(layer_number) + 1}.Residual_2.FeedForward.Linear_{fc_num}"
+    },
+    "ignore_prefixes": [],
+    "source_aliases": {},
+    "reshapes": {}
+}

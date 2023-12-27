@@ -97,7 +97,7 @@ def load_state_dict_conversion_maps() -> dict[str, dict]:
     conversion_maps = {}
     from importlib.resources import files
 
-    for file in files("imaginairy").joinpath("weight_conversion/maps").iterdir():
+    for file in files("imaginairy").joinpath("weight_management/weight_maps").iterdir():
         if file.is_file() and file.suffix == ".json":  # type: ignore
             conversion_maps[file.name] = json.loads(file.read_text())
     return conversion_maps
@@ -117,3 +117,23 @@ def cast_weights(
         dest_format=dest_format,
     )
     return weight_map.cast_weights(source_weights)
+
+
+def render_fstring(fstring, variables):
+    """
+    Render a string formatted like an f-string using the provided variables.
+
+    DANGER: This is a security risk if the fstring is user-provided.
+
+    Args:
+    fstring (str): The template string with placeholders for variables.
+    variables (dict): A dictionary containing the variables to be used in the f-string.
+
+    Returns:
+    str: The rendered string with variables substituted.
+    """
+    # Use locals().update to add the variables to the local scope
+    locals().update(variables)
+
+    # Evaluate the f-string using eval with an f-string formatted string
+    return eval(f'f"""{fstring}"""')

@@ -89,7 +89,7 @@ def platform_appropriate_autocast(precision="autocast", enabled=True):
     # https://github.com/pytorch/pytorch/issues/55374
     # https://github.com/invoke-ai/InvokeAI/pull/518
 
-    if precision == "autocast" and get_device() in ("cuda",):
+    if precision == "autocast" and get_device() in ("cuda",) and False:
         with autocast(get_device(), enabled=enabled):
             yield
     else:
@@ -320,3 +320,13 @@ def get_nested_attribute(obj, attribute_path, depth=None, return_key=False):
 
 def prompt_normalized(prompt, length=130):
     return re.sub(r"[^a-zA-Z0-9.,\[\]-]+", "_", prompt)[:length]
+
+
+def clear_gpu_cache():
+    import gc
+
+    import torch
+
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()

@@ -191,14 +191,15 @@ def imagine(
         precision
     ), fix_torch_nn_layer_norm(), fix_torch_group_norm():
         for i, prompt in enumerate(prompts):
+            concrete_prompt = prompt.make_concrete_copy()
             logger.info(
-                f"🖼  Generating  {i + 1}/{num_prompts}: {prompt.prompt_description()}"
+                f"🖼  Generating  {i + 1}/{num_prompts}: {concrete_prompt.prompt_description()}"
             )
             for attempt in range(unsafe_retry_count + 1):
-                if attempt > 0 and isinstance(prompt.seed, int):
-                    prompt.seed += 100_000_000 + attempt
+                if attempt > 0 and isinstance(concrete_prompt.seed, int):
+                    concrete_prompt.seed += 100_000_000 + attempt
                 result = generate_single_image(
-                    prompt,
+                    concrete_prompt,
                     debug_img_callback=debug_img_callback,
                     progress_img_callback=progress_img_callback,
                     progress_img_interval_steps=progress_img_interval_steps,

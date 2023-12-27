@@ -122,8 +122,6 @@ class ImageLoggingContext:
         )
 
     def log_latents(self, latents, description):
-        from imaginairy.utils.img_utils import model_latents_to_pillow_imgs
-
         if "predicted_latent" in description:
             if self.progress_latent_callback is not None:
                 self.progress_latent_callback(latents)
@@ -148,11 +146,18 @@ class ImageLoggingContext:
         except TypeError:
             shape_str = str(latents.shape)
         description = f"{description}-{shape_str}"
-        for img in model_latents_to_pillow_imgs(latents):
+        for latent in latents:
             self.image_count += 1
+            latent = latent.unsqueeze(0)
+            img = latent_to_raw_image(latent)
             self.debug_img_callback(
                 img, description, self.image_count, self.step_count, self.prompt
             )
+        # for img in model_latents_to_pillow_imgs(latents):
+        #     self.image_count += 1
+        #     self.debug_img_callback(
+        #         img, description, self.image_count, self.step_count, self.prompt
+        #     )
 
     def log_img(self, img, description):
         if not self.debug_img_callback:
@@ -329,3 +334,39 @@ def suppress_annoying_logs_and_warnings():
     disable_transformers_custom_logging()
     disable_pytorch_lighting_custom_logging()
     disable_common_warnings()
+
+
+def latent_to_raw_image(tensor):
+    """
+    Converts a tensor of size (1, 4, x, y) into a PIL image of size (x*4, y*4).
+
+    Args:
+    tensor (numpy.ndarray): A tensor of size (1, 4, x, y).
+
+    Returns:
+    PIL.Image: An image representing the tensor.
+    """
+    from PIL import Image
+
+    if tensor.ndim != 4 or tensor.shape[0] != 1:
+        msg = f"Tensor must be of shape (1, c, x, y). got shape: {tensor.shape}"
+        raise ValueError(msg)
+
+    _, c, x, y = tensor.shape
+
+    full_image = Image.new("L", (x, y * c))
+
+    # Process each channel
+    for i in range(c):
+        # Extract the channel
+        channel = tensor[0, i, :, :]
+
+        # Normalize and convert to an image
+        channel_image = Image.fromarray(
+            (channel / channel.max() * 255).cpu().numpy().astype("uint8")
+        )
+
+        # Paste the channel image into the full image
+        full_image.paste(channel_image, (0, i * y))
+
+    return full_image

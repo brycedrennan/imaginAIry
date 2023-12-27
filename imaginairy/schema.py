@@ -299,7 +299,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     caption_text: str = Field(
         "", description="text to be overlaid on the image", validate_default=True
     )
-    composition_strength: float = Field(default=0.5, ge=0, le=1, validate_default=True)
+    composition_strength: float = Field(ge=0, le=1, validate_default=True)
     inpaint_method: InpaintMethod = "finetune"
 
     def __init__(
@@ -453,6 +453,23 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         if not isinstance(v, Tensor):
             raise ValueError("conditioning must be a torch.Tensor")  # noqa
         return v
+
+    @model_validator(mode="before")
+    @classmethod
+    def set_default_composition_strength(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        comp_strength = data.get("composition_strength")
+        default_comp_strength = 0.5
+        if comp_strength is None:
+            model_weights = data.get("model_weights")
+            if isinstance(model_weights, config.ModelWeightsConfig):
+                default_comp_strength = model_weights.defaults.get(
+                    "composition_strength", default_comp_strength
+                )
+            data["composition_strength"] = default_comp_strength
+
+        return data
 
     # @field_validator("init_image", "mask_image", mode="after")
     # def handle_images(cls, v):
