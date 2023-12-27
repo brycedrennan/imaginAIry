@@ -29,7 +29,7 @@ init: require_pyenv  ## Setup a dev environment for local development.
 af: autoformat  ## Alias for `autoformat`
 autoformat:  ## Run the autoformatter.
 	@-ruff check --config tests/ruff.toml . --fix-only
-	@black .
+	@ruff format --config tests/ruff.toml .
 
 test:  ## Run the tests.
 	@pytest

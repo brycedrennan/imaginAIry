@@ -32,7 +32,7 @@ class DPT(BaseModel):
         readout="project",
         channels_last=False,
         use_bn=False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
 

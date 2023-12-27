@@ -32,14 +32,17 @@ TileModeType = Literal["", "x", "y", "xy"]
 
 
 def _tile_mode_conv2d_conv_forward(
-    self, input: torch.Tensor, weight: torch.Tensor, bias: torch.Tensor  # noqa
+    self,
+    tensor_input: torch.Tensor,
+    weight: torch.Tensor,
+    bias: torch.Tensor,  # noqa
 ):
     if self.padding_mode_x == self.padding_mode_y:
         self.padding_mode = self.padding_mode_x
-        return self._orig_conv_forward(input, weight, bias)
+        return self._orig_conv_forward(tensor_input, weight, bias)
 
-    w1 = F.pad(input, self.padding_x, mode=self.padding_modeX)
-    del input
+    w1 = F.pad(tensor_input, self.padding_x, mode=self.padding_modeX)
+    del tensor_input
 
     w2 = F.pad(w1, self.padding_y, mode=self.padding_modeY)
     del w1

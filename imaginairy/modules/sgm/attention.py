@@ -625,7 +625,7 @@ class BasicTransformerBlock(nn.Module):
 class BasicTransformerSingleLayerBlock(nn.Module):
     ATTENTION_MODES = {
         "softmax": CrossAttention,  # vanilla attention
-        "softmax-xformers": MemoryEfficientCrossAttention  # on the A100s not quite as fast as the above version
+        "softmax-xformers": MemoryEfficientCrossAttention,  # on the A100s not quite as fast as the above version
         # (todo might depend on head_dim, check, falls back to semi-optimized kernels for dim!=[16,32,64,128])
     }
 
