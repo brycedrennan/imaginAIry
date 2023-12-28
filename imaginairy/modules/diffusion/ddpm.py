@@ -714,7 +714,10 @@ class DDPM(pl.LightningModule):
 
 
 def _TileModeConv2DConvForward(
-    self, input: torch.Tensor, weight: torch.Tensor, bias: torch.Tensor  # noqa
+    self,
+    input: torch.Tensor,  # noqa
+    weight: torch.Tensor,
+    bias: torch.Tensor,
 ):
     if self.padding_modeX == self.padding_modeY:
         self.padding_mode = self.padding_modeX

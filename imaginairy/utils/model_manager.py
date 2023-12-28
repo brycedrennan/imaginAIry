@@ -650,7 +650,8 @@ def open_weights(filepath, device=None):
 
         with safe_open(path=filepath, framework="pytorch", device=device) as tensors:
             state_dict = {
-                key: tensors.get_tensor(key) for key in tensors.keys()  # noqa
+                key: tensors.get_tensor(key)
+                for key in tensors.keys()  # noqa
             }
     else:
         import torch

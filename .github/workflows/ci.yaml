@@ -29,29 +29,14 @@ jobs:
       - name: Install Ruff
         if: steps.cache.outputs.cache-hit != 'true'
         run: grep -E 'ruff==' requirements-dev.txt | xargs pip install
+      - name: Format
+        run: |
+          echo "::add-matcher::.github/pylama_matcher.json"
+          ruff format --config tests/ruff.toml .  --check
       - name: Lint
         run: |
           echo "::add-matcher::.github/pylama_matcher.json"
           ruff --config tests/ruff.toml .
-  autoformat:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4.5.0
-        with:
-          python-version: "3.10"
-      - name: Cache dependencies
-        uses: actions/cache@v3.2.4
-        id: cache
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('requirements-dev.txt') }}-autoformat
-      - name: Install Black
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: grep -E 'black==' requirements-dev.txt | xargs pip install
-      - name: Lint
-        run: |
-          black --diff --fast .
   test-gpu:
     runs-on: nvidia-4090
     steps:

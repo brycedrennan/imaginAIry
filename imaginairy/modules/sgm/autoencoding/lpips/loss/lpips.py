@@ -52,8 +52,9 @@ class LPIPS(nn.Module):
         feats0, feats1, diffs = {}, {}, {}
         lins = [self.lin0, self.lin1, self.lin2, self.lin3, self.lin4]
         for kk in range(len(self.chns)):
-            feats0[kk], feats1[kk] = normalize_tensor(outs0[kk]), normalize_tensor(
-                outs1[kk]
+            feats0[kk], feats1[kk] = (
+                normalize_tensor(outs0[kk]),
+                normalize_tensor(outs1[kk]),
             )
             diffs[kk] = (feats0[kk] - feats1[kk]) ** 2
 
