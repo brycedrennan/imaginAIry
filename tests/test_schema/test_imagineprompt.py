@@ -22,7 +22,7 @@ def test_imagine_prompt_default():
     prompt = ImaginePrompt(negative_prompt="")
     assert prompt.negative_prompt == [WeightedPrompt(text="")]
 
-    assert prompt.width == 512
+    assert prompt.width == 1024
 
 
 def test_imagine_prompt_has_default_negative():

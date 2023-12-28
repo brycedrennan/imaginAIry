@@ -115,7 +115,6 @@ class ModelWeightsConfig:
             self.architecture = MODEL_ARCHITECTURE_LOOKUP[self.architecture]
         if not isinstance(self.architecture, ModelArchitecture):
             msg = f"zYou must specify an architecture {self.architecture}"
-            raise Exception(msg)
             raise ValueError(msg)  # noqa
 
 

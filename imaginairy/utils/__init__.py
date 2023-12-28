@@ -235,7 +235,11 @@ def glob_expand_paths(paths):
         if p.startswith("http"):
             expanded_paths.append(p)
         else:
-            expanded_paths.extend(glob.glob(os.path.expanduser(p)))
+            p = os.path.expanduser(p)
+            if os.path.exists(p) and os.path.isfile(p):
+                expanded_paths.append(p)
+            else:
+                expanded_paths.extend(glob.glob(os.path.expanduser(p)))
     return expanded_paths
 
 

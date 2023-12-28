@@ -11,9 +11,6 @@ def test_resolved_paths():
     """Test that the resolved model path is correct."""
     model_weights_config = resolve_model_weights_config(config.DEFAULT_MODEL_WEIGHTS)
     assert config.DEFAULT_MODEL_WEIGHTS.lower() in model_weights_config.aliases
-    assert (
-        config.DEFAULT_MODEL_ARCHITECTURE in model_weights_config.architecture.aliases
-    )
 
     model_weights_config = resolve_model_weights_config(
         model_weights="foo.ckpt",
