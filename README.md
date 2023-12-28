@@ -64,12 +64,12 @@ Options:
 
 ### Images
 <p float="left">
-<img src="assets/000019_786355545_PLMS50_PS7.5_a_scenic_landscape.jpg" height="256">
-<img src="assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg" height="256">
-<img src="assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="256">
-<img src="assets/000078_260972468_PLMS40_PS7.5_portrait_photo_of_a_freckled_woman.jpg" height="256">
-<img src="assets/013986_1_kdpmpp2m59_PS7.5_a_bluejay_[generated].jpg" height="256">
-<img src="assets/009719_942389026_kdpmpp2m15_PS7.5_a_flower.gif" height="256">
+<img src="assets/026882_1_ddim50_PS7.5_a_scenic_landscape_[generated].jpg" height="256">
+<img src="assets/026884_1_ddim50_PS7.5_photo_of_a_dog_[generated].jpg" height="256">
+<img src="assets/026890_1_ddim50_PS7.5_photo_of_a_bowl_of_fruit._still_life_[generated].jpg" height="256">
+<img src="assets/026885_1_ddim50_PS7.5_girl_with_a_pearl_earring_[generated].jpg" height="256">
+<img src="assets/026891_1_ddim50_PS7.5_close-up_photo_of_a_bluejay_[generated].jpg" height="256">
+<img src="assets/026893_1_ddim50_PS7.5_macro_photo_of_a_flower_[generated].jpg" height="256">
 </p>
 
 ### Whats New
@@ -77,6 +77,9 @@ Options:
 - 🎉 video generation using [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
   - add `--videogen` to any image generation to create a short video from the generated image
   - or use `aimg videogen` to generate a video from an image
+- 🎉 SDXL (Stable Diffusion Extra Large) models are now supported.
+  - try `--model opendalle` or `--model sdxl`
+  - inpainting and controlnets are not yet supported for SDXL
 - 🎉 imaginairy is now backed by the [refiners library](https://github.com/finegrain-ai/refiners)
   - This was a huge rewrite which is why some features are not yet supported.  On the plus side, refiners supports
 cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
