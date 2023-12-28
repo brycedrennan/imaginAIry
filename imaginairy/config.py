@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, List
 
-DEFAULT_MODEL_WEIGHTS = "opendalle"
+DEFAULT_MODEL_WEIGHTS = "sd15"
 DEFAULT_SOLVER = "ddim"
 
 DEFAULT_NEGATIVE_PROMPT = (

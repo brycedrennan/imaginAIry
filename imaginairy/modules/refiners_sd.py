@@ -3,10 +3,9 @@
 import logging
 import math
 from functools import lru_cache
-from typing import Literal
+from typing import List, Literal
 
 import torch
-from black import List
 from refiners.fluxion.layers.attentions import ScaledDotProductAttention
 from refiners.fluxion.layers.chain import ChainError
 from refiners.foundationals.latent_diffusion.self_attention_guidance import (

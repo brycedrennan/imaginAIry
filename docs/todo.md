@@ -15,7 +15,7 @@
  - ✅ SDXL support
  - sdxl inpainting 
  - t2i adapters
- - 
+ - embedding inputs
  - only output the main image unless some flag is set
  - allow selection of output video format
  - chain multiple operations together imggen => videogen
