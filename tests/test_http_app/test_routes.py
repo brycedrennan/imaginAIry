@@ -63,6 +63,8 @@ async def test_list_models():
         "openjourney-v4",
         "modern-disney",
         "redshift-diffusion",
+        "sdxl",
+        "opendalle11",
     }
     model_ids = {m["id"] for m in response.json()}
     assert model_ids == expected_model_ids

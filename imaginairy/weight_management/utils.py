@@ -4,7 +4,7 @@ import os.path
 
 _base_dir = os.path.dirname(os.path.realpath(__file__))
 
-WEIGHT_MAPS_PATH = os.path.join(_base_dir, "maps")
+WEIGHT_MAPS_PATH = os.path.join(_base_dir, "weight_maps")
 WEIGHT_INFO_PATH = os.path.join(_base_dir, "weight_info")
 
 

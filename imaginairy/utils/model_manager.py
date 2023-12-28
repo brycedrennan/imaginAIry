@@ -16,17 +16,19 @@ from huggingface_hub import (
     try_to_load_from_cache,
 )
 from omegaconf import OmegaConf
-from refiners.foundationals.latent_diffusion import SD1UNet
+from refiners.foundationals.latent_diffusion import DoubleTextEncoder, SD1UNet, SDXLUNet
 from refiners.foundationals.latent_diffusion.model import LatentDiffusionModel
 from safetensors.torch import load_file
 
 from imaginairy import config as iconfig
 from imaginairy.config import IMAGE_WEIGHTS_SHORT_NAMES, ModelArchitecture
 from imaginairy.modules import attention
-from imaginairy.utils import get_device, instantiate_from_config
+from imaginairy.modules.refiners_sd import SDXLAutoencoderSliced, StableDiffusion_XL
+from imaginairy.utils import clear_gpu_cache, get_device, instantiate_from_config
 from imaginairy.utils.model_cache import memory_managed_model
 from imaginairy.utils.named_resolutions import normalize_image_size
 from imaginairy.utils.paths import PKG_ROOT
+from imaginairy.weight_management import translators
 
 logger = logging.getLogger(__name__)
 
@@ -35,20 +37,6 @@ MOST_RECENTLY_LOADED_MODEL = None
 
 class HuggingFaceAuthorizationError(RuntimeError):
     pass
-
-
-def load_tensors(tensorfile, map_location=None):
-    if tensorfile == "empty":
-        # used for testing
-        return {}
-    if tensorfile.endswith((".ckpt", ".pth", ".bin")):
-        return torch.load(tensorfile, map_location=map_location)
-    if tensorfile.endswith(".safetensors"):
-        return load_file(tensorfile, device=map_location)
-
-    return load_file(tensorfile, device=map_location)
-
-    # raise ValueError(f"Unknown tensorfile type: {tensorfile}")
 
 
 def load_state_dict(weights_location, half_mode=False, device=None):
@@ -233,8 +221,10 @@ def get_diffusion_model_refiners(
     dtype=None,
 ) -> LatentDiffusionModel:
     """Load a diffusion model."""
+
     return _get_diffusion_model_refiners(
         weights_location=weights_config.weights_location,
+        architecture_alias=weights_config.architecture.primary_alias,
         for_inpainting=for_inpainting,
         dtype=dtype,
     )
@@ -266,6 +256,40 @@ def normalize_diffusers_repo_url(url: str) -> str:
 @lru_cache(maxsize=1)
 def _get_diffusion_model_refiners(
     weights_location: str,
+    architecture_alias: str,
+    for_inpainting: bool = False,
+    device=None,
+    dtype=torch.float16,
+) -> LatentDiffusionModel:
+    """
+    Load a diffusion model.
+
+    Weights location may also be shortcut name, e.g. "SD-1.5"
+    """
+    global MOST_RECENTLY_LOADED_MODEL
+    _get_diffusion_model_refiners.cache_clear()
+    clear_gpu_cache()
+
+    architecture = iconfig.MODEL_ARCHITECTURE_LOOKUP[architecture_alias]
+    if architecture.primary_alias in ("sd15", "sd15inpaint"):
+        sd = _get_sd15_diffusion_model_refiners(
+            weights_location=weights_location,
+            for_inpainting=for_inpainting,
+            device=device,
+            dtype=dtype,
+        )
+    elif architecture.primary_alias == "sdxl":
+        sd = load_sdxl_pipeline(base_url=weights_location, device=device)
+    else:
+        msg = f"Invalid architecture {architecture.primary_alias}"
+        raise ValueError(msg)
+
+    MOST_RECENTLY_LOADED_MODEL = sd
+    return sd
+
+
+def _get_sd15_diffusion_model_refiners(
+    weights_location: str,
     for_inpainting: bool = False,
     device=None,
     dtype=torch.float16,
@@ -281,15 +305,13 @@ def _get_diffusion_model_refiners(
         StableDiffusion_1_Inpainting,
     )
 
-    global MOST_RECENTLY_LOADED_MODEL
-
     device = device or get_device()
     if is_diffusers_repo_url(weights_location):
         (
             vae_weights,
             unet_weights,
             text_encoder_weights,
-        ) = load_stable_diffusion_diffusers_weights(weights_location)
+        ) = load_sd15_diffusers_weights(weights_location)
     else:
         (
             vae_weights,
@@ -299,10 +321,10 @@ def _get_diffusion_model_refiners(
 
     StableDiffusionCls: type[LatentDiffusionModel]
     if for_inpainting:
-        unet = SD1UNet(in_channels=9)
+        unet = SD1UNet(in_channels=9, device=device, dtype=dtype)
         StableDiffusionCls = StableDiffusion_1_Inpainting
     else:
-        unet = SD1UNet(in_channels=4)
+        unet = SD1UNet(in_channels=4, device=device, dtype=dtype)
         StableDiffusionCls = StableDiffusion_1
     logger.debug(f"Using class {StableDiffusionCls.__name__}")
 
@@ -319,8 +341,6 @@ def _get_diffusion_model_refiners(
     sd.unet.load_state_dict(unet_weights, strict=False)
 
     logger.debug(f"'{weights_location}' Loaded")
-
-    MOST_RECENTLY_LOADED_MODEL = sd
 
     sd.set_self_attention_guidance(enable=True)
 
@@ -559,7 +579,7 @@ def extract_huggingface_repo_commit_file_from_url(url):
     return repo, commit_hash, filepath
 
 
-def download_diffusers_weights(base_url, sub, filename=None):
+def download_diffusers_weights(base_url, sub, filename=None, prefer_fp16=True):
     if filename is None:
         # select which weights to download. prefer fp16 safetensors
         data = parse_diffusers_repo_url(base_url)
@@ -567,7 +587,7 @@ def download_diffusers_weights(base_url, sub, filename=None):
         filepaths = fs.ls(
             f"{data['author']}/{data['repo']}/{sub}", revision=data["ref"], detail=False
         )
-        filepath = choose_diffusers_weights(filepaths)
+        filepath = choose_diffusers_weights(filepaths, prefer_fp16=prefer_fp16)
         if not filepath:
             msg = f"Could not find any weights in {base_url}/{sub}"
             raise ValueError(msg)
@@ -577,22 +597,26 @@ def download_diffusers_weights(base_url, sub, filename=None):
     return new_path
 
 
-def choose_diffusers_weights(filenames):
+def choose_diffusers_weights(filenames, prefer_fp16=True):
     extension_priority = (".safetensors", ".bin", ".pth", ".pt")
     # filter out any files that don't have a valid extension
     filenames = [f for f in filenames if any(f.endswith(e) for e in extension_priority)]
     filenames_and_extension = [(f, os.path.splitext(f)[1]) for f in filenames]
     # sort by priority
-    filenames_and_extension.sort(
-        key=lambda x: ("fp16" not in x[0], extension_priority.index(x[1]))
-    )
+    if prefer_fp16:
+        filenames_and_extension.sort(
+            key=lambda x: ("fp16" not in x[0], extension_priority.index(x[1]))
+        )
+    else:
+        filenames_and_extension.sort(
+            key=lambda x: ("fp16" in x[0], extension_priority.index(x[1]))
+        )
     if filenames_and_extension:
         return filenames_and_extension[0][0]
     return None
 
 
-@lru_cache
-def load_stable_diffusion_diffusers_weights(base_url: str, device=None):
+def load_sd15_diffusers_weights(base_url: str, device=None):
     from imaginairy.utils import get_device
     from imaginairy.weight_management.conversion import cast_weights
     from imaginairy.weight_management.utils import (
@@ -639,6 +663,76 @@ def load_stable_diffusion_diffusers_weights(base_url: str, device=None):
     return vae_weights, unet_weights, text_encoder_weights
 
 
+def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16):
+    from imaginairy.utils import get_device
+
+    device = device or get_device()
+
+    base_url = normalize_diffusers_repo_url(base_url)
+
+    translator = translators.diffusers_autoencoder_kl_to_refiners_translator()
+    vae_weights_path = download_diffusers_weights(
+        base_url=base_url, sub="vae", prefer_fp16=False
+    )
+    print(vae_weights_path)
+    vae_weights = translator.load_and_translate_weights(
+        source_path=vae_weights_path,
+        device="cpu",
+    )
+    lda = SDXLAutoencoderSliced(device="cpu", dtype=dtype)
+    lda.load_state_dict(vae_weights)
+    del vae_weights
+
+    translator = translators.diffusers_unet_sdxl_to_refiners_translator()
+    unet_weights_path = download_diffusers_weights(base_url=base_url, sub="unet")
+    print(unet_weights_path)
+    unet_weights = translator.load_and_translate_weights(
+        source_path=unet_weights_path,
+        device="cpu",
+    )
+    unet = SDXLUNet(device="cpu", dtype=dtype, in_channels=4)
+    unet.load_state_dict(unet_weights)
+    del unet_weights
+
+    text_encoder_1_path = download_diffusers_weights(
+        base_url=base_url, sub="text_encoder"
+    )
+    text_encoder_2_path = download_diffusers_weights(
+        base_url=base_url, sub="text_encoder_2"
+    )
+    print(text_encoder_1_path)
+    print(text_encoder_2_path)
+    text_encoder_weights = (
+        translators.DoubleTextEncoderTranslator().load_and_translate_weights(
+            text_encoder_l_weights_path=text_encoder_1_path,
+            text_encoder_g_weights_path=text_encoder_2_path,
+            device="cpu",
+        )
+    )
+    text_encoder = DoubleTextEncoder(device="cpu", dtype=dtype)
+    text_encoder.load_state_dict(text_encoder_weights)
+    del text_encoder_weights
+    lda = lda.to(device=device)
+    unet = unet.to(device=device)
+    text_encoder = text_encoder.to(device=device)
+    sd = StableDiffusion_XL(
+        device=device, dtype=dtype, lda=lda, unet=unet, clip_text_encoder=text_encoder
+    )
+    sd.lda.to(device=device, dtype=torch.float32)
+
+    return sd
+
+
+def load_sdxl_pipeline(base_url, device=None):
+    logger.info(f"Loading SDXL weights from {base_url}")
+    device = device or get_device()
+    sd = load_sdxl_diffusers_weights(base_url, device=device)
+
+    sd.set_self_attention_guidance(enable=True)
+
+    return sd
+
+
 def open_weights(filepath, device=None):
     from imaginairy.utils import get_device
 
@@ -662,6 +756,20 @@ def open_weights(filepath, device=None):
         state_dict = state_dict["state_dict"]
 
     return state_dict
+
+
+def load_tensors(tensorfile, map_location=None):
+    if tensorfile == "empty":
+        # used for testing
+        return {}
+    if tensorfile.endswith((".ckpt", ".pth", ".bin")):
+        return torch.load(tensorfile, map_location=map_location)
+    if tensorfile.endswith(".safetensors"):
+        return load_file(tensorfile, device=map_location)
+
+    return load_file(tensorfile, device=map_location)
+
+    # raise ValueError(f"Unknown tensorfile type: {tensorfile}")
 
 
 def load_stable_diffusion_compvis_weights(weights_url):

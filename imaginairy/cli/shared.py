@@ -101,10 +101,10 @@ def _imagine_cmd(
 
     from imaginairy.utils import glob_expand_paths
 
-    num_prexpaned_init_images = len(init_images)
+    num_prexpanded_init_images = len(init_images)
     init_images = glob_expand_paths(init_images)
 
-    if len(init_images) < num_prexpaned_init_images:
+    if len(init_images) < num_prexpanded_init_images:
         msg = f"Could not find any images matching the glob pattern(s) {init_image}. Are you sure the file(s) exists?"
         raise ValueError(msg)
 

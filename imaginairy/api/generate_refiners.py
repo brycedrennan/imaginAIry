@@ -1,10 +1,10 @@
 """Functions for generating refined images"""
 
 import logging
-from typing import List, Optional
 
 from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
-from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode, WeightedPrompt
+from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode
+from imaginairy.utils import clear_gpu_cache
 
 logger = logging.getLogger(__name__)
 
@@ -96,14 +96,6 @@ def generate_single_image(
     ) as lc:
         sd.set_tile_mode(prompt.tile_mode)
 
-        clip_text_embedding = _calc_conditioning(
-            positive_prompts=prompt.prompts,
-            negative_prompts=prompt.negative_prompt,
-            positive_conditioning=prompt.conditioning,
-            text_encoder=sd.clip_text_encoder,
-        )
-        clip_text_embedding = clip_text_embedding.to(device=sd.device, dtype=sd.dtype)
-
         result_images: dict[str, torch.Tensor | None | Image.Image] = {}
         progress_latents: list[torch.Tensor] = []
         first_step = 0
@@ -151,7 +143,7 @@ def generate_single_image(
                 max_width=prompt.width,
             )
             init_image_t = pillow_img_to_torch_image(init_image)
-            init_image_t = init_image_t.to(device=sd.device, dtype=sd.dtype)
+            init_image_t = init_image_t.to(device=sd.lda.device, dtype=sd.lda.dtype)
             init_latent = sd.lda.encode(init_image_t)
 
             shape = list(init_latent.shape)
@@ -233,12 +225,15 @@ def generate_single_image(
                 log_img(comp_img_orig, "comp_image")
                 log_img(comp_image, "comp_image_upscaled")
                 comp_image_t = pillow_img_to_torch_image(comp_image)
-                comp_image_t = comp_image_t.to(sd.device, dtype=sd.dtype)
+                comp_image_t = comp_image_t.to(sd.lda.device, dtype=sd.lda.dtype)
                 init_latent = sd.lda.encode(comp_image_t)
-
-                compose_control_inputs: list[ControlInput] = [
-                    ControlInput(mode="details", image=comp_image, strength=1),
-                ]
+                compose_control_inputs: list[ControlInput]
+                if prompt.model_weights.architecture.primary_alias == "sdxl":
+                    compose_control_inputs = []
+                else:
+                    compose_control_inputs = [
+                        ControlInput(mode="details", image=comp_image, strength=1),
+                    ]
                 for control_input in compose_control_inputs:
                     (
                         controlnet,
@@ -255,8 +250,10 @@ def generate_single_image(
                     controlnets.append((controlnet, control_image_t))
 
         for controlnet, control_image_t in controlnets:
+            msg = f"Injecting controlnet {controlnet.name}. setting to device: {sd.unet.device}, dtype: {sd.unet.dtype}"
+            print(msg)
             controlnet.set_controlnet_condition(
-                control_image_t.to(device=sd.device, dtype=sd.dtype)
+                control_image_t.to(device=sd.unet.device, dtype=sd.unet.dtype)
             )
             controlnet.inject()
         if prompt.solver_type.lower() == SolverName.DPMPP:
@@ -275,6 +272,12 @@ def generate_single_image(
                 mask=ImageOps.invert(mask_image),
                 latents_size=shape[-2:],
             )
+            sd.target_image_latents = sd.target_image_latents.to(
+                dtype=sd.unet.dtype, device=sd.unet.device
+            )
+            sd.mask_latents = sd.mask_latents.to(
+                dtype=sd.unet.dtype, device=sd.unet.device
+            )
 
         if init_latent is not None:
             noise_step = noise_step if noise_step is not None else first_step
@@ -285,30 +288,37 @@ def generate_single_image(
                     x=init_latent, noise=noise, step=sd.steps[noise_step]
                 )
 
-        x = noised_latent
-        x = x.to(device=sd.device, dtype=sd.dtype)
+        text_conditioning_kwargs = sd.calculate_text_conditioning_kwargs(
+            positive_prompts=prompt.prompts,
+            negative_prompts=prompt.negative_prompt,
+            positive_conditioning_override=prompt.conditioning,
+        )
 
-        # if "cuda" in str(sd.lda.device):
-        #     sd.lda.to("cpu")
+        for k, v in text_conditioning_kwargs.items():
+            text_conditioning_kwargs[k] = v.to(
+                device=sd.unet.device, dtype=sd.unet.dtype
+            )
+        x = noised_latent
+        x = x.to(device=sd.unet.device, dtype=sd.unet.dtype)
         clear_gpu_cache()
-        # print(f"moving unet to {sd.device}")
-        # sd.unet.to(device=sd.device, dtype=sd.dtype)
+
         for step in tqdm(sd.steps[first_step:], bar_format="    {l_bar}{bar}{r_bar}"):
             log_latent(x, "noisy_latent")
             x = sd(
                 x,
                 step=step,
-                clip_text_embedding=clip_text_embedding,
                 condition_scale=prompt.prompt_strength,
+                **text_conditioning_kwargs,
             )
-
+        sd.unet.set_context(context="self_attention_map", value={})
         clear_gpu_cache()
 
         logger.debug("Decoding image")
         if x.device != sd.lda.device:
             sd.lda.to(x.device)
         clear_gpu_cache()
-        gen_img = sd.lda.decode_latents(x)
+
+        gen_img = sd.lda.decode_latents(x.to(dtype=sd.lda.dtype))
 
         if mask_image_orig and init_image:
             result_images["pre-reconstitution"] = gen_img
@@ -391,56 +401,6 @@ def generate_single_image(
         return result
 
 
-def _prompts_to_embeddings(prompts, text_encoder):
-    import torch
-
-    if not prompts:
-        prompts = [WeightedPrompt(text="")]
-
-    total_weight = sum(wp.weight for wp in prompts)
-    if str(text_encoder.device) == "cpu":
-        text_encoder = text_encoder.to(dtype=torch.float32)
-    conditioning = sum(
-        text_encoder(wp.text) * (wp.weight / total_weight) for wp in prompts
-    )
-
-    return conditioning
-
-
-def _calc_conditioning(
-    positive_prompts: Optional[List[WeightedPrompt]],
-    negative_prompts: Optional[List[WeightedPrompt]],
-    positive_conditioning,
-    text_encoder,
-):
-    import torch
-
-    from imaginairy.utils.log_utils import log_conditioning
-
-    # need to expand if doing batches
-    neutral_conditioning = _prompts_to_embeddings(negative_prompts, text_encoder)
-    log_conditioning(neutral_conditioning, "neutral conditioning")
-
-    if positive_conditioning is None:
-        positive_conditioning = _prompts_to_embeddings(positive_prompts, text_encoder)
-    log_conditioning(positive_conditioning, "positive conditioning")
-
-    clip_text_embedding = torch.cat(
-        tensors=(neutral_conditioning, positive_conditioning), dim=0
-    )
-    return clip_text_embedding
-
-
-def clear_gpu_cache():
-    import gc
-
-    import torch
-
-    gc.collect()
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-
-
 def prep_control_input(
     control_input: ControlInput, sd, init_image_t, fit_width, fit_height
 ):
@@ -521,7 +481,9 @@ def prep_control_input(
         target=sd.unet,
         weights_location=control_config.weights_location,
     )
+
     controlnet.set_scale(control_input.strength)
+    control_image_t = control_image_t.to(device=sd.unet.device, dtype=sd.unet.dtype)
     return controlnet, control_image_t, control_image_disp
 
 

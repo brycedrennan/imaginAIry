@@ -7,9 +7,8 @@ from imaginairy.img_processors.control_modes import CONTROL_MODES
 from imaginairy.schema import ControlInput, ImaginePrompt, LazyLoadingImage, MaskMode
 from imaginairy.utils import get_device
 from imaginairy.utils.img_utils import pillow_fit_image_within
-
-from . import TESTS_FOLDER
-from .utils import assert_image_similar_to_expectation
+from tests import TESTS_FOLDER
+from tests.utils import assert_image_similar_to_expectation
 
 
 def test_imagine(solver_type, filename_base_for_outputs):

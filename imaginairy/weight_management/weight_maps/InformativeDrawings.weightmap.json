@@ -1,0 +1,20 @@
+{
+    "name_map": {
+        "model0.1": "Chain_1.Conv2d",
+        "model1.0": "Chain_2.Conv2d",
+        "model1.3": "Chain_3.Conv2d",
+        "model2.0.conv_block.1": "Residual_1.Conv2d_1",
+        "model2.0.conv_block.5": "Residual_1.Conv2d_2",
+        "model2.1.conv_block.1": "Residual_2.Conv2d_1",
+        "model2.1.conv_block.5": "Residual_2.Conv2d_2",
+        "model2.2.conv_block.1": "Residual_3.Conv2d_1",
+        "model2.2.conv_block.5": "Residual_3.Conv2d_2",
+        "model3.0": "Chain_4.ConvTranspose2d",
+        "model3.3": "Chain_5.ConvTranspose2d",
+        "model4.1": "Chain_6.Conv2d"
+    },
+    "regex_map": {},
+    "ignore_prefixes": [],
+    "source_aliases": {},
+    "reshapes": {}
+}

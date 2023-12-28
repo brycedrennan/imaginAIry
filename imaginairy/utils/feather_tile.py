@@ -117,13 +117,7 @@ def add_tiles(tiles, base_img, tile_coords, tile_size, overlap):
         f_ovlp[1] = 0
 
     t = 0
-    (
-        column,
-        row,
-    ) = (
-        0,
-        0,
-    )
+    (column, row) = (0, 0)
 
     for y in tile_coords[0]:
         for x in tile_coords[1]:
@@ -151,7 +145,10 @@ def add_tiles(tiles, base_img, tile_coords, tile_size, overlap):
                 if f_ovlp[1] > 0:
                     c_overlap[3] = f_ovlp[1]  # Change left overlap
 
-            # print(f"mask_tile: tile.shape={tiles[t].shape}, overlap={c_overlap}, side={mask_sides} col={column}, row={row}")
+            # print(f"num-tiles={len(tiles)} t={t}")
+            # print(
+            #     f"mask_tile: tile.shape={tiles[t].shape}, overlap={c_overlap}, side={mask_sides} col={column}, row={row}"
+            # )
 
             tile = mask_tile(tiles[t], c_overlap, std_overlap=overlap, side=mask_sides)
             # torch_img_to_pillow_img(tile).show()
