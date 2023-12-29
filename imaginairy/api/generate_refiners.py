@@ -310,7 +310,9 @@ def generate_single_image(
                 condition_scale=prompt.prompt_strength,
                 **text_conditioning_kwargs,
             )
+        # trying to clear memory. not sure if this helps
         sd.unet.set_context(context="self_attention_map", value={})
+        sd.unet._reset_context()
         clear_gpu_cache()
 
         logger.debug("Decoding image")
