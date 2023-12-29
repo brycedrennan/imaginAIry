@@ -1,3 +1,4 @@
+import logging
 import math
 import os
 import queue
@@ -12,6 +13,7 @@ from imaginairy.utils.model_manager import get_cached_url_path
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+logger = logging.getLogger(__name__)
 
 class RealESRGANer:
     """A helper class for upsampling images with RealESRGAN.
@@ -146,7 +148,7 @@ class RealESRGANer:
         self.output = self.img.new_zeros(output_shape)
         tiles_x = math.ceil(width / self.tile_size)
         tiles_y = math.ceil(height / self.tile_size)
-
+        logger.debug(f"Tiling with {tiles_x}x{tiles_y} ({tiles_x*tiles_y}) tiles")
         # loop over all tiles
         for y in range(tiles_y):
             for x in range(tiles_x):

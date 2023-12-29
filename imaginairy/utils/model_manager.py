@@ -674,7 +674,7 @@ def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16)
     vae_weights_path = download_diffusers_weights(
         base_url=base_url, sub="vae", prefer_fp16=False
     )
-    print(vae_weights_path)
+    logger.debug(f"vae: {vae_weights_path}")
     vae_weights = translator.load_and_translate_weights(
         source_path=vae_weights_path,
         device="cpu",
@@ -684,8 +684,10 @@ def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16)
     del vae_weights
 
     translator = translators.diffusers_unet_sdxl_to_refiners_translator()
-    unet_weights_path = download_diffusers_weights(base_url=base_url, sub="unet")
-    print(unet_weights_path)
+    unet_weights_path = download_diffusers_weights(
+        base_url=base_url, sub="unet", prefer_fp16=True
+    )
+    logger.debug(f"unet: {unet_weights_path}")
     unet_weights = translator.load_and_translate_weights(
         source_path=unet_weights_path,
         device="cpu",
@@ -700,8 +702,8 @@ def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16)
     text_encoder_2_path = download_diffusers_weights(
         base_url=base_url, sub="text_encoder_2"
     )
-    print(text_encoder_1_path)
-    print(text_encoder_2_path)
+    logger.debug(f"text encoder 1: {text_encoder_1_path}")
+    logger.debug(f"text encoder 2: {text_encoder_2_path}")
     text_encoder_weights = (
         translators.DoubleTextEncoderTranslator().load_and_translate_weights(
             text_encoder_l_weights_path=text_encoder_1_path,

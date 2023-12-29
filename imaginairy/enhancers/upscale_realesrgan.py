@@ -12,7 +12,7 @@ from imaginairy.vendored.realesrgan import RealESRGANer
 
 
 @memory_managed_model("realesrgan_upsampler", memory_usage_mb=70)
-def realesrgan_upsampler(tile=1024, tile_pad=50, ultrasharp=False):
+def realesrgan_upsampler(tile=512, tile_pad=50, ultrasharp=False):
     model = RRDBNet(
         num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4
     )
