@@ -362,6 +362,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             composition_strength=composition_strength,
             inpaint_method=inpaint_method,
         )
+        self._default_negative_prompt = None
 
     @field_validator("prompt", "negative_prompt", mode="before")
     def make_into_weighted_prompts(
@@ -401,16 +402,20 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             v.sort(key=lambda p: p.weight, reverse=True)
         return v
 
+    @property
+    def default_negative_prompt(self):
+        default_negative_prompt = config.DEFAULT_NEGATIVE_PROMPT
+        if self.model_weights:
+            default_negative_prompt = self.model_weights.defaults.get(
+                "negative_prompt", default_negative_prompt
+            )
+        return default_negative_prompt
+
     @model_validator(mode="after")
     def validate_negative_prompt(self):
         if self.negative_prompt == []:
-            default_negative_prompt = config.DEFAULT_NEGATIVE_PROMPT
-            if self.model_weights:
-                default_negative_prompt = self.model_weights.defaults.get(
-                    "negative_prompt", default_negative_prompt
-                )
+            self.negative_prompt = [WeightedPrompt(text=self.default_negative_prompt)]
 
-            self.negative_prompt = [WeightedPrompt(text=default_negative_prompt)]
         return self
 
     @field_validator("prompt_strength", mode="before")
@@ -667,15 +672,27 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         return self.model_weights.architecture
 
     def prompt_description(self):
+        if self.negative_prompt_text == self.default_negative_prompt:
+            neg_prompt = "DEFAULT-NEGATIVE-PROMPT"
+        else:
+            neg_prompt = f'"{self.negative_prompt_text}"'
+
+        from termcolor import colored
+
+        prompt_text = colored(self.prompt_text, "green")
+
         return (
-            f'"{self.prompt_text}" {self.width}x{self.height}px '
-            f'negative-prompt:"{self.negative_prompt_text}" '
+            f'"{prompt_text}"\n'
+            "    "
+            f"negative-prompt:{neg_prompt}\n"
+            "    "
+            f"size:{self.width}x{self.height}px "
             f"seed:{self.seed} "
             f"prompt-strength:{self.prompt_strength} "
             f"steps:{self.steps} solver-type:{self.solver_type} "
             f"init-image-strength:{self.init_image_strength} "
             f"arch:{self.model_architecture.aliases[0]} "
-            f"weights: {self.model_weights.aliases[0]}"
+            f"weights:{self.model_weights.aliases[0]}"
         )
 
     def logging_dict(self):
@@ -724,7 +741,7 @@ class ImagineResult:
         is_nsfw,
         safety_score,
         result_images=None,
-        timings=None,
+        performance_stats=None,
         progress_latents=None,
     ):
         import torch
@@ -750,7 +767,7 @@ class ImagineResult:
                         r_img = torch_img_to_pillow_img(r_img)
                 self.images[img_type] = r_img
 
-        self.timings = timings
+        self.performance_stats = performance_stats
         self.progress_latents = progress_latents
 
         # for backward compat
@@ -771,9 +788,24 @@ class ImagineResult:
         }
 
     def timings_str(self) -> str:
-        if not self.timings:
+        if not self.performance_stats:
             return ""
-        return " ".join(f"{k}:{v:.2f}s" for k, v in self.timings.items())
+        return " ".join(
+            f"{k}:{v['duration']:.2f}s" for k, v in self.performance_stats.items()
+        )
+
+    def total_time(self) -> float:
+        if not self.performance_stats:
+            return 0
+        return self.performance_stats["total"]["duration"]
+
+    def gpu_str(self, stat_name="memory_peak") -> str:
+        if not self.performance_stats:
+            return ""
+        return " ".join(
+            f"{k}:{v[stat_name]/(10**6):.1f}MB"
+            for k, v in self.performance_stats.items()
+        )
 
     def _exif(self) -> "Image.Exif":
         from PIL import Image

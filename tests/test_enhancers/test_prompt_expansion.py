@@ -42,3 +42,8 @@ def test_prompt_expander_from_wordlist():
 
 def test_get_phraselist_names():
     print(", ".join(category_list()))
+
+
+def test_complex_prompt():
+    prompt = "{_painting-style_} of {_art-scene_}. painting"
+    assert len(list(expand_prompts(prompt, n=100))) == 100

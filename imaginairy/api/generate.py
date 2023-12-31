@@ -84,7 +84,6 @@ def imagine_image_files(
             f"{base_count:06}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
             f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
         )
-
         for image_type in result.images:
             subpath = os.path.join(outdir, image_type)
             os.makedirs(subpath, exist_ok=True)
@@ -92,7 +91,7 @@ def imagine_image_files(
                 subpath, f"{basefilename}_[{image_type}].{output_file_extension}"
             )
             result.save(filepath, image_type=image_type)
-            logger.info(f"    [{image_type}] saved to: {filepath}")
+            logger.info(f"        {image_type:<22} {filepath}")
             if image_type == return_filename_type:
                 result_filenames.append(filepath)
                 if videogen:
@@ -123,7 +122,8 @@ def imagine_image_files(
                 start_pause_duration_ms=1500,
                 end_pause_duration_ms=1000,
             )
-            logger.info(f"    [gif] {len(frames)} frames saved to: {filepath}")
+            image_type = "gif"
+            logger.info(f"        {image_type:<22} {filepath}")
         if make_compare_gif and prompt.init_image:
             subpath = os.path.join(outdir, "gif")
             os.makedirs(subpath, exist_ok=True)
@@ -137,7 +137,8 @@ def imagine_image_files(
                 imgs=frames,
                 outpath=filepath,
             )
-            logger.info(f"    [gif-comparison] saved to: {filepath}")
+            image_type = "gif"
+            logger.info(f"        {image_type:<22} {filepath}")
 
         base_count += 1
         del result
@@ -192,9 +193,8 @@ def imagine(
     ), fix_torch_nn_layer_norm(), fix_torch_group_norm():
         for i, prompt in enumerate(prompts):
             concrete_prompt = prompt.make_concrete_copy()
-            logger.info(
-                f"🖼  Generating  {i + 1}/{num_prompts}: {concrete_prompt.prompt_description()}"
-            )
+            prog_text = f"{i + 1}/{num_prompts}"
+            logger.info(f"🖼  {prog_text} {concrete_prompt.prompt_description()}")
             for attempt in range(unsafe_retry_count + 1):
                 if attempt > 0 and isinstance(concrete_prompt.seed, int):
                     concrete_prompt.seed += 100_000_000 + attempt
@@ -204,7 +204,6 @@ def imagine(
                     progress_img_callback=progress_img_callback,
                     progress_img_interval_steps=progress_img_interval_steps,
                     progress_img_interval_min_s=progress_img_interval_min_s,
-                    half_mode=half_mode,
                     add_caption=add_caption,
                     dtype=torch.float16 if half_mode else torch.float32,
                 )

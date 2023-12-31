@@ -124,7 +124,7 @@ MODEL_WEIGHT_CONFIGS = [
         aliases=MODEL_ARCHITECTURE_LOOKUP["sd15"].aliases,
         architecture=MODEL_ARCHITECTURE_LOOKUP["sd15"],
         defaults={"negative_prompt": DEFAULT_NEGATIVE_PROMPT},
-        weights_location="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/889b629140e71758e1e0006e355c331a5744b4bf/v1-5-pruned-emaonly.ckpt",
+        weights_location="https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/889b629140e71758e1e0006e355c331a5744b4bf/",
     ),
     ModelWeightsConfig(
         name="Stable Diffusion 1.5 - Inpainting",
@@ -151,7 +151,7 @@ MODEL_WEIGHT_CONFIGS = [
         name="OpenJourney V4",
         aliases=["openjourney-v4", "oj4", "ojv4", "openjourney4", "openjourney", "oj"],
         architecture=MODEL_ARCHITECTURE_LOOKUP["sd15"],
-        weights_location="https://huggingface.co/prompthero/openjourney/resolve/e291118e93d5423dc88ac1ed93c02362b17d698f/mdjrny-v4.safetensors",
+        weights_location="https://huggingface.co/prompthero/openjourney/tree/f4572661b028c732b2b97c8fbdc32fa5db3afe03/",
         defaults={"negative_prompt": "poor quality"},
     ),
     ModelWeightsConfig(
