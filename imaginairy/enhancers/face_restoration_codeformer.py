@@ -74,7 +74,7 @@ def enhance_faces(img, fidelity=0):
     num_det_faces = face_helper.get_face_landmarks_5(
         only_center_face=False, resize=640, eye_dist_threshold=5
     )
-    logger.info(f"Enhancing {num_det_faces} faces")
+    logger.debug(f"Enhancing {num_det_faces} faces")
     # align and warp each face
     face_helper.align_warp_face()
 

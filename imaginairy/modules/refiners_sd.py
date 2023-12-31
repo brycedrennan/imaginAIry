@@ -3,11 +3,18 @@
 import logging
 import math
 from functools import lru_cache
-from typing import List, Literal
+from typing import Any, List, Literal
 
+import refiners.fluxion.layers as fl
 import torch
 from refiners.fluxion.layers.attentions import ScaledDotProductAttention
 from refiners.fluxion.layers.chain import ChainError
+from refiners.foundationals.clip.text_encoder import CLIPTextEncoderL
+from refiners.foundationals.latent_diffusion.model import (
+    TLatentDiffusionModel,
+)
+from refiners.foundationals.latent_diffusion.schedulers.ddim import DDIM
+from refiners.foundationals.latent_diffusion.schedulers.scheduler import Scheduler
 from refiners.foundationals.latent_diffusion.self_attention_guidance import (
     SelfAttentionMap,
 )
@@ -25,7 +32,11 @@ from refiners.foundationals.latent_diffusion.stable_diffusion_xl.model import (
     SDXLAutoencoder,
     StableDiffusion_XL as RefinerStableDiffusion_XL,
 )
-from torch import Tensor, nn
+from refiners.foundationals.latent_diffusion.stable_diffusion_xl.text_encoder import (
+    DoubleTextEncoder,
+)
+from refiners.foundationals.latent_diffusion.stable_diffusion_xl.unet import SDXLUNet
+from torch import Tensor, device as Device, dtype as DType, nn
 from torch.nn import functional as F
 
 from imaginairy.schema import WeightedPrompt
@@ -83,6 +94,45 @@ class TileModeMixin(nn.Module):
 
 
 class StableDiffusion_1(TileModeMixin, RefinerStableDiffusion_1):
+    def __init__(
+        self,
+        unet: SD1UNet | None = None,
+        lda: SD1Autoencoder | None = None,
+        clip_text_encoder: CLIPTextEncoderL | None = None,
+        scheduler: Scheduler | None = None,
+        device: Device | str = "cpu",
+        dtype: DType = torch.float32,
+    ) -> None:
+        unet = unet or SD1UNet(in_channels=4)
+        lda = lda or SD1Autoencoder()
+        clip_text_encoder = clip_text_encoder or CLIPTextEncoderL()
+        scheduler = scheduler or DDIM(num_inference_steps=50)
+        fl.Module.__init__(self)
+
+        # all this is to allow us to make structural copies without unnecessary device or dtype shuffeling
+        # since default behavior was to put everything on the same device and dtype and we want the option to
+        # not alter them from whatever they're already set to
+        self.unet = unet
+        self.lda = lda
+        self.clip_text_encoder = clip_text_encoder
+        self.scheduler = scheduler
+        to_kwargs: dict[str, Any] = {}
+
+        if device is not None:
+            device = device if isinstance(device, Device) else Device(device=device)
+            to_kwargs["device"] = device
+        if dtype is not None:
+            to_kwargs["dtype"] = dtype
+
+        self.device = device
+        self.dtype = dtype
+
+        if to_kwargs:
+            self.unet = unet.to(**to_kwargs)
+            self.lda = lda.to(**to_kwargs)
+            self.clip_text_encoder = clip_text_encoder.to(**to_kwargs)
+            self.scheduler = scheduler.to(**to_kwargs)
+
     def calculate_text_conditioning_kwargs(
         self,
         positive_prompts: List[WeightedPrompt],
@@ -122,6 +172,48 @@ class StableDiffusion_1(TileModeMixin, RefinerStableDiffusion_1):
 
 
 class StableDiffusion_XL(TileModeMixin, RefinerStableDiffusion_XL):
+    def __init__(
+        self,
+        unet: SDXLUNet | None = None,
+        lda: SDXLAutoencoder | None = None,
+        clip_text_encoder: DoubleTextEncoder | None = None,
+        scheduler: Scheduler | None = None,
+        device: Device | str | None = "cpu",
+        dtype: DType | None = None,
+    ) -> None:
+        unet = unet or SDXLUNet(in_channels=4)
+        lda = lda or SDXLAutoencoder()
+        clip_text_encoder = clip_text_encoder or DoubleTextEncoder()
+        scheduler = scheduler or DDIM(num_inference_steps=30)
+        fl.Module.__init__(self)
+
+        # all this is to allow us to make structural copies without unnecessary device or dtype shuffeling
+        # since default behavior was to put everything on the same device and dtype and we want the option to
+        # not alter them from whatever they're already set to
+        self.unet = unet
+        self.lda = lda
+        self.clip_text_encoder = clip_text_encoder
+        self.scheduler = scheduler
+        to_kwargs: dict[str, Any] = {}
+
+        if device is not None:
+            device = device if isinstance(device, Device) else Device(device=device)
+            to_kwargs["device"] = device
+        if dtype is not None:
+            to_kwargs["dtype"] = dtype
+
+        self.device = device  # type: ignore
+        self.dtype = dtype  # type: ignore
+        self.unet = unet
+        self.lda = lda
+        self.clip_text_encoder = clip_text_encoder
+        self.scheduler = scheduler
+        if to_kwargs:
+            self.unet = self.unet.to(**to_kwargs)
+            self.lda = self.lda.to(**to_kwargs)
+            self.clip_text_encoder = self.clip_text_encoder.to(**to_kwargs)
+            self.scheduler = self.scheduler.to(**to_kwargs)
+
     def forward(  # type: ignore
         self,
         x: Tensor,
@@ -143,6 +235,22 @@ class StableDiffusion_XL(TileModeMixin, RefinerStableDiffusion_XL):
             condition_scale=condition_scale,
             **kwargs,
         )
+
+    def structural_copy(self: TLatentDiffusionModel) -> TLatentDiffusionModel:
+        logger.debug("Making structural copy of StableDiffusion_XL model")
+
+        sd = self.__class__(
+            unet=self.unet.structural_copy(),
+            lda=self.lda.structural_copy(),
+            clip_text_encoder=self.clip_text_encoder,
+            scheduler=self.scheduler,
+            device=self.device,
+            dtype=None,  # type: ignore
+        )
+        logger.debug(
+            f"dtype: {sd.dtype} unet-dtype:{sd.unet.dtype} lda-dtype:{sd.lda.dtype} text-encoder-dtype:{sd.clip_text_encoder.dtype} scheduler-dtype:{sd.scheduler.dtype}"
+        )
+        return sd
 
     def calculate_text_conditioning_kwargs(
         self,
@@ -452,7 +560,7 @@ def monkeypatch_sd1controlnetadapter():
             device=target.device,
             dtype=target.dtype,
         )
-        print(
+        logger.debug(
             f"controlnet: {name} loaded to device {target.device} and type {target.dtype}"
         )
 

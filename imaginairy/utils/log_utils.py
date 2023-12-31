@@ -5,6 +5,7 @@ import logging.config
 import re
 import time
 import warnings
+from typing import Callable
 
 _CURRENT_LOGGING_CONTEXT = None
 
@@ -53,23 +54,65 @@ def increment_step():
 
 
 class TimingContext:
-    def __init__(self, logging_context, description):
-        self.logging_context = logging_context
-        self.description = description
-        self.start_time = None
+    """Tracks time and memory usage of a block of code"""
 
-    def __enter__(self):
+    def __init__(
+        self,
+        description: str,
+        device: str | None = None,
+        callback_fn: Callable | None = None,
+    ):
+        from imaginairy.utils import get_device
+
+        self.description = description
+        self._device = device or get_device()
+        self.callback_fn = callback_fn
+
+        self.start_time = None
+        self.end_time = None
+        self.duration = 0
+
+        self.memory_start = 0
+        self.memory_end = 0
+        self.memory_peak = 0
+
+    def start(self):
+        if self._device == "cuda":
+            import torch
+
+            torch.cuda.reset_peak_memory_stats()
+            self.memory_start = torch.cuda.memory_allocated()
+            self.end_time = None
         self.start_time = time.time()
 
+    def stop(self):
+        self.end_time = time.time()
+        self.duration += self.end_time - self.start_time
+
+        if self._device == "cuda":
+            import torch
+
+            self.memory_end = torch.cuda.memory_allocated()
+            self.memory_peak = max(
+                torch.cuda.max_memory_allocated() - self.memory_start, self.memory_peak
+            )
+
+        if self.callback_fn is not None:
+            self.callback_fn(self)
+
+    def __enter__(self):
+        self.start()
+        return self
+
     def __exit__(self, exc_type, exc_value, traceback):
-        self.logging_context.timings[self.description] = time.time() - self.start_time
+        self.stop()
 
 
 class ImageLoggingContext:
     def __init__(
         self,
         prompt,
-        model,
+        model=None,
         debug_img_callback=None,
         img_outdir=None,
         progress_img_callback=None,
@@ -88,29 +131,60 @@ class ImageLoggingContext:
         self.progress_img_interval_min_s = progress_img_interval_min_s
         self.progress_latent_callback = progress_latent_callback
 
-        self.start_ts = time.perf_counter()
-        self.timings = {}
+        self.summary_context = TimingContext("total")
+        self.summary_context.start()
+        self.timing_contexts = {}
         self.last_progress_img_ts = 0
         self.last_progress_img_step = -1000
 
         self._prev_log_context = None
 
     def __enter__(self):
+        self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+
+    def start(self):
         global _CURRENT_LOGGING_CONTEXT
         self._prev_log_context = _CURRENT_LOGGING_CONTEXT
         _CURRENT_LOGGING_CONTEXT = self
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def stop(self):
         global _CURRENT_LOGGING_CONTEXT
         _CURRENT_LOGGING_CONTEXT = self._prev_log_context
 
     def timing(self, description):
-        return TimingContext(self, description)
+        if description not in self.timing_contexts:
 
-    def get_timings(self):
-        self.timings["total"] = time.perf_counter() - self.start_ts
-        return self.timings
+            def cb(context):
+                self.timing_contexts[description] = context
+
+            tc = TimingContext(description, callback_fn=cb)
+            self.timing_contexts[description] = tc
+        return self.timing_contexts[description]
+
+    def get_performance_stats(self) -> dict[str, dict[str, float]]:
+        # calculate max peak seen in any timing context
+        self.summary_context.stop()
+        self.timing_contexts["total"] = self.summary_context
+
+        self.summary_context.memory_peak = max(
+            max(context.memory_peak, context.memory_start, context.memory_end)
+            for context in self.timing_contexts.values()
+        )
+
+        performance_stats = {}
+        for context in self.timing_contexts.values():
+            performance_stats[context.description] = {
+                "duration": context.duration,
+                "memory_start": context.memory_start,
+                "memory_end": context.memory_end,
+                "memory_peak": context.memory_peak,
+                "memory_delta": context.memory_end - context.memory_start,
+            }
+        return performance_stats
 
     def log_conditioning(self, conditioning, description):
         if not self.debug_img_callback:

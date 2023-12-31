@@ -123,12 +123,9 @@ def load_model_from_config_old(
 
     if half_mode:
         model = model.half()
-    print("halved")
 
     model.to(get_device())
-    print("moved to device")
     model.eval()
-    print("set to eval mode")
     return model
 
 
@@ -222,12 +219,18 @@ def get_diffusion_model_refiners(
 ) -> LatentDiffusionModel:
     """Load a diffusion model."""
 
-    return _get_diffusion_model_refiners(
+    sd = _get_diffusion_model_refiners(
         weights_location=weights_config.weights_location,
         architecture_alias=weights_config.architecture.primary_alias,
         for_inpainting=for_inpainting,
         dtype=dtype,
     )
+    # ensures a "fresh" copy that doesn't have additional injected parts
+    # sd = sd.structural_copy()
+
+    sd.set_self_attention_guidance(enable=True)
+
+    return sd
 
 
 hf_repo_url_pattern = re.compile(
@@ -241,7 +244,9 @@ def parse_diffusers_repo_url(url: str) -> dict[str, str]:
 
 
 def is_diffusers_repo_url(url: str) -> bool:
-    return bool(parse_diffusers_repo_url(url))
+    result = bool(parse_diffusers_repo_url(url))
+    logger.debug(f"{url} is diffusers repo url: {result}")
+    return result
 
 
 def normalize_diffusers_repo_url(url: str) -> str:
@@ -332,17 +337,16 @@ def _get_sd15_diffusion_model_refiners(
         device=device, dtype=dtype, lda=SD1AutoencoderSliced(), unet=unet
     )
     logger.debug("Loading VAE")
-    sd.lda.load_state_dict(vae_weights)
+    sd.lda.load_state_dict(vae_weights, assign=True)
 
     logger.debug("Loading text encoder")
-    sd.clip_text_encoder.load_state_dict(text_encoder_weights)
+    sd.clip_text_encoder.load_state_dict(text_encoder_weights, assign=True)
 
     logger.debug("Loading UNet")
-    sd.unet.load_state_dict(unet_weights, strict=False)
+    sd.unet.load_state_dict(unet_weights, strict=False, assign=True)
 
     logger.debug(f"'{weights_location}' Loaded")
-
-    sd.set_self_attention_guidance(enable=True)
+    sd.to(device=device, dtype=dtype)
 
     return sd
 
@@ -711,16 +715,15 @@ def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16)
             device="cpu",
         )
     )
-    text_encoder = DoubleTextEncoder(device="cpu", dtype=dtype)
+    text_encoder = DoubleTextEncoder(device="cpu", dtype=torch.float32)
     text_encoder.load_state_dict(text_encoder_weights)
     del text_encoder_weights
-    lda = lda.to(device=device)
+    lda = lda.to(device=device, dtype=torch.float32)
     unet = unet.to(device=device)
     text_encoder = text_encoder.to(device=device)
     sd = StableDiffusion_XL(
-        device=device, dtype=dtype, lda=lda, unet=unet, clip_text_encoder=text_encoder
+        device=device, dtype=None, lda=lda, unet=unet, clip_text_encoder=text_encoder
     )
-    sd.lda.to(device=device, dtype=torch.float32)
 
     return sd
 
@@ -729,9 +732,6 @@ def load_sdxl_pipeline(base_url, device=None):
     logger.info(f"Loading SDXL weights from {base_url}")
     device = device or get_device()
     sd = load_sdxl_diffusers_weights(base_url, device=device)
-
-    sd.set_self_attention_guidance(enable=True)
-
     return sd
 
 

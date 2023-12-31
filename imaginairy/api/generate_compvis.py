@@ -475,7 +475,7 @@ def _generate_single_image_compvis(
             is_nsfw=safety_score.is_nsfw,
             safety_score=safety_score,
             result_images=result_images,
-            timings=lc.get_timings(),
+            performance_stats=lc.get_performance_stats(),
             progress_latents=progress_latents.copy(),
         )
 
