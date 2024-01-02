@@ -431,8 +431,10 @@ def generate_single_image(
         if result.performance_stats:
             log = logger.info if output_perf else logger.debug
             log(f"   Timings: {result.timings_str()}")
-            log(f"   Peak VRAM: {result.gpu_str('memory_peak')}")
-            log(f"   Ending VRAM: {result.gpu_str('memory_end')}")
+            if torch.cuda.is_available():
+                log(f"   Peak VRAM: {result.gpu_str('memory_peak')}")
+                log(f"   Peak VRAM Delta: {result.gpu_str('memory_peak_delta')}")
+                log(f"   Ending VRAM: {result.gpu_str('memory_end')}")
         for controlnet, _ in controlnets:
             controlnet.eject()
         clear_gpu_cache()

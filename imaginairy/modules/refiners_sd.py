@@ -100,7 +100,7 @@ class StableDiffusion_1(TileModeMixin, RefinerStableDiffusion_1):
         lda: SD1Autoencoder | None = None,
         clip_text_encoder: CLIPTextEncoderL | None = None,
         scheduler: Scheduler | None = None,
-        device: Device | str = "cpu",
+        device: Device | str | None = "cpu",
         dtype: DType = torch.float32,
     ) -> None:
         unet = unet or SD1UNet(in_channels=4)
@@ -124,7 +124,7 @@ class StableDiffusion_1(TileModeMixin, RefinerStableDiffusion_1):
         if dtype is not None:
             to_kwargs["dtype"] = dtype
 
-        self.device = device
+        self.device = device  # type: ignore
         self.dtype = dtype
 
         if to_kwargs:

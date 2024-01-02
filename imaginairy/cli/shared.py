@@ -111,9 +111,9 @@ def _imagine_cmd(
     total_image_count = len(prompt_texts) * max(len(init_images), 1) * repeats
     img_msg = ""
     if len(init_images) > 0:
-        img_msg = f" and {len(init_images)} image(s)"
+        img_msg = f" x {len(init_images)} image(s)"
     logger.info(
-        f"Received {len(prompt_texts)} prompt(s){img_msg}. Will repeat these {repeats} times to create {total_image_count} images.\n"
+        f"Generating {total_image_count} images. ({len(prompt_texts)} prompt(s){img_msg} x {repeats} repetitions)\n"
     )
 
     from imaginairy.api import imagine_image_files

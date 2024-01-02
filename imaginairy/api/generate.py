@@ -206,6 +206,7 @@ def imagine(
                     progress_img_interval_min_s=progress_img_interval_min_s,
                     add_caption=add_caption,
                     dtype=torch.float16 if half_mode else torch.float32,
+                    output_perf=True,
                 )
                 if not result.safety_score.is_filtered:
                     break
