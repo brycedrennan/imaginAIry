@@ -81,7 +81,6 @@ setup(
         "fairscale>=0.4.4",  # for vendored blip
         "fastapi>=0.70.0",
         "ftfy>=6.0.1",  # for vendored clip
-        # 2.0.0 produced garbage images on macOS
         "torch>=2.1.0",
         # https://numpy.org/neps/nep-0029-deprecation_policy.html
         "numpy>=1.19.0,<1.26.0",
@@ -90,8 +89,6 @@ setup(
         "imageio>=2.9.0",
         "Pillow>=9.1.0",
         "psutil>5.7.3",
-        # 2.0.0 need to fix `ImportError: cannot import name 'rank_zero_only' from 'pytorch_lightning.utilities.distributed' `
-        "pytorch-lightning>=1.4.2,<2.0.0",
         "omegaconf>=2.1.1",
         "open-clip-torch>=2.0.0",
         "opencv-python>=4.4.0.46",
@@ -105,7 +102,6 @@ setup(
         "scipy<1.11",
         "timm>=0.4.12,!=0.9.0,!=0.9.1",  # for vendored blip
         "torchdiffeq>=0.2.0",
-        "torchmetrics>=0.6.0",
         "torchvision>=0.13.1",
         "transformers>=4.19.2",
         "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64'",

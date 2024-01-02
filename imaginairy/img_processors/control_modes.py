@@ -15,7 +15,7 @@ def create_canny_edges(img: "Tensor") -> "Tensor":
     img = torch.clamp((img + 1.0) / 2.0, min=0.0, max=1.0)
     img = einops.rearrange(img[0], "c h w -> h w c")
     img = (255.0 * img).cpu().numpy().astype(np.uint8).squeeze()
-    blurred = cv2.GaussianBlur(img, (5, 5), 0).astype(np.uint8)
+    blurred = cv2.GaussianBlur(img, (5, 5), 0).astype(np.uint8)  # type: ignore
 
     if len(blurred.shape) > 2:
         blurred = cv2.cvtColor(blurred, cv2.COLOR_BGR2GRAY)
@@ -143,7 +143,7 @@ def make_noise_disk(H: int, W: int, C: int, F: int) -> "np.ndarray":
     import numpy as np
 
     noise = np.random.uniform(low=0, high=1, size=((H // F) + 2, (W // F) + 2, C))
-    noise = cv2.resize(noise, (W + 2 * F, H + 2 * F), interpolation=cv2.INTER_CUBIC)
+    noise = cv2.resize(noise, (W + 2 * F, H + 2 * F), interpolation=cv2.INTER_CUBIC)  # type: ignore
     noise = noise[F : F + H, F : F + W]
     noise -= np.min(noise)
     noise /= np.max(noise)
@@ -165,7 +165,7 @@ def shuffle_map_np(img: "np.ndarray", h=None, w=None, f=256) -> "np.ndarray":
     x = make_noise_disk(h, w, 1, f) * float(W - 1)
     y = make_noise_disk(h, w, 1, f) * float(H - 1)
     flow = np.concatenate([x, y], axis=2).astype(np.float32)
-    return cv2.remap(img, flow, None, cv2.INTER_LINEAR)
+    return cv2.remap(img, flow, None, cv2.INTER_LINEAR)  # type: ignore
 
 
 def shuffle_map_torch(tensor: "Tensor", h=None, w=None, f=256) -> "Tensor":

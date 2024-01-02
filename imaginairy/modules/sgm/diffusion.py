@@ -5,10 +5,10 @@ import math
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import pytorch_lightning as pl
 import torch
 from omegaconf import ListConfig, OmegaConf
 from safetensors.torch import load_file as load_safetensors
+from torch import nn
 from torch.optim.lr_scheduler import LambdaLR
 
 from imaginairy.modules.ema import LitEma
@@ -30,7 +30,7 @@ UNCONDITIONAL_CONFIG = {
 OPENAIUNETWRAPPER = "imaginairy.modules.sgm.diffusionmodules.wrappers.OpenAIWrapper"
 
 
-class DiffusionEngine(pl.LightningModule):
+class DiffusionEngine(nn.Module):
     def __init__(
         self,
         network_config,

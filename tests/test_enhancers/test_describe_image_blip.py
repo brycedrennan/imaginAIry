@@ -1,9 +1,8 @@
 import pytest
-from lightning_fabric import seed_everything
 from PIL import Image
 
 from imaginairy.enhancers.describe_image_blip import generate_caption
-from imaginairy.utils import get_device
+from imaginairy.utils import get_device, seed_everything
 from tests import TESTS_FOLDER
 
 

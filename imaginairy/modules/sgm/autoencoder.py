@@ -7,7 +7,6 @@ from abc import abstractmethod
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
-import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from einops import rearrange
@@ -32,7 +31,7 @@ if TYPE_CHECKING:
 logpy = logging.getLogger(__name__)
 
 
-class AbstractAutoencoder(pl.LightningModule):
+class AbstractAutoencoder(nn.Module):
     """
     This is the base class for all autoencoders, including image autoencoders, image autoencoders with discriminators,
     unCLIP models, etc. Hence, it is fairly general, and specific features

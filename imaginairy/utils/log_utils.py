@@ -389,7 +389,10 @@ def disable_transformers_custom_logging():
 
 
 def disable_pytorch_lighting_custom_logging():
-    from pytorch_lightning import _logger as pytorch_logger
+    try:
+        from pytorch_lightning import _logger as pytorch_logger
+    except ImportError:
+        return
 
     try:
         from pytorch_lightning.utilities.seed import log
@@ -419,7 +422,7 @@ def disable_common_warnings():
 
 def suppress_annoying_logs_and_warnings():
     disable_transformers_custom_logging()
-    disable_pytorch_lighting_custom_logging()
+    # disable_pytorch_lighting_custom_logging()
     disable_common_warnings()
 
 
