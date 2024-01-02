@@ -6,7 +6,7 @@ from typing import Any
 
 from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
 from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode
-from imaginairy.utils import clear_gpu_cache
+from imaginairy.utils import clear_gpu_cache, seed_everything
 from imaginairy.utils.log_utils import ImageLoggingContext
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,6 @@ def generate_single_image(
 ):
     import torch.nn
     from PIL import Image, ImageOps
-    from pytorch_lightning import seed_everything
     from refiners.foundationals.latent_diffusion.schedulers import DDIM, DPMSolver
     from tqdm import tqdm
 

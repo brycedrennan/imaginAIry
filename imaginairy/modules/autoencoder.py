@@ -5,8 +5,8 @@ import logging
 import math
 from contextlib import contextmanager
 
-import pytorch_lightning as pl
 import torch
+from torch import nn
 from torch.cuda import OutOfMemoryError
 
 from imaginairy.modules.diffusion.model import Decoder, Encoder
@@ -18,7 +18,7 @@ from imaginairy.utils.feather_tile import rebuild_image, tile_image
 logger = logging.getLogger(__name__)
 
 
-class AutoencoderKL(pl.LightningModule):
+class AutoencoderKL(nn.Module):
     def __init__(
         self,
         ddconfig,

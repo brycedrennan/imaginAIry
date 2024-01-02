@@ -2,6 +2,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from imaginairy.api.generate import IMAGINAIRY_SAFETY_MODE
+from imaginairy.utils import seed_everything
 from imaginairy.utils.img_utils import calc_scale_to_fit_within, combine_image
 from imaginairy.utils.named_resolutions import normalize_image_size
 
@@ -25,7 +26,6 @@ def _generate_single_image_compvis(
 ):
     import torch.nn
     from PIL import Image, ImageOps
-    from pytorch_lightning import seed_everything
 
     from imaginairy.enhancers.clip_masking import get_img_mask
     from imaginairy.enhancers.describe_image_blip import generate_caption

@@ -14,7 +14,6 @@ from functools import partial
 from typing import Optional
 
 import numpy as np
-import pytorch_lightning as pl
 import torch
 from einops import rearrange, repeat
 from omegaconf import ListConfig
@@ -93,7 +92,7 @@ def uniform_on_device(r1, r2, shape, device):
     return (r1 - r2) * torch.rand(*shape, device=device) + r2
 
 
-class DDPM(pl.LightningModule):
+class DDPM(nn.Module):
     # classic DDPM with Gaussian diffusion, in image space
     def __init__(
         self,
@@ -1711,7 +1710,7 @@ class LatentDiffusion(DDPM):
         return x
 
 
-class DiffusionWrapper(pl.LightningModule):
+class DiffusionWrapper(nn.Module):
     def __init__(self, diff_model_config, conditioning_key):
         super().__init__()
         self.diffusion_model = instantiate_from_config(diff_model_config)

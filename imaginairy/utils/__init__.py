@@ -1,6 +1,8 @@
 import importlib
 import logging
+import numpy as np
 import platform
+import random
 import re
 import time
 from contextlib import contextmanager, nullcontext
@@ -334,3 +336,12 @@ def clear_gpu_cache():
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+
+def seed_everything(seed: int | None = None) -> None:
+    if seed is None:
+        seed = random.randint(0, 2**32 - 1)
+        logger.info(f"Using random seed: {seed}")
+    random.seed(a=seed)
+    np.random.seed(seed=seed)
+    torch.manual_seed(seed=seed)
+    torch.cuda.manual_seed_all(seed=seed)
