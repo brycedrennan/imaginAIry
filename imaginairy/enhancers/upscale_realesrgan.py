@@ -31,6 +31,7 @@ def realesrgan_upsampler(tile=512, tile_pad=50, ultrasharp=False):
         tile=tile,
         device=device,
         tile_pad=tile_pad,
+        half=True,
     )
 
     upsampler.device = torch.device(device)
