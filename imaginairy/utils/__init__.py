@@ -1,6 +1,5 @@
 import importlib
 import logging
-import numpy as np
 import platform
 import random
 import re
@@ -9,6 +8,7 @@ from contextlib import contextmanager, nullcontext
 from functools import lru_cache
 from typing import Any, List, Optional
 
+import numpy as np
 import torch
 from torch import Tensor, autocast
 from torch.nn import functional
@@ -336,6 +336,7 @@ def clear_gpu_cache():
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+
 
 def seed_everything(seed: int | None = None) -> None:
     if seed is None:

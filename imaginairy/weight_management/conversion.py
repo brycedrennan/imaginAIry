@@ -74,7 +74,10 @@ class WeightMap:
     def cast_weights(self, source_weights) -> dict[str, "Tensor"]:
         converted_state_dict: dict[str, "Tensor"] = {}
         for source_key in source_weights:
-            source_prefix, suffix = source_key.rsplit(sep=".", maxsplit=1)
+            try:
+                source_prefix, suffix = source_key.rsplit(sep=".", maxsplit=1)
+            except ValueError:
+                continue
             # handle aliases
             source_prefix = self.source_aliases.get(source_prefix, source_prefix)
             try:
