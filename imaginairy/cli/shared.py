@@ -23,6 +23,8 @@ def imaginairy_click_context(log_level="INFO"):
         yield
     except errors_to_catch as e:
         logger.error(e)
+        # import traceback
+        # traceback.print_exc()
 
 
 def _imagine_cmd(
