@@ -7,6 +7,10 @@ import time
 import warnings
 from typing import Callable
 
+import torch.cuda
+
+from imaginairy.utils.memory_tracker import TorchRAMTracker
+
 _CURRENT_LOGGING_CONTEXT = None
 
 logger = logging.getLogger(__name__)
@@ -72,29 +76,34 @@ class TimingContext:
         self.end_time = None
         self.duration = 0
 
-        self.memory_start = 0
+        self.memory_context = None
+        self.memory_start = None
         self.memory_end = 0
         self.memory_peak = 0
+        self.memory_peak_delta = 0
 
     def start(self):
+        # supports repeated calls to start/stop
         if self._device == "cuda":
-            import torch
-
-            torch.cuda.reset_peak_memory_stats()
-            self.memory_start = torch.cuda.memory_allocated()
+            self.memory_context = TorchRAMTracker(self.description)
+            self.memory_context.start()
+            if self.memory_start is None:
+                self.memory_start = self.memory_context.start_memory
             self.end_time = None
         self.start_time = time.time()
 
     def stop(self):
+        # supports repeated calls to start/stop
         self.end_time = time.time()
         self.duration += self.end_time - self.start_time
 
         if self._device == "cuda":
-            import torch
+            self.memory_context.stop()
 
-            self.memory_end = torch.cuda.memory_allocated()
-            self.memory_peak = max(
-                torch.cuda.max_memory_allocated() - self.memory_start, self.memory_peak
+            self.memory_end = self.memory_context.end_memory
+            self.memory_peak = max(self.memory_context.peak_memory, self.memory_peak)
+            self.memory_peak_delta = max(
+                self.memory_context.peak_memory_delta, self.memory_peak_delta
             )
 
         if self.callback_fn is not None:
@@ -170,10 +179,11 @@ class ImageLoggingContext:
         self.summary_context.stop()
         self.timing_contexts["total"] = self.summary_context
 
-        self.summary_context.memory_peak = max(
-            max(context.memory_peak, context.memory_start, context.memory_end)
-            for context in self.timing_contexts.values()
-        )
+        if torch.cuda.is_available():
+            self.summary_context.memory_peak = max(
+                max(context.memory_peak, context.memory_start, context.memory_end)
+                for context in self.timing_contexts.values()
+            )
 
         performance_stats = {}
         for context in self.timing_contexts.values():
@@ -182,7 +192,7 @@ class ImageLoggingContext:
                 "memory_start": context.memory_start,
                 "memory_end": context.memory_end,
                 "memory_peak": context.memory_peak,
-                "memory_delta": context.memory_end - context.memory_start,
+                "memory_peak_delta": context.memory_peak_delta,
             }
         return performance_stats
 

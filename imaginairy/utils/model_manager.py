@@ -16,6 +16,7 @@ from huggingface_hub import (
     try_to_load_from_cache,
 )
 from omegaconf import OmegaConf
+from refiners.foundationals.clip.text_encoder import CLIPTextEncoderL
 from refiners.foundationals.latent_diffusion import DoubleTextEncoder, SD1UNet, SDXLUNet
 from refiners.foundationals.latent_diffusion.model import LatentDiffusionModel
 from safetensors.torch import load_file
@@ -226,7 +227,7 @@ def get_diffusion_model_refiners(
         dtype=dtype,
     )
     # ensures a "fresh" copy that doesn't have additional injected parts
-    # sd = sd.structural_copy()
+    sd = sd.structural_copy()
 
     sd.set_self_attention_guidance(enable=True)
 
@@ -290,9 +291,19 @@ def _get_diffusion_model_refiners(
         raise ValueError(msg)
 
     MOST_RECENTLY_LOADED_MODEL = sd
+
+    msg = (
+        f"sd dtype:{sd.dtype} device:{sd.device}\n"
+        f"sd.unet dtype:{sd.unet.dtype} device:{sd.unet.device}\n"
+        f"sd.lda dtype:{sd.lda.dtype} device:{sd.lda.device}\n"
+        f"sd.clip_text_encoder dtype:{sd.clip_text_encoder.dtype} device:{sd.clip_text_encoder.device}\n"
+    )
+    logger.debug(msg)
+
     return sd
 
 
+# new
 def _get_sd15_diffusion_model_refiners(
     weights_location: str,
     for_inpainting: bool = False,
@@ -316,20 +327,19 @@ def _get_sd15_diffusion_model_refiners(
             vae_weights,
             unet_weights,
             text_encoder_weights,
-        ) = load_sd15_diffusers_weights(weights_location)
+        ) = load_sd15_diffusers_weights(weights_location, device="cpu")
     else:
         (
             vae_weights,
             unet_weights,
             text_encoder_weights,
         ) = load_stable_diffusion_compvis_weights(weights_location)
-
     StableDiffusionCls: type[LatentDiffusionModel]
     if for_inpainting:
-        unet = SD1UNet(in_channels=9, device=device, dtype=dtype)
+        unet = SD1UNet(in_channels=9, device="cpu", dtype=dtype)
         StableDiffusionCls = StableDiffusion_1_Inpainting
     else:
-        unet = SD1UNet(in_channels=4, device=device, dtype=dtype)
+        unet = SD1UNet(in_channels=4, device="cpu", dtype=dtype)
         StableDiffusionCls = StableDiffusion_1
     logger.debug(f"Using class {StableDiffusionCls.__name__}")
 
@@ -347,7 +357,70 @@ def _get_sd15_diffusion_model_refiners(
 
     logger.debug(f"'{weights_location}' Loaded")
     sd.to(device=device, dtype=dtype)
+    return sd
 
+
+def _get_sd15_diffusion_model_refiners_new(
+    weights_location: str,
+    for_inpainting: bool = False,
+    device=None,
+    dtype=torch.float16,
+) -> LatentDiffusionModel:
+    """
+    Load a diffusion model.
+
+    Weights location may also be shortcut name, e.g. "SD-1.5"
+    """
+    from imaginairy.modules.refiners_sd import (
+        SD1AutoencoderSliced,
+        StableDiffusion_1,
+        StableDiffusion_1_Inpainting,
+    )
+
+    device = device or get_device()
+    if is_diffusers_repo_url(weights_location):
+        (
+            vae_weights,
+            unet_weights,
+            text_encoder_weights,
+        ) = load_sd15_diffusers_weights(weights_location, device="cpu")
+    else:
+        (
+            vae_weights,
+            unet_weights,
+            text_encoder_weights,
+        ) = load_stable_diffusion_compvis_weights(weights_location)
+    StableDiffusionCls: type[LatentDiffusionModel]
+    if for_inpainting:
+        unet = SD1UNet(in_channels=9, device="cpu", dtype=dtype)
+        StableDiffusionCls = StableDiffusion_1_Inpainting
+    else:
+        unet = SD1UNet(in_channels=4, device="cpu", dtype=dtype)
+        StableDiffusionCls = StableDiffusion_1
+
+    logger.debug("Loading UNet")
+    unet.load_state_dict(unet_weights, strict=False, assign=True)
+    del unet_weights
+    unet.to(device=device, dtype=dtype)
+
+    logger.debug("Loading VAE")
+    lda = SD1AutoencoderSliced(device=device, dtype=dtype)
+    lda.load_state_dict(vae_weights, assign=True)
+    del vae_weights
+    lda.to(device=device, dtype=dtype)
+
+    logger.debug("Loading text encoder")
+    clip_text_encoder = CLIPTextEncoderL()
+    clip_text_encoder.load_state_dict(text_encoder_weights, assign=True)
+    del text_encoder_weights
+    clip_text_encoder.to(device=device, dtype=dtype)
+
+    logger.debug(f"Using class {StableDiffusionCls.__name__}")
+
+    sd = StableDiffusionCls(device=None, dtype=dtype, lda=lda, unet=unet)  # type: ignore
+    sd.to(device=device, dtype=dtype)
+
+    logger.debug(f"'{weights_location}' Loaded")
     return sd
 
 
@@ -378,7 +451,7 @@ def load_controlnet(control_weights_location, half_mode):
         "model"
     ]["params"]["control_stage_config"]
     controlnet = instantiate_from_config(control_stage_config)
-    controlnet.load_state_dict(controlnet_state_dict)
+    controlnet.load_state_dict(controlnet_state_dict, assign=True)
     controlnet.to(get_device())
     return controlnet
 
@@ -663,7 +736,15 @@ def load_sd15_diffusers_weights(base_url: str, device=None):
         source_format=FORMAT_NAMES.DIFFUSERS,
         dest_format=FORMAT_NAMES.REFINERS,
     )
-
+    first_vae = next(iter(vae_weights.values()))
+    first_unet = next(iter(unet_weights.values()))
+    first_encoder = next(iter(text_encoder_weights.values()))
+    msg = (
+        f"vae weights. dtype: {first_vae.dtype} device: {first_vae.device}\n"
+        f"unet weights. dtype: {first_unet.dtype} device: {first_unet.device}\n"
+        f"text_encoder weights. dtype: {first_encoder.dtype} device: {first_encoder.device}\n"
+    )
+    logger.debug(msg)
     return vae_weights, unet_weights, text_encoder_weights
 
 
@@ -684,7 +765,7 @@ def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16)
         device="cpu",
     )
     lda = SDXLAutoencoderSliced(device="cpu", dtype=dtype)
-    lda.load_state_dict(vae_weights)
+    lda.load_state_dict(vae_weights, assign=True)
     del vae_weights
 
     translator = translators.diffusers_unet_sdxl_to_refiners_translator()
@@ -697,7 +778,7 @@ def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16)
         device="cpu",
     )
     unet = SDXLUNet(device="cpu", dtype=dtype, in_channels=4)
-    unet.load_state_dict(unet_weights)
+    unet.load_state_dict(unet_weights, assign=True)
     del unet_weights
 
     text_encoder_1_path = download_diffusers_weights(
@@ -716,7 +797,7 @@ def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16)
         )
     )
     text_encoder = DoubleTextEncoder(device="cpu", dtype=torch.float32)
-    text_encoder.load_state_dict(text_encoder_weights)
+    text_encoder.load_state_dict(text_encoder_weights, assign=True)
     del text_encoder_weights
     lda = lda.to(device=device, dtype=torch.float32)
     unet = unet.to(device=device)
