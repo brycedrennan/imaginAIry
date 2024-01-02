@@ -58,7 +58,7 @@ setup(
     package_data={
         "imaginairy": [
             "configs/*.yaml",
-            "weight_management/maps/*.json",
+            "weight_management/weight_maps/*.json",
             "data/*.*",
             "cli/bin/*.*",
             "http_app/stablestudio/dist/*.*",
