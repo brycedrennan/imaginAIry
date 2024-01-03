@@ -37,7 +37,7 @@ def generate_video(
     output_folder: str | None = None,
     num_frames: int = 6,
     num_steps: int = 30,
-    model_name: str = "svd_xt",
+    model_name: str = "svd-xt",
     fps_id: int = 6,
     output_fps: int = 6,
     motion_bucket_id: int = 127,

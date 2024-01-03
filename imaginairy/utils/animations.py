@@ -38,9 +38,17 @@ def make_bounce_animation(
 
     # convert from latents
     converted_frames = []
+
     for frame in frames:
         if isinstance(frame, torch.Tensor):
             frame = model_latents_to_pillow_imgs(frame)[0]
+        converted_frames.append(frame)
+    frames = converted_frames
+    max_size = max([frame.size for frame in frames])
+    converted_frames = []
+    for frame in frames:
+        if frame.size != max_size:
+            frame = frame.resize(max_size)
         converted_frames.append(frame)
     frames = converted_frames
 

@@ -336,6 +336,7 @@ def generate_single_image(
                     condition_scale=prompt.prompt_strength,
                     **text_conditioning_kwargs,
                 )
+                lc.progress_latent_callback(x)
             # trying to clear memory. not sure if this helps
             sd.unet.set_context(context="self_attention_map", value={})
             sd.unet._reset_context()
@@ -423,7 +424,7 @@ def generate_single_image(
             safety_score=safety_score,
             result_images=result_images,
             performance_stats=lc.get_performance_stats(),
-            progress_latents=[],  # todo
+            progress_latents=progress_latents,
         )
 
         _most_recent_result = result

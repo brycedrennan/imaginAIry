@@ -18,8 +18,6 @@ AI imagined images. Pythonic generation of stable diffusion images **and videos*
 # be sure to use Python 3.10, Python 3.11 is not supported at the moment
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman" "a bluejay"
-# Make an animation showing the generation process
->> imagine --gif "a flower"
 # Make an AI video
 >> aimg videogen --start-image rocket.png
 ```
@@ -84,15 +82,27 @@ Options:
   - This was a huge rewrite which is why some features are not yet supported.  On the plus side, refiners supports
 cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
   - [self-attention guidance](https://github.com/SusungHong/Self-Attention-Guidance) which makes details of images more accurate
+- 🎉 feature: larger image generations now work MUCH better and stay faithful to the same image as it looks at a smaller size. 
+For example `--size 720p --seed 1` and `--size 1080p --seed 1` will produce the same image for SD15
+- 🎉 feature: loading diffusers based models now supported. Example `--model https://huggingface.co/ainz/diseny-pixar --model-architecture sd15`
+- 🎉 feature: qrcode controlnet!
+- feature: generate word images automatically. great for use with qrcode controlnet: `imagine "flowers" --gif --size hd --control-mode qrcode --control-image "textimg='JOY' font_color=white background_color=gray" -r 10`
+- feature: opendalle 1.1 added. `--model opendalle` to use it
 - feature: added `--size` parameter for more intuitive sizing (e.g. 512, 256x256, 4k, uhd, FHD, VGA, etc)
 - feature: detect if wrong torch version is installed and provide instructions on how to install proper version
 - feature: better logging output: color, error handling
 - feature: support for pytorch 2.0
+- feature: command line output significantly cleaned up and easier to read
+- feature: adds --composition-strength parameter to cli (#416)
+- performance: lower memory usage for upscaling
+- performance: lower memory usage at startup
+- performance: add sliced attention to several models (lowers memory use)
+- fix: simpler memory management that avoids some of the previous bugs
 - deprecated: support for python 3.8, 3.9
 - deprecated: support for torch 1.13
 - deprecated: support for Stable Diffusion versions 1.4, 2.0, and 2.1
 - deprecated: image training
-- broken: most samplers, tile/details controlnet, and model memory management
+- broken: samplers other than ddim
 
 ### Run API server and StableStudio web interface (alpha)
 Generate images via API or web interface.  Much smaller featureset compared to the command line tool.
