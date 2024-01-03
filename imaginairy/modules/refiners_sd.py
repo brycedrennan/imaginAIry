@@ -5,42 +5,52 @@ import math
 from functools import lru_cache
 from typing import Any, List, Literal
 
-import refiners.fluxion.layers as fl
 import torch
-from refiners.fluxion.layers.attentions import ScaledDotProductAttention
-from refiners.fluxion.layers.chain import ChainError
-from refiners.foundationals.clip.text_encoder import CLIPTextEncoderL
-from refiners.foundationals.latent_diffusion.model import (
+from torch import Tensor, device as Device, dtype as DType, nn
+from torch.nn import functional as F
+
+import imaginairy.vendored.refiners.fluxion.layers as fl
+from imaginairy.schema import WeightedPrompt
+from imaginairy.utils.feather_tile import rebuild_image, tile_image
+from imaginairy.vendored.refiners.fluxion.layers.attentions import (
+    ScaledDotProductAttention,
+)
+from imaginairy.vendored.refiners.fluxion.layers.chain import ChainError
+from imaginairy.vendored.refiners.foundationals.clip.text_encoder import (
+    CLIPTextEncoderL,
+)
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.model import (
     TLatentDiffusionModel,
 )
-from refiners.foundationals.latent_diffusion.schedulers.ddim import DDIM
-from refiners.foundationals.latent_diffusion.schedulers.scheduler import Scheduler
-from refiners.foundationals.latent_diffusion.self_attention_guidance import (
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.schedulers.ddim import (
+    DDIM,
+)
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.schedulers.scheduler import (
+    Scheduler,
+)
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.self_attention_guidance import (
     SelfAttentionMap,
 )
-from refiners.foundationals.latent_diffusion.stable_diffusion_1.controlnet import (
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.stable_diffusion_1.controlnet import (
     Controlnet,
     SD1ControlnetAdapter,
 )
-from refiners.foundationals.latent_diffusion.stable_diffusion_1.model import (
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.stable_diffusion_1.model import (
     SD1Autoencoder,
     SD1UNet,
     StableDiffusion_1 as RefinerStableDiffusion_1,
     StableDiffusion_1_Inpainting as RefinerStableDiffusion_1_Inpainting,
 )
-from refiners.foundationals.latent_diffusion.stable_diffusion_xl.model import (
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.stable_diffusion_xl.model import (
     SDXLAutoencoder,
     StableDiffusion_XL as RefinerStableDiffusion_XL,
 )
-from refiners.foundationals.latent_diffusion.stable_diffusion_xl.text_encoder import (
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.stable_diffusion_xl.text_encoder import (
     DoubleTextEncoder,
 )
-from refiners.foundationals.latent_diffusion.stable_diffusion_xl.unet import SDXLUNet
-from torch import Tensor, device as Device, dtype as DType, nn
-from torch.nn import functional as F
-
-from imaginairy.schema import WeightedPrompt
-from imaginairy.utils.feather_tile import rebuild_image, tile_image
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.stable_diffusion_xl.unet import (
+    SDXLUNet,
+)
 from imaginairy.weight_management.conversion import cast_weights
 
 logger = logging.getLogger(__name__)
@@ -375,8 +385,8 @@ class StableDiffusion_1_Inpainting(TileModeMixin, RefinerStableDiffusion_1_Inpai
         import torch
 
         total_weight = sum(wp.weight for wp in prompts)
-        if str(self.clip_text_encoder.device) == "cpu":
-            self.clip_text_encoder = self.clip_text_encoder.to(dtype=torch.float32)
+        if str(self.clip_text_encoder.device) == "cpu":  # type: ignore
+            self.clip_text_encoder = self.clip_text_encoder.to(dtype=torch.float32)  # type: ignore
         conditioning = sum(
             self.clip_text_encoder(wp.text) * (wp.weight / total_weight)
             for wp in prompts

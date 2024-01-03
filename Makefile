@@ -201,6 +201,19 @@ vendorize_normal_map:
 	make af
 
 
+vendorize_refiners:
+	export REPO=git@github.com:finegrain-ai/refiners.git PKG=refiners COMMIT=20c229903f53d05dc1c44659ec97603660ef964c && \
+	make download_repo REPO=$$REPO PKG=$$PKG COMMIT=$$COMMIT && \
+	mkdir -p ./imaginairy/vendored/$$PKG && \
+	rm -rf ./imaginairy/vendored/$$PKG/* && \
+	cp -R ./downloads/refiners/src/refiners/* ./imaginairy/vendored/$$PKG/ && \
+	cp ./downloads/refiners/LICENSE ./imaginairy/vendored/$$PKG/ && \
+	rm -rf ./imaginairy/vendored/$$PKG/training_utils && \
+	echo "vendored from $$REPO @ $$COMMIT" | tee ./imaginairy/vendored/$$PKG/readme.txt
+	find ./imaginairy/vendored/refiners/ -type f -name "*.py" -exec sed -i '' 's/from refiners/from imaginairy.vendored.refiners/g' {} + &&\
+    find ./imaginairy/vendored/refiners/ -type f -name "*.py" -exec sed -i '' 's/import refiners/import imaginairy.vendored.refiners/g' {} + &&\
+	make af
+
 
 vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
 	mkdir -p ./downloads

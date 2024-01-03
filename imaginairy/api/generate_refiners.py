@@ -27,7 +27,6 @@ def generate_single_image(
 ):
     import torch.nn
     from PIL import Image, ImageOps
-    from refiners.foundationals.latent_diffusion.schedulers import DDIM, DPMSolver
     from tqdm import tqdm
 
     from imaginairy.api.generate import (
@@ -61,6 +60,10 @@ def generate_single_image(
         prepare_image_for_outpaint,
     )
     from imaginairy.utils.safety import create_safety_score
+    from imaginairy.vendored.refiners.foundationals.latent_diffusion.schedulers import (
+        DDIM,
+        DPMSolver,
+    )
 
     if dtype is None:
         dtype = torch.float16
@@ -513,7 +516,9 @@ def prep_control_input(
     if not control_config:
         msg = f"Unknown control mode: {control_input.mode}"
         raise ValueError(msg)
-    from refiners.foundationals.latent_diffusion import SD1ControlnetAdapter
+    from imaginairy.vendored.refiners.foundationals.latent_diffusion import (
+        SD1ControlnetAdapter,
+    )
 
     controlnet = SD1ControlnetAdapter(  # type: ignore
         name=control_input.mode,

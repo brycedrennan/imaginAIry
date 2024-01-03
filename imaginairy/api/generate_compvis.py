@@ -12,17 +12,17 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _generate_single_image_compvis(
+def _generate_single_image(
     prompt: "ImaginePrompt",
     debug_img_callback=None,
     progress_img_callback=None,
     progress_img_interval_steps=3,
     progress_img_interval_min_s=0.1,
-    half_mode=None,
     add_caption=False,
     # controlnet, finetune, naive, auto
     inpaint_method="finetune",
     return_latent=False,
+    dtype=None,
 ):
     import torch.nn
     from PIL import Image, ImageOps
@@ -96,7 +96,7 @@ def _generate_single_image_compvis(
         weights_location=prompt.model_weights,
         config_path=prompt.model_architecture,
         control_weights_locations=control_modes,
-        half_mode=half_mode,
+        half_mode=dtype == torch.float16,
         for_inpainting=for_inpainting and inpaint_method == "finetune",
     )
     is_controlnet_model = hasattr(model, "control_key")
@@ -502,7 +502,6 @@ def _generate_composition_image(
 ):
     from PIL import Image
 
-    from imaginairy.api.generate_refiners import generate_single_image
     from imaginairy.utils import default, get_default_dtype
 
     cutoff = normalize_image_size(cutoff)
@@ -532,7 +531,7 @@ def _generate_composition_image(
         },
     )
 
-    result = generate_single_image(composition_prompt, dtype=dtype)
+    result = _generate_single_image(composition_prompt, dtype=dtype)
     img = result.images["generated"]
     while img.width < target_width:
         from imaginairy.enhancers.upscale_realesrgan import upscale_image

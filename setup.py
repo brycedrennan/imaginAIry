@@ -95,9 +95,10 @@ setup(
         # need to migration to 2.0
         "pydantic>=2.3.0",
         "requests>=2.28.1",
-        "refiners>=0.2.0",
+        # "refiners>=0.2.0",
+        "jaxtyping>=0.2.23",  # refiners dependency
         "einops>=0.3.0",
-        "safetensors>=0.2.1",
+        "safetensors>=0.4.0",
         # scipy is a sub dependency but v1.11 doesn't support python 3.8.  https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy
         "scipy<1.11",
         "timm>=0.4.12,!=0.9.0,!=0.9.1",  # for vendored blip
