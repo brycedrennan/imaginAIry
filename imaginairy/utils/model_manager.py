@@ -16,9 +16,6 @@ from huggingface_hub import (
     try_to_load_from_cache,
 )
 from omegaconf import OmegaConf
-from refiners.foundationals.clip.text_encoder import CLIPTextEncoderL
-from refiners.foundationals.latent_diffusion import DoubleTextEncoder, SD1UNet, SDXLUNet
-from refiners.foundationals.latent_diffusion.model import LatentDiffusionModel
 from safetensors.torch import load_file
 
 from imaginairy import config as iconfig
@@ -29,6 +26,17 @@ from imaginairy.utils import clear_gpu_cache, get_device, instantiate_from_confi
 from imaginairy.utils.model_cache import memory_managed_model
 from imaginairy.utils.named_resolutions import normalize_image_size
 from imaginairy.utils.paths import PKG_ROOT
+from imaginairy.vendored.refiners.foundationals.clip.text_encoder import (
+    CLIPTextEncoderL,
+)
+from imaginairy.vendored.refiners.foundationals.latent_diffusion import (
+    DoubleTextEncoder,
+    SD1UNet,
+    SDXLUNet,
+)
+from imaginairy.vendored.refiners.foundationals.latent_diffusion.model import (
+    LatentDiffusionModel,
+)
 from imaginairy.weight_management import translators
 
 logger = logging.getLogger(__name__)
@@ -823,7 +831,7 @@ def open_weights(filepath, device=None):
         device = get_device()
 
     if "safetensor" in filepath.lower():
-        from refiners.fluxion.utils import safe_open
+        from imaginairy.vendored.refiners.fluxion.utils import safe_open
 
         with safe_open(path=filepath, framework="pytorch", device=device) as tensors:
             state_dict = {
