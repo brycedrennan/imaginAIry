@@ -18,11 +18,11 @@
 
 ## Features
 
-- **Image Generation**: Create with SDXL, Openjourney, OpenDalle, and many others.
-  - **Generation Control**: Exert detailed control over the generation process.
-- **Image Editing**: Edit images with instructions.
-- **Image Upscaling**: Add details to images.
-- **Video Generation**: Turn images into videos.
+- [Image Generation](#image-generation): Create with SDXL, Openjourney, OpenDalle, and many others.
+    - [Generation Control](#image-generation-control): Exert detailed control over the generation process.
+- [Image Editing](#editing-instructions-control): Edit images with instructions.
+- [Image Upscaling](#add-details-control-upscalingsuper-resolution): Add details to images.
+- [Video Generation](#video-generation): Turn images into videos.
 - **Image Captioning**: 
 ---
 
@@ -65,23 +65,6 @@ pip install imaginairy
 
 
 ---
-
-
-## Video Generation
-
-=== "CLI"
-    ```bash
-    aimg videogen --start-image assets/rocket-wide.png
-    ```
-
-=== "Python"
-    ``` py
-    from imaginairy.api.video_sample import generate_video
-
-    generate_video(input_path="assets/rocket-wide.png")
-
-    ```
-<img src="/assets/svd-rocket.gif" alt="portrait photo of a freckled woman" width="50%" height="auto">
 
 ## Image Generation Control
 Guide the generation process by providing body poses, depth maps, canny edges, hed boundaries, normal maps, or even QR codes.
@@ -330,3 +313,20 @@ allow the tool to generate one for you.
     <img src="assets/pearl-gray.jpg" width="30%" height="auto">
     <img src="assets/pearl-recolor-a.jpg" width="30%" height="auto">
 </p>
+
+
+## Video Generation
+
+=== "CLI"
+    ```bash
+    aimg videogen --start-image assets/rocket-wide.png
+    ```
+
+=== "Python"
+    ``` py
+    from imaginairy.api.video_sample import generate_video
+
+    generate_video(input_path="assets/rocket-wide.png")
+
+    ```
+<img src="/assets/svd-rocket.gif" alt="portrait photo of a freckled woman" width="50%" height="auto">
