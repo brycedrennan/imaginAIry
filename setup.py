@@ -79,7 +79,6 @@ setup(
         "click-shell>=2.0",
         "protobuf != 3.20.2, != 3.19.5",
         "facexlib>=0.2.1.1",
-        "fairscale>=0.4.4",  # for vendored blip
         "fastapi>=0.70.0",
         "ftfy>=6.0.1",  # for vendored clip
         "torch>=2.1.0",
