@@ -70,6 +70,7 @@ setup(
             "vendored/blip/configs/*.*",
             "vendored/noodle_soup_prompts/*.*",
             "vendored/noodle_soup_prompts/LICENSE",
+            "vendored/refiners/foundationals/clip/bpe_simple_vocab_16e6.txt.gz",
         ]
     },
     install_requires=[
@@ -101,6 +102,7 @@ setup(
         "safetensors>=0.4.0",
         # scipy is a sub dependency but v1.11 doesn't support python 3.8.  https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy
         "scipy<1.11",
+        "termcolor",
         "timm>=0.4.12,!=0.9.0,!=0.9.1",  # for vendored blip
         "torchdiffeq>=0.2.0",
         "torchvision>=0.13.1",
