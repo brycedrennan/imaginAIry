@@ -19,8 +19,11 @@
 ## Features
 
 - **Image Generation**: Create with SDXL, Openjourney, OpenDalle, and many others.
-- **Stable Video Diffusion**: Turn images into videos.
-- **Image Manipulation with ControlNet**: Keep the pose, but make the person a bear, and more.
+  - **Generation Control**: Exert detailed control over the generation process.
+- **Image Editing**: Edit images with instructions.
+- **Image Upscaling**: Add details to images.
+- **Video Generation**: Turn images into videos.
+- **Image Captioning**: 
 ---
 
 ## Installation
@@ -39,7 +42,7 @@ pip install imaginairy
 
 === "CLI"
     ```bash
-    aimg imagine --seed 1 --model sd-xl "wide shot of sun setting on a green valley"
+    aimg imagine --seed 1 --model sdxl --size hd "wide shot of sun setting on a green valley"
     ```
 
 === "Python"
@@ -47,19 +50,24 @@ pip install imaginairy
     from imaginairy.api.generate import imagine
     from imaginairy.schema import ImaginePrompt
 
-    prompt = ImaginePrompt(prompt="wide shot of sun setting on a green valley", seed=1, model_weights="sd-xl")
+    prompt = ImaginePrompt(
+        prompt="wide shot of sun setting on a green valley", 
+        seed=1, 
+        model_weights="sdxl", 
+        size="hd"
+    )
 
     result = next(imagine(prompts=prompt))
     result.img.save("sun_set_green_valley.png")
     ```
 
-<img src="/assets/000005_1_ddim50_PS7.5_wide_shot_of_sun_setting_on_a_green_valley_[generated].jpg" alt="portrait photo of a freckled woman" width="50%" height="auto">
+<img src="/assets/028374_1_ddim50_PS7.5_wide_shot_of_sun_setting_on_a_green_valley_[generated].jpg" width="100%" height="auto">
 
 
 ---
 
 
-## Stable Video Diffusion
+## Video Generation
 
 === "CLI"
     ```bash
@@ -75,10 +83,10 @@ pip install imaginairy
     ```
 <img src="/assets/svd-rocket.gif" alt="portrait photo of a freckled woman" width="50%" height="auto">
 
-## Image Structure Control [by ControlNet](https://github.com/lllyasviel/ControlNet)
-Generate images guided by body poses, depth maps, canny edges, hed boundaries, or normal maps.
+## Image Generation Control
+Guide the generation process by providing body poses, depth maps, canny edges, hed boundaries, normal maps, or even QR codes.
 
-#### Openpose Control
+#### Body Pose Control
 
 === "CLI"
     ```bash
