@@ -52,13 +52,16 @@ check-fast:  ## Run autoformatter, linter, typechecker, and fast tests
 	@make type-check
 	@make test-fast
 
+build-pkg:  ## Build the package
+	python setup.py sdist bdist_wheel
+	python setup.py bdist_wheel --plat-name=win-amd64
+
 deploy:  ## Deploy the package to pypi.org
 	pip install twine wheel
 	-git tag $$(python setup.py -V)
 	git push --tags
 	rm -rf dist
-	python setup.py bdist_wheel
-	python setup.py bdist_wheel --plat-name=win-amd64
+	make build-pkg
 	#python setup.py sdist
 	@twine upload --verbose dist/* -u __token__;
 	rm -rf build

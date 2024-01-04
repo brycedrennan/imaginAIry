@@ -239,7 +239,9 @@ starlette==0.32.0.post1
 sympy==1.12
     # via torch
 termcolor==2.4.0
-    # via pytest-sugar
+    # via
+    #   imaginAIry (setup.py)
+    #   pytest-sugar
 timm==0.9.12
     # via
     #   imaginAIry (setup.py)
