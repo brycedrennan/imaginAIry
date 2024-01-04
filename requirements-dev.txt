@@ -45,8 +45,6 @@ exceptiongroup==1.2.0
     #   pytest
 facexlib==0.3.0
     # via imaginAIry (setup.py)
-fairscale==0.4.13
-    # via imaginAIry (setup.py)
 fastapi==0.108.0
     # via imaginAIry (setup.py)
 filelock==3.13.1
@@ -125,7 +123,6 @@ numpy==1.24.4
     #   contourpy
     #   diffusers
     #   facexlib
-    #   fairscale
     #   filterpy
     #   imageio
     #   imaginAIry (setup.py)
@@ -255,7 +252,6 @@ tomli==2.0.1
 torch==2.1.2
     # via
     #   facexlib
-    #   fairscale
     #   imaginAIry (setup.py)
     #   kornia
     #   open-clip-torch
