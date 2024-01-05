@@ -241,7 +241,7 @@ def generate_video(
                     c[k] = repeat(c[k], "b ... -> b t ...", t=num_frames)
                     c[k] = rearrange(c[k], "b t ... -> (b t) ...", t=num_frames)
 
-                randn = torch.randn(shape, device=device)
+                randn = torch.randn(shape, device=device, dtype=torch.float16)
 
                 additional_model_inputs = {}
                 additional_model_inputs["image_only_indicator"] = torch.zeros(
