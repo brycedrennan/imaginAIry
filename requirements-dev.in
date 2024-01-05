@@ -1,5 +1,8 @@
 coverage
 httpx
+mkdocs-material
+mkdocs-click
+mkdocstrings[python]
 mypy
 ruff
 pytest

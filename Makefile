@@ -91,6 +91,11 @@ require_pyenv:
 	  echo -e "\033[0;32m ✔️  pyenv-virtualenv installed\033[0m";\
 	fi
 
+.PHONY: docs
+
+docs:
+	mkdocs serve
+
 update-stablestudio:
 	@echo "Updating stablestudio"
 	cd ../imaginAIry-StableStudio && \

@@ -1,0 +1,56 @@
+site_name: ImaginAIry
+theme:
+  name: material
+  features:
+    - content.tabs.link
+    - content.code.copy
+  palette:
+    primary: cyan
+
+markdown_extensions:
+  - pymdownx.highlight:
+        anchor_linenums: true
+        line_spans: __span
+        pygments_lang_class: true
+  - mkdocs-click
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+      alternate_style: true
+  - attr_list
+  - md_in_html
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: true
+
+nav:
+  - Home: index.md
+  - Docs:
+      - CLI:
+          - Create Image: docs/CLI/imagine.md
+          - Create Video: docs/CLI/videogen.md
+          - Edit Image: docs/CLI/edit.md
+          - Upscale Image: docs/CLI/upscale.md
+          - Colorize Image: docs/CLI/colorize.md
+          - Describe Image: docs/CLI/describe.md
+      - Python:
+          - imagine(): docs/Python/imagine.md
+          - imagine_image_files(): docs/Python/imagine-image-files.md
+          - generate_video(): docs/Python/generate-video.md
+          - colorize_img(): docs/Python/colorize-img.md
+          - ImaginePrompt: docs/Python/ImaginePrompt.md
+          - ControlInput: docs/Python/ControlInput.md
+          - LazyLoadingImage: docs/Python/LazyLoadingImage.md
+          - WeightedPrompt: docs/Python/WeightedPrompt.md
+

@@ -21,12 +21,12 @@ AI imagined images. Pythonic generation of stable diffusion images **and videos*
 ```
 ## Stable Video Diffusion
 <p float="left">
-<img src="assets/svd-rocket.gif" height="190">
-<img src="assets/svd-athens.gif" height="190">
-<img src="assets/svd-pearl-girl.gif" height="190">
-<img src="assets/svd-starry-night.gif" height="190">
-<img src="assets/svd-dog.gif" height="190">
-<img src="assets/svd-xpbliss.gif" height="190">
+<img src="docs/assets/svd-rocket.gif" height="190">
+<img src="docs/assets/svd-athens.gif" height="190">
+<img src="docs/assets/svd-pearl-girl.gif" height="190">
+<img src="docs/assets/svd-starry-night.gif" height="190">
+<img src="docs/assets/svd-dog.gif" height="190">
+<img src="docs/assets/svd-xpbliss.gif" height="190">
 </p>
 
 ### Rushed release of Stable Diffusion Video!
@@ -60,12 +60,12 @@ Options:
 
 ### Images
 <p float="left">
-<img src="assets/026882_1_ddim50_PS7.5_a_scenic_landscape_[generated].jpg" height="256">
-<img src="assets/026884_1_ddim50_PS7.5_photo_of_a_dog_[generated].jpg" height="256">
-<img src="assets/026890_1_ddim50_PS7.5_photo_of_a_bowl_of_fruit._still_life_[generated].jpg" height="256">
-<img src="assets/026885_1_ddim50_PS7.5_girl_with_a_pearl_earring_[generated].jpg" height="256">
-<img src="assets/026891_1_ddim50_PS7.5_close-up_photo_of_a_bluejay_[generated].jpg" height="256">
-<img src="assets/026893_1_ddim50_PS7.5_macro_photo_of_a_flower_[generated].jpg" height="256">
+<img src="docs/assets/026882_1_ddim50_PS7.5_a_scenic_landscape_[generated].jpg" height="256">
+<img src="docs/assets/026884_1_ddim50_PS7.5_photo_of_a_dog_[generated].jpg" height="256">
+<img src="docs/assets/026890_1_ddim50_PS7.5_photo_of_a_bowl_of_fruit._still_life_[generated].jpg" height="256">
+<img src="docs/assets/026885_1_ddim50_PS7.5_girl_with_a_pearl_earring_[generated].jpg" height="256">
+<img src="docs/assets/026891_1_ddim50_PS7.5_close-up_photo_of_a_bluejay_[generated].jpg" height="256">
+<img src="docs/assets/026893_1_ddim50_PS7.5_macro_photo_of_a_flower_[generated].jpg" height="256">
 </p>
 
 ### Whats New
@@ -124,9 +124,9 @@ imagine --control-image assets/indiana.jpg  --control-mode openpose --caption-te
 ```
 
 <p float="left">
-    <img src="assets/indiana.jpg" height="256">
-    <img src="assets/indiana-pose.jpg" height="256">
-    <img src="assets/indiana-pose-polar-bear.jpg" height="256">
+    <img src="docs/assets/indiana.jpg" height="256">
+    <img src="docs/assets/indiana-pose.jpg" height="256">
+    <img src="docs/assets/indiana-pose-polar-bear.jpg" height="256">
 </p>
 
 #### Canny Edge Control
@@ -136,9 +136,9 @@ imagine --control-image assets/lena.png  --control-mode canny "photo of a woman 
 ```
 
 <p float="left">
-    <img src="assets/lena.png" height="256">
-    <img src="assets/lena-canny.jpg" height="256">
-    <img src="assets/lena-canny-generated.jpg" height="256">
+    <img src="docs/assets/lena.png" height="256">
+    <img src="docs/assets/lena-canny.jpg" height="256">
+    <img src="docs/assets/lena-canny-generated.jpg" height="256">
 </p>
 
 #### HED Boundary Control
@@ -148,9 +148,9 @@ imagine --control-image dog.jpg  --control-mode hed  "photo of a dalmation"
 ```
 
 <p float="left">
-    <img src="assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg" height="256">
-    <img src="assets/dog-hed-boundary.jpg" height="256">
-    <img src="assets/dog-hed-boundary-dalmation.jpg" height="256">
+    <img src="docs/assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg" height="256">
+    <img src="docs/assets/dog-hed-boundary.jpg" height="256">
+    <img src="docs/assets/dog-hed-boundary-dalmation.jpg" height="256">
 </p>
 
 #### Depth Map Control
@@ -160,9 +160,9 @@ imagine --control-image fancy-living.jpg  --control-mode depth  "a modern living
 ```
 
 <p float="left">
-    <img src="assets/fancy-living.jpg" height="256">
-    <img src="assets/fancy-living-depth.jpg" height="256">
-    <img src="assets/fancy-living-depth-generated.jpg" height="256">
+    <img src="docs/assets/fancy-living.jpg" height="256">
+    <img src="docs/assets/fancy-living-depth.jpg" height="256">
+    <img src="docs/assets/fancy-living-depth-generated.jpg" height="256">
 </p>
 
 #### Normal Map Control
@@ -172,9 +172,9 @@ imagine --control-image bird.jpg  --control-mode normal  "a bird"
 ```
 
 <p float="left">
-    <img src="assets/013986_1_kdpmpp2m59_PS7.5_a_bluejay_[generated].jpg" height="256">
-    <img src="assets/bird-normal.jpg" height="256">
-    <img src="assets/bird-normal-generated.jpg" height="256">
+    <img src="docs/assets/013986_1_kdpmpp2m59_PS7.5_a_bluejay_[generated].jpg" height="256">
+    <img src="docs/assets/bird-normal.jpg" height="256">
+    <img src="docs/assets/bird-normal-generated.jpg" height="256">
 </p>
 
 #### Image Shuffle Control
@@ -185,9 +185,9 @@ imagine --control-image pearl-girl.jpg  --control-mode shuffle  "a clown"
 ```
 The middle image is the "shuffled" input image
 <p float="left">
-    <img src="assets/girl_with_a_pearl_earring.jpg" height="256">
-    <img src="assets/pearl_shuffle_019331_1_kdpmpp2m15_PS7.5_img2img-0.0_a_clown.jpg" height="256">
-    <img src="assets/pearl_shuffle_clown_019331_1_kdpmpp2m15_PS7.5_img2img-0.0_a_clown.jpg" height="256">
+    <img src="docs/assets/girl_with_a_pearl_earring.jpg" height="256">
+    <img src="docs/assets/pearl_shuffle_019331_1_kdpmpp2m15_PS7.5_img2img-0.0_a_clown.jpg" height="256">
+    <img src="docs/assets/pearl_shuffle_clown_019331_1_kdpmpp2m15_PS7.5_img2img-0.0_a_clown.jpg" height="256">
 </p>
 
 #### Editing Instructions Control
@@ -198,9 +198,9 @@ imagine --control-image pearl-girl.jpg  --control-mode edit --init-image-strengt
 ```
 
 <p float="left">
-    <img src="assets/girl_with_a_pearl_earring.jpg" height="256">
-    <img src="assets/pearl_anime_019537_521829407_kdpmpp2m30_PS9.0_img2img-0.01_make_it_anime.jpg" height="256">
-    <img src="assets/pearl_beach_019561_862735879_kdpmpp2m30_PS7.0_img2img-0.01_make_it_at_the_beach.jpg" height="256">
+    <img src="docs/assets/girl_with_a_pearl_earring.jpg" height="256">
+    <img src="docs/assets/pearl_anime_019537_521829407_kdpmpp2m30_PS9.0_img2img-0.01_make_it_anime.jpg" height="256">
+    <img src="docs/assets/pearl_beach_019561_862735879_kdpmpp2m30_PS7.0_img2img-0.01_make_it_at_the_beach.jpg" height="256">
 </p>
 
 #### Add Details Control (upscaling/super-resolution)
@@ -211,8 +211,8 @@ imagine --control-image "assets/wishbone.jpg" --control-mode details "sharp focu
 ```
 
 <p float="left">
-    <img src="assets/wishbone_headshot_badscale.jpg" height="256">
-    <img src="assets/wishbone_headshot_details.jpg" height="256">
+    <img src="docs/assets/wishbone_headshot_badscale.jpg" height="256">
+    <img src="docs/assets/wishbone_headshot_details.jpg" height="256">
 </p>
 
 
@@ -226,24 +226,24 @@ allow the tool to generate one for you.
 aimg colorize pearl-girl.jpg --caption "photo of a woman"
 ```
 <p float="left">
-    <img src="assets/girl_with_a_pearl_earring.jpg" height="256">
-    <img src="assets/pearl-gray.jpg" height="256">
-    <img src="assets/pearl-recolor-a.jpg" height="256">
+    <img src="docs/assets/girl_with_a_pearl_earring.jpg" height="256">
+    <img src="docs/assets/pearl-gray.jpg" height="256">
+    <img src="docs/assets/pearl-recolor-a.jpg" height="256">
 </p>
 
 ###  Instruction based image edits [by InstructPix2Pix](https://github.com/timothybrooks/instruct-pix2pix)
 #### (Broken as of 14.0.0)
 Just tell imaginairy how to edit the image and it will do it for you!
 <p float="left">
-<img src="assets/scenic_landscape_winter.jpg" height="256">
-<img src="assets/dog_red.jpg" height="256">
-<img src="assets/bowl_of_fruit_strawberries.jpg" height="256">
-<img src="assets/freckled_woman_cyborg.jpg" height="256">
-<img src="assets/014214_51293814_kdpmpp2m30_PS10.0_img2img-1.0_make_the_bird_wear_a_cowboy_hat_[generated].jpg" height="256">
-<img src="assets/flower-make-the-flower-out-of-paper-origami.gif" height="256">
-<img src="assets/girl-pearl-clown-compare.gif" height="256">
-<img src="assets/mona-lisa-headshot-anim.gif" height="256">
-<img src="assets/make-it-night-time.gif" height="256">
+<img src="docs/assets/scenic_landscape_winter.jpg" height="256">
+<img src="docs/assets/dog_red.jpg" height="256">
+<img src="docs/assets/bowl_of_fruit_strawberries.jpg" height="256">
+<img src="docs/assets/freckled_woman_cyborg.jpg" height="256">
+<img src="docs/assets/014214_51293814_kdpmpp2m30_PS10.0_img2img-1.0_make_the_bird_wear_a_cowboy_hat_[generated].jpg" height="256">
+<img src="docs/assets/flower-make-the-flower-out-of-paper-origami.gif" height="256">
+<img src="docs/assets/girl-pearl-clown-compare.gif" height="256">
+<img src="docs/assets/mona-lisa-headshot-anim.gif" height="256">
+<img src="docs/assets/make-it-night-time.gif" height="256">
 </p>
 
 <details>
@@ -276,12 +276,12 @@ Want just quickly have some fun? Try `edit-demo` to apply some pre-defined edits
 >> aimg edit-demo pearl_girl.jpg
 ```
 <p float="left">
-<img src="assets/girl_with_a_pearl_earring_suprise.gif" height="256">
-<img src="assets/mona-lisa-suprise.gif" height="256">
-<img src="assets/luke-suprise.gif" height="256">
-<img src="assets/spock-suprise.gif" height="256">
-<img src="assets/gg-bridge-suprise.gif" height="256">
-<img src="assets/shire-suprise.gif" height="256">
+<img src="docs/assets/girl_with_a_pearl_earring_suprise.gif" height="256">
+<img src="docs/assets/mona-lisa-suprise.gif" height="256">
+<img src="docs/assets/luke-suprise.gif" height="256">
+<img src="docs/assets/spock-suprise.gif" height="256">
+<img src="docs/assets/gg-bridge-suprise.gif" height="256">
+<img src="docs/assets/shire-suprise.gif" height="256">
 </p>
 
 
@@ -309,11 +309,11 @@ When writing strength modifiers keep in mind that pixel values are between 0 and
     --fix-faces \
     "a modern female president" "a female robot" "a female doctor" "a female firefighter"
 ```
-<img src="assets/mask_examples/pearl000.jpg" height="200">➡️ 
-<img src="assets/mask_examples/pearl_pres.png" height="200">
-<img src="assets/mask_examples/pearl_robot.png" height="200">
-<img src="assets/mask_examples/pearl_doctor.png" height="200">
-<img src="assets/mask_examples/pearl_firefighter.png" height="200">
+<img src="docs/assets/mask_examples/pearl000.jpg" height="200">➡️ 
+<img src="docs/assets/mask_examples/pearl_pres.png" height="200">
+<img src="docs/assets/mask_examples/pearl_robot.png" height="200">
+<img src="docs/assets/mask_examples/pearl_doctor.png" height="200">
+<img src="docs/assets/mask_examples/pearl_firefighter.png" height="200">
 
 ```bash
 >> imagine \
@@ -324,11 +324,11 @@ When writing strength modifiers keep in mind that pixel values are between 0 and
     --init-image-strength .1 \
     "a bowl of kittens" "a bowl of gold coins" "a bowl of popcorn" "a bowl of spaghetti"
 ```
-<img src="assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="200">➡️ 
-<img src="assets/mask_examples/bowl004.jpg" height="200">
-<img src="assets/mask_examples/bowl001.jpg" height="200">
-<img src="assets/mask_examples/bowl002.jpg" height="200">
-<img src="assets/mask_examples/bowl003.jpg" height="200">
+<img src="docs/assets/000056_293284644_PLMS40_PS7.5_photo_of_a_bowl_of_fruit.jpg" height="200">➡️ 
+<img src="docs/assets/mask_examples/bowl004.jpg" height="200">
+<img src="docs/assets/mask_examples/bowl001.jpg" height="200">
+<img src="docs/assets/mask_examples/bowl002.jpg" height="200">
+<img src="docs/assets/mask_examples/bowl003.jpg" height="200">
 
 
 ### Face Enhancement [by CodeFormer](https://github.com/sczhou/CodeFormer)
@@ -365,16 +365,16 @@ big_img = upscale_image(i)
 >> imagine  "gold coins" "a lush forest" "piles of old books" leaves --tile
 ```
 
-<img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128">
-<img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128">
+<img src="docs/assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="docs/assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128"><img src="docs/assets/000066_801493266_PLMS40_PS7.5_gold_coins.jpg" height="128">
+<img src="docs/assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="docs/assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128"><img src="docs/assets/000118_597948545_PLMS40_PS7.5_a_lush_forest.jpg" height="128">
 <br>
-<img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128">
-<img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128">
+<img src="docs/assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="docs/assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128"><img src="docs/assets/000075_961095192_PLMS40_PS7.5_piles_of_old_books.jpg" height="128">
+<img src="docs/assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="docs/assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128"><img src="docs/assets/000040_527733581_PLMS40_PS7.5_leaves.jpg" height="128">
 #### 360 degree images
 ```bash
 imagine --tile-x -w 1024 -h 512 "360 degree equirectangular panorama photograph of the desert"  --upscale
 ```
-<img src="assets/desert_360.jpg" height="128">
+<img src="docs/assets/desert_360.jpg" height="128">
 
 ### Image-to-Image
 Use depth maps for amazing "translations" of existing images.
@@ -384,8 +384,8 @@ Use depth maps for amazing "translations" of existing images.
 ```
 <p float="left">
 <img src="tests/data/girl_with_a_pearl_earring.jpg" width="256"> ➡️ 
-<img src="assets/pearl_depth_1.jpg" width="256">
-<img src="assets/pearl_depth_2.jpg" width="256">
+<img src="docs/assets/pearl_depth_1.jpg" width="256">
+<img src="docs/assets/pearl_depth_2.jpg" width="256">
 </p>
 
 
@@ -402,9 +402,9 @@ Example:
 ### Work with different generation models
 
 <p float="left">
-    <img src="assets/fairytale-treehouse-sd15.jpg" height="256">
-    <img src="assets/fairytale-treehouse-openjourney-v1.jpg" height="256">
-    <img src="assets/fairytale-treehouse-openjourney-v2.jpg" height="256">
+    <img src="docs/assets/fairytale-treehouse-sd15.jpg" height="256">
+    <img src="docs/assets/fairytale-treehouse-openjourney-v1.jpg" height="256">
+    <img src="docs/assets/fairytale-treehouse-openjourney-v2.jpg" height="256">
 </p>
 
 <details>
@@ -433,9 +433,9 @@ You can use `{}` to randomly pull values from lists.  A list of values separated
 
    `imagine "a {lime|blue|silver|aqua} colored dog" -r 4 --seed 0` (note that it generates a dog of each color without repetition)
 
-<img src="assets/000184_0_plms40_PS7.5_a_silver_colored_dog_[generated].jpg" height="200"><img src="assets/000186_0_plms40_PS7.5_a_aqua_colored_dog_[generated].jpg" height="200">
-<img src="assets/000210_0_plms40_PS7.5_a_lime_colored_dog_[generated].jpg" height="200">
-<img src="assets/000211_0_plms40_PS7.5_a_blue_colored_dog_[generated].jpg" height="200">
+<img src="docs/assets/000184_0_plms40_PS7.5_a_silver_colored_dog_[generated].jpg" height="200"><img src="docs/assets/000186_0_plms40_PS7.5_a_aqua_colored_dog_[generated].jpg" height="200">
+<img src="docs/assets/000210_0_plms40_PS7.5_a_lime_colored_dog_[generated].jpg" height="200">
+<img src="docs/assets/000211_0_plms40_PS7.5_a_blue_colored_dog_[generated].jpg" height="200">
 
    `imagine "a {_color_} dog" -r 4 --seed 0` will generate four, different colored dogs. The colors will be pulled from an included 
    phraselist of colors.
