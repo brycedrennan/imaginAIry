@@ -91,7 +91,7 @@ def platform_appropriate_autocast(precision="autocast", enabled=True):
     # https://github.com/pytorch/pytorch/issues/55374
     # https://github.com/invoke-ai/InvokeAI/pull/518
 
-    if precision == "autocast" and get_device() in ("cuda",) and False:
+    if precision == "autocast" and get_device() in ("cuda",):
         with autocast(get_device(), enabled=enabled):
             yield
     else:
