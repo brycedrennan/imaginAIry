@@ -59,6 +59,12 @@ MODEL_ARCHITECTURES = [
         defaults={"size": "1024"},
     ),
     ModelArchitecture(
+        name="Stable Diffusion XL - Inpainting",
+        aliases=["sdxlinpaint", "sd-xlinpaint", "sdxl-inpaint"],
+        output_modality="image",
+        defaults={"size": "1024"},
+    ),
+    ModelArchitecture(
         name="Stable Video Diffusion",
         aliases=["svd", "stablevideo"],
         output_modality="video",
@@ -162,7 +168,7 @@ MODEL_WEIGHT_CONFIGS = [
         defaults={"negative_prompt": DEFAULT_NEGATIVE_PROMPT},
     ),
     ModelWeightsConfig(
-        name="Modern Disney",
+        name="Redshift Diffusion",
         aliases=["redshift-diffusion", "red", "redshift-diffusion-15", "red15"],
         architecture=MODEL_ARCHITECTURE_LOOKUP["sd15"],
         weights_location="https://huggingface.co/nitrosocke/redshift-diffusion/tree/80837fe18df05807861ab91c3bad3693c9342e4c/",
@@ -178,6 +184,16 @@ MODEL_WEIGHT_CONFIGS = [
             "composition_strength": 0.6,
         },
         weights_location="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/tree/462165984030d82259a11f4367a4eed129e94a7b/",
+    ),
+    ModelWeightsConfig(
+        name="Stable Diffusion XL - Inpainting",
+        aliases=MODEL_ARCHITECTURE_LOOKUP["sdxl-inpaint"].aliases,
+        architecture=MODEL_ARCHITECTURE_LOOKUP["sdxl-inpaint"],
+        defaults={
+            "negative_prompt": DEFAULT_NEGATIVE_PROMPT,
+            "composition_strength": 0.6,
+        },
+        weights_location="https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tree/115134f363124c53c7d878647567d04daf26e41e/",
     ),
     ModelWeightsConfig(
         name="OpenDalle V1.1",

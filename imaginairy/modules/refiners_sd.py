@@ -5,7 +5,9 @@ import math
 from functools import lru_cache
 from typing import Any, List, Literal
 
+import numpy as np
 import torch
+from PIL import Image
 from torch import Tensor, device as Device, dtype as DType, nn
 from torch.nn import functional as F
 
@@ -16,6 +18,7 @@ from imaginairy.vendored.refiners.fluxion.layers.attentions import (
     ScaledDotProductAttention,
 )
 from imaginairy.vendored.refiners.fluxion.layers.chain import ChainError
+from imaginairy.vendored.refiners.fluxion.utils import image_to_tensor, interpolate
 from imaginairy.vendored.refiners.foundationals.clip.text_encoder import (
     CLIPTextEncoderL,
 )
@@ -393,6 +396,131 @@ class StableDiffusion_1_Inpainting(TileModeMixin, RefinerStableDiffusion_1_Inpai
         )
 
         return conditioning
+
+
+class StableDiffusion_XL_Inpainting(StableDiffusion_XL):
+    def __init__(
+        self,
+        unet: SDXLUNet | None = None,
+        lda: SDXLAutoencoder | None = None,
+        clip_text_encoder: DoubleTextEncoder | None = None,
+        scheduler: Scheduler | None = None,
+        device: Device | str | None = "cpu",
+        dtype: DType | None = None,
+    ) -> None:
+        self.mask_latents: Tensor | None = None
+        self.target_image_latents: Tensor | None = None
+        super().__init__(
+            unet=unet,
+            lda=lda,
+            clip_text_encoder=clip_text_encoder,
+            scheduler=scheduler,
+            device=device,
+            dtype=dtype,
+        )
+
+    def forward(
+        self,
+        x: Tensor,
+        step: int,
+        *,
+        clip_text_embedding: Tensor,
+        pooled_text_embedding: Tensor,
+        time_ids: Tensor | None = None,
+        condition_scale: float = 5.0,
+        **_: Tensor,
+    ) -> Tensor:
+        assert self.mask_latents is not None
+        assert self.target_image_latents is not None
+        x = torch.cat(tensors=(x, self.mask_latents, self.target_image_latents), dim=1)
+        return super().forward(
+            x=x,
+            step=step,
+            clip_text_embedding=clip_text_embedding,
+            pooled_text_embedding=pooled_text_embedding,
+            time_ids=time_ids,
+            condition_scale=condition_scale,
+        )
+
+    def set_inpainting_conditions(
+        self,
+        target_image: Image.Image,
+        mask: Image.Image,
+        latents_size: tuple[int, int] = (64, 64),
+    ) -> tuple[Tensor, Tensor]:
+        target_image = target_image.convert(mode="RGB")
+        mask = mask.convert(mode="L")
+
+        mask_tensor = torch.tensor(
+            data=np.array(object=mask).astype(dtype=np.float32) / 255.0
+        ).to(device=self.device)
+        mask_tensor = (
+            (mask_tensor > 0.5)
+            .unsqueeze(dim=0)
+            .unsqueeze(dim=0)
+            .to(dtype=self.unet.dtype)
+        )
+
+        self.mask_latents = interpolate(x=mask_tensor, factor=torch.Size(latents_size))
+
+        init_image_tensor = (
+            image_to_tensor(
+                image=target_image, device=self.device, dtype=self.unet.dtype
+            )
+            * 2
+            - 1
+        )
+        masked_init_image = init_image_tensor * (1 - mask_tensor)
+        self.target_image_latents = self.lda.encode(
+            x=masked_init_image.to(dtype=self.lda.dtype)
+        )
+        assert self.target_image_latents is not None
+        self.target_image_latents = self.target_image_latents.to(dtype=self.unet.dtype)
+
+        return self.mask_latents, self.target_image_latents  # type: ignore
+
+    def compute_self_attention_guidance(
+        self,
+        x: Tensor,
+        noise: Tensor,
+        step: int,
+        *,
+        clip_text_embedding: Tensor,
+        pooled_text_embedding: Tensor,
+        time_ids: Tensor,
+        **kwargs: Tensor,
+    ) -> Tensor:
+        sag = self._find_sag_adapter()
+        assert sag is not None
+        assert self.mask_latents is not None
+        assert self.target_image_latents is not None
+
+        degraded_latents = sag.compute_degraded_latents(
+            scheduler=self.scheduler,
+            latents=x,
+            noise=noise,
+            step=step,
+            classifier_free_guidance=True,
+        )
+
+        negative_embedding, _ = clip_text_embedding.chunk(2)
+        negative_pooled_embedding, _ = pooled_text_embedding.chunk(2)
+        timestep = self.scheduler.timesteps[step].unsqueeze(dim=0)
+        time_ids, _ = time_ids.chunk(2)
+        self.set_unet_context(
+            timestep=timestep,
+            clip_text_embedding=negative_embedding,
+            pooled_text_embedding=negative_pooled_embedding,
+            time_ids=time_ids,
+            **kwargs,
+        )
+        x = torch.cat(
+            tensors=(degraded_latents, self.mask_latents, self.target_image_latents),
+            dim=1,
+        )
+        degraded_noise = self.unet(x)
+
+        return sag.scale * (noise - degraded_noise)
 
 
 class SlicedEncoderMixin(nn.Module):
