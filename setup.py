@@ -85,7 +85,6 @@ setup(
         "numpy>=1.22.0,<1.27.0",
         "tqdm>=4.64.0",
         "diffusers>=0.3.0",
-        "imageio>=2.9.0",
         "Pillow>=9.1.0",
         "psutil>5.7.3",
         "omegaconf>=2.1.1",
