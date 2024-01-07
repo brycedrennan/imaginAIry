@@ -1,5 +1,6 @@
 """Functions for creating animations from images."""
 import os.path
+from typing import TYPE_CHECKING, List
 
 import cv2
 import torch
@@ -12,18 +13,24 @@ from imaginairy.utils.img_utils import (
     pillow_img_to_opencv_img,
 )
 
+if TYPE_CHECKING:
+    from PIL import Image
+
+    from imaginairy.utils.img_utils import LazyLoadingImage
+
 
 def make_bounce_animation(
-    imgs,
-    outpath,
+    imgs: "List[Image.Image | LazyLoadingImage | torch.Tensor]",
+    outpath: str,
     transition_duration_ms=500,
     start_pause_duration_ms=1000,
     end_pause_duration_ms=2000,
+    max_fps=20,
 ):
     first_img = imgs[0]
-    last_img = imgs[-1]
     middle_imgs = imgs[1:-1]
-    max_fps = 20
+    last_img = imgs[-1]
+
     max_frames = int(round(transition_duration_ms / 1000 * max_fps))
     min_duration = int(1000 / 20)
     if middle_imgs:
@@ -37,20 +44,8 @@ def make_bounce_animation(
     frames = [first_img, *middle_imgs, last_img, *list(reversed(middle_imgs))]
 
     # convert from latents
-    converted_frames = []
-
-    for frame in frames:
-        if isinstance(frame, torch.Tensor):
-            frame = model_latents_to_pillow_imgs(frame)[0]
-        converted_frames.append(frame)
-    frames = converted_frames
-    max_size = max([frame.size for frame in frames])
-    converted_frames = []
-    for frame in frames:
-        if frame.size != max_size:
-            frame = frame.resize(max_size)
-        converted_frames.append(frame)
-    frames = converted_frames
+    converted_frames = _ensure_pillow_images(frames)
+    converted_frames = _ensure_images_same_size(converted_frames)
 
     durations = (
         [start_pause_duration_ms]
@@ -59,7 +54,29 @@ def make_bounce_animation(
         + [progress_duration] * len(middle_imgs)
     )
 
-    make_animation(imgs=frames, outpath=outpath, frame_duration_ms=durations)
+    make_animation(imgs=converted_frames, outpath=outpath, frame_duration_ms=durations)
+
+
+def _ensure_pillow_images(
+    imgs: "List[Image.Image | LazyLoadingImage | torch.Tensor]",
+) -> "List[Image.Image]":
+    converted_frames: "List[Image.Image]" = []
+    for frame in imgs:
+        if isinstance(frame, torch.Tensor):
+            converted_frames.append(model_latents_to_pillow_imgs(frame)[0])
+        else:
+            converted_frames.append(frame)  # type: ignore
+    return converted_frames
+
+
+def _ensure_images_same_size(imgs: "List[Image.Image]") -> "List[Image.Image]":
+    max_size = max([frame.size for frame in imgs])
+    converted_frames = []
+    for frame in imgs:
+        if frame.size != max_size:
+            frame = frame.resize(max_size)
+        converted_frames.append(frame)
+    return converted_frames
 
 
 def make_slideshow_animation(
@@ -79,7 +96,9 @@ def make_slideshow_animation(
     make_animation(imgs=converted_frames, outpath=outpath, frame_duration_ms=durations)
 
 
-def make_animation(imgs, outpath, frame_duration_ms=100, captions=None):
+def make_animation(
+    imgs, outpath, frame_duration_ms: int | List[int] = 100, captions=None
+):
     imgs = imgpaths_to_imgs(imgs)
     ext = os.path.splitext(outpath)[1].lower().strip(".")
 
@@ -89,7 +108,7 @@ def make_animation(imgs, outpath, frame_duration_ms=100, captions=None):
         for img, caption in zip(imgs, captions):
             add_caption_to_image(img, caption)
 
-    if ext == "gif":
+    if ext == "gif" or ext == "webp":
         make_gif_animation(
             imgs=imgs, outpath=outpath, frame_duration_ms=frame_duration_ms
         )
