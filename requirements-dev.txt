@@ -88,8 +88,6 @@ idna==3.6
     #   anyio
     #   httpx
     #   requests
-imageio==2.33.1
-    # via imaginAIry (setup.py)
 importlib-metadata==7.0.1
     # via diffusers
 iniconfig==2.0.0
@@ -150,7 +148,6 @@ numpy==1.24.4
     # via
     #   -c tests/constraints.txt
     #   diffusers
-    #   imageio
     #   imaginAIry (setup.py)
     #   jaxtyping
     #   opencv-python
@@ -178,7 +175,6 @@ pathspec==0.12.1
 pillow==10.2.0
     # via
     #   diffusers
-    #   imageio
     #   imaginAIry (setup.py)
     #   torchvision
 platformdirs==4.1.0
