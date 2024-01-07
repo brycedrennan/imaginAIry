@@ -5,18 +5,60 @@ from functools import lru_cache
 
 import numpy as np
 import torch
-from facexlib.utils.face_restoration_helper import FaceRestoreHelper
 from PIL import Image
 from torchvision.transforms.functional import normalize
 
 from imaginairy.utils.model_manager import get_cached_url_path
 from imaginairy.vendored.basicsr.img_util import img2tensor, tensor2img
 from imaginairy.vendored.codeformer.codeformer_arch import CodeFormer
+from imaginairy.vendored.facexlib.utils.face_restoration_helper import FaceRestoreHelper
 
 logger = logging.getLogger(__name__)
 
+
 face_restore_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 half_mode = face_restore_device == "cuda"
+
+
+def load_file_from_url(
+    url, model_dir=None, progress=True, file_name=None, save_dir=None
+):
+    return get_cached_url_path(url, category="facexlib")
+
+
+@lru_cache(maxsize=1)
+def patch_download_function_in_facexlib_modules():
+    """Replaces the custom weights downloaded with the standard imaginairy one."""
+    import imaginairy.vendored.facexlib.utils.misc
+    from imaginairy.vendored.facexlib import (
+        alignment,
+        assessment,
+        detection,
+        headpose,
+        matting,
+        parsing,
+        recognition,
+        tracking,
+        visualization,
+    )
+
+    modules = [
+        alignment,
+        assessment,
+        detection,
+        headpose,
+        matting,
+        parsing,
+        recognition,
+        tracking,
+        visualization,
+        imaginairy.vendored.facexlib.utils.misc,
+    ]
+    for m in modules:
+        m.load_file_from_url = load_file_from_url
+
+
+patch_download_function_in_facexlib_modules()
 
 
 @lru_cache

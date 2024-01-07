@@ -222,6 +222,18 @@ vendorize_refiners:
     find ./imaginairy/vendored/refiners/ -type f -name "*.py" -exec sed -i '' 's/import refiners/import imaginairy.vendored.refiners/g' {} + &&\
 	make af
 
+vendorize_facexlib:
+	export REPO=git@github.com:xinntao/facexlib.git PKG=facexlib COMMIT=260620ae93990a300f4b16448df9bb459f1caba9 && \
+	make download_repo REPO=$$REPO PKG=$$PKG COMMIT=$$COMMIT && \
+	mkdir -p ./imaginairy/vendored/$$PKG && \
+	rm -rf ./imaginairy/vendored/$$PKG/* && \
+	cp -R ./downloads/$$PKG/facexlib/* ./imaginairy/vendored/$$PKG/ && \
+	rm -rf ./imaginairy/vendored/$$PKG/weights && \
+	cp ./downloads/$$PKG/LICENSE ./imaginairy/vendored/$$PKG/ && \
+	echo "vendored from $$REPO @ $$COMMIT" | tee ./imaginairy/vendored/$$PKG/readme.txt
+	find ./imaginairy/vendored/facexlib/ -type f -name "*.py" -exec sed -i '' 's/from facexlib/from imaginairy.vendored.facexlib/g' {} + &&\
+	sed -i '' '/from \.version import __gitsha__, __version__/d' ./imaginairy/vendored/facexlib/__init__.py
+	make af
 
 vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
 	mkdir -p ./downloads
