@@ -1,5 +1,5 @@
 
-#ImaginAIry 🤖🧠
+# ImaginAIry 🤖🧠
 **Pythonic AI generation of images and videos**
 
 [![Downloads](https://pepy.tech/badge/imaginairy)](https://pepy.tech/project/imaginairy)
@@ -61,12 +61,12 @@ pip install imaginairy
     result.img.save("sun_set_green_valley.png")
     ```
 
-<img src="/assets/028374_1_ddim50_PS7.5_wide_shot_of_sun_setting_on_a_green_valley_[generated].jpg" width="100%" height="auto">
+<img src="assets/028374_1_ddim50_PS7.5_wide_shot_of_sun_setting_on_a_green_valley_[generated].jpg" width="100%" height="auto">
 
 
 ---
 
-## Image Generation Control
+### Image Generation Control
 Guide the generation process by providing body poses, depth maps, canny edges, hed boundaries, normal maps, or even QR codes.
 
 #### Body Pose Control
@@ -270,7 +270,7 @@ Replaces existing details in an image. Good to use with --init-image-strength 0.
     ```
 
 === "Python"
-    ``` py
+    ```py
     from imaginairy.api.generate import imagine
     from imaginairy.schema import ImaginePrompt, ControlInput, LazyLoadingImage
 
@@ -323,10 +323,10 @@ allow the tool to generate one for you.
     ```
 
 === "Python"
-    ``` py
+    ```py
     from imaginairy.api.video_sample import generate_video
 
     generate_video(input_path="assets/rocket-wide.png")
 
     ```
-<img src="/assets/svd-rocket.gif" alt="portrait photo of a freckled woman" width="50%" height="auto">
+<img src="assets/svd-rocket.gif" width="50%" height="auto">
