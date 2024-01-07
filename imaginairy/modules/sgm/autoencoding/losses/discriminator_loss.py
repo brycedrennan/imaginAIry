@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 import torchvision
 from einops import rearrange
-from matplotlib import colormaps, pyplot as plt
 
 from imaginairy.modules.sgm.autoencoding.lpips.loss.lpips import LPIPS
 from imaginairy.modules.sgm.autoencoding.lpips.model.model import weights_init
@@ -98,6 +97,8 @@ class GeneralLPIPSWithDiscriminator(nn.Module):
     def log_images(
         self, inputs: torch.Tensor, reconstructions: torch.Tensor
     ) -> Dict[str, torch.Tensor]:
+        from matplotlib import colormaps, pyplot as plt
+
         # calc logits of real/fake
         logits_real = self.discriminator(inputs.contiguous().detach())
         if len(logits_real.shape) < 4:

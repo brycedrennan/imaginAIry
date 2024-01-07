@@ -78,7 +78,6 @@ setup(
         "click-help-colors>=0.9.1",
         "click-shell>=2.0",
         "protobuf != 3.20.2, != 3.19.5",
-        "facexlib>=0.2.1.1",
         "fastapi>=0.70.0",
         "ftfy>=6.0.1",  # for vendored clip
         "torch>=2.1.0",
@@ -94,6 +93,8 @@ setup(
         "opencv-python>=4.4.0.46",
         # need to migration to 2.0
         "pydantic>=2.3.0",
+        # pyparsing used for masking logic and creating text images
+        "pyparsing>=3.0.0",
         "requests>=2.28.1",
         # "refiners>=0.2.0",
         "jaxtyping>=0.2.23",  # refiners dependency

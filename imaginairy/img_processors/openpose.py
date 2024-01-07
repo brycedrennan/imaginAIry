@@ -5,7 +5,6 @@ from collections import OrderedDict
 from functools import lru_cache
 
 import cv2
-import matplotlib as mpl
 import numpy as np
 import torch
 from scipy.ndimage.filters import gaussian_filter
@@ -125,6 +124,8 @@ def draw_bodypose(canvas, candidate, subset):
 
 # image drawed by opencv is not good.
 def draw_handpose(canvas, all_hand_peaks, show_number=False):
+    import matplotlib as mpl
+
     edges = [
         [0, 1],
         [1, 2],

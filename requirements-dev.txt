@@ -38,12 +38,8 @@ colorama==0.4.6
     # via
     #   griffe
     #   mkdocs-material
-contourpy==1.2.0
-    # via matplotlib
 coverage==7.4.0
     # via -r requirements-dev.in
-cycler==0.12.1
-    # via matplotlib
 diffusers==0.25.0
     # via imaginAIry (setup.py)
 einops==0.7.0
@@ -52,8 +48,6 @@ exceptiongroup==1.2.0
     # via
     #   anyio
     #   pytest
-facexlib==0.3.0
-    # via imaginAIry (setup.py)
 fastapi==0.108.0
     # via imaginAIry (setup.py)
 filelock==3.13.1
@@ -62,10 +56,6 @@ filelock==3.13.1
     #   huggingface-hub
     #   torch
     #   transformers
-filterpy==1.4.5
-    # via facexlib
-fonttools==4.47.0
-    # via matplotlib
 fsspec==2023.12.2
     # via
     #   huggingface-hub
@@ -86,7 +76,7 @@ httpcore==1.0.2
     # via httpx
 httpx==0.26.0
     # via -r requirements-dev.in
-huggingface-hub==0.20.1
+huggingface-hub==0.20.2
     # via
     #   diffusers
     #   open-clip-torch
@@ -112,12 +102,8 @@ jinja2==3.1.2
     #   mkdocs-material
     #   mkdocstrings
     #   torch
-kiwisolver==1.4.5
-    # via matplotlib
 kornia==0.7.1
     # via imaginAIry (setup.py)
-llvmlite==0.41.1
-    # via numba
 markdown==3.5.1
     # via
     #   mkdocs
@@ -131,10 +117,6 @@ markupsafe==2.1.3
     #   jinja2
     #   mkdocs
     #   mkdocstrings
-matplotlib==3.7.4
-    # via
-    #   -c tests/constraints.txt
-    #   filterpy
 mergedeep==1.3.4
     # via mkdocs
 mkdocs==1.5.3
@@ -164,20 +146,13 @@ mypy-extensions==1.0.0
     # via mypy
 networkx==3.2.1
     # via torch
-numba==0.58.1
-    # via facexlib
 numpy==1.24.4
     # via
     #   -c tests/constraints.txt
-    #   contourpy
     #   diffusers
-    #   facexlib
-    #   filterpy
     #   imageio
     #   imaginAIry (setup.py)
     #   jaxtyping
-    #   matplotlib
-    #   numba
     #   opencv-python
     #   scipy
     #   torchvision
@@ -187,14 +162,11 @@ omegaconf==2.3.0
 open-clip-torch==2.23.0
     # via imaginAIry (setup.py)
 opencv-python==4.9.0.80
-    # via
-    #   facexlib
-    #   imaginAIry (setup.py)
+    # via imaginAIry (setup.py)
 packaging==23.2
     # via
     #   huggingface-hub
     #   kornia
-    #   matplotlib
     #   mkdocs
     #   pytest
     #   pytest-sugar
@@ -206,10 +178,8 @@ pathspec==0.12.1
 pillow==10.2.0
     # via
     #   diffusers
-    #   facexlib
     #   imageio
     #   imaginAIry (setup.py)
-    #   matplotlib
     #   torchvision
 platformdirs==4.1.0
     # via
@@ -236,7 +206,7 @@ pymdown-extensions==10.7
     #   mkdocs-material
     #   mkdocstrings
 pyparsing==3.1.1
-    # via matplotlib
+    # via imaginAIry (setup.py)
 pytest==7.4.4
     # via
     #   -r requirements-dev.in
@@ -250,9 +220,7 @@ pytest-randomly==3.15.0
 pytest-sugar==0.9.7
     # via -r requirements-dev.in
 python-dateutil==2.8.2
-    # via
-    #   ghp-import
-    #   matplotlib
+    # via ghp-import
 pyyaml==6.0.1
     # via
     #   huggingface-hub
@@ -292,8 +260,6 @@ safetensors==0.4.1
     #   transformers
 scipy==1.10.1
     # via
-    #   facexlib
-    #   filterpy
     #   imaginAIry (setup.py)
     #   torchdiffeq
 sentencepiece==0.1.99
@@ -324,7 +290,6 @@ tomli==2.0.1
     #   pytest
 torch==2.1.2
     # via
-    #   facexlib
     #   imaginAIry (setup.py)
     #   kornia
     #   open-clip-torch
@@ -335,13 +300,11 @@ torchdiffeq==0.2.3
     # via imaginAIry (setup.py)
 torchvision==0.16.2
     # via
-    #   facexlib
     #   imaginAIry (setup.py)
     #   open-clip-torch
     #   timm
 tqdm==4.66.1
     # via
-    #   facexlib
     #   huggingface-hub
     #   imaginAIry (setup.py)
     #   open-clip-torch
@@ -350,13 +313,13 @@ transformers==4.36.2
     # via imaginAIry (setup.py)
 typeguard==2.13.3
     # via jaxtyping
-types-pillow==10.1.0.2
+types-pillow==10.1.0.20240106
     # via -r requirements-dev.in
-types-psutil==5.9.5.17
+types-psutil==5.9.5.20240106
     # via -r requirements-dev.in
-types-requests==2.31.0.20231231
+types-requests==2.31.0.20240106
     # via -r requirements-dev.in
-types-tqdm==4.66.0.5
+types-tqdm==4.66.0.20240106
     # via -r requirements-dev.in
 typing-extensions==4.9.0
     # via
@@ -378,7 +341,7 @@ uvicorn==0.25.0
     # via imaginAIry (setup.py)
 watchdog==3.0.0
     # via mkdocs
-wcwidth==0.2.12
+wcwidth==0.2.13
     # via ftfy
 wheel==0.42.0
     # via -r requirements-dev.in
