@@ -217,7 +217,7 @@ def generate_single_image(
         if prompt.allow_compose_phase:
             with lc.timing("composition"):
                 cutoff_size = get_model_default_image_size(prompt.model_architecture)
-                cutoff_size = (int(cutoff_size[0] * 1.30), int(cutoff_size[1] * 1.30))
+                cutoff_size = (int(cutoff_size[0] * 1.00), int(cutoff_size[1] * 1.00))
                 compose_kwargs = {
                     "prompt": prompt,
                     "target_height": prompt.height,
