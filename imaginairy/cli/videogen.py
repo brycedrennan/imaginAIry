@@ -25,7 +25,20 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--fps", default=6, type=int, help="FPS for the AI to target when generating video"
 )
+@click.option(
+    "--size",
+    default="1024,576",
+    show_default=True,
+    type=str,
+    help="Video dimensions. Can be a named size, single integer, or WIDTHxHEIGHT pair. Should be multiple of 8. Examples: SVD, 512x512, 4k, UHD, 8k, 512, 1080p",
+)
 @click.option("--output-fps", default=None, type=int, help="FPS for the output video")
+@click.option(
+    "--output-format",
+    default="webp",
+    help="Output video format",
+    type=click.Choice(["webp", "mp4", "gif"]),
+)
 @click.option(
     "--motion-amount",
     default=127,
@@ -54,7 +67,9 @@ def videogen_cmd(
     steps,
     model,
     fps,
+    size,
     output_fps,
+    output_format,
     motion_amount,
     repeats,
     cond_aug,
@@ -83,7 +98,9 @@ def videogen_cmd(
             num_steps=steps,
             model_name=model,
             fps_id=fps,
+            size=size,
             output_fps=output_fps,
+            output_format=output_format,
             motion_bucket_id=motion_amount,
             cond_aug=cond_aug,
             seed=seed,
