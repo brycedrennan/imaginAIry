@@ -19,6 +19,7 @@ from PIL import Image
 from torchvision.transforms import ToTensor
 
 from imaginairy import config
+from imaginairy.enhancers.video_interpolation.rife.interpolate import interpolate_images
 from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import (
     default,
@@ -91,7 +92,6 @@ def generate_video(
         )
         logger.warning(msg)
 
-    start_time = time.perf_counter()
     output_fps = default(output_fps, fps_id)
 
     video_model_config = config.MODEL_WEIGHT_CONFIG_LOOKUP.get(model_name, None)
@@ -139,6 +139,7 @@ def generate_video(
     expected_size = (vid_width, vid_height)
     for _ in range(repetitions):
         for input_path in all_img_paths:
+            start_time = time.perf_counter()
             _seed = default(seed, random.randint(0, 1000000))
             torch.manual_seed(_seed)
             logger.info(
@@ -318,15 +319,32 @@ def save_video(samples: torch.Tensor, video_filename: str, output_fps: int):
     os.system(f"ffmpeg -i {video_filename} -c:v libx264 {video_path_h264}")
 
 
-def save_video_bounce(samples: torch.Tensor, video_filename: str, output_fps: int):
+def save_video_bounce(
+    samples: torch.Tensor, video_filename: str, output_fps: int, interpolate_fps=60
+):
     frames_np = (
         (torch.permute(samples, (0, 2, 3, 1)) * 255).cpu().numpy().astype(np.uint8)
     )
+    transition_duration = len(frames_np) / float(output_fps)
+    frames_pil = [Image.fromarray(frame) for frame in frames_np]
+    if interpolate_fps:
+        # bring it up to at least 60 fps
+        fps_multiplier = int(math.ceil(interpolate_fps / output_fps))
+        frames_pil = interpolate_images(frames_pil, fps_multiplier=fps_multiplier)
 
+    transition_duration_ms = transition_duration * 1000
+    logger.info(
+        f"Interpolated from {len(frames_np)} to {len(frames_pil)} frames ({fps_multiplier} multiplier)"
+    )
+    logger.info(
+        f"Making bounce animation with transition duration {transition_duration_ms:.1f}ms"
+    )
     make_bounce_animation(
-        imgs=[Image.fromarray(frame) for frame in frames_np],
+        imgs=frames_pil,
         outpath=video_filename,
-        end_pause_duration_ms=750,
+        transition_duration_ms=transition_duration_ms,
+        end_pause_duration_ms=100,
+        max_fps=60,
     )
 
 

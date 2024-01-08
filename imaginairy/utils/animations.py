@@ -1,6 +1,7 @@
 """Functions for creating animations from images."""
+import logging
 import os.path
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Sequence
 
 import cv2
 import torch
@@ -19,8 +20,11 @@ if TYPE_CHECKING:
     from imaginairy.utils.img_utils import LazyLoadingImage
 
 
+logger = logging.getLogger(__name__)
+
+
 def make_bounce_animation(
-    imgs: "List[Image.Image | LazyLoadingImage | torch.Tensor]",
+    imgs: "Sequence[Image.Image | LazyLoadingImage | torch.Tensor]",
     outpath: str,
     transition_duration_ms=500,
     start_pause_duration_ms=1000,
@@ -32,7 +36,7 @@ def make_bounce_animation(
     last_img = imgs[-1]
 
     max_frames = int(round(transition_duration_ms / 1000 * max_fps))
-    min_duration = int(1000 / 20)
+    min_duration = int(1000 / max_fps)
     if middle_imgs:
         progress_duration = int(round(transition_duration_ms / len(middle_imgs)))
     else:
@@ -53,7 +57,9 @@ def make_bounce_animation(
         + [end_pause_duration_ms]
         + [progress_duration] * len(middle_imgs)
     )
-
+    logger.info(
+        f"Making animation with {len(converted_frames)} frames and {progress_duration:.1f}ms per transition frame."
+    )
     make_animation(imgs=converted_frames, outpath=outpath, frame_duration_ms=durations)
 
 
@@ -150,8 +156,8 @@ def select_images_by_duration_at_fps(images, durations_ms, fps=30):
     for i, image in enumerate(images):
         duration = durations_ms[i] / 1000
         num_frames = int(round(duration * fps))
-        print(
-            f"Showing image {i} for {num_frames} frames for {durations_ms[i]}ms at {fps} fps."
-        )
+        # print(
+        #     f"Showing image {i} for {num_frames} frames for {durations_ms[i]}ms at {fps} fps."
+        # )
         for j in range(num_frames):
             yield image
