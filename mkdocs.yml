@@ -35,8 +35,8 @@ plugins:
             show_source: true
 
 nav:
-  - Home: index.md
-  - Docs:
+  - Overview: index.md
+  - API Docs:
       - CLI:
           - Create Image: docs/CLI/imagine.md
           - Create Video: docs/CLI/videogen.md
