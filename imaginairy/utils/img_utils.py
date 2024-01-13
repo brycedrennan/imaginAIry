@@ -258,3 +258,26 @@ def calc_scale_to_fit_within(height: int, width: int, max_size) -> float:
     height_ratio = max_height / height
 
     return min(width_ratio, height_ratio)
+
+
+def aspect_ratio(width, height):
+    """
+    Calculate the aspect ratio of a given width and height.
+
+    Args:
+    width (int): The width dimension.
+    height (int): The height dimension.
+
+    Returns:
+    str: The aspect ratio in the format 'X:Y'.
+    """
+    from math import gcd
+
+    # Calculate the greatest common divisor
+    divisor = gcd(width, height)
+
+    # Calculate the aspect ratio
+    x = width // divisor
+    y = height // divisor
+
+    return f"{x}:{y}"

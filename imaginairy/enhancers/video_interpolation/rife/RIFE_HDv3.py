@@ -6,7 +6,7 @@ from .IFNet_HDv3 import IFNet
 class Model:
     def __init__(self):
         self.flownet = IFNet()
-        self.version: float
+        self.version = None
 
     def eval(self):
         self.flownet.eval()

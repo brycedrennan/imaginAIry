@@ -1,4 +1,3 @@
-import logging
 import re
 from dataclasses import asdict, dataclass, field
 from typing import Dict
@@ -7,7 +6,9 @@ import torch
 from safetensors import safe_open
 from torch import device as Device
 
-logger = logging.getLogger(__name__)
+from imaginairy.utils.log_utils import getLogger
+
+logger = getLogger(__name__)
 
 
 TensorDict = Dict[str, torch.Tensor]
@@ -21,7 +22,7 @@ class WeightTranslationMap:
     source_aliases: dict[str, str] = field(default_factory=dict)
     reshapes: dict[str, tuple[int, ...]] = field(default_factory=dict)
 
-    def load_and_translate_weights(
+    def load_untranslated_weights(
         self, source_path: str, device: Device | str = "cpu"
     ) -> TensorDict:
         extension = source_path.split(".")[-1]
@@ -34,7 +35,12 @@ class WeightTranslationMap:
         else:
             msg = f"Unsupported extension {extension}"
             raise ValueError(msg)
+        return source_weights
 
+    def load_and_translate_weights(
+        self, source_path: str, device: Device | str = "cpu"
+    ) -> TensorDict:
+        source_weights = self.load_untranslated_weights(source_path, device=device)
         return self.translate_weights(source_weights)
 
     def translate_weights(self, source_weights: TensorDict) -> TensorDict:
@@ -90,19 +96,21 @@ def check_nan_path(path: str, device):
 
 
 def translate_weights(
-    source_weights: TensorDict, weight_map: WeightTranslationMap
+    source_weights: TensorDict, weight_map: WeightTranslationMap, nan_check=False
 ) -> TensorDict:
     new_state_dict: TensorDict = {}
     # check source weights for nan
-    for k, v in source_weights.items():
-        nan_count = torch.sum(torch.isnan(v)).item()
-        if nan_count:
-            msg = (
-                f"Found {nan_count} nan values in {k} of source state dict."
-                " This could indicate the source weights are corrupted and "
-                "need to be re-downloaded. "
-            )
-            logger.warning(msg)
+    if nan_check:
+        with logger.timed_debug("Checking for nans"):
+            for k, v in source_weights.items():
+                nan_count = torch.sum(torch.isnan(v)).item()
+                if nan_count:
+                    msg = (
+                        f"Found {nan_count} nan values in {k} of source state dict."
+                        " This could indicate the source weights are corrupted and "
+                        "need to be re-downloaded. "
+                    )
+                    logger.warning(msg)
 
     # print(f"Translating {len(source_weights)} weights")
     # print(f"Using {len(weight_map.name_map)} name mappings")
@@ -110,79 +118,85 @@ def translate_weights(
 
     source_weights = flatten_dict(source_weights)
 
-    for source_key in list(source_weights.keys()):
-        source_key = weight_map.source_aliases.get(source_key, source_key)
-        try:
-            target_key = weight_map.name_map[source_key]
-            # print(f"Found {source_prefix} -> {target_prefix}")
-        except KeyError:
-            continue
-        if target_key is None:
-            # mapped to None means we ignore it
-            source_weights.pop(source_key)
-        else:
-            # print(f"Adding {target_key}")
+    with logger.timed_debug("Translating exact match keys", hide_below_ms=50):
+        for source_key in list(source_weights.keys()):
+            source_key = weight_map.source_aliases.get(source_key, source_key)
+            try:
+                target_key = weight_map.name_map[source_key]
+                # print(f"Found {source_prefix} -> {target_prefix}")
+            except KeyError:
+                continue
+            if target_key is None:
+                # mapped to None means we ignore it
+                source_weights.pop(source_key)
+                continue
+
             new_state_dict[target_key] = source_weights.pop(source_key)
 
-    for source_key in list(source_weights.keys()):
-        try:
-            source_prefix, suffix = source_key.rsplit(sep=".", maxsplit=1)
-        except ValueError:
-            # no dots
-            continue
-        # print(f"Checking {source_prefix} {suffix}")
+    with logger.timed_debug("Translating prefix matched keys", hide_below_ms=50):
+        for source_key in list(source_weights.keys()):
+            try:
+                source_prefix, suffix = source_key.rsplit(sep=".", maxsplit=1)
+            except ValueError:
+                # no dots
+                continue
+            # print(f"Checking {source_prefix} {suffix}")
 
-        source_prefix = weight_map.source_aliases.get(source_prefix, source_prefix)
-        try:
-            target_prefix = weight_map.name_map[source_prefix]
-            # print(f"Found {source_prefix} -> {target_prefix}")
-        except KeyError:
-            continue
-        if target_prefix is None:
-            # mapped to None means we ignore it
-            source_weights.pop(source_key)
-            continue
-        else:
-            target_key = ".".join([target_prefix, suffix])
-            # print(f"Adding {target_key}")
-            new_state_dict[target_key] = source_weights.pop(source_key)
+            source_prefix = weight_map.source_aliases.get(source_prefix, source_prefix)
+            try:
+                target_prefix = weight_map.name_map[source_prefix]
+                # print(f"Found {source_prefix} -> {target_prefix}")
+            except KeyError:
+                continue
+            if target_prefix is None:
+                # mapped to None means we ignore it
+                source_weights.pop(source_key)
+                continue
+            else:
+                target_key = ".".join([target_prefix, suffix])
+                # print(f"Adding {target_key}")
+                new_state_dict[target_key] = source_weights.pop(source_key)
 
-    for source_key in list(source_weights.keys()):
-        try:
-            source_prefix, suffix = source_key.rsplit(sep=".", maxsplit=1)
-        except ValueError:
-            # no dots
-            continue
-        for pattern, replace_pattern in weight_map.regex_map.items():
-            match = re.match(pattern, source_prefix)
-            if match:
-                match_data = match.groupdict()
-                new_k = render_fstring(replace_pattern, match_data)
-                new_k = ".".join([new_k, suffix])
-                new_state_dict[new_k] = source_weights.pop(source_key)
+    with logger.timed_debug("Translating regex matched keys", hide_below_ms=50):
+        for source_key in list(source_weights.keys()):
+            try:
+                source_prefix, suffix = source_key.rsplit(sep=".", maxsplit=1)
+            except ValueError:
+                # no dots
+                continue
+            for pattern, replace_pattern in weight_map.regex_map.items():
+                match = re.match(pattern, source_prefix)
+                if match:
+                    match_data = match.groupdict()
+                    new_k = render_fstring(replace_pattern, match_data)
+                    new_k = ".".join([new_k, suffix])
+                    new_state_dict[new_k] = source_weights.pop(source_key)
 
     if source_weights:
         msg = f"Unmapped keys: {list(source_weights.keys())}"
         logger.info(msg)
         for k in source_weights:
             if isinstance(source_weights[k], torch.Tensor):
-                print(f"  {k}: {source_weights[k].shape}")
+                logger.info(f"  Unmapped key '{k}': {source_weights[k].shape}")
             else:
-                print(f"  {k}: {repr(source_weights[k])[:100]}")
+                logger.info(f"  Unmapped key '{k}': {repr(source_weights[k])[:100]}")
 
-    if weight_map.reshapes:
-        for key, new_shape in weight_map.reshapes.items():
-            if key in new_state_dict:
-                new_state_dict[key] = new_state_dict[key].reshape(new_shape)
+    with logger.timed_debug("reshaping weights", hide_below_ms=50):
+        if weight_map.reshapes:
+            for key, new_shape in weight_map.reshapes.items():
+                if key in new_state_dict:
+                    new_state_dict[key] = new_state_dict[key].reshape(new_shape)
 
     # check for nan values
-    for k in list(new_state_dict.keys()):
-        v = new_state_dict[k]
-        nan_count = torch.sum(torch.isnan(v)).item()
-        if nan_count:
-            logger.warning(
-                f"Found {nan_count} nan values in {k} of converted state dict."
-            )
+    if nan_check:
+        with logger.timed_debug("Checking for nans", hide_below_ms=50):
+            for k in list(new_state_dict.keys()):
+                v = new_state_dict[k]
+                nan_count = torch.sum(torch.isnan(v)).item()
+                if nan_count:
+                    logger.warning(
+                        f"Found {nan_count} nan values in {k} of converted state dict."
+                    )
 
     return new_state_dict
 

@@ -38,6 +38,12 @@ from imaginairy.vendored.refiners.foundationals.latent_diffusion.model import (
     LatentDiffusionModel,
 )
 from imaginairy.weight_management import translators
+from imaginairy.weight_management.translators import (
+    DoubleTextEncoderTranslator,
+    diffusers_autoencoder_kl_to_refiners_translator,
+    diffusers_unet_sdxl_to_refiners_translator,
+    load_weight_map,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -103,36 +109,6 @@ def load_model_from_config(config, weights_location, half_mode=False):
     model.init_from_state_dict(base_model_dict)
     if half_mode:
         model = model.half()
-    model.to(get_device())
-    model.eval()
-    return model
-
-
-def load_model_from_config_old(
-    config, weights_location, control_weights_locations=None, half_mode=False
-):
-    model = instantiate_from_config(config.model)
-    base_model_dict = load_state_dict(weights_location, half_mode=half_mode)
-    model.init_from_state_dict(base_model_dict)
-
-    control_weights_locations = control_weights_locations or []
-    controlnets = []
-    for control_weights_location in control_weights_locations:
-        controlnet_state_dict = load_state_dict(
-            control_weights_location, half_mode=half_mode
-        )
-        controlnet_state_dict = {
-            k.replace("control_model.", ""): v for k, v in controlnet_state_dict.items()
-        }
-        controlnet = instantiate_from_config(model.control_stage_config)
-        controlnet.load_state_dict(controlnet_state_dict)
-        controlnet.to(get_device())
-        controlnets.append(controlnet)
-        model.set_control_models(controlnets)
-
-    if half_mode:
-        model = model.half()
-
     model.to(get_device())
     model.eval()
     return model
@@ -286,7 +262,7 @@ def _get_diffusion_model_refiners(
 
     architecture = iconfig.MODEL_ARCHITECTURE_LOOKUP[architecture_alias]
     if architecture.primary_alias in ("sd15", "sd15inpaint"):
-        sd = _get_sd15_diffusion_model_refiners(
+        sd = load_sd15_pipeline(
             weights_location=weights_location,
             for_inpainting=for_inpainting,
             device=device,
@@ -301,10 +277,11 @@ def _get_diffusion_model_refiners(
     MOST_RECENTLY_LOADED_MODEL = sd
 
     msg = (
-        f"sd dtype:{sd.dtype} device:{sd.device}\n"
-        f"sd.unet dtype:{sd.unet.dtype} device:{sd.unet.device}\n"
-        f"sd.lda dtype:{sd.lda.dtype} device:{sd.lda.device}\n"
-        f"sd.clip_text_encoder dtype:{sd.clip_text_encoder.dtype} device:{sd.clip_text_encoder.device}\n"
+        "Pipeline loaded "
+        f"sd[dtype:{sd.dtype} device:{sd.device}] "
+        f"sd.unet[dtype:{sd.unet.dtype} device:{sd.unet.device}] "
+        f"sd.lda[dtype:{sd.lda.dtype} device:{sd.lda.device}]"
+        f"sd.clip_text_encoder[dtype:{sd.clip_text_encoder.dtype} device:{sd.clip_text_encoder.device}]"
     )
     logger.debug(msg)
 
@@ -312,7 +289,7 @@ def _get_diffusion_model_refiners(
 
 
 # new
-def _get_sd15_diffusion_model_refiners(
+def load_sd15_pipeline(
     weights_location: str,
     for_inpainting: bool = False,
     device=None,
@@ -756,7 +733,9 @@ def load_sd15_diffusers_weights(base_url: str, device=None):
     return vae_weights, unet_weights, text_encoder_weights
 
 
-def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16):
+def load_sdxl_pipeline_from_diffusers_weights(
+    base_url: str, device=None, dtype=torch.float16
+):
     from imaginairy.utils import get_device
 
     device = device or get_device()
@@ -817,11 +796,45 @@ def load_sdxl_diffusers_weights(base_url: str, device=None, dtype=torch.float16)
     return sd
 
 
-def load_sdxl_pipeline(base_url, device=None):
-    logger.info(f"Loading SDXL weights from {base_url}")
+def load_sdxl_pipeline_from_compvis_weights(
+    base_url: str, device=None, dtype=torch.float16
+):
+    from imaginairy.utils import get_device
+
     device = device or get_device()
-    sd = load_sdxl_diffusers_weights(base_url, device=device)
+    unet_weights, vae_weights, text_encoder_weights = load_sdxl_compvis_weights(
+        base_url
+    )
+    lda = SDXLAutoencoderSliced(device="cpu", dtype=dtype)
+    lda.load_state_dict(vae_weights, assign=True)
+    del vae_weights
+
+    unet = SDXLUNet(device="cpu", dtype=dtype, in_channels=4)
+    unet.load_state_dict(unet_weights, assign=True)
+    del unet_weights
+
+    text_encoder = DoubleTextEncoder(device="cpu", dtype=torch.float32)
+    text_encoder.load_state_dict(text_encoder_weights, assign=True)
+    del text_encoder_weights
+    lda = lda.to(device=device, dtype=torch.float32)
+    unet = unet.to(device=device)
+    text_encoder = text_encoder.to(device=device)
+    sd = StableDiffusion_XL(
+        device=device, dtype=None, lda=lda, unet=unet, clip_text_encoder=text_encoder
+    )
+
     return sd
+
+
+def load_sdxl_pipeline(base_url, device=None):
+    device = device or get_device()
+
+    with logger.timed_info(f"Loaded SDXL pipeline from {base_url}"):
+        if is_diffusers_repo_url(base_url):
+            sd = load_sdxl_pipeline_from_diffusers_weights(base_url, device=device)
+        else:
+            sd = load_sdxl_pipeline_from_compvis_weights(base_url, device=device)
+        return sd
 
 
 def open_weights(filepath, device=None):
@@ -940,3 +953,76 @@ def load_stable_diffusion_compvis_weights(weights_url):
     )
 
     return vae_state_dict, unet_state_dict, text_encoder_state_dict
+
+
+def load_sdxl_compvis_weights(url):
+    from safetensors import safe_open
+
+    weights_path = get_cached_url_path(url)
+    state_dict = {}
+    unet_state_dict = {}
+    vae_state_dict = {}
+    text_encoder_1_state_dict = {}
+    text_encoder_2_state_dict = {}
+    with safe_open(weights_path, framework="pt") as f:
+        for key in f.keys():  # noqa
+            if key.startswith("model.diffusion_model."):
+                unet_state_dict[key] = f.get_tensor(key)
+            elif key.startswith("first_stage_model"):
+                vae_state_dict[key] = f.get_tensor(key)
+            elif key.startswith("conditioner.embedders.0."):
+                text_encoder_1_state_dict[key] = f.get_tensor(key)
+            elif key.startswith("conditioner.embedders.1."):
+                text_encoder_2_state_dict[key] = f.get_tensor(key)
+            else:
+                state_dict[key] = f.get_tensor(key)
+                logger.warning(f"Unused key {key}")
+
+    unet_weightmap = load_weight_map("Compvis-UNet-SDXL-to-Diffusers")
+    vae_weightmap = load_weight_map("Compvis-Autoencoder-SDXL-to-Diffusers")
+    text_encoder_1_weightmap = load_weight_map("Compvis-TextEncoder-SDXL-to-Diffusers")
+    text_encoder_2_weightmap = load_weight_map(
+        "Compvis-OpenClipTextEncoder-SDXL-to-Diffusers"
+    )
+
+    diffusers_unet_state_dict = unet_weightmap.translate_weights(unet_state_dict)
+
+    refiners_unet_state_dict = (
+        diffusers_unet_sdxl_to_refiners_translator().translate_weights(
+            diffusers_unet_state_dict
+        )
+    )
+
+    diffusers_vae_state_dict = vae_weightmap.translate_weights(vae_state_dict)
+
+    refiners_vae_state_dict = (
+        diffusers_autoencoder_kl_to_refiners_translator().translate_weights(
+            diffusers_vae_state_dict
+        )
+    )
+
+    diffusers_text_encoder_1_state_dict = text_encoder_1_weightmap.translate_weights(
+        text_encoder_1_state_dict
+    )
+
+    for key in list(text_encoder_2_state_dict.keys()):
+        if key.endswith((".in_proj_bias", ".in_proj_weight")):
+            value = text_encoder_2_state_dict[key]
+            q, k, v = value.chunk(3, dim=0)
+            text_encoder_2_state_dict[f"{key}.0"] = q
+            text_encoder_2_state_dict[f"{key}.1"] = k
+            text_encoder_2_state_dict[f"{key}.2"] = v
+            del text_encoder_2_state_dict[key]
+
+    diffusers_text_encoder_2_state_dict = text_encoder_2_weightmap.translate_weights(
+        text_encoder_2_state_dict
+    )
+
+    refiners_text_encoder_weights = DoubleTextEncoderTranslator().translate_weights(
+        diffusers_text_encoder_1_state_dict, diffusers_text_encoder_2_state_dict
+    )
+    return (
+        refiners_unet_state_dict,
+        refiners_vae_state_dict,
+        refiners_text_encoder_weights,
+    )

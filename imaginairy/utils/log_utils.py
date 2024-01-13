@@ -5,6 +5,9 @@ import logging.config
 import re
 import time
 import warnings
+from contextlib import contextmanager
+from functools import lru_cache
+from logging import Logger
 from typing import Callable
 
 import torch.cuda
@@ -55,6 +58,73 @@ def increment_step():
     if _CURRENT_LOGGING_CONTEXT is None:
         return
     _CURRENT_LOGGING_CONTEXT.step_count += 1
+
+
+@contextmanager
+def timed_log_method(logger, level, msg, *args, hide_below_ms=0, **kwargs):
+    start_time = time.perf_counter()
+    try:
+        yield
+    finally:
+        end_time = time.perf_counter()
+        elapsed_ms = (end_time - start_time) * 1000
+        if elapsed_ms < hide_below_ms:
+            return
+        full_msg = f"{msg} (in {elapsed_ms:.1f}ms)"
+        logger.log(level, full_msg, *args, **kwargs, stacklevel=3)
+
+
+@lru_cache
+def add_timed_methods_to_logger():
+    """Monkey patches the default python logger to have timed logs"""
+
+    def create_timed_method(level):
+        def timed_method(self, msg, *args, hide_below_ms=0, **kwargs):
+            return timed_log_method(
+                self, level, msg, *args, hide_below_ms=hide_below_ms, **kwargs
+            )
+
+        return timed_method
+
+    logging.Logger.timed_debug = create_timed_method(logging.DEBUG)
+    logging.Logger.timed_info = create_timed_method(logging.INFO)
+    logging.Logger.timed_warning = create_timed_method(logging.WARNING)
+    logging.Logger.timed_error = create_timed_method(logging.ERROR)
+    logging.Logger.timed_critical = create_timed_method(logging.CRITICAL)
+
+
+add_timed_methods_to_logger()
+
+
+class TimedLogger(Logger):
+    def timed_debug(self, msg, *args, hide_below_ms=0, **kwargs):
+        return timed_log_method(
+            self, logging.DEBUG, msg, *args, hide_below_ms=hide_below_ms, **kwargs
+        )
+
+    def timed_info(self, msg, *args, hide_below_ms=0, **kwargs):
+        return timed_log_method(
+            self, logging.INFO, msg, *args, hide_below_ms=hide_below_ms, **kwargs
+        )
+
+    def timed_warning(self, msg, *args, hide_below_ms=0, **kwargs):
+        return timed_log_method(
+            self, logging.WARNING, msg, *args, hide_below_ms=hide_below_ms, **kwargs
+        )
+
+    def timed_error(self, msg, *args, hide_below_ms=0, **kwargs):
+        return timed_log_method(
+            self, logging.ERROR, msg, *args, hide_below_ms=hide_below_ms, **kwargs
+        )
+
+    def timed_critical(self, msg, *args, hide_below_ms=0, **kwargs):
+        return timed_log_method(
+            self, logging.CRITICAL, msg, *args, hide_below_ms=hide_below_ms, **kwargs
+        )
+
+
+def getLogger(name) -> TimedLogger:
+    return logging.getLogger(name)  # type: ignore
 
 
 class TimingContext:
