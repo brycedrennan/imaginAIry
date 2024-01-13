@@ -761,6 +761,12 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         return self.size[1]
 
     @property
+    def aspect_ratio(self) -> str:
+        from imaginairy.utils.img_utils import aspect_ratio
+
+        return aspect_ratio(width=self.width, height=self.height)
+
+    @property
     def should_use_inpainting(self) -> bool:
         return bool(self.outpaint or self.mask_image or self.mask_prompt)
 
@@ -787,7 +793,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             "    "
             f"negative-prompt:{neg_prompt}\n"
             "    "
-            f"size:{self.width}x{self.height}px "
+            f"size:{self.width}x{self.height}px-({self.aspect_ratio}) "
             f"seed:{self.seed} "
             f"prompt-strength:{self.prompt_strength} "
             f"steps:{self.steps} solver-type:{self.solver_type} "

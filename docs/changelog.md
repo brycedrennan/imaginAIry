@@ -1,7 +1,27 @@
 
 ## ChangeLog
 
-**14.0.0**
+**14.1.0**
+- 🎉 feature: make video generation smooth by adding frame interpolation
+- feature: SDXL weights in the compvis format can now be used
+- feature: allow video generation at any size specified by user
+- feature: video generations output in "bounce" format
+- feature: choose video output format: mp4, webp, or gif
+- feature: fix random seed handling in video generation
+- docs: auto-publish docs on push to master
+- build: remove imageio dependency
+- build: vendorize facexlib so we don't install its unneeded dependencies
+
+
+**14.0.4**
+- docs: add a documentation website at https://brycedrennan.github.io/imaginAIry/
+- build: remove fairscale dependency
+- fix: video generation was broken
+
+**14.0.3**
+- fix: several critical bugs with package
+- tests: add a wheel smoketest to detect these issues in the future
+
 **14.0.0**
 - 🎉 video generation using [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
   - add `--videogen` to any image generation to create a short video from the generated image
