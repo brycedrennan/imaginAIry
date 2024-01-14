@@ -3,7 +3,8 @@
         "text_model.embeddings.token_embedding": "Sum.TokenEncoder",
         "text_model.embeddings.position_embedding": "Sum.PositionalEncoder.Embedding",
         "text_model.final_layer_norm": "LayerNorm",
-        "text_projection": "Linear"
+        "text_projection": "Linear",
+        "text_model.embeddings.position_ids": null
     },
     "regex_map": {
         "text_model\\.encoder\\.layers\\.(?P<layer>\\d+)\\.layer_norm(?P<norm>\\d+)": "TransformerLayer_{int(layer) + 1}.Residual_{norm}.LayerNorm",
