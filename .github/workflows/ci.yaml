@@ -62,7 +62,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version:
+          - "3.10"
+          - "3.11"
+# torch for python 3.12 is not available yet
+# https://github.com/pytorch/pytorch/issues/110436
+#          - "3.12"
         os: ["ubuntu-latest"]
     steps:
     - uses: actions/checkout@v3
@@ -113,11 +118,12 @@ jobs:
           name: wheels
           path: dist/*.whl
   smoke-test-wheel:
+    needs: build-wheel
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11"]
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4.5.0
