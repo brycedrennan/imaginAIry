@@ -26,6 +26,8 @@
  - allow specification of filename format
  - chain multiple operations together imggen => videogen
    - https://github.com/pallets/click/tree/main/examples/imagepipe 
+ 
+ - 
 
  
  - https://huggingface.co/playgroundai/playground-v2-1024px-aesthetic
@@ -37,8 +39,11 @@
  
 
 #### Investigate
+ - use fancy noise https://github.com/Extraltodeus/noise_latent_perlinpinpin
+ - use latent upscaler https://github.com/city96/SD-Latent-Upscaler
+ - use latent interposer https://github.com/city96/SD-Latent-Interposer/tree/main
+ - https://github.com/madebyollin/taesd
  - textdiffusers https://jingyechen.github.io/textdiffuser2/
- - Scalecrafter https://yingqinghe.github.io/scalecrafter/
  - Fast diffusion with LCM Lora https://huggingface.co/latent-consistency/lcm-lora-sdv1-5/tree/main
  - 3d diffusion https://huggingface.co/stabilityai/stable-zero123
  - magic animate
@@ -185,4 +190,6 @@
     - [ColoassalAI](https://github.com/hpcaitech/ColossalAI/tree/main/examples/images/diffusion) - almost got it working but it's not easy enough to install to merit inclusion in imaginairy. We should check back in on this.
     - Xformers
     - Deepspeed
-    - 
+
+## Decided against
+ - Scalecrafter https://yingqinghe.github.io/scalecrafter/  - doesn't look any better than img2img
