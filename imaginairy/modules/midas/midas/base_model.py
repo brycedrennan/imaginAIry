@@ -2,7 +2,7 @@
 
 import torch
 
-from imaginairy.utils.model_manager import get_cached_url_path
+from imaginairy.utils.downloads import get_cached_url_path
 
 
 class BaseModel(torch.nn.Module):

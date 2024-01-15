@@ -2,8 +2,8 @@
 
 import safetensors
 
+from imaginairy.utils.downloads import get_cached_url_path
 from imaginairy.utils.model_manager import (
-    get_cached_url_path,
     open_weights,
     resolve_model_weights_config,
 )

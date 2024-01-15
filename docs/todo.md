@@ -13,11 +13,17 @@
  - ✅ add type checker
  - ✅ add interface for loading diffusers weights
  - ✅ SDXL support
- - sdxl inpainting 
+ - ✅ sdxl inpainting 
  - t2i adapters
+ - image prompts
  - embedding inputs
+ - save complete metadata to image
+  - recreate image from metadata
+ - auto-incoporate https://huggingface.co/madebyollin/sdxl-vae-fp16-fix
  - only output the main image unless some flag is set
- - allow selection of output video format
+ - ✅ allow selection of output video format
+ - test on python 3.11
+ - allow specification of filename format
  - chain multiple operations together imggen => videogen
    - https://github.com/pallets/click/tree/main/examples/imagepipe 
 
@@ -57,7 +63,7 @@
    - ✅ set up ci (test/lint/format)
    - ✅ unified pipeline (txt2img & img2img combined)
    - ✅ setup parallel testing
-   - add docs
+   - ✅ add docs
    - 🚫 remove yaml config
    - 🚫 delete more unused code
    - faster latent logging https://discuss.huggingface.co/t/decoding-latents-to-rgb-without-upscaling/23204/9
