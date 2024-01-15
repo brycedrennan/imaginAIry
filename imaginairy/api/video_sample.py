@@ -28,7 +28,7 @@ from imaginairy.utils import (
     platform_appropriate_autocast,
 )
 from imaginairy.utils.animations import make_bounce_animation
-from imaginairy.utils.model_manager import get_cached_url_path
+from imaginairy.utils.downloads import get_cached_url_path
 from imaginairy.utils.named_resolutions import normalize_image_size
 from imaginairy.utils.paths import PKG_ROOT
 

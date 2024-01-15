@@ -15,7 +15,7 @@ from torch.nn import functional as F
 from tqdm import tqdm
 
 from imaginairy.utils import get_device
-from imaginairy.utils.model_manager import get_cached_url_path
+from imaginairy.utils.downloads import get_cached_url_path
 
 from .msssim import ssim_matlab
 from .RIFE_HDv3 import Model

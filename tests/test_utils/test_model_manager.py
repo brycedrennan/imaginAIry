@@ -1,8 +1,8 @@
 import pytest
 
 from imaginairy import config
+from imaginairy.utils.downloads import parse_diffusers_repo_url
 from imaginairy.utils.model_manager import (
-    parse_diffusers_repo_url,
     resolve_model_weights_config,
 )
 

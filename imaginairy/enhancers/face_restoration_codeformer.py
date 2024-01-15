@@ -8,7 +8,7 @@ import torch
 from PIL import Image
 from torchvision.transforms.functional import normalize
 
-from imaginairy.utils.model_manager import get_cached_url_path
+from imaginairy.utils.downloads import get_cached_url_path
 from imaginairy.vendored.basicsr.img_util import img2tensor, tensor2img
 from imaginairy.vendored.codeformer.codeformer_arch import CodeFormer
 from imaginairy.vendored.facexlib.utils.face_restoration_helper import FaceRestoreHelper

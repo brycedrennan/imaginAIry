@@ -71,6 +71,27 @@ Options:
 ### Whats New
 [See full Changelog here](./docs/changelog.md)
 
+**14.1.0**
+- 🎉 feature: make video generation smooth by adding frame interpolation
+- feature: SDXL weights in the compvis format can now be used
+- feature: allow video generation at any size specified by user
+- feature: video generations output in "bounce" format
+- feature: choose video output format: mp4, webp, or gif
+- feature: fix random seed handling in video generation
+- docs: auto-publish docs on push to master
+- build: remove imageio dependency
+- build: vendorize facexlib so we don't install its unneeded dependencies
+
+
+**14.0.4**
+- docs: add a documentation website at https://brycedrennan.github.io/imaginAIry/
+- build: remove fairscale dependency
+- fix: video generation was broken
+
+**14.0.3**
+- fix: several critical bugs with package
+- tests: add a wheel smoketest to detect these issues in the future
+
 **14.0.0**
 - 🎉 video generation using [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
   - add `--videogen` to any image generation to create a short video from the generated image
@@ -86,23 +107,7 @@ cutting edge features (SDXL, image prompts, etc) which will be added to imaginai
 For example `--size 720p --seed 1` and `--size 1080p --seed 1` will produce the same image for SD15
 - 🎉 feature: loading diffusers based models now supported. Example `--model https://huggingface.co/ainz/diseny-pixar --model-architecture sd15`
 - 🎉 feature: qrcode controlnet!
-- feature: generate word images automatically. great for use with qrcode controlnet: `imagine "flowers" --gif --size hd --control-mode qrcode --control-image "textimg='JOY' font_color=white background_color=gray" -r 10`
-- feature: opendalle 1.1 added. `--model opendalle` to use it
-- feature: added `--size` parameter for more intuitive sizing (e.g. 512, 256x256, 4k, uhd, FHD, VGA, etc)
-- feature: detect if wrong torch version is installed and provide instructions on how to install proper version
-- feature: better logging output: color, error handling
-- feature: support for pytorch 2.0
-- feature: command line output significantly cleaned up and easier to read
-- feature: adds --composition-strength parameter to cli (#416)
-- performance: lower memory usage for upscaling
-- performance: lower memory usage at startup
-- performance: add sliced attention to several models (lowers memory use)
-- fix: simpler memory management that avoids some of the previous bugs
-- deprecated: support for python 3.8, 3.9
-- deprecated: support for torch 1.13
-- deprecated: support for Stable Diffusion versions 1.4, 2.0, and 2.1
-- deprecated: image training
-- broken: samplers other than ddim
+
 
 ### Run API server and StableStudio web interface (alpha)
 Generate images via API or web interface.  Much smaller featureset compared to the command line tool.

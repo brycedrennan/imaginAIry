@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from imaginairy.utils import get_device
-from imaginairy.utils.model_manager import get_cached_url_path
+from imaginairy.utils.downloads import get_cached_url_path
 
 
 class Network(torch.nn.Module):

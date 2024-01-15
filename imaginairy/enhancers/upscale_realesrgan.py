@@ -5,8 +5,8 @@ import torch
 from PIL import Image
 
 from imaginairy.utils import get_device
+from imaginairy.utils.downloads import get_cached_url_path
 from imaginairy.utils.model_cache import memory_managed_model
-from imaginairy.utils.model_manager import get_cached_url_path
 from imaginairy.vendored.basicsr.rrdbnet_arch import RRDBNet
 from imaginairy.vendored.realesrgan import RealESRGANer
 
