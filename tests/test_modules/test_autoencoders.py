@@ -3,7 +3,7 @@ import pytest
 from PIL import Image
 from torch.nn.functional import interpolate
 
-from imaginairy.enhancers.upscale_riverwing import upscale_latent
+from imaginairy.enhancers.upscalers.riverwing import upscale_latent
 from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import get_device
 from imaginairy.utils.img_utils import (

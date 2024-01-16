@@ -30,7 +30,7 @@ def _generate_single_image(
     from imaginairy.enhancers.clip_masking import get_img_mask
     from imaginairy.enhancers.describe_image_blip import generate_caption
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
-    from imaginairy.enhancers.upscale_realesrgan import upscale_image
+    from imaginairy.enhancers.upscalers.realesrgan import upscale_image
     from imaginairy.modules.midas.api import torch_image_to_depth_map
     from imaginairy.samplers import SOLVER_LOOKUP
     from imaginairy.samplers.editing import CFGEditingDenoiser
@@ -534,7 +534,7 @@ def _generate_composition_image(
     result = _generate_single_image(composition_prompt, dtype=dtype)
     img = result.images["generated"]
     while img.width < target_width:
-        from imaginairy.enhancers.upscale_realesrgan import upscale_image
+        from imaginairy.enhancers.upscalers.realesrgan import upscale_image
 
         img = upscale_image(img)
 

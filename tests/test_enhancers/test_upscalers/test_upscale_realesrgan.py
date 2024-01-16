@@ -1,6 +1,6 @@
 from PIL import Image
 
-from imaginairy.enhancers.upscale_realesrgan import upscale_image
+from imaginairy.enhancers.upscalers.realesrgan import upscale_image
 from tests import TESTS_FOLDER
 from tests.utils import assert_image_similar_to_expectation
 

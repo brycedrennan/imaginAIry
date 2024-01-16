@@ -144,12 +144,12 @@ def test_edit_demo(monkeypatch):
 
 
 def test_upscale(monkeypatch):
-    from imaginairy.enhancers import upscale_realesrgan
+    from imaginairy.enhancers.upscalers import realesrgan
 
     def mock_upscale_image(*args, **kwargs):
         return LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/dog.jpg")
 
-    monkeypatch.setattr(upscale_realesrgan, "upscale_image", mock_upscale_image)
+    monkeypatch.setattr(realesrgan, "upscale_image", mock_upscale_image)
     runner = CliRunner()
     result = runner.invoke(
         upscale_cmd,
