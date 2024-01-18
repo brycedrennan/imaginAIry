@@ -71,6 +71,10 @@ Options:
 ### Whats New
 [See full Changelog here](./docs/changelog.md)
 
+**14.1.1**
+- tests: add installation tests for windows, mac, and conda
+- fix: dependency issues
+
 **14.1.0**
 - 🎉 feature: make video generation smooth by adding frame interpolation
 - feature: SDXL weights in the compvis format can now be used
