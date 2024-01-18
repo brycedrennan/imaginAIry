@@ -105,7 +105,7 @@ setup(
         "torchdiffeq>=0.2.0",
         "torchvision>=0.13.1",
         "transformers>=4.19.2",
-        "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64'",
+        "triton>=2.0.0; sys_platform!='darwin' and platform_machine!='aarch64' and sys_platform == 'linux'",
         "kornia>=0.6",
         "uvicorn>=0.16.0",
         # "xformers>=0.0.22; sys_platform!='darwin' and platform_machine!='aarch64'",
