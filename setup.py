@@ -82,7 +82,7 @@ setup(
         "ftfy>=6.0.1",  # for vendored clip
         "torch>=2.1.0",
         # https://numpy.org/neps/nep-0029-deprecation_policy.html
-        "numpy>=1.22.0,<1.27.0",
+        "numpy>=1.22.0",
         "tqdm>=4.64.0",
         "diffusers>=0.3.0",
         "Pillow>=9.1.0",
@@ -99,8 +99,7 @@ setup(
         "jaxtyping>=0.2.23",  # refiners dependency
         "einops>=0.3.0",
         "safetensors>=0.4.0",
-        # scipy is a sub dependency but v1.11 doesn't support python 3.8.  https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy
-        "scipy<1.11",
+        "scipy>=1.8",
         "termcolor",
         "timm>=0.4.12,!=0.9.0,!=0.9.1",  # for vendored blip
         "torchdiffeq>=0.2.0",
