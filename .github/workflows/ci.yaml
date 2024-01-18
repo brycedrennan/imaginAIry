@@ -113,17 +113,21 @@ jobs:
         run: python -m pip install wheel
       - name: Build package
         run: python setup.py bdist_wheel
+      - name: Rename wheel
+        run: mv dist/*.whl dist/imaginAIry-0.0.1b0-py3-none-any.whl
       - uses: actions/upload-artifact@v3
         with:
           name: wheels
           path: dist/*.whl
   smoke-test-wheel:
     needs: build-wheel
-    runs-on: ubuntu-latest
+    name:  Smoketest (Python ${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11"]
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4.5.0
@@ -135,7 +139,7 @@ jobs:
         path: dist
     - name: Install built wheel
       run: |
-        python -m pip install dist/*.whl
+        python -m pip install dist/imaginAIry-0.0.1b0-py3-none-any.whl
     - name: Generate an image
       run: |
         imagine fruit --steps 10 --size 512 --seed 1
@@ -143,7 +147,41 @@ jobs:
       with:
         name: images
         path: outputs/generated/*.jpg
-        
+  smoke-test-wheel-conda:
+    needs: build-wheel
+    name: Smoketest (Conda, Python ${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.10", "3.11" ]
+        os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: test-env
+          create-env-file: true
+      - uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: dist
+      - name: Install built wheel
+        shell: bash -l {0}
+        run: |
+          conda activate test-env
+          python -m pip install dist/imaginAIry-0.0.1b0-py3-none-any.whl
+      - name: Generate an image
+        shell: bash -l {0}
+        run: |
+          conda activate test-env
+          imagine fruit --steps 10 --size 512 --seed 1
+      - uses: actions/upload-artifact@v3
+        with:
+          name: images
+          path: outputs/generated/*.jpg
 
   publish-docs:
     if: github.ref == 'refs/heads/master'
