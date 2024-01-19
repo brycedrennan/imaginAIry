@@ -146,6 +146,7 @@ def tensor_to_image(tensor: Tensor) -> Image.Image:
     assert tensor.ndim == 4 and tensor.shape[0] == 1, f"Unsupported tensor shape: {tensor.shape}"
     num_channels = tensor.shape[1]
     tensor = tensor.clamp(0, 1).squeeze(0)
+    tensor = tensor.to(torch.float32)  # to avoid numpy error with bfloat16
 
     match num_channels:
         case 1:
@@ -187,20 +188,26 @@ def save_to_safetensors(path: Path | str, tensors: dict[str, Tensor], metadata: 
 
 
 def summarize_tensor(tensor: torch.Tensor, /) -> str:
-    return (
-        "Tensor("
-        + ", ".join(
+    info_list = [
+        f"shape=({', '.join(map(str, tensor.shape))})",
+        f"dtype={str(object=tensor.dtype).removeprefix('torch.')}",
+        f"device={tensor.device}",
+    ]
+    if not tensor.is_complex():
+        info_list.extend(
             [
-                f"shape=({', '.join(map(str, tensor.shape))})",
-                f"dtype={str(object=tensor.dtype).removeprefix('torch.')}",
-                f"device={tensor.device}",
                 f"min={tensor.min():.2f}",  # type: ignore
                 f"max={tensor.max():.2f}",  # type: ignore
-                f"mean={tensor.mean():.2f}",
-                f"std={tensor.std():.2f}",
-                f"norm={norm(x=tensor):.2f}",
-                f"grad={tensor.requires_grad}",
             ]
         )
-        + ")"
+
+    info_list.extend(
+        [
+            f"mean={tensor.float().mean():.2f}",
+            f"std={tensor.float().std():.2f}",
+            f"norm={norm(x=tensor.float()):.2f}",
+            f"grad={tensor.requires_grad}",
+        ]
     )
+
+    return "Tensor(" + ", ".join(info_list) + ")"

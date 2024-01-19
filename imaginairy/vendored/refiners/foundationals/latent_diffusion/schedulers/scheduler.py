@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import TypeVar
 
-from torch import Tensor, device as Device, dtype as DType, float32, linspace, log, sqrt
+from torch import Generator, Tensor, device as Device, dtype as DType, float32, linspace, log, sqrt
 
 T = TypeVar("T", bound="Scheduler")
 
@@ -50,7 +50,7 @@ class Scheduler(ABC):
         self.timesteps = self._generate_timesteps()
 
     @abstractmethod
-    def __call__(self, x: Tensor, noise: Tensor, step: int) -> Tensor:
+    def __call__(self, x: Tensor, noise: Tensor, step: int, generator: Generator | None = None) -> Tensor:
         """
         Applies a step of the diffusion process to the input tensor `x` using the provided `noise` and `timestep`.
 
@@ -70,6 +70,12 @@ class Scheduler(ABC):
     @property
     def steps(self) -> list[int]:
         return list(range(self.num_inference_steps))
+
+    def scale_model_input(self, x: Tensor, step: int) -> Tensor:
+        """
+        For compatibility with schedulers that need to scale the input according to the current timestep.
+        """
+        return x
 
     def sample_power_distribution(self, power: float = 2, /) -> Tensor:
         return (

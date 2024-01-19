@@ -1,4 +1,4 @@
-from torch import Tensor, arange, device as Device
+from torch import Generator, Tensor, arange, device as Device
 
 from imaginairy.vendored.refiners.foundationals.latent_diffusion.schedulers.scheduler import Scheduler
 
@@ -30,5 +30,5 @@ class DDPM(Scheduler):
         timesteps = arange(start=0, end=self.num_inference_steps, step=1, device=self.device) * step_ratio
         return timesteps.flip(0)
 
-    def __call__(self, x: Tensor, noise: Tensor, step: int) -> Tensor:
+    def __call__(self, x: Tensor, noise: Tensor, step: int, generator: Generator | None = None) -> Tensor:
         raise NotImplementedError

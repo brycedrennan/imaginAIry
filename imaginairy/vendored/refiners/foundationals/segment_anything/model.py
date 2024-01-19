@@ -3,11 +3,12 @@ from typing import Sequence
 
 import numpy as np
 import torch
+from jaxtyping import Float
 from PIL import Image
 from torch import Tensor, device as Device, dtype as DType
 
 import imaginairy.vendored.refiners.fluxion.layers as fl
-from imaginairy.vendored.refiners.fluxion.utils import image_to_tensor, interpolate, no_grad, normalize, pad
+from imaginairy.vendored.refiners.fluxion.utils import interpolate, no_grad, normalize, pad
 from imaginairy.vendored.refiners.foundationals.segment_anything.image_encoder import SAMViT, SAMViTH
 from imaginairy.vendored.refiners.foundationals.segment_anything.mask_decoder import MaskDecoder
 from imaginairy.vendored.refiners.foundationals.segment_anything.prompt_encoder import MaskEncoder, PointEncoder
@@ -55,7 +56,7 @@ class SegmentAnything(fl.Module):
         foreground_points: Sequence[tuple[float, float]] | None = None,
         background_points: Sequence[tuple[float, float]] | None = None,
         box_points: Sequence[Sequence[tuple[float, float]]] | None = None,
-        masks: Sequence[Image.Image] | None = None,
+        low_res_mask: Float[Tensor, "1 1 256 256"] | None = None,
         binarize: bool = True,
     ) -> tuple[Tensor, Tensor, Tensor]:
         if isinstance(input, ImageEmbedding):
@@ -74,15 +75,13 @@ class SegmentAnything(fl.Module):
         )
         self.point_encoder.set_type_mask(type_mask=type_mask)
 
-        if masks is not None:
-            mask_tensor = torch.stack(
-                tensors=[image_to_tensor(image=mask, device=self.device, dtype=self.dtype) for mask in masks]
-            )
-            mask_embedding = self.mask_encoder(mask_tensor)
+        if low_res_mask is not None:
+            mask_embedding = self.mask_encoder(low_res_mask)
         else:
             mask_embedding = self.mask_encoder.get_no_mask_dense_embedding(
                 image_embedding_size=self.image_encoder.image_embedding_size
             )
+
         point_embedding = self.point_encoder(
             self.normalize(coordinates, target_size=target_size, original_size=original_size)
         )
