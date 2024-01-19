@@ -38,6 +38,7 @@ class DPMSolver(Scheduler):
         )
         self.estimated_data = deque([tensor([])] * 2, maxlen=2)
         self.last_step_first_order = last_step_first_order
+        self._first_step_has_been_run = False
 
     def _generate_timesteps(self) -> Tensor:
         # We need to use numpy here because:
@@ -80,7 +81,6 @@ class DPMSolver(Scheduler):
         previous_scale_factor = self.cumulative_scale_factors[previous_timestep]
         previous_noise_std = self.noise_std[previous_timestep]
         current_noise_std = self.noise_std[current_timestep]
-
         estimation_delta = (current_data_estimation - next_data_estimation) / (
             (current_ratio - next_ratio) / (previous_ratio - current_ratio)
         )
@@ -105,7 +105,8 @@ class DPMSolver(Scheduler):
         estimated_denoised_data = (x - noise_ratio * noise) / scale_factor
         self.estimated_data.append(estimated_denoised_data)
 
-        if step == 0 or (self.last_step_first_order and step == self.num_inference_steps - 1):
+        if step == 0 or (self.last_step_first_order and step == self.num_inference_steps - 1) or not self._first_step_has_been_run:
+            self._first_step_has_been_run = True
             return self.dpm_solver_first_order_update(x=x, noise=estimated_denoised_data, step=step)
 
         return self.multistep_dpm_solver_second_order_update(x=x, step=step)
