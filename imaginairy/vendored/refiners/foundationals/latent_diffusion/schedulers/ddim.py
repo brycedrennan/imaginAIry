@@ -1,4 +1,4 @@
-from torch import Tensor, arange, device as Device, dtype as Dtype, float32, sqrt, tensor
+from torch import Generator, Tensor, arange, device as Device, dtype as Dtype, float32, sqrt, tensor
 
 from imaginairy.vendored.refiners.foundationals.latent_diffusion.schedulers.scheduler import NoiseSchedule, Scheduler
 
@@ -34,7 +34,7 @@ class DDIM(Scheduler):
         timesteps = arange(start=0, end=self.num_inference_steps, step=1, device=self.device) * step_ratio + 1
         return timesteps.flip(0)
 
-    def __call__(self, x: Tensor, noise: Tensor, step: int) -> Tensor:
+    def __call__(self, x: Tensor, noise: Tensor, step: int, generator: Generator | None = None) -> Tensor:
         timestep, previous_timestep = (
             self.timesteps[step],
             (
@@ -52,6 +52,12 @@ class DDIM(Scheduler):
             ),
         )
         predicted_x = (x - sqrt(1 - current_scale_factor**2) * noise) / current_scale_factor
-        denoised_x = previous_scale_factor * predicted_x + sqrt(1 - previous_scale_factor**2) * noise
+        noise_factor = sqrt(1 - previous_scale_factor**2)
+
+        # Do not add noise at the last step to avoid visual artifacts.
+        if step == self.num_inference_steps - 1:
+            noise_factor = 0
+
+        denoised_x = previous_scale_factor * predicted_x + noise_factor * noise
 
         return denoised_x

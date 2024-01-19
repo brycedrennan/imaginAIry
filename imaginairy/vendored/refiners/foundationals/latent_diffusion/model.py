@@ -11,7 +11,6 @@ from imaginairy.vendored.refiners.foundationals.latent_diffusion.schedulers.sche
 
 T = TypeVar("T", bound="fl.Module")
 
-
 TLatentDiffusionModel = TypeVar("TLatentDiffusionModel", bound="LatentDiffusionModel")
 
 
@@ -91,6 +90,8 @@ class LatentDiffusionModel(fl.Module, ABC):
         self.set_unet_context(timestep=timestep, clip_text_embedding=clip_text_embedding, **kwargs)
 
         latents = torch.cat(tensors=(x, x))  # for classifier-free guidance
+        # scale latents for schedulers that need it
+        latents = self.scheduler.scale_model_input(latents, step=step)
         unconditional_prediction, conditional_prediction = self.unet(latents).chunk(2)
 
         # classifier-free guidance

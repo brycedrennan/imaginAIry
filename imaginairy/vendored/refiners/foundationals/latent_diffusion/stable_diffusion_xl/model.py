@@ -138,17 +138,25 @@ class StableDiffusion_XL(LatentDiffusionModel):
             classifier_free_guidance=True,
         )
 
-        negative_embedding, _ = clip_text_embedding.chunk(2)
+        negative_text_embedding, _ = clip_text_embedding.chunk(2)
         negative_pooled_embedding, _ = pooled_text_embedding.chunk(2)
         timestep = self.scheduler.timesteps[step].unsqueeze(dim=0)
         time_ids, _ = time_ids.chunk(2)
+
         self.set_unet_context(
             timestep=timestep,
-            clip_text_embedding=negative_embedding,
+            clip_text_embedding=negative_text_embedding,
             pooled_text_embedding=negative_pooled_embedding,
             time_ids=time_ids,
-            **kwargs,
         )
-        degraded_noise = self.unet(degraded_latents)
+        if "ip_adapter" in self.unet.provider.contexts:
+            # this implementation is a bit hacky, it should be refactored in the future
+            ip_adapter_context = self.unet.use_context("ip_adapter")
+            image_embedding_copy = ip_adapter_context["clip_image_embedding"].clone()
+            ip_adapter_context["clip_image_embedding"], _ = ip_adapter_context["clip_image_embedding"].chunk(2)
+            degraded_noise = self.unet(degraded_latents)
+            ip_adapter_context["clip_image_embedding"] = image_embedding_copy
+        else:
+            degraded_noise = self.unet(degraded_latents)
 
         return sag.scale * (noise - degraded_noise)
