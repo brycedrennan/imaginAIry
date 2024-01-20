@@ -12,7 +12,7 @@ from imaginairy.vendored.realesrgan import RealESRGANer
 
 
 @memory_managed_model("realesrgan_upsampler", memory_usage_mb=70)
-def realesrgan_upsampler(tile=512, tile_pad=50, ultrasharp=False):
+def realesrgan_upsampler(tile=512, tile_pad=50, ultrasharp=False, weights_url=None):
     model = RRDBNet(
         num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4
     )
@@ -20,6 +20,9 @@ def realesrgan_upsampler(tile=512, tile_pad=50, ultrasharp=False):
         url = "https://huggingface.co/lokCX/4x-Ultrasharp/resolve/1856559b50de25116a7c07261177dd128f1f5664/4x-UltraSharp.pth"
     else:
         url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
+
+    if weights_url:
+        url = weights_url
 
     model_path = get_cached_url_path(url)
     device = get_device()
@@ -40,11 +43,11 @@ def realesrgan_upsampler(tile=512, tile_pad=50, ultrasharp=False):
     return upsampler
 
 
-def upscale_image(img, ultrasharp=False):
+def upscale_image(img, ultrasharp=False, weights_url=None):
     img = img.convert("RGB")
 
     np_img = np.array(img, dtype=np.uint8)
-    upsampler_output, img_mode = realesrgan_upsampler(ultrasharp=ultrasharp).enhance(
-        np_img[:, :, ::-1]
-    )
+    upsampler_output, img_mode = realesrgan_upsampler(
+        ultrasharp=ultrasharp, weights_url=weights_url
+    ).enhance(np_img[:, :, ::-1])
     return Image.fromarray(upsampler_output[:, :, ::-1], mode=img_mode)
