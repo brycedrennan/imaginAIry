@@ -210,7 +210,7 @@ vendorize_normal_map:
 
 
 vendorize_refiners:
-	export REPO=git@github.com:finegrain-ai/refiners.git PKG=refiners COMMIT=ce3035923ba71bcb5044708d2f1c37fd1d6722e9 && \
+	export REPO=git@github.com:finegrain-ai/refiners.git PKG=refiners COMMIT=91aea9b7ff63ddf93f99e2ce6a4452bd658b1948 && \
 	make download_repo REPO=$$REPO PKG=$$PKG COMMIT=$$COMMIT && \
 	mkdir -p ./imaginairy/vendored/$$PKG && \
 	rm -rf ./imaginairy/vendored/$$PKG/* && \

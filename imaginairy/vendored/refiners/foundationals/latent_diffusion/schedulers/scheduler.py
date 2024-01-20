@@ -33,6 +33,7 @@ class Scheduler(ABC):
         initial_diffusion_rate: float = 8.5e-4,
         final_diffusion_rate: float = 1.2e-2,
         noise_schedule: NoiseSchedule = NoiseSchedule.QUADRATIC,
+        first_inference_step: int = 0,
         device: Device | str = "cpu",
         dtype: DType = float32,
     ):
@@ -43,6 +44,7 @@ class Scheduler(ABC):
         self.initial_diffusion_rate = initial_diffusion_rate
         self.final_diffusion_rate = final_diffusion_rate
         self.noise_schedule = noise_schedule
+        self.first_inference_step = first_inference_step
         self.scale_factors = self.sample_noise_schedule()
         self.cumulative_scale_factors = sqrt(self.scale_factors.cumprod(dim=0))
         self.noise_std = sqrt(1.0 - self.scale_factors.cumprod(dim=0))
@@ -68,8 +70,12 @@ class Scheduler(ABC):
         ...
 
     @property
-    def steps(self) -> list[int]:
+    def all_steps(self) -> list[int]:
         return list(range(self.num_inference_steps))
+
+    @property
+    def inference_steps(self) -> list[int]:
+        return self.all_steps[self.first_inference_step :]
 
     def scale_model_input(self, x: Tensor, step: int) -> Tensor:
         """
