@@ -13,6 +13,7 @@ class EulerScheduler(Scheduler):
         initial_diffusion_rate: float = 8.5e-4,
         final_diffusion_rate: float = 1.2e-2,
         noise_schedule: NoiseSchedule = NoiseSchedule.QUADRATIC,
+        first_inference_step: int = 0,
         device: Device | str = "cpu",
         dtype: Dtype = float32,
     ):
@@ -24,6 +25,7 @@ class EulerScheduler(Scheduler):
             initial_diffusion_rate=initial_diffusion_rate,
             final_diffusion_rate=final_diffusion_rate,
             noise_schedule=noise_schedule,
+            first_inference_step=first_inference_step,
             device=device,
             dtype=dtype,
         )
@@ -64,6 +66,8 @@ class EulerScheduler(Scheduler):
         s_tmax: float = float("inf"),
         s_noise: float = 1.0,
     ) -> Tensor:
+        assert self.first_inference_step <= step < self.num_inference_steps, "invalid step {step}"
+
         sigma = self.sigmas[step]
 
         gamma = min(s_churn / (len(self.sigmas) - 1), 2**0.5 - 1) if s_tmin <= sigma <= s_tmax else 0

@@ -289,7 +289,7 @@ def generate_single_image(
             msg = f"Unknown solver type: {prompt.solver_type}"
             raise ValueError(msg)
         sd.scheduler.to(device=sd.unet.device, dtype=sd.unet.dtype)
-        sd.set_num_inference_steps(prompt.steps)
+        sd.set_inference_steps(prompt.steps, first_step=first_step)
 
         if hasattr(sd, "mask_latents") and mask_image is not None:
             sd.set_inpainting_conditions(
@@ -306,11 +306,11 @@ def generate_single_image(
 
         if init_latent is not None:
             noise_step = noise_step if noise_step is not None else first_step
-            if first_step >= len(sd.steps):
+            if first_step >= len(sd.scheduler.all_steps):
                 noised_latent = init_latent
             else:
                 noised_latent = sd.scheduler.add_noise(
-                    x=init_latent, noise=noise, step=sd.steps[noise_step]
+                    x=init_latent, noise=noise, step=sd.scheduler.all_steps[noise_step]
                 )
 
         with lc.timing("text-conditioning"):
@@ -330,7 +330,7 @@ def generate_single_image(
 
         with lc.timing("unet"):
             for step in tqdm(
-                sd.steps[first_step:], bar_format="    {l_bar}{bar}{r_bar}", leave=False
+                sd.steps, bar_format="    {l_bar}{bar}{r_bar}", leave=False
             ):
                 log_latent(x, "noisy_latent")
                 x = sd(

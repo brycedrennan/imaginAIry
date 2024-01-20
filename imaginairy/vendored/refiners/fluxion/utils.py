@@ -193,19 +193,23 @@ def summarize_tensor(tensor: torch.Tensor, /) -> str:
         f"dtype={str(object=tensor.dtype).removeprefix('torch.')}",
         f"device={tensor.device}",
     ]
-    if not tensor.is_complex():
-        info_list.extend(
-            [
-                f"min={tensor.min():.2f}",  # type: ignore
-                f"max={tensor.max():.2f}",  # type: ignore
-            ]
-        )
+    if tensor.is_complex():
+        tensor_f = tensor.real.float()
+    else:
+        if tensor.numel() > 0:
+            info_list.extend(
+                [
+                    f"min={tensor.min():.2f}",  # type: ignore
+                    f"max={tensor.max():.2f}",  # type: ignore
+                ]
+            )
+        tensor_f = tensor.float()
 
     info_list.extend(
         [
-            f"mean={tensor.float().mean():.2f}",
-            f"std={tensor.float().std():.2f}",
-            f"norm={norm(x=tensor.float()):.2f}",
+            f"mean={tensor_f.mean():.2f}",
+            f"std={tensor_f.std():.2f}",
+            f"norm={norm(x=tensor_f):.2f}",
             f"grad={tensor.requires_grad}",
         ]
     )

@@ -5,8 +5,9 @@ from imaginairy.vendored.refiners.foundationals.latent_diffusion.schedulers.sche
 
 class DDPM(Scheduler):
     """
-    The Denoising Diffusion Probabilistic Models (DDPM) is a specific type of diffusion model,
-    which uses a specific strategy to generate the timesteps and applies the diffusion process in a specific way.
+    Denoising Diffusion Probabilistic Model
+
+    Only used for training Latent Diffusion models. Cannot be called.
     """
 
     def __init__(
@@ -15,6 +16,7 @@ class DDPM(Scheduler):
         num_train_timesteps: int = 1_000,
         initial_diffusion_rate: float = 8.5e-4,
         final_diffusion_rate: float = 1.2e-2,
+        first_inference_step: int = 0,
         device: Device | str = "cpu",
     ) -> None:
         super().__init__(
@@ -22,6 +24,7 @@ class DDPM(Scheduler):
             num_train_timesteps=num_train_timesteps,
             initial_diffusion_rate=initial_diffusion_rate,
             final_diffusion_rate=final_diffusion_rate,
+            first_inference_step=first_inference_step,
             device=device,
         )
 

@@ -11,6 +11,7 @@ class DDIM(Scheduler):
         initial_diffusion_rate: float = 8.5e-4,
         final_diffusion_rate: float = 1.2e-2,
         noise_schedule: NoiseSchedule = NoiseSchedule.QUADRATIC,
+        first_inference_step: int = 0,
         device: Device | str = "cpu",
         dtype: Dtype = float32,
     ) -> None:
@@ -20,6 +21,7 @@ class DDIM(Scheduler):
             initial_diffusion_rate=initial_diffusion_rate,
             final_diffusion_rate=final_diffusion_rate,
             noise_schedule=noise_schedule,
+            first_inference_step=first_inference_step,
             device=device,
             dtype=dtype,
         )
@@ -35,6 +37,8 @@ class DDIM(Scheduler):
         return timesteps.flip(0)
 
     def __call__(self, x: Tensor, noise: Tensor, step: int, generator: Generator | None = None) -> Tensor:
+        assert self.first_inference_step <= step < self.num_inference_steps, "invalid step {step}"
+
         timestep, previous_timestep = (
             self.timesteps[step],
             (

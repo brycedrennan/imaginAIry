@@ -32,21 +32,21 @@ class LatentDiffusionModel(fl.Module, ABC):
         self.clip_text_encoder = clip_text_encoder.to(device=self.device, dtype=self.dtype)
         self.scheduler = scheduler.to(device=self.device, dtype=self.dtype)
 
-    def set_num_inference_steps(self, num_inference_steps: int) -> None:
+    def set_inference_steps(self, num_steps: int, first_step: int = 0) -> None:
         initial_diffusion_rate = self.scheduler.initial_diffusion_rate
         final_diffusion_rate = self.scheduler.final_diffusion_rate
         device, dtype = self.scheduler.device, self.scheduler.dtype
         self.scheduler = self.scheduler.__class__(
-            num_inference_steps,
+            num_inference_steps=num_steps,
             initial_diffusion_rate=initial_diffusion_rate,
             final_diffusion_rate=final_diffusion_rate,
+            first_inference_step=first_step,
         ).to(device=device, dtype=dtype)
 
     def init_latents(
         self,
         size: tuple[int, int],
         init_image: Image.Image | None = None,
-        first_step: int = 0,
         noise: Tensor | None = None,
     ) -> Tensor:
         height, width = size
@@ -59,11 +59,15 @@ class LatentDiffusionModel(fl.Module, ABC):
         if init_image is None:
             return noise
         encoded_image = self.lda.encode_image(image=init_image.resize(size=(width, height)))
-        return self.scheduler.add_noise(x=encoded_image, noise=noise, step=self.steps[first_step])
+        return self.scheduler.add_noise(
+            x=encoded_image,
+            noise=noise,
+            step=self.scheduler.first_inference_step,
+        )
 
     @property
     def steps(self) -> list[int]:
-        return self.scheduler.steps
+        return self.scheduler.inference_steps
 
     @abstractmethod
     def set_unet_context(self, *, timestep: Tensor, clip_text_embedding: Tensor, **_: Tensor) -> None:
