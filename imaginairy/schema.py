@@ -333,6 +333,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             prompt_strength (float, optional): Strength of the influence of the prompt on the output.
             init_image (LazyLoadingImage, optional): Initial image to base the generation on.
             init_image_strength (float, optional): Strength of the influence of the initial image.
+            image_prompt (LazyLoadingImage, optional): Image to be used as part of the prompt using IP-Adapter.
+            image_prompt_strength (float, optional): Strength of the influence of the prompt_image.
             control_inputs (List[ControlInput], optional): Additional control inputs for image generation.
             mask_prompt (str, optional): Mask prompt for selective area generation.
             mask_image (LazyLoadingImage, optional): Image used for masking.
@@ -370,6 +372,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     init_image_strength: float | None = Field(
         ge=0, le=1, default=None, validate_default=True
     )
+    image_prompt: LazyLoadingImage | None = Field(None, validate_default=True)
+    image_prompt_strength: float | None = Field(ge=0, le=1, default=0.0)
     control_inputs: List[ControlInput] = Field(
         default_factory=list, validate_default=True
     )
@@ -411,6 +415,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         prompt_strength: float | None = 7.5,
         init_image: LazyLoadingImage | None = None,
         init_image_strength: float | None = None,
+        image_prompt: LazyLoadingImage | None = None,
+        image_prompt_strength: float | None = None,
         control_inputs: List[ControlInput] | None = None,
         mask_prompt: str | None = None,
         mask_image: LazyLoadingImage | None = None,
@@ -440,6 +446,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             prompt_strength=prompt_strength,
             init_image=init_image,
             init_image_strength=init_image_strength,
+            image_prompt=image_prompt,
+            image_prompt_strength=image_prompt_strength,
             control_inputs=control_inputs,
             mask_prompt=mask_prompt,
             mask_image=mask_image,
