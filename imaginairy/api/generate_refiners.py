@@ -35,7 +35,7 @@ def generate_single_image(
     from imaginairy.enhancers.clip_masking import get_img_mask
     from imaginairy.enhancers.describe_image_blip import generate_caption
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
-    from imaginairy.enhancers.upscale_realesrgan import upscale_image
+    from imaginairy.enhancers.upscale import upscale_image
     from imaginairy.samplers import SolverName
     from imaginairy.schema import ImagineResult
     from imaginairy.utils import get_device, randn_seeded
@@ -587,7 +587,7 @@ def _generate_composition_image(
     )
     img = result.images["generated"]
     while img.width < target_width:
-        from imaginairy.enhancers.upscale_realesrgan import upscale_image
+        from imaginairy.enhancers.upscale import upscale_image
 
         if prompt.fix_faces:
             from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
@@ -596,7 +596,7 @@ def _generate_composition_image(
                 logger.info("Fixing 😊 's in 🖼  using CodeFormer...")
                 img = enhance_faces(img, fidelity=prompt.fix_faces_fidelity)
         with logging_context.timing("upscaling"):
-            img = upscale_image(img, ultrasharp=True)
+            img = upscale_image(img, upscaler_model="ultrasharp")
 
     img = img.resize(
         (target_width, target_height),

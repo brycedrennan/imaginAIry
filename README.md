@@ -70,6 +70,8 @@ Options:
 
 ### Whats New
 [See full Changelog here](./docs/changelog.md)
+**14.2.1**
+- feature: integrates spandrel for upscaling. 
 
 **14.1.1**
 - tests: add installation tests for windows, mac, and conda
@@ -349,14 +351,26 @@ When writing strength modifiers keep in mind that pixel values are between 0 and
 <img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
 
 
-### Upscaling [by RealESRGAN](https://github.com/xinntao/Real-ESRGAN)
-```bash
->> imagine "colorful smoke" --steps 40 --upscale
-# upscale an existing image
->> aimg upscale my-image.jpg
-```
-<details>
-<summary>Python Example</summary>
+## Image Upscaling
+Upscale images easily. 
+
+You can view available models with "aimg upscale --list-models". Try a different model by using --upscale-model with the name or a url.
+
+=== "CLI"
+    ```bash
+    aimg upscale assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg --upscale-model real-hat
+    ```
+
+=== "Python"
+    ```py
+    from imaginairy.api.upscale import upscale
+
+    img = upscale(img="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg")
+    img.save("colorful_smoke.upscaled.jpg")
+
+    ```
+<img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" width="25%" height="auto"> ➡️ 
+<img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" width="50%" height="auto">
 
 ```python
 from imaginairy.enhancers.upscale_realesrgan import upscale_image
@@ -365,9 +379,7 @@ img = Image.open("my-image.jpg")
 big_img = upscale_image(i)
 ```
 
-</details>
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" height="128"> ➡️ 
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" height="256"> 
+
 
 ### Tiled Images
 ```bash
