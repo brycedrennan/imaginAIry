@@ -488,6 +488,16 @@ def disable_common_warnings():
         "ignore", category=UserWarning, message=r"Arguments other than a weight.*"
     )
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+    warnings.filterwarnings(
+        "ignore",
+        category=UserWarning,
+        message=r".*?torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument..*?",
+    )
+    warnings.filterwarnings(
+        "ignore",
+        category=UserWarning,
+        message=r".*?is not currently supported on the MPS backend and will fall back.*?",
+    )
 
 
 def suppress_annoying_logs_and_warnings():

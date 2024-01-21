@@ -1,5 +1,13 @@
 
 ## ChangeLog
+**14.2.1**
+
+- feature: integrates spandrel for upscaling 
+
+**14.1.1**
+
+- tests: add installation tests for windows, mac, and conda
+- fix: dependency issues
 
 **14.2.0**
 - 🎉 feature: add image prompt support via `--image-prompt` and `--image-prompt-strength`
@@ -9,6 +17,7 @@
 - fix: dependency issues
 
 **14.1.0**
+
 - 🎉 feature: make video generation smooth by adding frame interpolation
 - feature: SDXL weights in the compvis format can now be used
 - feature: allow video generation at any size specified by user
@@ -21,15 +30,18 @@
 
 
 **14.0.4**
+
 - docs: add a documentation website at https://brycedrennan.github.io/imaginAIry/
 - build: remove fairscale dependency
 - fix: video generation was broken
 
 **14.0.3**
+
 - fix: several critical bugs with package
 - tests: add a wheel smoketest to detect these issues in the future
 
 **14.0.0**
+
 - 🎉 video generation using [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
   - add `--videogen` to any image generation to create a short video from the generated image
   - or use `aimg videogen` to generate a video from an image
@@ -63,15 +75,18 @@ For example `--size 720p --seed 1` and `--size 1080p --seed 1` will produce the 
 - broken: samplers other than ddim
 
 **13.2.1**
+
 - fix: pydantic models for http server working now. Fixes #380
 - fix: install triton so annoying message is gone
 
 **13.2.0**
+
 - fix: allow tile_mode to be set to True or False for backward compatibility
 - fix: various pydantic issues have been resolved
 - feature: switch to pydantic 2.3 (faster but was a pain to migrate)
 
 **13.1.0**
+
 - feature: *api server now has feature parity with the python API*. View the docs at http://127.0.0.1:8000/docs after running `aimg server`
   - `ImaginePrompt` is now a pydantic model and can thus be sent over the rest API
   - images are expected in base64 string format
@@ -81,11 +96,13 @@ For example `--size 720p --seed 1` and `--size 1080p --seed 1` will produce the 
 - docs: add a discord link
 
 **13.0.1**
+
 - feature: show full stack trace when there is an api error
 - fix: make lack of support for python 3.11 explicit
 - fix: add some routes to match StableStudio routes
 
 **13.0.0**
+
 - 🎉 feature: multi-controlnet support. pass in multiple `--control-mode`, `--control-image`, and `--control-image-raw` arguments.
 - 🎉 feature: add colorization controlnet. improve `aimg colorize` command
 - 🎉🧪 feature: Graphical Web Interface [StableStudio](https://github.com/Stability-AI/StableStudio). run `aimg server` and visit http://127.0.0.1:8000/
@@ -103,12 +120,15 @@ MacOS M1, [torch will not be able to use the M1 when generating images.](https:/
 - build: check for torch version at runtime (fixes #329)
 
 **12.0.3**
+
 - fix: exclude broken versions of timm as dependencies
 
 **12.0.2**
+
 - fix: move normal map preprocessor for conda compatibility
 
 **12.0.1**
+
 - fix: use correct device for depth images on mps. Fixes #300
 
 **12.0.0**
@@ -123,6 +143,7 @@ MacOS M1, [torch will not be able to use the M1 when generating images.](https:/
 - fix: filenames start numbers after latest image, even if some previous images were deleted
 
 **11.1.1**
+
 - fix: fix globbing bug with input image path handling
 - fix: changed sample to True to generate caption using blip model
 
@@ -135,6 +156,7 @@ MacOS M1, [torch will not be able to use the M1 when generating images.](https:/
 - fix: fix model downloads that were broken by [library change in transformers 4.27.0](https://github.com/huggingface/transformers/commit/8f3b4a1d5bd97045541c43179efe8cd9c58adb76)
 
 **11.0.0**
+
 - all these changes together mean same seed/sampler will not be guaranteed to produce same image (thus the version bump)
 - fix: image composition didn't work very well. Works well now but probably very slow on non-cuda platforms
 - fix: remove upscaler tiling message
@@ -142,6 +164,7 @@ MacOS M1, [torch will not be able to use the M1 when generating images.](https:/
 - fix: img2img was broken for all samplers except plms and ddim when init image strength was >~0.25
 
 **10.2.0**
+
  - feature: input raw control images (a pose, canny map, depth map, etc) directly using `--control-image-raw`
    This is opposed to current behavior of extracting the control signal from an input image via `--control-image`
  - feature: `aimg model-list` command lists included models
@@ -153,11 +176,13 @@ MacOS M1, [torch will not be able to use the M1 when generating images.](https:/
  - docs: pypi docs now link properly to github automatically
 
 **10.1.0**
+
 - feature: 🎉 ControlNet integration!  Control the structure of generated images.
 - feature: `aimg colorize` attempts to use controlnet to colorize images
 - feature: `--caption-text` command adds text at the bottom left of an image
 
 **10.0.1**
+
 - fix: `edit` was broken
 
 **10.0.0**
@@ -171,9 +196,11 @@ MacOS M1, [torch will not be able to use the M1 when generating images.](https:/
 - perf: sliced latent decoding - now possible to make much bigger images. 3310x3310 on 11 GB GPU.
 
 **9.0.2**
+
 - fix: edit interface was broken
 
 **9.0.1**
+
 - fix: use entry_points for windows since setup.py scripts doesn't work on windows [#239](https://github.com/brycedrennan/imaginAIry/issues/239)
 
 **9.0.0**
@@ -187,9 +214,11 @@ batch editing of images as requested in [#229](https://github.com/brycedrennan/i
 - docs: add directions on how to change model cache path
 
 **8.3.1**
+
 - fix: init-image-strength type
 
 **8.3.0**
+
 - feature: create `gifs` or `mp4s` from any images made in a single run with `--compilation-anim gif`
 - feature: create a series of images or edits by iterating over a parameter with the `--arg-schedule` argument
 - feature: `openjourney-v1` and `openjourney-v2` models added. available via `--model openjourney-v2`
@@ -199,9 +228,11 @@ batch editing of images as requested in [#229](https://github.com/brycedrennan/i
 - fix: tile mode was broken since latest perf improvements
 
 **8.2.0**
+
 - feature: added `aimg system-info` command to help debug issues
 
 **8.1.0**
+
 - feature: some memory optimizations and documentation
 - feature: surprise-me improvements
 - feature: image sizes can now be multiples of 8 instead of 64. Inputs will be silently rounded down.
@@ -211,44 +242,55 @@ batch editing of images as requested in [#229](https://github.com/brycedrennan/i
 - fix: make captioning work with alpha pngs
  
 **8.0.5**
+
 - fix: bypass huggingface cache retrieval bug
 
 **8.0.4**
+
 - fix: limit attention slice size on MacOS machines with 64gb (#175)
 
 **8.0.3**
+
 - fix: use python 3.7 compatible lru_cache
 - fix: use windows compatible filenames
 
 **8.0.2**
+
 - fix: hf_hub_download() got an unexpected keyword argument 'token'
 
 **8.0.1**
+
 - fix: spelling mistake of "surprise"
 
 **8.0.0**
+
 - feature: 🎉 edit images with instructions alone!
 - feature: when editing an image add `--gif` to create a comparision gif
 - feature: `aimg edit --surprise-me --gif my-image.jpg` for some fun pre-programmed edits
 - feature: prune-ckpt command also removes the non-ema weights
 
 **7.6.0**
+
 - fix: default model config was broken
 - feature: print version with `--version`
 - feature: ability to load safetensors
 - feature:  🎉 outpainting. Examples: `--outpaint up10,down300,left50,right50` or `--outpaint all100` or `--outpaint u100,d200,l300,r400`
 
 **7.4.3**
+
 - fix: handle old pytorch lightning imports with a graceful failure (fixes #161)
 - fix: handle failed image generations better (fixes #83)
 
 **7.4.2**
+
 - fix: run face enhancement on GPU for 10x speedup
 
 **7.4.1**
+
 - fix: incorrect config files being used for non-1.0 models
 
 **7.4.0**
+
 - feature: 🎉 finetune your own image model. kind of like dreambooth. Read instructions on ["Concept Training"](docs/concept-training.md) page
 - feature: image prep command. crops to face or other interesting parts of photo
 - fix: back-compat for hf_hub_download
@@ -256,33 +298,41 @@ batch editing of images as requested in [#229](https://github.com/brycedrennan/i
 - feature: allow specification of model config file
 
 **7.3.0**
+
 - feature: 🎉 depth-based image-to-image generations (and inpainting) 
 - fix: k_euler_a produces more consistent images per seed (randomization respects the seed again)
 
 **7.2.0**
+
 - feature: 🎉 tile in a single dimension ("x" or "y").  This enables, with a bit of luck, generation of 360 VR images.
 Try this for example: `imagine --tile-x -w 1024 -h 512 "360 degree equirectangular panorama photograph of the mountains"  --upscale`
 
 **7.1.1**
+
 - fix: memory/speed regression introduced in 6.1.0
 - fix: model switching now clears memory better, thus avoiding out of memory errors
 
 **7.1.0**
+
 - feature: 🎉 Stable Diffusion 2.1.  Generated people are no longer (completely) distorted. 
 Use with `--model SD-2.1` or `--model SD-2.0-v` 
 
 **7.0.0**
+
 - feature: negative prompting.  `--negative-prompt` or `ImaginePrompt(..., negative_prompt="ugly, deformed, extra arms, etc")`
 - feature: a default negative prompt is added to all generations. Images in SD-2.0 don't look bad anymore. Images in 1.5 look improved as well.
 
 **6.1.2**
+
 - fix: add back in memory-efficient algorithms
 
 **6.1.1**
+
 - feature: xformers will be used if available (for faster generation)
 - fix: version metadata was broken
 
 **6.1.0**
+
 - feature: use different default steps and image sizes depending on sampler and model selected
 - fix: #110 use proper version in image metadata
 - refactor: solvers all have their own class that inherits from ImageSolver
@@ -294,13 +344,16 @@ Use with `--model SD-2.1` or `--model SD-2.0-v`
   - 768x768 model working for all samplers except PLMS (`--model SD-2.0-v `)
 
 **5.1.0**
+
 - feature: add progress image callback
 
 **5.0.1**
+
 - fix: support larger images on M1. Fixes #8
 - fix: support CPU generation by disabling autocast on CPU. Fixes #81
 
 **5.0.0**
+
 - feature: 🎉 inpainting support using new inpainting model from RunwayML. It works really well! By default, the 
 inpainting model will automatically be used for any image-masking task 
 - feature: 🎉 new default sampler makes image generation more than twice as fast
@@ -312,10 +365,12 @@ inpainting model will automatically be used for any image-masking task
 - fix: larger image sizes now work on macOS. fixes #8
 
 **4.1.0**
+
  - feature: allow dynamic switching between models/weights `--model SD-1.5` or `--model SD-1.4` or `--model path/my-custom-weights.ckpt`)
  - feature: log total progress when generating images (image X out of Y)
 
 **4.0.0**
+
  - feature: stable diffusion 1.5 (slightly improved image quality)
  - feature: dilation and erosion of masks
  Previously the `+` and `-` characters in a mask (example: `face{+0.1}`) added to the grayscale value of any masked areas. This wasn't very useful. The new behavior is that the mask will expand or contract by the number of pixel specified. The technical terms for this are dilation and erosion.  This allows much greater control over the masked area.
@@ -325,39 +380,49 @@ inpainting model will automatically be used for any image-masking task
  - ci: minor logging improvements
 
 **3.0.1**
+
  - fix: k-samplers were broken
 
 **3.0.0**
+
  - feature: improved safety filter
 
 **2.4.0**
+
  - 🎉 feature: prompt expansion
  - feature: make (blip) photo captions more descriptive
 
 **2.3.1**
+
  - fix: face fidelity default was broken
 
 **2.3.0**
+
  - feature: model weights file can be specified via `--model-weights-path` argument at the command line
  - fix: set face fidelity default back to old value
  - fix: handle small images without throwing exception. credit to @NiclasEriksen
  - docs: add setuptools-rust as dependency for macos 
 
 **2.2.1**
+
  - fix: init image is fully ignored if init-image-strength = 0
 
 **2.2.0**
+
  - feature: face enhancement fidelity is now configurable
 
 **2.1.0**
+
  - [improved masking accuracy from clipseg](https://github.com/timojl/clipseg/issues/8#issuecomment-1259150865)
 
 **2.0.3**
+
  - fix memory leak in face enhancer
  - fix blurry inpainting 
  - fix for pillow compatibility
 
 **2.0.0**
+
  - 🎉 fix: inpainted areas correlate with surrounding image, even at 100% generation strength.  Previously if the generation strength was high enough the generated image
 would be uncorrelated to the rest of the surrounding image.  It created terrible looking images.   
  - 🎉 feature: interactive prompt added. access by running `aimg`
@@ -370,35 +435,44 @@ would be uncorrelated to the rest of the surrounding image.  It created terrible
  - fix: img2img algorithm was wrong and wouldn't at values close to 0 or 1
 
 **1.6.2**
+
  - fix: another bfloat16 fix
 
 **1.6.1**
+
  - fix: make sure image tensors come to the CPU as float32 so there aren't compatibility issues with non-bfloat16 cpus
 
 **1.6.0**
+
  - fix: *maybe* address #13 with `expected scalar type BFloat16 but found Float`
    - at minimum one can specify `--precision full` now and that will probably fix the issue  
  - feature: tile mode can now be specified per-prompt
 
 **1.5.3**
+
  - fix: missing config file for describe feature
 
 **1.5.1**
+
  - img2img now supported with PLMS (instead of just DDIM)
  - added image captioning feature `aimg describe dog.jpg` => `a brown dog sitting on grass`
  - added new commandline tool `aimg` for additional image manipulation functionality
 
 **1.4.0**
+
  - support multiple additive targets for masking with `|` symbol.  Example: "fruit|stem|fruit stem"
 
 **1.3.0**
+
  - added prompt based image editing. Example: "fruit => gold coins"
  - test coverage improved
 
 **1.2.0**
+
  - allow urls as init-images
 
 **previous**
+
  - img2img actually does # of steps you specify  
  - performance optimizations
  - numerous other changes
