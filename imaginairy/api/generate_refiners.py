@@ -281,6 +281,7 @@ def generate_single_image(
                 control_image_t.to(device=sd.unet.device, dtype=sd.unet.dtype)
             )
             controlnet.inject()
+
         if prompt.solver_type.lower() == SolverName.DPMPP:
             sd.scheduler = DPMSolver(num_inference_steps=prompt.steps)
         elif prompt.solver_type.lower() == SolverName.DDIM:
@@ -302,6 +303,12 @@ def generate_single_image(
             )
             sd.mask_latents = sd.mask_latents.to(
                 dtype=sd.unet.dtype, device=sd.unet.device
+            )
+        if prompt.image_prompt:
+            sd.set_image_prompt(
+                prompt.image_prompt,
+                scale=prompt.image_prompt_strength,
+                model_type="plus",
             )
 
         if init_latent is not None:

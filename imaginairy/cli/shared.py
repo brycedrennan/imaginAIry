@@ -23,8 +23,10 @@ def imaginairy_click_context(log_level="INFO"):
         yield
     except errors_to_catch as e:
         logger.error(e)
-        # import traceback
-        # traceback.print_exc()
+        if log_level.upper() == "DEBUG":
+            import traceback
+
+            traceback.print_exc()
 
 
 def _imagine_cmd(
@@ -162,6 +164,14 @@ def _imagine_cmd(
             architecture=model_architecture,
             defaults={"negative_prompt": config.DEFAULT_NEGATIVE_PROMPT},
         )
+
+    def _img(img_str):
+        if img_str.startswith("http"):
+            return LazyLoadingImage(url=img_str)
+        else:
+            return LazyLoadingImage(filepath=img_str)
+
+    image_prompt = [_img(i) for i in image_prompt] if image_prompt else None
 
     for _ in range(repeats):
         for prompt_text in prompt_texts:

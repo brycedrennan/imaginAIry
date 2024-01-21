@@ -380,6 +380,24 @@ SOLVER_CONFIGS = [
     ),
 ]
 
+_ip_adapter_commit = "92a2d51861c754afacf8b3aaf90845254b49f219"
+IP_ADAPTER_WEIGHT_LOCATIONS = {
+    "sd15": {
+        "full-face": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/models/ip-adapter-full-face_sd15.safetensors",
+        "plus-face": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/models/ip-adapter-plus-face_sd15.safetensors",
+        "plus": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/models/ip-adapter-plus_sd15.safetensors",
+        "normal": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/models/ip-adapter_sd15.safetensors",
+        "light": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/models/ip-adapter_sd15_light.safetensors",
+        "vitg": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/models/ip-adapter_sd15_vit-G.safetensors",
+    },
+    "sdxl": {
+        "plus-face": f"https://huggingface.co/h94/IP-Adapter/blob/{_ip_adapter_commit}/sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors",
+        "plus": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors",
+        "vit-g": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/sdxl_models/ip-adapter_sdxl.safetensors",
+        "normal": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/sdxl_models/ip-adapter_sdxl_vit-h.safetensors",
+    },
+}
+
 SOLVER_TYPE_NAMES = [s.aliases[0] for s in SOLVER_CONFIGS]
 
 SOLVER_LOOKUP = {}

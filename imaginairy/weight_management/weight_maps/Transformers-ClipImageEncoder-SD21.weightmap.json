@@ -261,7 +261,9 @@
         "vision_model.encoder.layers.29.mlp.fc2": "Chain.TransformerLayer_30.Residual_2.FeedForward.Linear_2",
         "vision_model.encoder.layers.30.mlp.fc2": "Chain.TransformerLayer_31.Residual_2.FeedForward.Linear_2",
         "vision_model.encoder.layers.31.mlp.fc2": "Chain.TransformerLayer_32.Residual_2.FeedForward.Linear_2",
-        "visual_projection": "Linear"
+        "visual_projection": "Linear",
+        "vision_model.embeddings.position_ids": null
+
     },
     "regex_map": {},
     "ignore_prefixes": [],

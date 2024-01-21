@@ -372,8 +372,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     init_image_strength: float | None = Field(
         ge=0, le=1, default=None, validate_default=True
     )
-    image_prompt: LazyLoadingImage | None = Field(None, validate_default=True)
-    image_prompt_strength: float | None = Field(ge=0, le=1, default=0.0)
+    image_prompt: List[LazyLoadingImage] | None = Field(None, validate_default=True)
+    image_prompt_strength: float = Field(ge=0, le=1, default=0.0)
     control_inputs: List[ControlInput] = Field(
         default_factory=list, validate_default=True
     )
@@ -415,8 +415,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         prompt_strength: float | None = 7.5,
         init_image: LazyLoadingImage | None = None,
         init_image_strength: float | None = None,
-        image_prompt: LazyLoadingImage | None = None,
-        image_prompt_strength: float | None = None,
+        image_prompt: LazyLoadingImage | List[LazyLoadingImage] | None = None,
+        image_prompt_strength: float | None = 0.35,
         control_inputs: List[ControlInput] | None = None,
         mask_prompt: str | None = None,
         mask_image: LazyLoadingImage | None = None,
@@ -440,6 +440,12 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         composition_strength: float | None = 0.5,
         inpaint_method: InpaintMethod = "finetune",
     ):
+        if image_prompt and not isinstance(image_prompt, list):
+            image_prompt = [image_prompt]
+
+        if not image_prompt_strength:
+            image_prompt_strength = 0.35
+
         super().__init__(
             prompt=prompt,
             negative_prompt=negative_prompt,
@@ -815,6 +821,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         data = self.model_dump()
         data["init_image"] = repr(self.init_image)
         data["mask_image"] = repr(self.mask_image)
+        data["image_prompt"] = repr(self.image_prompt)
         if self.control_inputs:
             data["control_inputs"] = [repr(ci) for ci in self.control_inputs]
         return data
