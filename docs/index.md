@@ -314,6 +314,29 @@ allow the tool to generate one for you.
     <img src="assets/pearl-recolor-a.jpg" width="30%" height="auto">
 </p>
 
+## Image Upscaling
+Upscale images easily. 
+
+You can view available models with "aimg upscale --list-models". Try a different model by using --upscale-model with the name or a url.
+Control the new file format/location with --format.
+
+=== "CLI"
+    ```bash
+    aimg upscale assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg --upscale-model realesrgan-x2-plus
+    ```
+
+=== "Python"
+    ```py
+    from imaginairy.api.upscale import upscale
+
+    img = upscale(img="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg")
+    img.save("colorful_smoke.upscaled.jpg")
+
+    ```
+<img src="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" width="25%" height="auto"> ➡️ 
+<img src="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" width="50%" height="auto">
+
+
 
 ## Video Generation
 
@@ -329,4 +352,6 @@ allow the tool to generate one for you.
     generate_video(input_path="assets/rocket-wide.png")
 
     ```
+
+
 <img src="assets/svd-rocket.gif" width="50%" height="auto">
