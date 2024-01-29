@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from imaginairy.schema import LazyLoadingImage
 
 
-def upscale_img(
+def upscale_image(
     img: "Union[LazyLoadingImage, Image.Image, str]",
     upscale_model: str = DEFAULT_UPSCALE_MODEL,
     tile_size: int = 512,
