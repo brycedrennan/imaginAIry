@@ -352,9 +352,7 @@ When writing strength modifiers keep in mind that pixel values are between 0 and
 
 
 ## Image Upscaling
-Upscale images easily. 
-
-You can view available models with "aimg upscale --list-models". Try a different model by using --upscale-model with the name or a url.
+Upscale images easily.
 
 === "CLI"
     ```bash
@@ -371,6 +369,10 @@ You can view available models with "aimg upscale --list-models". Try a different
     ```
 <img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" width="25%" height="auto"> ➡️ 
 <img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" width="50%" height="auto">
+
+Upscaling uses [Spandrel](https://github.com/chaiNNer-org/spandrel) to make it easy to use different upscaling models.
+You can view different integrated models by running `aimg upscale --list-models`, and then use it with `--upscale-model <model-name>`.
+Also accepts url's if you want to upscale an image with a different model. Control the new file format/location with --format.
 
 ```python
 from imaginairy.enhancers.upscale_realesrgan import upscale_image

@@ -315,14 +315,11 @@ allow the tool to generate one for you.
 </p>
 
 ## Image Upscaling
-Upscale images easily. 
-
-You can view available models with "aimg upscale --list-models". Try a different model by using --upscale-model with the name or a url.
-Control the new file format/location with --format.
+Upscale images easily.
 
 === "CLI"
     ```bash
-    aimg upscale assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg --upscale-model realesrgan-x2-plus
+    aimg upscale assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg --upscale-model real-hat
     ```
 
 === "Python"
@@ -333,9 +330,12 @@ Control the new file format/location with --format.
     img.save("colorful_smoke.upscaled.jpg")
 
     ```
-<img src="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" width="25%" height="auto"> ➡️ 
-<img src="assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" width="50%" height="auto">
+<img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" width="25%" height="auto"> ➡️ 
+<img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" width="50%" height="auto">
 
+Upscaling uses [Spandrel](https://github.com/chaiNNer-org/spandrel) to make it easy to use different upscaling models.
+You can view different integrated models by running `aimg upscale --list-models`, and then use it with `--upscale-model <model-name>`.
+Also accepts url's if you want to upscale an image with a different model. Control the new file format/location with --format.
 
 
 ## Video Generation
