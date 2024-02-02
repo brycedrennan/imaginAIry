@@ -84,7 +84,6 @@ def imagine_cmd(
     init_image,
     init_image_strength,
     outdir,
-    output_file_extension,
     repeats,
     size,
     steps,
@@ -122,6 +121,7 @@ def imagine_cmd(
     control_strength,
     control_mode,
     videogen,
+    format_template,
 ):
     """
     Generate images via AI.
@@ -192,7 +192,7 @@ def imagine_cmd(
         init_image=init_image,
         init_image_strength=init_image_strength,
         outdir=outdir,
-        output_file_extension=output_file_extension,
+        format_template=format_template,
         repeats=repeats,
         size=size,
         steps=steps,

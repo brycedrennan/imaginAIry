@@ -10,16 +10,19 @@ from imaginairy.config import DEFAULT_UPSCALE_MODEL
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_FORMAT_TEMPLATE = "{original_filename}.upscaled{file_extension}"
+DEFAULT_UPSCALE_FORMAT_TEMPLATE = "{original_filename}.upscaled{file_extension}"
+
+DEV_UPSCALE_FORMAT_TEMPLATE = (
+    "{file_sequence_number:06}_{algorithm}_{original_filename}.upscaled{file_extension}"
+)
+DEV_DEFAULT_OUTDIR = "./outputs/upscaled"
 
 
 @click.argument("image_filepaths", nargs=-1, required=False)
 @click.option(
     "--outdir",
-    default="./outputs/upscaled",
-    show_default=True,
     type=click.Path(),
-    help="Where to write results to. Default will be where the directory of the original file.",
+    help="Where to write results to. Default will be where the directory of the original file directory.",
 )
 @click.option("--fix-faces", is_flag=True)
 @click.option(
@@ -40,7 +43,7 @@ DEFAULT_FORMAT_TEMPLATE = "{original_filename}.upscaled{file_extension}"
 @click.option(
     "--format",
     "format_template",
-    default="{original_filename}.upscaled{file_extension}",
+    default="DEFAULT",
     type=str,
     help="Formats the file name. Default value will save '{original_filename}.upscaled{file_extension}' to the original directory."
     "  {original_filename}: original name without the extension;"
@@ -78,7 +81,12 @@ def upscale_cmd(
             click.echo(f"{model_name}")
         return
 
-    os.makedirs(outdir, exist_ok=True)
+    if outdir or format_template == "DEV":
+        if format_template == "DEV" and outdir is None:
+            format_template = DEV_UPSCALE_FORMAT_TEMPLATE
+            outdir = DEV_DEFAULT_OUTDIR
+        os.makedirs(outdir, exist_ok=True)
+
     image_filepaths = glob_expand_paths(image_filepaths)
 
     if not image_filepaths:
@@ -88,11 +96,13 @@ def upscale_cmd(
         return
 
     if format_template == "DEV":
-        format_template = "{file_sequence_number:06}_{algorithm}_{original_filename}.upscaled{file_extension}"
+        format_template = DEV_UPSCALE_FORMAT_TEMPLATE
     elif format_template == "DEFAULT":
-        format_template = DEFAULT_FORMAT_TEMPLATE
+        format_template = DEFAULT_UPSCALE_FORMAT_TEMPLATE
 
     for p in tqdm(image_filepaths):
+        if outdir is None:
+            outdir = os.path.dirname(p)
         savepath = os.path.join(outdir, os.path.basename(p))
         if p.startswith("http"):
             img = LazyLoadingImage(url=p)
@@ -106,9 +116,6 @@ def upscale_cmd(
             img = upscale_image(img, model)
             if fix_faces:
                 img = enhance_faces(img, fidelity=fix_faces_fidelity)
-
-            if format_template == DEFAULT_FORMAT_TEMPLATE:
-                outdir = os.path.dirname(p) + "/"
 
             file_base_name, extension = os.path.splitext(os.path.basename(p))
             base_count = len(os.listdir(outdir))

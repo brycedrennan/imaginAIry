@@ -7,6 +7,9 @@ DEFAULT_MODEL_WEIGHTS = "sd15"
 DEFAULT_SOLVER = "ddim"
 DEFAULT_UPSCALE_MODEL = "realesrgan-x2-plus"
 
+DEFAULT_SHARED_FILE_FORMAT_TEMPLATE = "{file_sequence_number:06}_{seed}_{solver_type}{steps}_PS{prompt_strength}{img_str}_{prompt_text}"
+DEFAULT_SHARED_OUTDIR = "./outputs"
+
 DEFAULT_NEGATIVE_PROMPT = (
     "Ugly, duplication, duplicates, mutilation, deformed, mutilated, mutation, twisted body, disfigured, bad anatomy, "
     "out of frame, extra fingers, mutated hands, "
