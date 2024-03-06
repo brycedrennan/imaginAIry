@@ -9,22 +9,24 @@ pyenv_virt_instructions=https://github.com/pyenv/pyenv-virtualenv#pyenv-virtuale
 init: require_pyenv  ## Setup a dev environment for local development.
 	@pyenv install $(python_version) -s
 	@echo -e "\033[0;32m ✔️  🐍 $(python_version) installed \033[0m"
-	@if ! [ -d "$$(pyenv root)/versions/$(venv_name)" ]; then\
-		pyenv virtualenv $(python_version) $(venv_name);\
-	fi;
+	@if ! [ -d "$$(pyenv root)/versions/$(venv_name)" ]; then \
+		pyenv virtualenv $(python_version) $(venv_name); \
+	fi
 	@pyenv local $(venv_name)
 	@echo -e "\033[0;32m ✔️  🐍 $(venv_name) virtualenv activated \033[0m"
-	pip install --upgrade pip pip-tools
-	pip-sync requirements-dev.txt
-	pip install -e .
-	# the compiled requirements don't included OS specific subdependencies so we trigger those this way
-	#pip install `pip freeze | grep "^torch=="`
-	@echo -e "\nEnvironment setup! ✨ 🍰 ✨ 🐍 \n\nCopy this path to tell PyCharm where your virtualenv is. You may have to click the refresh button in the pycharm file explorer.\n"
-	@echo -e "\033[0;32m"
-	@pyenv which python
-	@echo -e "\n\033[0m"
-	@echo -e "The following commands are available to run in the Makefile\n"
+	@export VIRTUAL_ENV=$$(pyenv prefix); \
+	if command -v uv >/dev/null 2>&1; then \
+		uv pip install --upgrade uv; \
+	else \
+		pip install --upgrade pip uv; \
+	fi; \
+	uv pip sync requirements-dev.txt; \
+	uv pip install -e .
+	@echo -e "\nEnvironment setup! ✨ 🍰 ✨ 🐍 \n\nCopy this path to tell PyCharm where your virtualenv is. You may have to click the refresh button in the PyCharm file explorer.\n"
+	@echo -e "\033[0;32m$$(pyenv which python)\033[0m\n"
+	@echo -e "The following commands are available to run in the Makefile:\n"
 	@make -s help
+
 
 af: autoformat  ## Alias for `autoformat`
 autoformat:  ## Run the autoformatter.
@@ -83,12 +85,6 @@ require_pyenv:
 	  exit 1;\
 	else\
 	  echo -e "\033[0;32m ✔️  pyenv installed\033[0m";\
-	fi
-	@if ! [[ "$$(pyenv virtualenv --version)" == *"pyenv-virtualenv"* ]]; then\
-	  echo -e '\n\033[0;31m ❌ pyenv virtualenv is not installed.  Follow instructions here: $(pyenv_virt_instructions) \n\033[0m';\
-	  exit 1;\
-	else\
-	  echo -e "\033[0;32m ✔️  pyenv-virtualenv installed\033[0m";\
 	fi
 
 .PHONY: docs
