@@ -2,6 +2,7 @@
 
 import logging
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
@@ -59,8 +60,6 @@ def imagine_image_files(
 
     from imaginairy.api.video_sample import generate_video
     from imaginairy.utils import get_next_filenumber, prompt_normalized
-    from imaginairy.utils.animations import make_bounce_animation
-    from imaginairy.utils.img_utils import pillow_fit_image_within
 
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
@@ -93,78 +92,110 @@ def imagine_image_files(
         debug_img_callback=_record_step if record_step_images else None,
         add_caption=print_caption,
     ):
-        prompt = result.prompt
-        if prompt.is_intermediate:
-            # we don't save intermediate images
-            continue
-        img_str = ""
-        if prompt.init_image:
-            img_str = f"_img2img-{prompt.init_image_strength}"
-
-        basefilename = (
-            f"{base_count:06}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
-            f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
+        primary_filename = save_image_result(
+            result,
+            base_count,
+            outdir=outdir,
+            output_file_extension=output_file_extension,
+            primary_filename_type=return_filename_type,
+            make_gif=make_gif,
+            make_compare_gif=make_compare_gif,
         )
-        for image_type in result.images:
-            subpath = os.path.join(outdir, image_type)
-            os.makedirs(subpath, exist_ok=True)
-            filepath = os.path.join(
-                subpath, f"{basefilename}_[{image_type}].{output_file_extension}"
-            )
-            result.save(filepath, image_type=image_type)
-            logger.info(f"        {image_type:<22} {filepath}")
-            if image_type == return_filename_type:
-                result_filenames.append(filepath)
-                if videogen:
-                    try:
-                        generate_video(
-                            input_path=filepath,
-                        )
-                    except FileNotFoundError as e:
-                        logger.error(str(e))
-                        exit(1)
-
-        if make_gif and result.progress_latents:
-            subpath = os.path.join(outdir, "gif")
-            os.makedirs(subpath, exist_ok=True)
-            filepath = os.path.join(subpath, f"{basefilename}.gif")
-
-            frames = [*result.progress_latents, result.images["generated"]]
-
-            if prompt.init_image:
-                resized_init_image = pillow_fit_image_within(
-                    prompt.init_image, prompt.width, prompt.height
+        if not primary_filename:
+            continue
+        result_filenames.append(primary_filename)
+        if primary_filename and videogen:
+            try:
+                generate_video(
+                    input_path=primary_filename,
                 )
-                frames = [resized_init_image, *frames]
-            frames.reverse()
-            make_bounce_animation(
-                imgs=frames,
-                outpath=filepath,
-                start_pause_duration_ms=1500,
-                end_pause_duration_ms=1000,
-            )
-            image_type = "gif"
-            logger.info(f"        {image_type:<22} {filepath}")
-        if make_compare_gif and prompt.init_image:
-            subpath = os.path.join(outdir, "gif")
-            os.makedirs(subpath, exist_ok=True)
-            filepath = os.path.join(subpath, f"{basefilename}_[compare].gif")
-            resized_init_image = pillow_fit_image_within(
-                prompt.init_image, prompt.width, prompt.height
-            )
-            frames = [result.images["generated"], resized_init_image]
-
-            make_bounce_animation(
-                imgs=frames,
-                outpath=filepath,
-            )
-            image_type = "gif"
-            logger.info(f"        {image_type:<22} {filepath}")
+            except FileNotFoundError as e:
+                logger.error(str(e))
+                exit(1)
 
         base_count += 1
         del result
 
     return result_filenames
+
+
+def save_image_result(
+    result,
+    base_count: int,
+    outdir: str | Path,
+    output_file_extension: str,
+    primary_filename_type,
+    make_gif=False,
+    make_compare_gif=False,
+):
+    from imaginairy.utils import prompt_normalized
+    from imaginairy.utils.animations import make_bounce_animation
+    from imaginairy.utils.img_utils import pillow_fit_image_within
+
+    prompt = result.prompt
+    if prompt.is_intermediate:
+        # we don't save intermediate images
+        return
+
+    img_str = ""
+    if prompt.init_image:
+        img_str = f"_img2img-{prompt.init_image_strength}"
+
+    basefilename = (
+        f"{base_count:06}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
+        f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
+    )
+    primary_filename = None
+    for image_type in result.images:
+        subpath = os.path.join(outdir, image_type)
+        os.makedirs(subpath, exist_ok=True)
+        filepath = os.path.join(
+            subpath, f"{basefilename}_[{image_type}].{output_file_extension}"
+        )
+        result.save(filepath, image_type=image_type)
+        logger.info(f"        {image_type:<22} {filepath}")
+
+        if image_type == primary_filename_type:
+            primary_filename = filepath
+
+    if make_gif and result.progress_latents:
+        subpath = os.path.join(outdir, "gif")
+        os.makedirs(subpath, exist_ok=True)
+        filepath = os.path.join(subpath, f"{basefilename}.gif")
+
+        frames = [*result.progress_latents, result.images["generated"]]
+
+        if prompt.init_image:
+            resized_init_image = pillow_fit_image_within(
+                prompt.init_image, prompt.width, prompt.height
+            )
+            frames = [resized_init_image, *frames]
+        frames.reverse()
+        make_bounce_animation(
+            imgs=frames,
+            outpath=filepath,
+            start_pause_duration_ms=1500,
+            end_pause_duration_ms=1000,
+        )
+        image_type = "gif"
+        logger.info(f"        {image_type:<22} {filepath}")
+    if make_compare_gif and prompt.init_image:
+        subpath = os.path.join(outdir, "gif")
+        os.makedirs(subpath, exist_ok=True)
+        filepath = os.path.join(subpath, f"{basefilename}_[compare].gif")
+        resized_init_image = pillow_fit_image_within(
+            prompt.init_image, prompt.width, prompt.height
+        )
+        frames = [result.images["generated"], resized_init_image]
+
+        make_bounce_animation(
+            imgs=frames,
+            outpath=filepath,
+        )
+        image_type = "gif"
+        logger.info(f"        {image_type:<22} {filepath}")
+
+    return primary_filename
 
 
 def imagine(
