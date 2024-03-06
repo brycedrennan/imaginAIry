@@ -7,6 +7,7 @@ from contextlib import contextmanager
 import click
 
 from imaginairy import config
+from imaginairy.config import DEFAULT_SHARED_FILE_FORMAT_TEMPLATE
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ def _imagine_cmd(
     init_image,
     init_image_strength,
     outdir,
-    output_file_extension,
+    format_template,
     repeats,
     size,
     steps,
@@ -220,8 +221,8 @@ def _imagine_cmd(
     filenames = imagine_image_files(
         prompts,
         outdir=outdir,
+        format_template=format_template,
         record_step_images=show_work,
-        output_file_extension=output_file_extension,
         print_caption=caption,
         precision=precision,
         make_gif=make_gif,
@@ -320,11 +321,15 @@ common_options = [
         help="Where to write results to.",
     ),
     click.option(
-        "--output-file-extension",
-        default="jpg",
-        show_default=True,
-        type=click.Choice(["jpg", "png"]),
-        help="Where to write results to.",
+        "--format",
+        "format_template",
+        default=DEFAULT_SHARED_FILE_FORMAT_TEMPLATE,
+        type=str,
+        help="Formats the file name. Default value will save '{file_sequence_number:06}_{seed}_{solver_type}{steps}_PS{prompt_strength}{img_str}_{prompt_text}' to the default or specified directory."
+        "  {original_filename}: original name without the extension;"
+        "{file_sequence_number:pad}: sequence number in directory, can make zero-padded (e.g., 06 for six digits).;"
+        " {seed}: seed used in generation. {steps}: number of steps used in generation. {prompt_strength}: strength of the prompt. {img_str}: the init image name. {prompt_text}: the prompt text. {solver_type}: the solver used.;"
+        "{now:%Y-%m-%d:%H-%M-%S}: current date and time, customizable using standard strftime format codes.",
     ),
     click.option(
         "-r",

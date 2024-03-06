@@ -1,8 +1,13 @@
+import os
 import os.path
+from unittest.mock import patch
 
 import pytest
 
-from imaginairy.api import imagine, imagine_image_files
+from imaginairy.api import imagine
+from imaginairy.api.generate import (
+    imagine_image_files,
+)
 from imaginairy.img_processors.control_modes import CONTROL_MODES
 from imaginairy.schema import ControlInput, ImaginePrompt, LazyLoadingImage, MaskMode
 from imaginairy.utils import get_device
@@ -370,3 +375,163 @@ def test_large_image(filename_base_for_outputs):
 
     img_path = f"{filename_base_for_outputs}.png"
     assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=35000)
+
+
+class MockPrompt:
+    def __init__(self, seed, steps):
+        self.seed = seed
+        self.steps = steps
+        self.is_intermediate = False
+        self.init_image = None
+        self.init_image_strength = 0.5
+        self.solver_type = "k_dpm_2_a"
+        self.prompt_strength = 1.0
+        self.prompt_text = "a dog"
+
+
+class MockResult:
+    def __init__(self, prompt, images):
+        self.prompt = prompt
+        self.images = images
+
+    def save(self, filepath, image_type):
+        pass
+
+
+@pytest.mark.parametrize(
+    (
+        "prompts",
+        "outdir",
+        "format_template",
+        "precision",
+        "record_step_images",
+        "print_caption",
+        "make_gif",
+        "make_compare_gif",
+        "return_filename_type",
+        "videogen",
+        "expected_exception",
+        "expected_files",
+    ),
+    [
+        # default test case, no outdir, no format_template
+        (
+            [MockPrompt(123, 10)],
+            None,
+            None,
+            None,
+            False,
+            False,
+            False,
+            False,
+            None,
+            False,
+            None,
+            ["_kdpm2a10_PSPS1.0_a_dog_[generated].jpg"],
+        ),
+        # Custom outdir
+        (
+            [MockPrompt(123, 10)],
+            "./hello/world/",
+            None,
+            None,
+            False,
+            False,
+            False,
+            False,
+            None,
+            False,
+            None,
+            ["./hello/world/generated/"],
+        ),
+        # Custom format template
+        (
+            [MockPrompt(123, 10)],
+            None,
+            "{solver_type}_custom",
+            None,
+            False,
+            False,
+            False,
+            False,
+            None,
+            False,
+            None,
+            ["kdpm2a_custom"],
+        ),
+        # using .png in format
+        (
+            [MockPrompt(123, 10)],
+            None,
+            "{solver_type}_custom.png",
+            None,
+            False,
+            False,
+            False,
+            False,
+            None,
+            False,
+            None,
+            ["[generated].png"],
+        ),
+        # Combination of custom outdir and format template
+        (
+            [MockPrompt(123, 10)],
+            "./hello/world/",
+            "{prompt_text}_custom_{solver_type}",
+            "autocast",
+            False,
+            False,
+            False,
+            False,
+            None,
+            False,
+            None,
+            ["./hello/world/generated/a_dog_custom_kdpm2a_[generated].jpg"],
+        ),
+    ],
+)
+def test_imagine_image_file_formatting(
+    prompts,
+    outdir,
+    format_template,
+    precision,
+    record_step_images,
+    print_caption,
+    make_gif,
+    make_compare_gif,
+    return_filename_type,
+    videogen,
+    expected_exception,
+    expected_files,
+):
+    with patch("imaginairy.api.generate.imagine") as mock_imagine:
+        mock_imagine.return_value = [
+            MockResult(MockPrompt(123, 10), {"generated": "path/to/image.jpg"})
+        ]
+
+        params = locals()
+        assert len(params) == 13
+        test_params = {}
+
+        skip_params = [
+            "expected_exception",
+            "mock_imagine",
+            "expected_files",
+        ]
+
+        for key, value in params.items():
+            if key in skip_params:
+                pass
+            elif value:
+                test_params[key] = value
+
+        if expected_exception:
+            with pytest.raises(expected_exception):
+                imagine_image_files(**test_params)
+        else:
+            filenames = imagine_image_files(**test_params)
+            assert isinstance(filenames, list)
+            assert len(filenames) == len(expected_files)
+            for expected_file, actual_file in zip(expected_files, filenames):
+                assert expected_file in actual_file

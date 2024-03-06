@@ -2,7 +2,10 @@
 
 import logging
 import os
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Callable
+
+from imaginairy.config import DEFAULT_SHARED_FILE_FORMAT_TEMPLATE, DEFAULT_SHARED_OUTDIR
 
 if TYPE_CHECKING:
     from imaginairy.schema import ImaginePrompt
@@ -24,10 +27,10 @@ _most_recent_result = None
 
 def imagine_image_files(
     prompts: "list[ImaginePrompt] | ImaginePrompt",
-    outdir: str,
+    outdir: str = DEFAULT_SHARED_OUTDIR,
+    format_template: str = DEFAULT_SHARED_FILE_FORMAT_TEMPLATE,
     precision: str = "autocast",
     record_step_images: bool = False,
-    output_file_extension: str = "jpg",
     print_caption: bool = False,
     make_gif: bool = False,
     make_compare_gif: bool = False,
@@ -60,14 +63,18 @@ def imagine_image_files(
     from imaginairy.api.video_sample import generate_video
     from imaginairy.utils import get_next_filenumber, prompt_normalized
     from imaginairy.utils.animations import make_bounce_animation
+    from imaginairy.utils.format_file_name import format_filename
     from imaginairy.utils.img_utils import pillow_fit_image_within
 
     generated_imgs_path = os.path.join(outdir, "generated")
     os.makedirs(generated_imgs_path, exist_ok=True)
 
     base_count = get_next_filenumber(generated_imgs_path)
-    output_file_extension = output_file_extension.lower()
-    if output_file_extension not in {"jpg", "png"}:
+
+    format_template, output_file_extension = os.path.splitext(format_template)
+    if not output_file_extension:
+        output_file_extension = ".jpg"
+    elif output_file_extension not in {".jpg", ".png"}:
         raise ValueError("Must output a png or jpg")
 
     if not isinstance(prompts, list):
@@ -101,15 +108,29 @@ def imagine_image_files(
         if prompt.init_image:
             img_str = f"_img2img-{prompt.init_image_strength}"
 
-        basefilename = (
-            f"{base_count:06}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
-            f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
+        now = datetime.now(timezone.utc)
+
+        format_data = {
+            "file_sequence_number": f"{base_count:06}",
+            "seed": f"{prompt.seed}",
+            "steps": f"{prompt.steps}",
+            "solver_type": f"{prompt.solver_type.replace('_', '')}",
+            "prompt_strength": f"PS{prompt.prompt_strength}",
+            "prompt_text": f"{prompt_normalized(prompt.prompt_text)}",
+            "img_str": f"{img_str}",
+            "file_extension": f"{output_file_extension}",
+            "now": now,
+        }
+
+        basefilename = format_filename(
+            format_template=format_template, data=format_data
         )
+
         for image_type in result.images:
             subpath = os.path.join(outdir, image_type)
             os.makedirs(subpath, exist_ok=True)
             filepath = os.path.join(
-                subpath, f"{basefilename}_[{image_type}].{output_file_extension}"
+                subpath, f"{basefilename}_[{image_type}]{output_file_extension}"
             )
             result.save(filepath, image_type=image_type)
             logger.info(f"        {image_type:<22} {filepath}")
