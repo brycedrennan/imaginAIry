@@ -58,6 +58,7 @@ def imagine_image_files(
     from PIL import ImageDraw
 
     from imaginairy.api.video_sample import generate_video
+    from imaginairy.schema import LazyLoadingImage
     from imaginairy.utils import get_next_filenumber, prompt_normalized
     from imaginairy.utils.animations import make_bounce_animation
     from imaginairy.utils.img_utils import pillow_fit_image_within
@@ -116,9 +117,11 @@ def imagine_image_files(
             if image_type == return_filename_type:
                 result_filenames.append(filepath)
                 if videogen:
+                    # neeeds to be updated.
                     try:
+                        images = [LazyLoadingImage(filepath=filepath)]
                         generate_video(
-                            input_path=filepath,
+                            input_images=images,
                         )
                     except FileNotFoundError as e:
                         logger.error(str(e))
