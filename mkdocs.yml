@@ -49,8 +49,10 @@ nav:
           - imagine_image_files(): docs/Python/imagine-image-files.md
           - generate_video(): docs/Python/generate-video.md
           - colorize_img(): docs/Python/colorize-img.md
+          - upscale(): docs/Python/upscale.md
           - ImaginePrompt: docs/Python/ImaginePrompt.md
           - ControlInput: docs/Python/ControlInput.md
           - LazyLoadingImage: docs/Python/LazyLoadingImage.md
           - WeightedPrompt: docs/Python/WeightedPrompt.md
+  - Changelog: changelog.md
 

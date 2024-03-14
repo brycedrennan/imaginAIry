@@ -1,0 +1,1 @@
+::: imaginairy.api.upscale.upscale

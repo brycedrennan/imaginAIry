@@ -242,6 +242,7 @@ def glob_expand_paths(paths):
                 expanded_paths.append(p)
             else:
                 expanded_paths.extend(glob.glob(os.path.expanduser(p)))
+
     return expanded_paths
 
 

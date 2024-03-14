@@ -5,6 +5,7 @@ from typing import Any, List
 
 DEFAULT_MODEL_WEIGHTS = "sd15"
 DEFAULT_SOLVER = "ddim"
+DEFAULT_UPSCALE_MODEL = "realesrgan-x2-plus"
 
 DEFAULT_NEGATIVE_PROMPT = (
     "Ugly, duplication, duplicates, mutilation, deformed, mutilated, mutation, twisted body, disfigured, bad anatomy, "
