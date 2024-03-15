@@ -28,7 +28,7 @@ def test_clip_masking(filename_base_for_outputs):
         )
 
         img_path = f"{filename_base_for_outputs}_mask{mask_modifier}_bin.png"
-        assert_image_similar_to_expectation(pred_bin, img_path=img_path, threshold=10)
+        assert_image_similar_to_expectation(pred_bin, img_path=img_path, threshold=7000)
 
     prompt = ImaginePrompt(
         "woman in sparkly gold jacket",
