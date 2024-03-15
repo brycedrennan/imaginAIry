@@ -1,4 +1,5 @@
 """Functions to create hint images for controlnet."""
+
 from typing import TYPE_CHECKING, Callable, Dict, Union
 
 if TYPE_CHECKING:

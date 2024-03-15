@@ -5,6 +5,7 @@ If we don't do this then the scripts will be slow to start up because of
 pkg_resources.require() which is called by setuptools to ensure the
 "correct" version of the package is installed.
 """
+
 import os
 
 

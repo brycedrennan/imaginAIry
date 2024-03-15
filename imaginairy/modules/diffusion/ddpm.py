@@ -7,6 +7,7 @@ https://github.com/openai/improved-diffusion/blob/e94489283bb876ac1477d5dd7709bb
 https://github.com/CompVis/taming-transformers
 -- merci.
 """
+
 import itertools
 import logging
 from contextlib import contextmanager, nullcontext
@@ -1602,9 +1603,9 @@ class LatentDiffusion(DDPM):
                     unconditional_conditioning=uc,
                 )
                 x_samples_cfg = self.decode_first_stage(samples_cfg)
-                log[
-                    f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"
-                ] = x_samples_cfg
+                log[f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"] = (
+                    x_samples_cfg
+                )
 
         if inpaint:
             # make a simple center square
@@ -1921,9 +1922,9 @@ class LatentFinetuneDiffusion(LatentDiffusion):
                     unconditional_conditioning=uc_full,
                 )
                 x_samples_cfg = self.decode_first_stage(samples_cfg)
-                log[
-                    f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"
-                ] = x_samples_cfg
+                log[f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"] = (
+                    x_samples_cfg
+                )
 
         return log
 

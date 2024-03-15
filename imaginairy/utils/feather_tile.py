@@ -159,7 +159,7 @@ def add_tiles(tiles, base_img, tile_coords, tile_size, overlap):
             t += 1
             column += 1
 
-        row += 1
+        row += 1  # noqa
         # if row >= 2:
         #     exit()
         column = 0
