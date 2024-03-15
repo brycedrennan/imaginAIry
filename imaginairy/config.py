@@ -397,6 +397,8 @@ IP_ADAPTER_WEIGHT_LOCATIONS = {
         "normal": f"https://huggingface.co/h94/IP-Adapter/resolve/{_ip_adapter_commit}/sdxl_models/ip-adapter_sdxl_vit-h.safetensors",
     },
 }
+SD21_UNCLIP_WEIGHTS_URL = "https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip/resolve/e99f66a92bdcd1b0fb0d4b6a9b81b3b37d8bea44/image_encoder/model.fp16.safetensors"
+
 
 SOLVER_TYPE_NAMES = [s.aliases[0] for s in SOLVER_CONFIGS]
 

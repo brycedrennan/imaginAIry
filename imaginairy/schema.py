@@ -324,41 +324,6 @@ InpaintMethod = Literal["finetune", "control"]
 
 
 class ImaginePrompt(BaseModel, protected_namespaces=()):
-    """
-    The ImaginePrompt class is used for configuring and generating image prompts.
-
-    Attributes:
-            prompt (str | WeightedPrompt | list[WeightedPrompt] | list[str] | None, optional): Primary prompt for the image generation.
-            negative_prompt (str | WeightedPrompt | list[WeightedPrompt] | list[str] | None, optional): Prompt specifying what to avoid in the image.
-            prompt_strength (float, optional): Strength of the influence of the prompt on the output.
-            init_image (LazyLoadingImage, optional): Initial image to base the generation on.
-            init_image_strength (float, optional): Strength of the influence of the initial image.
-            image_prompt (LazyLoadingImage, optional): Image to be used as part of the prompt using IP-Adapter.
-            image_prompt_strength (float, optional): Strength of the influence of the prompt_image.
-            control_inputs (List[ControlInput], optional): Additional control inputs for image generation.
-            mask_prompt (str, optional): Mask prompt for selective area generation.
-            mask_image (LazyLoadingImage, optional): Image used for masking.
-            mask_mode (MaskMode | str): Mode of masking operation.
-            mask_modify_original (bool): Flag to modify the original image with mask.
-            outpaint (str, optional): Outpainting string for extending image boundaries.
-            model_weights (str): Weights configuration for the generation model.
-            solver_type (str): Type of solver used for image generation.
-            seed (int, optional): Seed for random number generator.
-            steps (int, optional): Number of steps for the generation process.
-            size (int | str | tuple[int, int], optional): Size of the generated image.
-            upscale (bool): Flag to enable upscaling of the generated image.
-            fix_faces (bool): Flag to apply face fixing in the generation.
-            fix_faces_fidelity (float, optional): Fidelity of face fixing.
-            conditioning (str, optional): Additional conditioning string.
-            tile_mode (str): Mode of tiling for the image.
-            allow_compose_phase (bool): Flag to allow composition phase in generation.
-            is_intermediate (bool): Flag for intermediate image processing.
-            collect_progress_latents (bool): Flag to collect progress latents.
-            caption_text (str): Caption text for the image.
-            composition_strength (float, optional): Strength of the composition effect.
-            inpaint_method (InpaintMethod): Method used for inpainting.
-    """
-
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     prompt: List[WeightedPrompt] = Field(default=None, validate_default=True)  # type: ignore

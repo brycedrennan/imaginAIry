@@ -276,6 +276,12 @@ def generate_single_image(
                         )
                         controlnets.append((controlnet, control_image_t))
 
+        if prompt.image_prompt:
+            sd.set_image_prompt(
+                prompt.image_prompt,
+                scale=prompt.image_prompt_strength,
+                model_type="plus",
+            )
         for controlnet, control_image_t in controlnets:
             controlnet.set_controlnet_condition(
                 control_image_t.to(device=sd.unet.device, dtype=sd.unet.dtype)
@@ -293,6 +299,15 @@ def generate_single_image(
         sd.set_inference_steps(prompt.steps, first_step=first_step)
 
         if hasattr(sd, "mask_latents") and mask_image is not None:
+            # import numpy as np
+            # init_size = init_image.size
+            # noise_image = Image.fromarray(np.random.randint(0, 255, (init_size[1], init_size[0], 3), dtype=np.uint8))
+            # masked_image = Image.composite(init_image, noise_image, mask_image)
+
+            masked_image = Image.composite(
+                init_image, mask_image.convert("RGB"), mask_image
+            )
+            result_images["masked_image"] = masked_image
             sd.set_inpainting_conditions(
                 target_image=init_image,
                 mask=ImageOps.invert(mask_image),
@@ -303,12 +318,6 @@ def generate_single_image(
             )
             sd.mask_latents = sd.mask_latents.to(
                 dtype=sd.unet.dtype, device=sd.unet.device
-            )
-        if prompt.image_prompt:
-            sd.set_image_prompt(
-                prompt.image_prompt,
-                scale=prompt.image_prompt_strength,
-                model_type="plus",
             )
 
         if init_latent is not None:
