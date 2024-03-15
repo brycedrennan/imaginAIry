@@ -16,6 +16,7 @@ Examples:
   fruit{-0.1} OR bowl
 
 """
+
 import operator
 from abc import ABC
 from typing import ClassVar

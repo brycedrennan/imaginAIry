@@ -118,9 +118,9 @@ class DoubleTextEncoderTranslator:
                 new_key = f"Parallel.CLIPTextEncoderL.{k}"
                 new_sd[new_key] = text_encoder_l_weights.pop(k)
 
-        new_sd[
-            "Parallel.TextEncoderWithPooling.Parallel.Chain.Linear.weight"
-        ] = text_encoder_g_weights.pop("Linear.weight")
+        new_sd["Parallel.TextEncoderWithPooling.Parallel.Chain.Linear.weight"] = (
+            text_encoder_g_weights.pop("Linear.weight")
+        )
         for k in list(text_encoder_g_weights.keys()):
             if k.startswith("TransformerLayer_32"):
                 new_key = f"Parallel.TextEncoderWithPooling.Parallel.Chain.CLIPTextEncoderG.TransformerLayer{k[19:]}"

@@ -54,9 +54,7 @@ def transfer_audio(sourceVideo, targetVideo):
             f'ffmpeg -y -i "{sourceVideo}" -c:a aac -b:a 160k -vn {tempAudioFileName}'
         )
         os.system(
-            'ffmpeg -y -i "{}" -i {} -c copy "{}"'.format(
-                targetNoAudio, tempAudioFileName, targetVideo
-            )
+            f'ffmpeg -y -i "{targetNoAudio}" -i {tempAudioFileName} -c copy "{targetVideo}"'
         )
         if (
             os.path.getsize(targetVideo) == 0
@@ -159,9 +157,7 @@ def interpolate_video_file(
         fourcc = cv2.VideoWriter_fourcc("m", "p", "4", "v")  # type: ignore
         video_path_wo_ext, ext = os.path.splitext(video_path)
         print(
-            "{}.{}, {} frames in total, {}FPS to {}FPS".format(
-                video_path_wo_ext, output_extension, tot_frame, fps, target_fps
-            )
+            f"{video_path_wo_ext}.{output_extension}, {tot_frame} frames in total, {fps}FPS to {target_fps}FPS"
         )
         if png_out is False and fpsNotAssigned is True:
             print("The audio will be merged after interpolation process")

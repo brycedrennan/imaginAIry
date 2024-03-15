@@ -271,9 +271,7 @@ def load_model(
 
     if "openvino" not in model_type:
         print(
-            "Model loaded, number of parameters = {:.0f}M".format(
-                sum(p.numel() for p in model.parameters()) / 1e6
-            )
+            f"Model loaded, number of parameters = {sum(p.numel() for p in model.parameters()) / 1e6:.0f}M"
         )
     else:
         print("Model loaded, optimized with OpenVINO")

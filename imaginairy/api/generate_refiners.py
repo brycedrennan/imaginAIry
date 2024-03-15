@@ -271,9 +271,9 @@ def generate_single_image(
                             fit_width=prompt.width,
                             fit_height=prompt.height,
                         )
-                        result_images[
-                            f"control-{control_input.mode}"
-                        ] = control_image_disp
+                        result_images[f"control-{control_input.mode}"] = (
+                            control_image_disp
+                        )
                         controlnets.append((controlnet, control_image_t))
 
         for controlnet, control_image_t in controlnets:

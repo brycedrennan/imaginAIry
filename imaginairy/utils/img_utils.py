@@ -9,6 +9,7 @@ OpenCV                      B, G, R, A          0-255           np.ndarray
 Torch       (B), C, H, W    R, G, B             -1.0-1.0        torch.Tensor
 
 """
+
 from typing import Sequence
 
 import numpy as np

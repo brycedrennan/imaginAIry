@@ -1,4 +1,5 @@
 """Functions for creating animations from images."""
+
 import logging
 import os.path
 from typing import TYPE_CHECKING, List, Sequence

@@ -8,13 +8,15 @@ annotated-types==0.6.0
     # via pydantic
 antlr4-python3-runtime==4.9.3
     # via omegaconf
-anyio==4.2.0
+anyio==4.3.0
     # via
     #   httpx
     #   starlette
 babel==2.14.0
     # via mkdocs-material
-certifi==2023.11.17
+build==1.1.1
+    # via pip-tools
+certifi==2024.2.2
     # via
     #   httpcore
     #   httpx
@@ -29,6 +31,7 @@ click==8.1.7
     #   mkdocs
     #   mkdocs-click
     #   mkdocstrings
+    #   pip-tools
     #   uvicorn
 click-help-colors==0.9.4
     # via imaginAIry (setup.py)
@@ -38,9 +41,9 @@ colorama==0.4.6
     # via
     #   griffe
     #   mkdocs-material
-coverage==7.4.0
+coverage==7.4.4
     # via -r requirements-dev.in
-diffusers==0.25.0
+diffusers==0.27.0
     # via imaginAIry (setup.py)
 einops==0.7.0
     # via imaginAIry (setup.py)
@@ -48,7 +51,7 @@ exceptiongroup==1.2.0
     # via
     #   anyio
     #   pytest
-fastapi==0.108.0
+fastapi==0.110.0
     # via imaginAIry (setup.py)
 filelock==3.13.1
     # via
@@ -56,7 +59,7 @@ filelock==3.13.1
     #   huggingface-hub
     #   torch
     #   transformers
-fsspec==2023.12.2
+fsspec==2024.2.0
     # via
     #   huggingface-hub
     #   torch
@@ -66,17 +69,17 @@ ftfy==6.1.3
     #   open-clip-torch
 ghp-import==2.1.0
     # via mkdocs
-griffe==0.38.1
+griffe==0.42.0
     # via mkdocstrings-python
 h11==0.14.0
     # via
     #   httpcore
     #   uvicorn
-httpcore==1.0.2
+httpcore==1.0.4
     # via httpx
-httpx==0.26.0
+httpx==0.27.0
     # via -r requirements-dev.in
-huggingface-hub==0.20.2
+huggingface-hub==0.21.4
     # via
     #   diffusers
     #   open-clip-torch
@@ -88,32 +91,36 @@ idna==3.6
     #   anyio
     #   httpx
     #   requests
-importlib-metadata==7.0.1
+importlib-metadata==7.0.2
     # via diffusers
 iniconfig==2.0.0
     # via pytest
-jaxtyping==0.2.25
+jaxtyping==0.2.28
     # via imaginAIry (setup.py)
-jinja2==3.1.2
+jinja2==3.1.3
     # via
     #   mkdocs
     #   mkdocs-material
     #   mkdocstrings
     #   torch
-kornia==0.7.1
+kornia==0.7.2
     # via imaginAIry (setup.py)
-markdown==3.5.1
+kornia-rs==0.1.1
+    # via kornia
+markdown==3.5.2
     # via
     #   mkdocs
     #   mkdocs-autorefs
     #   mkdocs-click
     #   mkdocs-material
     #   mkdocstrings
+    #   mkdocstrings-python
     #   pymdown-extensions
-markupsafe==2.1.3
+markupsafe==2.1.5
     # via
     #   jinja2
     #   mkdocs
+    #   mkdocs-autorefs
     #   mkdocstrings
 mergedeep==1.3.4
     # via mkdocs
@@ -122,23 +129,23 @@ mkdocs==1.5.3
     #   mkdocs-autorefs
     #   mkdocs-material
     #   mkdocstrings
-mkdocs-autorefs==0.5.0
+mkdocs-autorefs==1.0.1
     # via mkdocstrings
 mkdocs-click==0.8.1
     # via -r requirements-dev.in
-mkdocs-material==9.5.3
+mkdocs-material==9.5.13
     # via -r requirements-dev.in
 mkdocs-material-extensions==1.3.1
     # via mkdocs-material
-mkdocstrings[python]==0.24.0
+mkdocstrings[python]==0.24.1
     # via
     #   -r requirements-dev.in
     #   mkdocstrings-python
-mkdocstrings-python==1.7.5
+mkdocstrings-python==1.9.0
     # via mkdocstrings
 mpmath==1.3.0
     # via sympy
-mypy==1.8.0
+mypy==1.9.0
     # via -r requirements-dev.in
 mypy-extensions==1.0.0
     # via mypy
@@ -156,12 +163,13 @@ numpy==1.24.4
     #   transformers
 omegaconf==2.3.0
     # via imaginAIry (setup.py)
-open-clip-torch==2.23.0
+open-clip-torch==2.24.0
     # via imaginAIry (setup.py)
 opencv-python==4.9.0.80
     # via imaginAIry (setup.py)
-packaging==23.2
+packaging==24.0
     # via
+    #   build
     #   huggingface-hub
     #   kornia
     #   mkdocs
@@ -177,45 +185,51 @@ pillow==10.2.0
     #   diffusers
     #   imaginAIry (setup.py)
     #   torchvision
-platformdirs==4.1.0
+pip-tools==7.4.1
+    # via -r requirements-dev.in
+platformdirs==4.2.0
     # via
     #   mkdocs
     #   mkdocstrings
-pluggy==1.3.0
+pluggy==1.4.0
     # via pytest
-protobuf==4.25.1
+protobuf==5.26.0
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
-psutil==5.9.7
+psutil==5.9.8
     # via imaginAIry (setup.py)
-pydantic==2.5.3
+pydantic==2.6.4
     # via
     #   fastapi
     #   imaginAIry (setup.py)
-pydantic-core==2.14.6
+pydantic-core==2.16.3
     # via pydantic
 pygments==2.17.2
     # via mkdocs-material
-pymdown-extensions==10.7
+pymdown-extensions==10.7.1
     # via
     #   mkdocs-material
     #   mkdocstrings
-pyparsing==3.1.1
+pyparsing==3.1.2
     # via imaginAIry (setup.py)
-pytest==7.4.4
+pyproject-hooks==1.0.0
+    # via
+    #   build
+    #   pip-tools
+pytest==8.1.1
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio
     #   pytest-randomly
     #   pytest-sugar
-pytest-asyncio==0.23.3
+pytest-asyncio==0.23.5.post1
     # via -r requirements-dev.in
 pytest-randomly==3.15.0
     # via -r requirements-dev.in
-pytest-sugar==0.9.7
+pytest-sugar==1.0.0
     # via -r requirements-dev.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via ghp-import
 pyyaml==6.0.1
     # via
@@ -242,31 +256,30 @@ requests==2.31.0
     #   imaginAIry (setup.py)
     #   mkdocs-material
     #   responses
-    #   torchvision
     #   transformers
-responses==0.24.1
+responses==0.25.0
     # via -r requirements-dev.in
-ruff==0.1.11
+ruff==0.3.3
     # via -r requirements-dev.in
-safetensors==0.4.1
+safetensors==0.4.2
     # via
     #   diffusers
     #   imaginAIry (setup.py)
     #   timm
     #   transformers
-scipy==1.10.1
+scipy==1.12.0
     # via
     #   imaginAIry (setup.py)
     #   torchdiffeq
-sentencepiece==0.1.99
+sentencepiece==0.2.0
     # via open-clip-torch
 six==1.16.0
     # via python-dateutil
-sniffio==1.3.0
+sniffio==1.3.1
     # via
     #   anyio
     #   httpx
-starlette==0.32.0.post1
+starlette==0.36.3
     # via fastapi
 sympy==1.12
     # via torch
@@ -274,17 +287,20 @@ termcolor==2.4.0
     # via
     #   imaginAIry (setup.py)
     #   pytest-sugar
-timm==0.9.12
+timm==0.9.16
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
-tokenizers==0.15.0
+tokenizers==0.15.2
     # via transformers
 tomli==2.0.1
     # via
+    #   build
     #   mypy
+    #   pip-tools
+    #   pyproject-hooks
     #   pytest
-torch==2.1.2
+torch==2.2.1
     # via
     #   imaginAIry (setup.py)
     #   kornia
@@ -294,52 +310,57 @@ torch==2.1.2
     #   torchvision
 torchdiffeq==0.2.3
     # via imaginAIry (setup.py)
-torchvision==0.16.2
+torchvision==0.17.1
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
     #   timm
-tqdm==4.66.1
+tqdm==4.66.2
     # via
     #   huggingface-hub
     #   imaginAIry (setup.py)
     #   open-clip-torch
     #   transformers
-transformers==4.36.2
+transformers==4.38.2
     # via imaginAIry (setup.py)
 typeguard==2.13.3
     # via jaxtyping
-types-pillow==10.1.0.20240106
+types-pillow==10.2.0.20240311
     # via -r requirements-dev.in
-types-psutil==5.9.5.20240106
+types-psutil==5.9.5.20240311
     # via -r requirements-dev.in
-types-requests==2.31.0.20240106
+types-requests==2.31.0.20240311
     # via -r requirements-dev.in
 types-tqdm==4.66.0.20240106
     # via -r requirements-dev.in
-typing-extensions==4.9.0
+typing-extensions==4.10.0
     # via
     #   anyio
     #   fastapi
     #   huggingface-hub
-    #   jaxtyping
     #   mypy
     #   pydantic
     #   pydantic-core
     #   torch
     #   uvicorn
-urllib3==2.1.0
+urllib3==2.2.1
     # via
     #   requests
     #   responses
     #   types-requests
-uvicorn==0.25.0
+uvicorn==0.28.0
     # via imaginAIry (setup.py)
-watchdog==3.0.0
+watchdog==4.0.0
     # via mkdocs
 wcwidth==0.2.13
     # via ftfy
-wheel==0.42.0
-    # via -r requirements-dev.in
-zipp==3.17.0
+wheel==0.43.0
+    # via
+    #   -r requirements-dev.in
+    #   pip-tools
+zipp==3.18.1
     # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+# pip
+# setuptools

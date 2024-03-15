@@ -9,7 +9,6 @@
 #
 # thanks!
 
-
 import logging
 import math
 

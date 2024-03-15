@@ -145,15 +145,9 @@ class DPT(BaseModel):
 
 class DPTDepthModel(DPT):
     def __init__(self, path=None, non_negative=True, **kwargs):
-        features = kwargs["features"] if "features" in kwargs else 256
-        head_features_1 = (
-            kwargs["head_features_1"] if "head_features_1" in kwargs else features
-        )
-        head_features_2 = (
-            kwargs["head_features_2"] if "head_features_2" in kwargs else 32
-        )
-        kwargs.pop("head_features_1", None)
-        kwargs.pop("head_features_2", None)
+        features = kwargs.pop("features", 256)
+        head_features_1 = kwargs.pop("head_features_1", features)
+        head_features_2 = kwargs.pop("head_features_2", 32)
 
         head = nn.Sequential(
             nn.Conv2d(
