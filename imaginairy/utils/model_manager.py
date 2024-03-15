@@ -191,6 +191,7 @@ def _get_diffusion_model(
 def get_diffusion_model_refiners(
     weights_config: iconfig.ModelWeightsConfig,
     for_inpainting=False,
+    for_ipadapter=False,
     dtype=None,
 ) -> LatentDiffusionModel:
     """Load a diffusion model."""
@@ -204,41 +205,44 @@ def get_diffusion_model_refiners(
     # ensures a "fresh" copy that doesn't have additional injected parts
     sd = sd.structural_copy()
 
-    # inject ip-adapter (img to img prompt)
-    from PIL import Image
+    if for_ipadapter:
+        # inject ip-adapter (img to img prompt)
+        from PIL import Image
 
-    from imaginairy.vendored.refiners.fluxion.utils import (
-        load_from_safetensors,
-        no_grad,
-    )
-    from imaginairy.vendored.refiners.foundationals.latent_diffusion import (
-        SDXLIPAdapter,
-    )
-
-    image_prompt = Image.open(
-        "/imaginAIry/docs/assets/000032_337692011_PLMS40_PS7.5_a_photo_of_a_dog.jpg"
-    )
-
-    ip_adapter = SDXLIPAdapter(
-        target=sd.unet,
-        weights=load_from_safetensors(
-            "/imaginAIry/imaginairy/utils/ip-adapter_sdxl_vit-h.safetensors"
-        ),
-    )
-    ip_adapter.clip_image_encoder.load_from_safetensors(
-        "/imaginAIry/imaginairy/utils/clip_image.safetensors"
-    )
-    ip_adapter.inject()
-
-    scale = 0.4
-    ip_adapter.set_scale(scale)
-    print(f"SCALE: {scale}")
-
-    with no_grad():
-        clip_image_embedding = ip_adapter.compute_clip_image_embedding(
-            ip_adapter.preprocess_image(image_prompt)
+        from imaginairy.vendored.refiners.fluxion.utils import (
+            load_from_safetensors,
+            no_grad,
         )
-        ip_adapter.set_clip_image_embedding(clip_image_embedding)
+        from imaginairy.vendored.refiners.foundationals.latent_diffusion import (
+            SDXLIPAdapter,
+        )
+
+        image_prompt = Image.open(
+            "/Users/jaydrennan/projects/imaginAIry/docs/assets/mona-lisa-headshot-anim.gif"
+        )
+
+        ip_adapter = SDXLIPAdapter(
+            target=sd.unet,
+            weights=load_from_safetensors(
+                "/imaginAIry/imaginairy/utils/ip-adapter_sdxl_vit-h.safetensors"
+            ),
+        )
+
+
+        ip_adapter.clip_image_encoder.load_from_safetensors(
+            "/imaginAIry/imaginairy/utils/clip_image.safetensors"
+        )
+        ip_adapter.inject()
+
+        scale = 0.4
+        ip_adapter.set_scale(scale)
+        print(f"SCALE: {scale}")
+
+        with no_grad():
+            clip_image_embedding = ip_adapter.compute_clip_image_embedding(
+                ip_adapter.preprocess_image(image_prompt)
+            )
+            ip_adapter.set_clip_image_embedding(clip_image_embedding)
 
     sd.set_self_attention_guidance(enable=True)
 

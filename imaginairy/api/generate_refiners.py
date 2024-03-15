@@ -97,6 +97,7 @@ def generate_single_image(
                 weights_config=prompt.model_weights,
                 for_inpainting=prompt.should_use_inpainting
                 and prompt.inpaint_method == "finetune",
+                for_ipadapter=prompt.should_use_ipadapter,
                 dtype=dtype,
             )
         lc.model = sd

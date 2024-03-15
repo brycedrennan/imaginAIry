@@ -102,6 +102,7 @@ def _imagine_cmd(
     configure_logging(log_level)
 
     init_images = [init_image] if isinstance(init_image, str) else init_image
+    image_prompts = [image_prompt] if isinstance(image_prompt, str) else image_prompt
 
     from imaginairy.utils import glob_expand_paths
 
@@ -109,6 +110,13 @@ def _imagine_cmd(
     init_images = glob_expand_paths(init_images)
 
     if len(init_images) < num_prexpanded_init_images:
+        msg = f"Could not find any images matching the glob pattern(s) {init_image}. Are you sure the file(s) exists?"
+        raise ValueError(msg)
+
+    num_prexpanded_init_image_prompts = len(image_prompts)
+    image_prompts = glob_expand_paths(image_prompts)
+
+    if len(image_prompts) < num_prexpanded_init_image_prompts:
         msg = f"Could not find any images matching the glob pattern(s) {init_image}. Are you sure the file(s) exists?"
         raise ValueError(msg)
 
@@ -123,26 +131,31 @@ def _imagine_cmd(
     from imaginairy.api import imagine_image_files
     from imaginairy.schema import ImaginePrompt, LazyLoadingImage
 
-    new_init_images = []
-    for _init_image in init_images:
-        if _init_image and _init_image.startswith("http"):
-            _init_image = LazyLoadingImage(url=_init_image)
-        elif _init_image.startswith("textimg="):
-            from imaginairy.utils import named_resolutions
-            from imaginairy.utils.text_image import image_from_textimg_str
-
-            resolved_width, resolved_height = named_resolutions.normalize_image_size(
-                size
-            )
-            _init_image = image_from_textimg_str(
-                _init_image, resolved_width, resolved_height
-            )
-        else:
-            _init_image = LazyLoadingImage(filepath=_init_image)
-        new_init_images.append(_init_image)
-    init_images = new_init_images
+    # new_init_images = []
+    # for _init_image in init_images:
+    #     if _init_image and _init_image.startswith("http"):
+    #         _init_image = LazyLoadingImage(url=_init_image)
+    #     elif _init_image.startswith("textimg="):
+    #         from imaginairy.utils import named_resolutions
+    #         from imaginairy.utils.text_image import image_from_textimg_str
+    #
+    #         resolved_width, resolved_height = named_resolutions.normalize_image_size(
+    #             size
+    #         )
+    #         _init_image = image_from_textimg_str(
+    #             _init_image, resolved_width, resolved_height
+    #         )
+    #     else:
+    #         _init_image = LazyLoadingImage(filepath=_init_image)
+    #     new_init_images.append(_init_image)
+    # init_images = new_init_images
+    init_images = images_to_lazyloaders(init_images, size)
     if not init_images:
         init_images = [None]
+
+    image_prompts = images_to_lazyloaders(image_prompts, size)
+    if not image_prompts:
+        image_prompts = [None]
 
     if mask_image:
         if mask_image.startswith("http"):
@@ -188,6 +201,46 @@ def _imagine_cmd(
                     prompt_strength=prompt_strength,
                     init_image=_init_image,
                     init_image_strength=init_image_strength,
+                    # image_prompt=image_prompt,
+                    # image_prompt_strength=image_prompt_strength,
+                    control_inputs=control_inputs,
+                    seed=seed,
+                    solver_type=solver,
+                    steps=steps,
+                    size=size,
+                    mask_image=mask_image,
+                    mask_prompt=mask_prompt,
+                    mask_mode=mask_mode,
+                    mask_modify_original=mask_modify_original,
+                    outpaint=outpaint,
+                    upscale=upscale,
+                    fix_faces=fix_faces,
+                    fix_faces_fidelity=fix_faces_fidelity,
+                    tile_mode=_tile_mode,
+                    allow_compose_phase=allow_compose_phase,
+                    model_weights=model_weights_path,
+                    caption_text=caption_text,
+                    composition_strength=composition_strength,
+                )
+                from imaginairy.utils.prompt_schedules import (
+                    parse_schedule_strs,
+                    prompt_mutator,
+                )
+
+                if arg_schedules:
+                    schedules = parse_schedule_strs(arg_schedules)
+                    for new_prompt in prompt_mutator(prompt, schedules):
+                        prompts.append(new_prompt)
+                else:
+                    prompts.append(prompt)
+
+            for image_prompt in image_prompts:
+                prompt = ImaginePrompt(
+                    prompt=next(prompt_iterator),
+                    negative_prompt=negative_prompt,
+                    prompt_strength=prompt_strength,
+                    # init_image=_init_image,
+                    # init_image_strength=init_image_strength,
                     image_prompt=image_prompt,
                     image_prompt_strength=image_prompt_strength,
                     control_inputs=control_inputs,
@@ -256,6 +309,29 @@ def _imagine_cmd(
         logger.info(f"[compilation] saved to: {new_filename}")
 
 
+def images_to_lazyloaders(images, size):
+    from imaginairy.schema import LazyLoadingImage
+    lazyloaders = []
+
+    for image in images:
+        if image and image.startswith("http"):
+            image = LazyLoadingImage(url=image)
+        elif image.startswith("textimg="):
+            from imaginairy.utils import named_resolutions
+            from imaginairy.utils.text_image import image_from_textimg_str
+
+            resolved_width, resolved_height = named_resolutions.normalize_image_size(
+                size
+            )
+            image = image_from_textimg_str(
+                image, resolved_width, resolved_height
+            )
+        else:
+            image = LazyLoadingImage(filepath=image)
+        lazyloaders.append(image)
+    return lazyloaders
+
+
 def add_options(options):
     def _add_options(func):
         for option in reversed(options):
@@ -319,7 +395,7 @@ common_options = [
     click.option(
         "--image-prompt",
         metavar="PATH|URL",
-        help="Starting image.",
+        help="Image to be used as part of the image and test prompt.",
         multiple=True,
     ),
     click.option(

@@ -783,6 +783,10 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         return self.should_use_inpainting and self.inpaint_method == "finetune"
 
     @property
+    def should_use_ipadapter(self) -> bool:
+        return bool(self.image_prompt)
+
+    @property
     def model_architecture(self) -> config.ModelArchitecture:
         return self.model_weights.architecture
 
