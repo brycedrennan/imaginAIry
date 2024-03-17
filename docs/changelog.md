@@ -1,6 +1,13 @@
 
 ## ChangeLog
 
+**14.2.0**
+- 🎉 feature: add image prompt support via `--image-prompt` and `--image-prompt-strength`
+
+**14.1.1**
+- tests: add installation tests for windows, mac, and conda
+- fix: dependency issues
+
 **14.1.0**
 - 🎉 feature: make video generation smooth by adding frame interpolation
 - feature: SDXL weights in the compvis format can now be used

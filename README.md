@@ -71,6 +71,9 @@ Options:
 ### Whats New
 [See full Changelog here](./docs/changelog.md)
 
+**14.2.0**
+- 🎉 feature: add image prompt support via `--image-prompt` and `--image-prompt-strength`
+
 **14.1.1**
 - tests: add installation tests for windows, mac, and conda
 - fix: dependency issues
