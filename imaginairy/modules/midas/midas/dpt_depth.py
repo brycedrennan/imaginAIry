@@ -145,7 +145,7 @@ class DPT(BaseModel):
 
 class DPTDepthModel(DPT):
     def __init__(self, path=None, non_negative=True, **kwargs):
-        features = kwargs.pop("features", 256)
+        features = kwargs.get("features", 256)
         head_features_1 = kwargs.pop("head_features_1", features)
         head_features_2 = kwargs.pop("head_features_2", 32)
 

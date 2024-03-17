@@ -222,6 +222,7 @@ def _get_diffusion_model_refiners(
 
     Weights location may also be shortcut name, e.g. "SD-1.5"
     """
+
     global MOST_RECENTLY_LOADED_MODEL
     _get_diffusion_model_refiners.cache_clear()
     clear_gpu_cache()

@@ -324,39 +324,6 @@ InpaintMethod = Literal["finetune", "control"]
 
 
 class ImaginePrompt(BaseModel, protected_namespaces=()):
-    """
-    The ImaginePrompt class is used for configuring and generating image prompts.
-
-    Attributes:
-            prompt (str | WeightedPrompt | list[WeightedPrompt] | list[str] | None, optional): Primary prompt for the image generation.
-            negative_prompt (str | WeightedPrompt | list[WeightedPrompt] | list[str] | None, optional): Prompt specifying what to avoid in the image.
-            prompt_strength (float, optional): Strength of the influence of the prompt on the output.
-            init_image (LazyLoadingImage, optional): Initial image to base the generation on.
-            init_image_strength (float, optional): Strength of the influence of the initial image.
-            control_inputs (List[ControlInput], optional): Additional control inputs for image generation.
-            mask_prompt (str, optional): Mask prompt for selective area generation.
-            mask_image (LazyLoadingImage, optional): Image used for masking.
-            mask_mode (MaskMode | str): Mode of masking operation.
-            mask_modify_original (bool): Flag to modify the original image with mask.
-            outpaint (str, optional): Outpainting string for extending image boundaries.
-            model_weights (str): Weights configuration for the generation model.
-            solver_type (str): Type of solver used for image generation.
-            seed (int, optional): Seed for random number generator.
-            steps (int, optional): Number of steps for the generation process.
-            size (int | str | tuple[int, int], optional): Size of the generated image.
-            upscale (bool): Flag to enable upscaling of the generated image.
-            fix_faces (bool): Flag to apply face fixing in the generation.
-            fix_faces_fidelity (float, optional): Fidelity of face fixing.
-            conditioning (str, optional): Additional conditioning string.
-            tile_mode (str): Mode of tiling for the image.
-            allow_compose_phase (bool): Flag to allow composition phase in generation.
-            is_intermediate (bool): Flag for intermediate image processing.
-            collect_progress_latents (bool): Flag to collect progress latents.
-            caption_text (str): Caption text for the image.
-            composition_strength (float, optional): Strength of the composition effect.
-            inpaint_method (InpaintMethod): Method used for inpainting.
-    """
-
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     prompt: List[WeightedPrompt] = Field(default=None, validate_default=True)  # type: ignore
@@ -370,6 +337,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     init_image_strength: float | None = Field(
         ge=0, le=1, default=None, validate_default=True
     )
+    image_prompt: List[LazyLoadingImage] | None = Field(None, validate_default=True)
+    image_prompt_strength: float = Field(ge=0, le=1, default=0.0)
     control_inputs: List[ControlInput] = Field(
         default_factory=list, validate_default=True
     )
@@ -411,6 +380,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         prompt_strength: float | None = 7.5,
         init_image: LazyLoadingImage | None = None,
         init_image_strength: float | None = None,
+        image_prompt: LazyLoadingImage | List[LazyLoadingImage] | None = None,
+        image_prompt_strength: float | None = 0.35,
         control_inputs: List[ControlInput] | None = None,
         mask_prompt: str | None = None,
         mask_image: LazyLoadingImage | None = None,
@@ -434,12 +405,20 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         composition_strength: float | None = 0.5,
         inpaint_method: InpaintMethod = "finetune",
     ):
+        if image_prompt and not isinstance(image_prompt, list):
+            image_prompt = [image_prompt]
+
+        if not image_prompt_strength:
+            image_prompt_strength = 0.35
+
         super().__init__(
             prompt=prompt,
             negative_prompt=negative_prompt,
             prompt_strength=prompt_strength,
             init_image=init_image,
             init_image_strength=init_image_strength,
+            image_prompt=image_prompt,
+            image_prompt_strength=image_prompt_strength,
             control_inputs=control_inputs,
             mask_prompt=mask_prompt,
             mask_image=mask_image,
@@ -807,6 +786,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         data = self.model_dump()
         data["init_image"] = repr(self.init_image)
         data["mask_image"] = repr(self.mask_image)
+        data["image_prompt"] = repr(self.image_prompt)
         if self.control_inputs:
             data["control_inputs"] = [repr(ci) for ci in self.control_inputs]
         return data
