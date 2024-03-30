@@ -91,7 +91,9 @@ def huggingface_cached_path(url: str) -> str:
     dest_path = try_to_load_from_cache(
         repo_id=repo, revision=commit_hash, filename=filepath
     )
-    if not dest_path:
+    from huggingface_hub.file_download import _CACHED_NO_EXIST
+
+    if not dest_path or dest_path == _CACHED_NO_EXIST:
         check_huggingface_url_authorized(url)
         token = HfFolder.get_token()
         logger.info(f"Downloading {url} from huggingface")

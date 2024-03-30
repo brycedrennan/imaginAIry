@@ -57,12 +57,12 @@ async def test_list_models():
     assert response.status_code == 200
 
     expected_model_ids = {
+        "miniaturuspotentia",
         "sd15",
         "openjourney-v1",
         "openjourney-v2",
         "openjourney-v4",
         "modern-disney",
-        "redshift-diffusion",
         "sdxl",
         "opendalle11",
     }

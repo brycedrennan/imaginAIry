@@ -139,6 +139,24 @@ def create_pose_map(img_t: "Tensor"):
     return pose_t
 
 
+def create_densepose_map(img_t: "Tensor") -> "Tensor":
+    import torch
+
+    from imaginairy.img_processors.densepose import generate_densepose_image
+
+    img_np = generate_densepose_image(img_t)
+
+    img_t = (
+        torch.tensor(img_np, dtype=torch.float)
+        if not isinstance(img_np, torch.Tensor)
+        else img_np.float()
+    )
+    img_t /= 255.0
+    img_t = img_t.permute(2, 0, 1).unsqueeze(0)
+
+    return img_t
+
+
 def make_noise_disk(H: int, W: int, C: int, F: int) -> "np.ndarray":
     import cv2
     import numpy as np
@@ -312,4 +330,5 @@ CONTROL_MODES: Dict[str, FunctionType] = {
     "details": noop,
     "colorize": to_grayscale,
     "qrcode": adaptive_threshold_binarize,
+    "densepose": create_densepose_map,
 }

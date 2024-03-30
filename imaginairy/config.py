@@ -168,10 +168,17 @@ MODEL_WEIGHT_CONFIGS = [
         defaults={"negative_prompt": DEFAULT_NEGATIVE_PROMPT},
     ),
     ModelWeightsConfig(
-        name="Redshift Diffusion",
-        aliases=["redshift-diffusion", "red", "redshift-diffusion-15", "red15"],
+        name="Miniaturus Potentia V1.2",
+        aliases=[
+            "miniaturuspotentia",
+            "potentia",
+            "miniaturuspotentia12",
+            "mp12",
+            "mp",
+            "potentia12",
+        ],
         architecture=MODEL_ARCHITECTURE_LOOKUP["sd15"],
-        weights_location="https://huggingface.co/nitrosocke/redshift-diffusion/tree/80837fe18df05807861ab91c3bad3693c9342e4c/",
+        weights_location="https://huggingface.co/dataautogpt3/Miniaturus_PotentiaV1.2/tree/7ef539518ad5ad591c45f0b920050883f7e51e83/",
         defaults={"negative_prompt": DEFAULT_NEGATIVE_PROMPT},
     ),
     # SDXL Weights
@@ -338,6 +345,13 @@ CONTROL_CONFIGS = [
         weights_location="https://huggingface.co/monster-labs/control_v1p_sd15_qrcode_monster/resolve/4a946e610f670c4cd6cf46b8641fca190e4f56c4/diffusion_pytorch_model.safetensors",
         aliases=["qrcode"],
     ),
+    ControlConfig(
+        name="DensePose",
+        control_type="densepose",
+        config_path="configs/control-net-v15.yaml",
+        weights_location="https://huggingface.co/zcxu-eric/MagicAnimate/resolve/3d80ae8c50b289e55ee68deecc83afaab9c6a382/densepose_controlnet/diffusion_pytorch_model.safetensors?download=true",
+        aliases=["densepose"],
+    ),
 ]
 
 CONTROL_CONFIG_SHORTCUTS: dict[str, ControlConfig] = {}
@@ -398,7 +412,7 @@ IP_ADAPTER_WEIGHT_LOCATIONS = {
     },
 }
 SD21_UNCLIP_WEIGHTS_URL = "https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip/resolve/e99f66a92bdcd1b0fb0d4b6a9b81b3b37d8bea44/image_encoder/model.fp16.safetensors"
-
+DENSEPOSE_REPO_URL = "https://huggingface.co/LayerNorm/DensePose-TorchScript-with-hint-image/resolve/65446422ea6225b9d72f93f3d2e2ad55e78b0b78"
 
 SOLVER_TYPE_NAMES = [s.aliases[0] for s in SOLVER_CONFIGS]
 
