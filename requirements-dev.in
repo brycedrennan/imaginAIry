@@ -5,7 +5,6 @@ mkdocs-click
 mkdocstrings[python]
 mypy
 ruff
-pip-tools
 pytest
 pytest-asyncio
 pytest-randomly

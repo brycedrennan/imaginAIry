@@ -5,7 +5,7 @@ venv_name = $(venv_prefix)-$(python_version)
 pyenv_instructions=https://github.com/pyenv/pyenv#installation
 pyenv_virt_instructions=https://github.com/pyenv/pyenv-virtualenv#pyenv-virtualenv
 
-
+# waiting for https://github.com/astral-sh/uv/issues/2744 to be resolved
 init: require_pyenv  ## Setup a dev environment for local development.
 	@pyenv install $(python_version) -s
 	@echo -e "\033[0;32m ✔️  🐍 $(python_version) installed \033[0m"
@@ -27,6 +27,7 @@ init: require_pyenv  ## Setup a dev environment for local development.
 	@echo -e "The following commands are available to run in the Makefile:\n"
 	@make -s help
 
+req-init: requirements init  ## Alias of `make requirements && make init`
 
 af: autoformat  ## Alias for `autoformat`
 autoformat:  ## Run the autoformatter.
@@ -76,8 +77,8 @@ build-dev-image:
 run-dev: build-dev-image
 	docker run -it -v $$HOME/.cache/huggingface:/root/.cache/huggingface -v $$HOME/.cache/torch:/root/.cache/torch -v `pwd`/outputs:/outputs imaginairy-dev /bin/bash
 
-requirements:  ## Freeze the requirements.txt file
-	pip-compile setup.py requirements-dev.in --output-file=requirements-dev.txt --upgrade --resolver=backtracking
+requirements:  ## Update the frozen requirements.txt file
+	uv pip compile setup.py requirements-dev.in --output-file=requirements-dev.txt --upgrade
 
 require_pyenv:
 	@if ! [ -x "$$(command -v pyenv)" ]; then\
@@ -231,7 +232,7 @@ vendorize_facexlib:
 	sed -i '' '/from \.version import __gitsha__, __version__/d' ./imaginairy/vendored/facexlib/__init__.py
 	make af
 
-vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
+vendorize:  # vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
 	mkdir -p ./downloads
 	-cd ./downloads && git clone $(REPO) $(PKG)
 	cd ./downloads/$(PKG) && git fetch && git checkout $(COMMIT)
