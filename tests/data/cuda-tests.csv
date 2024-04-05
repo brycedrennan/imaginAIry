@@ -1,3 +1,4 @@
+tests/img_processors/test_control_modes.py::test_control_images[densepose-create_densepose_map]
 tests/img_processors/test_control_modes.py::test_control_images[depth-create_depth_map]
 tests/img_processors/test_control_modes.py::test_control_images[hed-create_hed_edges]
 tests/img_processors/test_control_modes.py::test_control_images[normal-create_normal_map]

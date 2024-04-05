@@ -62,6 +62,7 @@ from imaginairy.cli.shared import (
             "inpaint",
             "colorize",
             "qrcode",
+            "densepose",
         ]
     ),
     help="how the control image is used as signal",
