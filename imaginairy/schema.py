@@ -834,7 +834,7 @@ class ImagineResult:
         import torch
 
         from imaginairy.utils import get_device, get_hardware_description
-        from imaginairy.utils.img_utils import (
+        from imaginairy.utils.img_convert import (
             model_latent_to_pillow_img,
             torch_img_to_pillow_img,
         )

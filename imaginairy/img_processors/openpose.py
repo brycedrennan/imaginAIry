@@ -12,7 +12,7 @@ from torch import nn
 
 from imaginairy.utils import get_device
 from imaginairy.utils.downloads import get_cached_url_path
-from imaginairy.utils.img_utils import torch_image_to_openvcv_img
+from imaginairy.utils.img_convert import torch_image_to_openvcv_img
 
 
 def pad_right_down_corner(img, stride, padValue):

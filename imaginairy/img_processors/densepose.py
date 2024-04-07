@@ -12,6 +12,10 @@ from torch.nn import functional as F
 
 from imaginairy import config
 from imaginairy.utils.downloads import get_cached_url_path
+from imaginairy.utils.img_convert import (
+    assert_tensor_float_11_bchw,
+    assert_tensor_uint8_255_bchw,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -240,6 +244,7 @@ def _generate_densepose_image(
 ) -> np.ndarray:
     assert_tensor_float_11_bchw(img)
     input_h, input_w = img.shape[-2:]
+    img = img.to("cpu")
     # print(f"input_h: {input_h}, input_w: {input_w}")
     img, remove_pad = resize_image_with_pad_torch(
         img, detect_resolution, upscale_method
@@ -293,47 +298,6 @@ def _generate_densepose_image(
         )
     # print(f"detected_map shape (resized to original): {detected_map.shape}")
     return detected_map
-
-
-def assert_ndarray_uint8_255_hwc(img):
-    # assert input_image is ndarray with colors 0-255
-    assert img.dtype == np.uint8
-    assert img.ndim == 3
-    assert img.shape[2] == 3
-    assert img.max() <= 255
-    assert img.min() >= 0
-
-
-def assert_tensor_uint8_255_bchw(img):
-    # assert input_image is a PyTorch tensor with colors 0-255 and dimensions (C, H, W)
-    assert isinstance(img, torch.Tensor)
-    assert img.dtype == torch.uint8
-    assert img.ndim == 4
-    assert img.shape[1] == 3
-    assert img.max() <= 255
-    assert img.min() >= 0
-
-
-def assert_tensor_float_11_bchw(img):
-    # assert input_image is a PyTorch tensor with colors -1 to 1 and dimensions (C, H, W)
-    if not isinstance(img, torch.Tensor):
-        msg = f"Input image must be a PyTorch tensor, but got {type(img)}"
-        raise TypeError(msg)
-
-    if img.dtype not in (torch.float32, torch.float64, torch.float16):
-        msg = f"Input image must be a float tensor, but got {img.dtype}"
-        raise ValueError(msg)
-
-    if img.ndim != 4:
-        msg = f"Input image must be 4D (B, C, H, W), but got {img.ndim}D"
-        raise ValueError(msg)
-
-    if img.shape[1] != 3:
-        msg = f"Input image must have 3 channels, but got {img.shape[1]}"
-        raise ValueError(msg)
-    if img.max() > 1 or img.min() < -1:
-        msg = f"Input image must have values in [-1, 1], but got {img.min()} .. {img.max()}"
-        raise ValueError(msg)
 
 
 class BoxMode(IntEnum):

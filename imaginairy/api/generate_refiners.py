@@ -39,12 +39,14 @@ def generate_single_image(
     from imaginairy.samplers import SolverName
     from imaginairy.schema import ImagineResult
     from imaginairy.utils import get_device, randn_seeded
+    from imaginairy.utils.img_convert import (
+        pillow_img_to_torch_image,
+        pillow_mask_to_latent_mask,
+    )
     from imaginairy.utils.img_utils import (
         add_caption_to_image,
         combine_image,
         pillow_fit_image_within,
-        pillow_img_to_torch_image,
-        pillow_mask_to_latent_mask,
     )
     from imaginairy.utils.log_utils import (
         ImageLoggingContext,
@@ -470,9 +472,9 @@ def prep_control_input(
     from PIL import ImageOps
 
     from imaginairy.utils import get_device
+    from imaginairy.utils.img_convert import pillow_img_to_torch_image
     from imaginairy.utils.img_utils import (
         pillow_fit_image_within,
-        pillow_img_to_torch_image,
     )
     from imaginairy.utils.log_utils import (
         log_img,

@@ -8,11 +8,13 @@ import cv2
 import torch
 
 from imaginairy.utils import shrink_list
+from imaginairy.utils.img_convert import (
+    model_latents_to_pillow_imgs,
+    pillow_img_to_opencv_img,
+)
 from imaginairy.utils.img_utils import (
     add_caption_to_image,
     imgpaths_to_imgs,
-    model_latents_to_pillow_imgs,
-    pillow_img_to_opencv_img,
 )
 
 if TYPE_CHECKING:

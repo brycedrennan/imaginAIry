@@ -4,7 +4,7 @@ import pytest
 
 from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils.feather_tile import rebuild_image, tile_image, tile_setup
-from imaginairy.utils.img_utils import (
+from imaginairy.utils.img_convert import (
     pillow_img_to_torch_image,
     torch_img_to_pillow_img,
 )

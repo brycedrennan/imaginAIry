@@ -1,25 +1,17 @@
 """
 image utils.
-
-Library format cheat sheet:
-
-Library     Dim Order       Channel Order       Value Range     Type
-Pillow                      R, G, B, A          0-255           PIL.Image.Image
-OpenCV                      B, G, R, A          0-255           np.ndarray
-Torch       (B), C, H, W    R, G, B             -1.0-1.0        torch.Tensor
-
 """
 
-from typing import Sequence
-
-import numpy as np
 import PIL
 import torch
-from einops import rearrange, repeat
 from PIL import Image, ImageDraw, ImageFont
+from torch import Tensor
+from torch.nn import functional as F
 
 from imaginairy.schema import LazyLoadingImage
-from imaginairy.utils import get_device
+from imaginairy.utils import img_convert
+from imaginairy.utils.mask_helpers import binary_erosion
+from imaginairy.utils.mathy import make_odd
 from imaginairy.utils.named_resolutions import normalize_image_size
 from imaginairy.utils.paths import PKG_ROOT
 
@@ -49,106 +41,6 @@ def pillow_fit_image_within(
     if (w, h) != image.size:
         image = image.resize((w, h), resample=Image.Resampling.LANCZOS)
     return image
-
-
-def pillow_img_to_torch_image(
-    img: PIL.Image.Image | LazyLoadingImage, convert="RGB"
-) -> torch.Tensor:
-    if convert:
-        img = img.convert(convert)
-    img_np = np.array(img).astype(np.float32) / 255.0
-    # b, h, w, c => b, c, h, w
-    img_np = img_np[None].transpose(0, 3, 1, 2)
-    img_t = torch.from_numpy(img_np)
-    return 2.0 * img_t - 1.0
-
-
-def pillow_mask_to_latent_mask(
-    mask_img: PIL.Image.Image | LazyLoadingImage, downsampling_factor
-) -> torch.Tensor:
-    mask_img = mask_img.resize(
-        (
-            mask_img.width // downsampling_factor,
-            mask_img.height // downsampling_factor,
-        ),
-        resample=Image.Resampling.LANCZOS,
-    )
-
-    mask = np.array(mask_img).astype(np.float32) / 255.0
-    mask = mask[None, None]
-    mask_t = torch.from_numpy(mask)
-    return mask_t
-
-
-def pillow_img_to_opencv_img(img: PIL.Image.Image | LazyLoadingImage):
-    open_cv_image = np.array(img)
-    # Convert RGB to BGR
-    open_cv_image = open_cv_image[:, :, ::-1].copy()
-    return open_cv_image
-
-
-def torch_image_to_openvcv_img(img: torch.Tensor) -> np.ndarray:
-    img = (img + 1) / 2
-    img_np = img.detach().cpu().numpy()
-    # assert there is only one image
-    assert img_np.shape[0] == 1
-    img_np = img_np[0]
-    img_np = img_np.transpose(1, 2, 0)
-    img_np = (img_np * 255).astype(np.uint8)
-    # RGB to BGR
-    img_np = img_np[:, :, ::-1]
-    return img_np
-
-
-def torch_img_to_pillow_img(img_t: torch.Tensor) -> PIL.Image.Image:
-    img_t = img_t.to(torch.float32).detach().cpu()
-    if len(img_t.shape) == 3:
-        img_t = img_t.unsqueeze(0)
-    if img_t.shape[0] != 1:
-        raise ValueError("Only batch size 1 supported")
-    if img_t.shape[1] == 1:
-        colorspace = "L"
-    elif img_t.shape[1] == 3:
-        colorspace = "RGB"
-    else:
-        msg = (
-            f"Unsupported colorspace. {img_t.shape[1]} channels in {img_t.shape} shape"
-        )
-        raise ValueError(msg)
-    img_t = rearrange(img_t, "b c h w -> b h w c")
-    img_t = torch.clamp((img_t + 1.0) / 2.0, min=0.0, max=1.0)
-    img_np = (255.0 * img_t).cpu().numpy().astype(np.uint8)[0]
-    if colorspace == "L":
-        img_np = img_np[:, :, 0]
-    return Image.fromarray(img_np, colorspace)
-
-
-def model_latent_to_pillow_img(latent: torch.Tensor) -> PIL.Image.Image:
-    from imaginairy.utils.model_manager import get_current_diffusion_model
-
-    if len(latent.shape) == 3:
-        latent = latent.unsqueeze(0)
-    if latent.shape[0] != 1:
-        raise ValueError("Only batch size 1 supported")
-    model = get_current_diffusion_model()
-    img_t = model.lda.decode(latent)
-    return torch_img_to_pillow_img(img_t)
-
-
-def model_latents_to_pillow_imgs(latents: torch.Tensor) -> Sequence[PIL.Image.Image]:
-    return [model_latent_to_pillow_img(latent) for latent in latents]
-
-
-def pillow_img_to_model_latent(
-    model, img: PIL.Image.Image | LazyLoadingImage, batch_size=1, half=True
-):
-    init_image = pillow_img_to_torch_image(img).to(get_device())
-    init_image = repeat(init_image, "1 ... -> b ...", b=batch_size)
-    if half:
-        return model.get_first_stage_encoding(
-            model.encode_first_stage(init_image.half())
-        )
-    return model.get_first_stage_encoding(model.encode_first_stage(init_image))
 
 
 def imgpaths_to_imgs(imgpaths):
@@ -250,6 +142,28 @@ def combine_image(original_img, generated_img, mask_img):
     return rebuilt_orig_img
 
 
+def combine_img_torch(
+    target_img: torch.Tensor,
+    source_img: torch.Tensor,
+    mask_img: torch.Tensor,
+) -> torch.Tensor:
+    """Combine the source image with the target image using the mask image."""
+    img_convert.assert_b1c3hw(target_img)
+    img_convert.assert_b1c3hw(source_img)
+    img_convert.assert_torch_mask(mask_img)
+
+    # assert mask and img are the same size
+    if mask_img.shape[-2:] != source_img.shape[-2:]:
+        msg = "Mask and image must have the same height and width."
+        raise ValueError(msg)
+
+    # Using the mask, combine the images
+    combined_img = target_img * (1 - mask_img) + source_img * mask_img
+
+    img_convert.assert_b1c3hw(combined_img)
+    return combined_img
+
+
 def calc_scale_to_fit_within(height: int, width: int, max_size) -> float:
     max_width, max_height = normalize_image_size(max_size)
     if width <= max_width and height <= max_height:
@@ -282,3 +196,40 @@ def aspect_ratio(width, height):
     y = height // divisor
 
     return f"{x}:{y}"
+
+
+def blur_fill(image: torch.Tensor, mask: torch.Tensor, blur: int, falloff: int):
+    blur = make_odd(blur)
+    falloff = min(make_odd(falloff), blur - 2)
+
+    original = image.clone()
+    alpha = mask.floor()
+    if falloff > 0:
+        erosion = binary_erosion(alpha, falloff)
+        alpha = alpha * gaussian_blur(erosion, falloff)
+    alpha = alpha.repeat(1, 3, 1, 1)
+
+    image = gaussian_blur(image, blur)
+    image = original + (image - original) * alpha
+    return image
+
+
+def gaussian_blur(image: Tensor, radius: int, sigma: float = 0):
+    c = image.shape[-3]
+    if sigma <= 0:
+        sigma = 0.3 * (radius - 1) + 0.8
+
+    kernel = _gaussian_kernel(radius, sigma).to(image.device)
+    kernel_x = kernel[..., None, :].repeat(c, 1, 1).unsqueeze(1)
+    kernel_y = kernel[..., None].repeat(c, 1, 1).unsqueeze(1)
+
+    image = F.pad(image, (radius, radius, radius, radius), mode="reflect")
+    image = F.conv2d(image, kernel_x, groups=c)
+    image = F.conv2d(image, kernel_y, groups=c)
+    return image
+
+
+def _gaussian_kernel(radius: int, sigma: float):
+    x = torch.linspace(-radius, radius, steps=radius * 2 + 1)
+    pdf = torch.exp(-0.5 * (x / sigma).pow(2))
+    return pdf / pdf.sum()

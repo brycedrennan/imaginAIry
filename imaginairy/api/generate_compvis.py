@@ -41,12 +41,14 @@ def _generate_single_image(
         MaskMode,
     )
     from imaginairy.utils import get_device, randn_seeded
-    from imaginairy.utils.img_utils import (
-        add_caption_to_image,
-        pillow_fit_image_within,
+    from imaginairy.utils.img_convert import (
         pillow_img_to_torch_image,
         pillow_mask_to_latent_mask,
         torch_img_to_pillow_img,
+    )
+    from imaginairy.utils.img_utils import (
+        add_caption_to_image,
+        pillow_fit_image_within,
     )
     from imaginairy.utils.log_utils import (
         ImageLoggingContext,

@@ -42,6 +42,7 @@ tests/test_api.py::test_tile_mode
 tests/test_api/test_generate.py::test_cliptext_inpainting_pearl_doctor
 tests/test_api/test_generate.py::test_controlnet[canny]
 tests/test_api/test_generate.py::test_controlnet[colorize]
+tests/test_api/test_generate.py::test_controlnet[densepose]
 tests/test_api/test_generate.py::test_controlnet[depth]
 tests/test_api/test_generate.py::test_controlnet[details]
 tests/test_api/test_generate.py::test_controlnet[edit]
@@ -91,6 +92,7 @@ tests/test_enhancers/test_upscale_realesrgan.py::test_upscale_textured_image
 tests/test_modules/diffusion/test_model.py::test_nonlinearity
 tests/test_outpaint.py::test_outpainting_outpaint
 tests/test_safety.py::test_is_nsfw
+tests/test_utils/test_mask_helpers.py::test_inpaint_prep_dogbench
 tests/test_utils/test_model_cache.py::test_cache_ordering
 tests/test_utils/test_model_cache.py::test_get_existing_move_to_gpu
 tests/test_utils/test_model_cache.py::test_set_cpu_full

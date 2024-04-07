@@ -6,7 +6,7 @@ from imaginairy.img_processors.control_modes import CONTROL_MODES, create_depth_
 from imaginairy.modules.midas.api import ISL_PATHS
 from imaginairy.schema import LazyLoadingImage
 from imaginairy.utils import seed_everything
-from imaginairy.utils.img_utils import (
+from imaginairy.utils.img_convert import (
     pillow_img_to_torch_image,
     torch_img_to_pillow_img,
 )

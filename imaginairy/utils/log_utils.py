@@ -331,7 +331,7 @@ class ImageLoggingContext:
         )
 
     def log_progress_latent(self, latent):
-        from imaginairy.utils.img_utils import model_latents_to_pillow_imgs
+        from imaginairy.utils.img_convert import model_latents_to_pillow_imgs
 
         if not self.progress_img_callback:
             return
