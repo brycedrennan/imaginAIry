@@ -45,8 +45,6 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
-        cache: pip
-        cache-dependency-path: requirements-dev.txt
     - name: Install dependencies
       run: |
         python -m pip install uv
@@ -108,6 +106,8 @@ jobs:
   build-wheel:
     name: Build Wheel
     runs-on: ubuntu-latest
+    outputs:
+      wheel_name: ${{ steps.set_wheel_name.outputs.wheel_name }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4.5.0
@@ -117,8 +117,9 @@ jobs:
         run: python -m pip install wheel
       - name: Build package
         run: python setup.py bdist_wheel
-      - name: Rename wheel
-        run: mv dist/*.whl dist/imaginAIry-0.0.1b0-py3-none-any.whl
+      - name: Set wheel filename
+        id: set_wheel_name
+        run: echo "wheel_name=$(ls dist/*.whl)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v3
         with:
           name: wheels
@@ -142,11 +143,14 @@ jobs:
         name: wheels
         path: dist
     - name: Install built wheel
+      env:
+        WHEEL_FILENAME: ${{ needs.build-wheel.outputs.wheel_name }}
       run: |
-        python -m pip install dist/imaginAIry-0.0.1b0-py3-none-any.whl
+        python -m pip install uv
+        uv pip install --system ${{ needs.build-wheel.outputs.wheel_name }}
     - name: Generate an image
       run: |
-        imagine fruit --steps 10 --size 512 --seed 1
+        imagine fruit --steps 3 --size 512 --seed 1
     - uses: actions/upload-artifact@v3
       with:
         name: images
@@ -174,14 +178,17 @@ jobs:
           path: dist
       - name: Install built wheel
         shell: bash -l {0}
+        env:
+          WHEEL_FILENAME: ${{ steps.set-wheel-name.outputs.WHEEL_FILENAME }}
         run: |
           conda activate test-env
-          python -m pip install dist/imaginAIry-0.0.1b0-py3-none-any.whl
+          python -m pip install uv
+          uv pip install ${{ needs.build-wheel.outputs.wheel_name }}
       - name: Generate an image
         shell: bash -l {0}
         run: |
           conda activate test-env
-          imagine fruit --steps 10 --size 512 --seed 1
+          imagine fruit --steps 3 --size 512 --seed 1
       - uses: actions/upload-artifact@v3
         with:
           name: images
