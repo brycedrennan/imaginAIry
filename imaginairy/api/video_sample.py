@@ -94,6 +94,8 @@ def generate_video(
 
     output_fps = default(output_fps, fps_id)
 
+    model_name = model_name.lower().replace("_", "-")
+
     video_model_config = config.MODEL_WEIGHT_CONFIG_LOOKUP.get(model_name, None)
     if video_model_config is None:
         msg = f"Version {model_name} does not exist."
