@@ -21,6 +21,7 @@ def test_upscale_cmd_format_option():
 
     mock_img = Mock()
     mock_img.save = Mock()
+    mock_img.height = 1000
 
     with patch.multiple(
         "imaginairy.enhancers.upscale", upscale_image=Mock(return_value=mock_img)
@@ -38,5 +39,5 @@ def test_upscale_cmd_format_option():
         )
 
         assert result.exit_code == 0
-        assert "Saved to " in result.output
+        assert "saved to " in result.output
         mock_img.save.assert_called()  # Check if save method was called

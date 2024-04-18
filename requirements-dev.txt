@@ -14,7 +14,7 @@ anyio==4.3.0
     #   starlette
 babel==2.14.0
     # via mkdocs-material
-build==1.1.1
+build==1.2.1
     # via pip-tools
 certifi==2024.2.2
     # via
@@ -43,55 +43,57 @@ colorama==0.4.6
     #   mkdocs-material
 coverage==7.4.4
     # via -r requirements-dev.in
-diffusers==0.27.0
+diffusers==0.27.2
     # via imaginAIry (setup.py)
 einops==0.7.0
-    # via imaginAIry (setup.py)
+    # via
+    #   imaginAIry (setup.py)
+    #   spandrel
 exceptiongroup==1.2.0
     # via
     #   anyio
     #   pytest
-fastapi==0.110.0
+fastapi==0.110.1
     # via imaginAIry (setup.py)
-filelock==3.13.1
+filelock==3.13.4
     # via
     #   diffusers
     #   huggingface-hub
     #   torch
     #   transformers
-fsspec==2024.2.0
+fsspec==2024.3.1
     # via
     #   huggingface-hub
     #   torch
-ftfy==6.1.3
+ftfy==6.2.0
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
 ghp-import==2.1.0
     # via mkdocs
-griffe==0.42.0
+griffe==0.42.2
     # via mkdocstrings-python
 h11==0.14.0
     # via
     #   httpcore
     #   uvicorn
-httpcore==1.0.4
+httpcore==1.0.5
     # via httpx
 httpx==0.27.0
     # via -r requirements-dev.in
-huggingface-hub==0.21.4
+huggingface-hub==0.22.2
     # via
     #   diffusers
     #   open-clip-torch
     #   timm
     #   tokenizers
     #   transformers
-idna==3.6
+idna==3.7
     # via
     #   anyio
     #   httpx
     #   requests
-importlib-metadata==7.0.2
+importlib-metadata==7.1.0
     # via diffusers
 iniconfig==2.0.0
     # via pytest
@@ -105,16 +107,15 @@ jinja2==3.1.3
     #   torch
 kornia==0.7.2
     # via imaginAIry (setup.py)
-kornia-rs==0.1.1
+kornia-rs==0.1.3
     # via kornia
-markdown==3.5.2
+markdown==3.6
     # via
     #   mkdocs
     #   mkdocs-autorefs
     #   mkdocs-click
     #   mkdocs-material
     #   mkdocstrings
-    #   mkdocstrings-python
     #   pymdown-extensions
 markupsafe==2.1.5
     # via
@@ -133,15 +134,15 @@ mkdocs-autorefs==1.0.1
     # via mkdocstrings
 mkdocs-click==0.8.1
     # via -r requirements-dev.in
-mkdocs-material==9.5.13
+mkdocs-material==9.5.18
     # via -r requirements-dev.in
 mkdocs-material-extensions==1.3.1
     # via mkdocs-material
-mkdocstrings[python]==0.24.1
+mkdocstrings[python]==0.24.3
     # via
     #   -r requirements-dev.in
     #   mkdocstrings-python
-mkdocstrings-python==1.9.0
+mkdocstrings-python==1.9.2
     # via mkdocstrings
 mpmath==1.3.0
     # via sympy
@@ -149,7 +150,7 @@ mypy==1.9.0
     # via -r requirements-dev.in
 mypy-extensions==1.0.0
     # via mypy
-networkx==3.2.1
+networkx==3.3
     # via torch
 numpy==1.24.4
     # via
@@ -159,6 +160,7 @@ numpy==1.24.4
     #   jaxtyping
     #   opencv-python
     #   scipy
+    #   spandrel
     #   torchvision
     #   transformers
 omegaconf==2.3.0
@@ -180,7 +182,7 @@ paginate==0.5.6
     # via mkdocs-material
 pathspec==0.12.1
     # via mkdocs
-pillow==10.2.0
+pillow==10.3.0
     # via
     #   diffusers
     #   imaginAIry (setup.py)
@@ -193,17 +195,17 @@ platformdirs==4.2.0
     #   mkdocstrings
 pluggy==1.4.0
     # via pytest
-protobuf==5.26.0
+protobuf==5.26.1
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
 psutil==5.9.8
     # via imaginAIry (setup.py)
-pydantic==2.6.4
+pydantic==2.7.0
     # via
     #   fastapi
     #   imaginAIry (setup.py)
-pydantic-core==2.16.3
+pydantic-core==2.18.1
     # via pydantic
 pygments==2.17.2
     # via mkdocs-material
@@ -223,7 +225,7 @@ pytest==8.1.1
     #   pytest-asyncio
     #   pytest-randomly
     #   pytest-sugar
-pytest-asyncio==0.23.5.post1
+pytest-asyncio==0.23.6
     # via -r requirements-dev.in
 pytest-randomly==3.15.0
     # via -r requirements-dev.in
@@ -243,7 +245,7 @@ pyyaml==6.0.1
     #   transformers
 pyyaml-env-tag==0.1
     # via mkdocs
-regex==2023.12.25
+regex==2024.4.16
     # via
     #   diffusers
     #   mkdocs-material
@@ -259,15 +261,16 @@ requests==2.31.0
     #   transformers
 responses==0.25.0
     # via -r requirements-dev.in
-ruff==0.3.3
+ruff==0.3.7
     # via -r requirements-dev.in
-safetensors==0.4.2
+safetensors==0.4.3
     # via
     #   diffusers
     #   imaginAIry (setup.py)
+    #   spandrel
     #   timm
     #   transformers
-scipy==1.12.0
+scipy==1.13.0
     # via
     #   imaginAIry (setup.py)
     #   torchdiffeq
@@ -279,7 +282,9 @@ sniffio==1.3.1
     # via
     #   anyio
     #   httpx
-starlette==0.36.3
+spandrel==0.3.1
+    # via imaginAIry (setup.py)
+starlette==0.37.2
     # via fastapi
 sympy==1.12
     # via torch
@@ -300,20 +305,22 @@ tomli==2.0.1
     #   pip-tools
     #   pyproject-hooks
     #   pytest
-torch==2.2.1
+torch==2.2.2
     # via
     #   imaginAIry (setup.py)
     #   kornia
     #   open-clip-torch
+    #   spandrel
     #   timm
     #   torchdiffeq
     #   torchvision
 torchdiffeq==0.2.3
     # via imaginAIry (setup.py)
-torchvision==0.17.1
+torchvision==0.17.2
     # via
     #   imaginAIry (setup.py)
     #   open-clip-torch
+    #   spandrel
     #   timm
 tqdm==4.66.2
     # via
@@ -321,19 +328,19 @@ tqdm==4.66.2
     #   imaginAIry (setup.py)
     #   open-clip-torch
     #   transformers
-transformers==4.38.2
+transformers==4.39.3
     # via imaginAIry (setup.py)
 typeguard==2.13.3
     # via jaxtyping
-types-pillow==10.2.0.20240311
+types-pillow==10.2.0.20240415
     # via -r requirements-dev.in
-types-psutil==5.9.5.20240311
+types-psutil==5.9.5.20240316
     # via -r requirements-dev.in
-types-requests==2.31.0.20240311
+types-requests==2.31.0.20240406
     # via -r requirements-dev.in
-types-tqdm==4.66.0.20240106
+types-tqdm==4.66.0.20240417
     # via -r requirements-dev.in
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via
     #   anyio
     #   fastapi
@@ -341,6 +348,7 @@ typing-extensions==4.10.0
     #   mypy
     #   pydantic
     #   pydantic-core
+    #   spandrel
     #   torch
     #   uvicorn
 urllib3==2.2.1
@@ -348,7 +356,7 @@ urllib3==2.2.1
     #   requests
     #   responses
     #   types-requests
-uvicorn==0.28.0
+uvicorn==0.29.0
     # via imaginAIry (setup.py)
 watchdog==4.0.0
     # via mkdocs

@@ -69,10 +69,7 @@ def upscale_image(
         model_path = upscaler_model
 
     model = ModelLoader().load_from_file(model_path)
-    logger.info(
-        f"Upscaling from {img.width}x{img.height} to {img.width * model.scale}x{img.height * model.scale}"
-    )
-    print(f"Upscaling image with model {model.architecture}@{upscaler_model}")
+    logger.debug(f"Upscaling image with model {model.architecture}@{upscaler_model}")
 
     assert isinstance(model, ImageModelDescriptor)
 

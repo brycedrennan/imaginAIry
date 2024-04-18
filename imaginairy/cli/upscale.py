@@ -62,7 +62,6 @@ def upscale_cmd(
     """
     Upscale an image 4x using AI.
     """
-    from tqdm import tqdm
 
     from imaginairy.enhancers.face_restoration_codeformer import enhance_faces
     from imaginairy.enhancers.upscale import upscale_image, upscale_model_lookup
@@ -92,15 +91,15 @@ def upscale_cmd(
     elif format_template == "DEFAULT":
         format_template = DEFAULT_FORMAT_TEMPLATE
 
-    for p in tqdm(image_filepaths):
-        savepath = os.path.join(outdir, os.path.basename(p))
+    for n, p in enumerate(image_filepaths):
         if p.startswith("http"):
             img = LazyLoadingImage(url=p)
         else:
             img = LazyLoadingImage(filepath=p)
+        orig_height = img.height
         for model in upscale_model:
             logger.info(
-                f"Upscaling {p} from {img.width}x{img.height} to {img.width * 4}x{img.height * 4} and saving it to {savepath}"
+                f"Upscaling ({n + 1}/{len(image_filepaths)}) {p} ({img.width}x{img.height})..."
             )
 
             img = upscale_image(img, model)
@@ -131,4 +130,7 @@ def upscale_cmd(
             new_file_name = format_filename(format_template, new_file_name_data)
             new_file_path = os.path.join(outdir, new_file_name)
             img.save(new_file_path)
-            print(f"Saved to {new_file_path}")
+            scale = int(img.height / orig_height)
+            logger.info(
+                f"Upscaled {scale}x to {img.width}x{img.height} and saved to {new_file_path}"
+            )
