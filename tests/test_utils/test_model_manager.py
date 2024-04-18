@@ -1,7 +1,7 @@
 import pytest
 
 from imaginairy import config
-from imaginairy.utils.downloads import parse_diffusers_repo_url
+from imaginairy.utils.downloads import parse_diffusers_repo_url, resolve_path_or_url
 from imaginairy.utils.model_manager import (
     resolve_model_weights_config,
 )
@@ -59,3 +59,8 @@ hf_urls_cases = [
 def test_parse_diffusers_repo_url(url, expected):
     result = parse_diffusers_repo_url(url)
     assert result == expected
+
+
+def test_resolve_sdxl_path_or_url():
+    a = "/foo/bar.safetensors"
+    assert resolve_path_or_url(a) == a

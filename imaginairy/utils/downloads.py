@@ -15,6 +15,17 @@ from huggingface_hub import (
 logger = logging.getLogger(__name__)
 
 
+def resolve_path_or_url(path_or_url: str, category=None) -> str:
+    """
+    Resolves a path or url to a local absolute file path
+
+    If the path_or_url is a url, it will be downloaded to the cache directory and the path to the downloaded file will be returned.
+    """
+    if path_or_url.startswith(("https://", "http://")):
+        return get_cached_url_path(url=path_or_url, category=category)
+    return os.path.abspath(path_or_url)
+
+
 def get_cached_url_path(url: str, category=None) -> str:
     """
     Gets the contents of a url, but caches the response indefinitely.

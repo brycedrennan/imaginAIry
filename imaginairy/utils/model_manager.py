@@ -24,6 +24,7 @@ from imaginairy.utils.downloads import (
     get_cached_url_path,
     is_diffusers_repo_url,
     normalize_diffusers_repo_url,
+    resolve_path_or_url,
 )
 from imaginairy.utils.model_cache import memory_managed_model
 from imaginairy.utils.named_resolutions import normalize_image_size
@@ -793,7 +794,7 @@ def load_stable_diffusion_compvis_weights(weights_url):
 def load_sdxl_compvis_weights(url):
     from safetensors import safe_open
 
-    weights_path = get_cached_url_path(url)
+    weights_path = resolve_path_or_url(url)
     state_dict = {}
     unet_state_dict = {}
     vae_state_dict = {}
