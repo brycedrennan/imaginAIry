@@ -4,11 +4,6 @@
 
 - feature: integrates spandrel for upscaling 
 
-**14.1.1**
-
-- tests: add installation tests for windows, mac, and conda
-- fix: dependency issues
-
 **14.2.0**
 - 🎉 feature: add image prompt support via `--image-prompt` and `--image-prompt-strength`
 
