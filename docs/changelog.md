@@ -1,11 +1,12 @@
 
 ## ChangeLog
-**14.2.1**
+**14.3.0**
 
-- feature: integrates spandrel for upscaling 
+- feature: integrates [spandrel](https://github.com/chaiNNer-org/spandrel) for upscaling 
+- fix: allow loading sdxl models from local paths. 
 
 **14.2.0**
-- 🎉 feature: add image prompt support via `--image-prompt` and `--image-prompt-strength`
+- 🎉 feature: add image prompt support via `--image-prompt` and `--image-prompt-strength` (IPAdapter)
 
 **14.1.1**
 - tests: add installation tests for windows, mac, and conda
