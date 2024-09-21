@@ -1,1 +1,1 @@
-::: imaginairy.api.upscale.upscale
+::: imaginairy.api.upscale.upscale_image
