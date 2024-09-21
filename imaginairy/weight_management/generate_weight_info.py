@@ -56,21 +56,21 @@ def save_diffusers_patterns():
         model_name=utils.MODEL_NAMES.SD15,
         component_name=utils.COMPONENT_NAMES.VAE,
         format_name=utils.FORMAT_NAMES.DIFFUSERS,
-        weights_url="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/vae/diffusion_pytorch_model.fp16.safetensors",
+        weights_url="https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/vae/diffusion_pytorch_model.fp16.safetensors",
     )
 
     save_weight_info(
         model_name=utils.MODEL_NAMES.SD15,
         component_name=utils.COMPONENT_NAMES.UNET,
         format_name=utils.FORMAT_NAMES.DIFFUSERS,
-        weights_url="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/unet/diffusion_pytorch_model.fp16.safetensors",
+        weights_url="https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/unet/diffusion_pytorch_model.fp16.safetensors",
     )
 
     save_weight_info(
         model_name=utils.MODEL_NAMES.SD15,
         component_name=utils.COMPONENT_NAMES.TEXT_ENCODER,
         format_name=utils.FORMAT_NAMES.DIFFUSERS,
-        weights_url="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/text_encoder/model.fp16.safetensors",
+        weights_url="https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/text_encoder/model.fp16.safetensors",
     )
 
 

@@ -131,7 +131,7 @@ MODEL_WEIGHT_CONFIGS = [
         aliases=MODEL_ARCHITECTURE_LOOKUP["sd15"].aliases,
         architecture=MODEL_ARCHITECTURE_LOOKUP["sd15"],
         defaults={"negative_prompt": DEFAULT_NEGATIVE_PROMPT},
-        weights_location="https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/1d0c4ebf6ff58a5caecab40fa1406526bca4b5b9/",
+        weights_location="https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/tree/f03de327dd89b501a01da37fc5240cf4fdba85a1/",
     ),
     ModelWeightsConfig(
         name="Stable Diffusion 1.5 - Inpainting",
