@@ -98,14 +98,15 @@ def trace_sd15_diffusers_execution_order(device=None):
     image_size = 256
     img_in = torch.randn(1, 3, image_size, image_size).to(device)
     vae = AutoencoderKL.from_pretrained(
-        pretrained_model_name_or_path="runwayml/stable-diffusion-v1-5", subfolder="vae"
+        pretrained_model_name_or_path="stable-diffusion-v1-5/stable-diffusion-v1-5",
+        subfolder="vae",
     ).to(device)
     vae_execution_order = trace_execution_order(vae, (img_in,))
 
     # text encoder model
 
     text_encoder = CLIPTextModelWithProjection.from_pretrained(
-        pretrained_model_name_or_path="runwayml/stable-diffusion-v1-5",
+        pretrained_model_name_or_path="stable-diffusion-v1-5/stable-diffusion-v1-5",
         subfolder="text_encoder",
     ).to(device)
     tokens = torch.Tensor(
@@ -200,7 +201,8 @@ def trace_sd15_diffusers_execution_order(device=None):
     text_embedding = torch.randn(1, 77, 768).to(device)
     timestep = torch.tensor(data=[0]).to(device)
     unet = UNet2DConditionModel.from_pretrained(
-        pretrained_model_name_or_path="runwayml/stable-diffusion-v1-5", subfolder="unet"
+        pretrained_model_name_or_path="stable-diffusion-v1-5/stable-diffusion-v1-5",
+        subfolder="unet",
     ).to(device)
     unet_execution_order = trace_execution_order(
         unet, (latent_in, timestep, text_embedding)

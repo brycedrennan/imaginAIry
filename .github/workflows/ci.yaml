@@ -132,7 +132,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11"]
-        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        os: ["ubuntu-latest", "windows-latest", "m2-16gb"]
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4.5.0
@@ -150,7 +150,7 @@ jobs:
         uv pip install --system ${{ needs.build-wheel.outputs.wheel_name }}
     - name: Generate an image
       run: |
-        imagine fruit --steps 3 --size 512 --seed 1
+        imagine fruit --steps 3 --size 128 --seed 1
     - uses: actions/upload-artifact@v3
       with:
         name: images
@@ -163,7 +163,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ "3.10", "3.11" ]
-        os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
+        os: [ "ubuntu-latest", "windows-latest", "m2-16gb" ]
     steps:
       - uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v3
@@ -188,7 +188,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate test-env
-          imagine fruit --steps 3 --size 512 --seed 1
+          imagine fruit --steps 3 --size 128 --seed 1
       - uses: actions/upload-artifact@v3
         with:
           name: images
