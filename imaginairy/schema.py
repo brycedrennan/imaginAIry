@@ -656,10 +656,27 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
 
     @field_validator("steps", mode="before")
     def validate_steps(cls, v, info: core_schema.FieldValidationInfo):
-        steps_lookup = {"ddim": 50, "dpmpp": 20}
+        model_weights = info.data.get("model_weights")
 
+        # Try to get steps from model weights defaults
+        if (
+            v is None
+            and model_weights
+            and isinstance(model_weights, config.ModelWeightsConfig)
+        ):
+            v = model_weights.defaults.get("steps")
+
+        # If not found in model weights, try model architecture defaults
+        if v is None and model_weights and model_weights.architecture:
+            v = model_weights.architecture.defaults.get("steps")
+
+        # If still not found, use solver-specific defaults
         if v is None:
-            v = steps_lookup[info.data["solver_type"]]
+            solver_type = info.data.get("solver_type", "ddim").lower()
+            steps_lookup = {"ddim": 50, "dpmpp": 20}
+            v = steps_lookup.get(
+                solver_type, 50
+            )  # Default to 50 if solver not recognized
 
         try:
             return int(v)
