@@ -29,7 +29,7 @@ class MockedMemory:
         cls.peak_memory = cls.allocated_memory
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocked_memory(monkeypatch):
     monkeypatch.setattr(TorchRAMTracker, "mem_interface", MockedMemory)
     MockedMemory.allocated_memory = 0

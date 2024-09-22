@@ -10,7 +10,7 @@ from imaginairy.cli.upscale import (
 from tests import TESTS_FOLDER
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_pil_save():
     with patch.object(Image, "save", autospec=True) as mock_save:
         yield mock_save

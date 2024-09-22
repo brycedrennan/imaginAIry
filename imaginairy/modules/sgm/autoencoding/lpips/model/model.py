@@ -32,7 +32,7 @@ class NLayerDiscriminator(nn.Module):
         super().__init__()
         norm_layer = nn.BatchNorm2d if not use_actnorm else ActNorm
         if (
-            type(norm_layer) == functools.partial
+            type(norm_layer) == functools.partial  # noqa
         ):  # no need to use bias as BatchNorm2d has affine parameters
             use_bias = norm_layer.func != nn.BatchNorm2d
         else:

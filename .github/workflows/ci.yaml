@@ -36,7 +36,7 @@ jobs:
       - name: Lint
         run: |
           echo "::add-matcher::.github/pylama_matcher.json"
-          ruff --config tests/ruff.toml .
+          ruff check --config tests/ruff.toml .
   test-gpu:
     runs-on: nvidia-4090
     steps:

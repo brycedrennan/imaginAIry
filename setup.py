@@ -84,7 +84,7 @@ setup(
         # https://numpy.org/neps/nep-0029-deprecation_policy.html
         "numpy>=1.22.0",
         "tqdm>=4.64.0",
-        "diffusers>=0.3.0",
+        "diffusers>=0.30.3",
         "Pillow>=9.1.0",
         "psutil>5.7.3",
         "omegaconf>=2.1.1",
@@ -110,6 +110,9 @@ setup(
         "uvicorn>=0.16.0",
         "spandrel>=0.1.8",
         # "xformers>=0.0.22; sys_platform!='darwin' and platform_machine!='aarch64'",
+        "optimum-quanto>=0.2.4",  # for flux quantization
+        "sentencepiece>=0.2.0",
+        "accelerate>=0.24.0",
     ],
     # don't specify maximum python versions as it can cause very long dependency resolution issues as the resolver
     # goes back to older versions of packages that didn't specify a maximum

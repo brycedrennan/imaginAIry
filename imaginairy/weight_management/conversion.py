@@ -72,7 +72,7 @@ class WeightMap:
         return source_keys.issubset(self.all_valid_prefixes)
 
     def cast_weights(self, source_weights) -> dict[str, "Tensor"]:
-        converted_state_dict: dict[str, "Tensor"] = {}
+        converted_state_dict: dict[str, Tensor] = {}
         for source_key in source_weights:
             try:
                 source_prefix, suffix = source_key.rsplit(sep=".", maxsplit=1)

@@ -15,7 +15,7 @@ def create_canny_edges(img: "Tensor") -> "Tensor":
 
     img = torch.clamp((img + 1.0) / 2.0, min=0.0, max=1.0)
     img = einops.rearrange(img[0], "c h w -> h w c")
-    img = (255.0 * img).cpu().numpy().astype(np.uint8).squeeze()
+    img = (255.0 * img).cpu().numpy().astype(np.uint8).squeeze()  # type: ignore
     blurred = cv2.GaussianBlur(img, (5, 5), 0).astype(np.uint8)  # type: ignore
 
     if len(blurred.shape) > 2:
