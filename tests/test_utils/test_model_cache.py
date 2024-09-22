@@ -23,7 +23,7 @@ def create_model_of_n_bytes(n):
     return DummyMemoryModule(n)
 
 
-@pytest.mark.skip()
+@pytest.mark.skip
 @pytest.mark.parametrize(
     "model_version",
     [

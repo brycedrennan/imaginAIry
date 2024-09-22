@@ -51,16 +51,16 @@ def mod_get_invoke(command):
         return False
 
     invoke_ = update_wrapper(invoke_, command.callback)
-    invoke_.__name__ = "do_%s" % command.name
+    invoke_.__name__ = f"do_{command.name}"
     return invoke_
 
 
 class ModClickShell(ClickShell):
     def add_command(self, cmd, name):
         # Use the MethodType to add these as bound methods to our current instance
-        setattr(self, "do_%s" % name, get_method_type(mod_get_invoke(cmd), self))
-        setattr(self, "help_%s" % name, get_method_type(get_help(cmd), self))
-        setattr(self, "complete_%s" % name, get_method_type(get_complete(cmd), self))
+        setattr(self, f"do_{name}", get_method_type(mod_get_invoke(cmd), self))
+        setattr(self, f"help_{name}", get_method_type(get_help(cmd), self))
+        setattr(self, f"complete_{name}", get_method_type(get_complete(cmd), self))
 
 
 class ModShell(Shell):

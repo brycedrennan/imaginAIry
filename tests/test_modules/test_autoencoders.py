@@ -64,7 +64,7 @@ def test_encode_decode(filename_base_for_outputs, encode_strat, decode_strat):
     diff_img.save(f"{filename_base_for_outputs}_diff.png")
 
 
-@pytest.mark.skip()
+@pytest.mark.skip
 def test_encode_decode_naive_scale(filename_base_for_outputs):
     model = get_diffusion_model()
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/dog.jpg")

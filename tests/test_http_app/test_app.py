@@ -8,13 +8,13 @@ from imaginairy.http_app.app import app
 client = TestClient(app)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_generate_image(monkeypatch):
     fake_generate = mock.MagicMock(return_value=iter("a fake image"))
     monkeypatch.setattr("imaginairy.http_app.app.generate_image", fake_generate)
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 def test_imagine_endpoint(mock_generate_image):
     test_input = {"prompt": "test prompt"}
 
@@ -24,7 +24,7 @@ def test_imagine_endpoint(mock_generate_image):
     assert response.content == b"a fake image"
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_get_imagine_endpoint(mock_generate_image):
     test_input = {"text": "a dog"}
 
@@ -34,7 +34,7 @@ async def test_get_imagine_endpoint(mock_generate_image):
     assert response.content == b"a fake image"
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_get_imagine_endpoint_mp(mock_generate_image):
     test_input = {"text": "a dog"}
 

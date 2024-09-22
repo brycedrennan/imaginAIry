@@ -85,13 +85,13 @@ def _reset_get_device():
     get_device.cache_clear()
 
 
-@pytest.fixture()
+@pytest.fixture
 def filename_base_for_outputs(request):
     filename_base = f"{TESTS_FOLDER}/test_output/{request.node.name}_"
     return filename_base
 
 
-@pytest.fixture()
+@pytest.fixture
 def filename_base_for_orig_outputs(request):
     filename_base = f"{TESTS_FOLDER}/test_output/{request.node.originalname}_"
     return filename_base
@@ -102,7 +102,7 @@ def solver_type(request):
     return request.param
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocked_responses():
     with responses.RequestsMock() as rsps:
         yield rsps

@@ -310,12 +310,12 @@ def interpolate_video_file(
         if montage:
             write_buffer.put(np.concatenate((lastframe, lastframe), 1))
             for mid in output:
-                mid = (mid[0] * 255.0).byte().cpu().numpy().transpose(1, 2, 0)
+                mid = (mid[0] * 255.0).byte().cpu().numpy().transpose(1, 2, 0)  # type: ignore
                 write_buffer.put(np.concatenate((lastframe, mid[:h, :w]), 1))
         else:
             write_buffer.put(lastframe)
             for mid in output:
-                mid = (mid[0] * 255.0).byte().cpu().numpy().transpose(1, 2, 0)
+                mid = (mid[0] * 255.0).byte().cpu().numpy().transpose(1, 2, 0)  # type: ignore
                 write_buffer.put(mid[:h, :w])
         pbar.update(1)
         lastframe = frame

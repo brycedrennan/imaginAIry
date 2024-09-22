@@ -67,7 +67,7 @@ def make_bounce_animation(
 def _ensure_pillow_images(
     imgs: "List[Image.Image | LazyLoadingImage | torch.Tensor]",
 ) -> "List[Image.Image]":
-    converted_frames: "List[Image.Image]" = []
+    converted_frames: List[Image.Image] = []
     for frame in imgs:
         if isinstance(frame, torch.Tensor):
             converted_frames.append(model_latents_to_pillow_imgs(frame)[0])

@@ -13,7 +13,7 @@ def _red_b64():
     return b"iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAQMAAADOtka5AAAABlBMVEX/AAD///9BHTQRAAAANklEQVR4nO3BAQEAAACCIP+vbkhAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB8G4IAAAHSeInwAAAAAElFTkSuQmCC"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_generate_image_b64(monkeypatch, red_b64):
     fake_generate = mock.MagicMock(return_value=red_b64)
     monkeypatch.setattr(
@@ -21,7 +21,7 @@ def mock_generate_image_b64(monkeypatch, red_b64):
     )
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_generate_endpoint(mock_generate_image_b64, red_b64):
     test_input = {
         "input": {
@@ -41,7 +41,7 @@ async def test_generate_endpoint(mock_generate_image_b64, red_b64):
         assert image["blob"] == red_b64.decode("utf-8")
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_list_samplers():
     response = client.get("/api/stablestudio/samplers")
     assert response.status_code == 200
@@ -51,7 +51,7 @@ async def test_list_samplers():
     ]
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_list_models():
     response = client.get("/api/stablestudio/models")
     assert response.status_code == 200

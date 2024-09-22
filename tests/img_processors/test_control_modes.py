@@ -21,7 +21,7 @@ def control_img_to_pillow_img(img_t):
 control_mode_params = list(CONTROL_MODES.items())
 
 
-@pytest.mark.skip()
+@pytest.mark.skip
 def test_compare_depth_maps(filename_base_for_outputs):
     sizes = [384, 512, 768]
     model_types = ISL_PATHS
