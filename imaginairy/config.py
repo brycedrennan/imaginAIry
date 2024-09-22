@@ -101,6 +101,12 @@ MODEL_ARCHITECTURES = [
         defaults={"size": "1024x576"},
         config_path="configs/svd_xt_image_decoder.yaml",
     ),
+    ModelArchitecture(
+        name="Flux",
+        aliases=["flux"],
+        output_modality="image",
+        defaults={"size": "1024", "steps": 3},
+    ),
 ]
 
 MODEL_ARCHITECTURE_LOOKUP = {}
@@ -241,6 +247,16 @@ MODEL_WEIGHT_CONFIGS = [
         architecture=MODEL_ARCHITECTURE_LOOKUP["svd-xt-image-decoder"],
         weights_location="https://huggingface.co/imaginairy/stable-video-diffusion/resolve/f9dce2757a0713da6262f35438050357c2be7ee6/svd_xt_image_decoder.fp16.safetensors",
         defaults={"frames": 25, "steps": 30},
+    ),
+    ModelWeightsConfig(
+        name="FLUX.1-schnell",
+        aliases=MODEL_ARCHITECTURE_LOOKUP["flux"].aliases,
+        architecture=MODEL_ARCHITECTURE_LOOKUP["flux"],
+        weights_location="",
+        defaults={
+            "steps": 5,
+            "negative_prompt": "",
+        },
     ),
 ]
 

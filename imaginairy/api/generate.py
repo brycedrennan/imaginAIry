@@ -58,7 +58,6 @@ def imagine_image_files(
     """
     from PIL import ImageDraw
 
-    from imaginairy.api.video_sample import generate_video
     from imaginairy.utils import get_next_filenumber, prompt_normalized
 
     generated_imgs_path = os.path.join(outdir, "generated")
@@ -105,6 +104,8 @@ def imagine_image_files(
             continue
         result_filenames.append(primary_filename)
         if primary_filename and videogen:
+            from imaginairy.api.video_sample import generate_video
+
             try:
                 generate_video(
                     input_path=primary_filename,
@@ -229,7 +230,6 @@ def imagine(
     """
     import torch.nn
 
-    from imaginairy.api.generate_refiners import generate_single_image
     from imaginairy.schema import ImaginePrompt
     from imaginairy.utils import (
         check_torch_version,
@@ -262,10 +262,27 @@ def imagine(
             concrete_prompt = prompt.make_concrete_copy()
             prog_text = f"{i + 1}/{num_prompts}"
             logger.info(f"🖼  {prog_text} {concrete_prompt.prompt_description()}")
+            # Determine which generate function to use based on the model
+            if (
+                concrete_prompt.model_architecture
+                and concrete_prompt.model_architecture.name.lower() == "flux"
+            ):
+                from imaginairy.api.generate_flux import (
+                    generate_single_image as generate_single_flux_image,
+                )
+
+                generate_func = generate_single_flux_image
+            else:
+                from imaginairy.api.generate_refiners import (
+                    generate_single_image as generate_single_image_refiners,
+                )
+
+                generate_func = generate_single_image_refiners
+
             for attempt in range(unsafe_retry_count + 1):
                 if attempt > 0 and isinstance(concrete_prompt.seed, int):
                     concrete_prompt.seed += 100_000_000 + attempt
-                result = generate_single_image(
+                result = generate_func(
                     concrete_prompt,
                     debug_img_callback=debug_img_callback,
                     progress_img_callback=progress_img_callback,
@@ -275,7 +292,7 @@ def imagine(
                     dtype=torch.float16 if half_mode else torch.float32,
                     output_perf=True,
                 )
-                if not result.safety_score.is_filtered:
+                if not result.safety_score or not result.safety_score.is_filtered:
                     break
                 if attempt < unsafe_retry_count:
                     logger.info("    Image was unsafe, retrying with new seed...")
