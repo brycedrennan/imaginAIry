@@ -1,0 +1,1069 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.36">
+    
+    
+      
+        <title>Todo - ImaginAIry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.06209087.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="cyan" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#todo" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="ImaginAIry" class="md-header__button md-logo" aria-label="ImaginAIry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ImaginAIry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Todo
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="ImaginAIry" class="md-nav__button md-logo" aria-label="ImaginAIry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    ImaginAIry
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Docs
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Docs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CLI
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            CLI
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/imagine/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/videogen/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create Video
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/edit/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Edit Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/upscale/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Upscale Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/colorize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Colorize Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/describe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Describe Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Python
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Python
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/imagine/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    imagine()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/imagine-image-files/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    imagine_image_files()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/generate-video/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    generate_video()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/colorize-img/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    colorize_img()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/upscale/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    upscale()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/ImaginePrompt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ImaginePrompt
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/ControlInput/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ControlInput
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/LazyLoadingImage/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LazyLoadingImage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/WeightedPrompt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    WeightedPrompt
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#todo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Todo
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Todo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v14-todo" class="md-nav__link">
+    <span class="md-ellipsis">
+      v14 todo
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v14 todo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#investigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Investigate
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#old-todo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Old Todo
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decided-against" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decided against
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  <h1>Todo</h1>
+
+<h2 id="todo">Todo</h2>
+<h3 id="v14-todo">v14 todo</h3>
+<ul>
+<li>✅ configurable composition cutoff</li>
+<li>✅ rename model parameter weights </li>
+<li>✅ rename model_config parameter to architecture and make it case insensitive</li>
+<li>✅ add --size parameter that accepts strings (e.g. 256x256, 4k, uhd, 8k, etc)</li>
+<li>✅ detect if cuda torch missing and give better error message</li>
+<li>✅ add method to install correct torch version</li>
+<li>✅ make cli run faster again</li>
+<li>✅ add tests for cli commands</li>
+<li>✅ add type checker</li>
+<li>✅ add interface for loading diffusers weights</li>
+<li>✅ SDXL support</li>
+<li>✅ sdxl inpainting </li>
+<li>t2i adapters</li>
+<li>image prompts</li>
+<li>embedding inputs</li>
+<li>save complete metadata to image</li>
+<li>recreate image from metadata</li>
+<li>auto-incoporate https://huggingface.co/madebyollin/sdxl-vae-fp16-fix</li>
+<li>only output the main image unless some flag is set</li>
+<li>✅ allow selection of output video format</li>
+<li>test on python 3.11</li>
+<li>allow specification of filename format</li>
+<li>chain multiple operations together imggen =&gt; videogen</li>
+<li>
+<p>https://github.com/pallets/click/tree/main/examples/imagepipe </p>
+</li>
+<li></li>
+<li>
+<p>https://huggingface.co/playgroundai/playground-v2-1024px-aesthetic</p>
+</li>
+<li>make sure terminal output on windows doesn't suck</li>
+<li>add method to show cache size</li>
+<li>add method to clear model cache</li>
+<li>add method to clear cached items not recently used (does diffusers have one?)</li>
+<li>create actual documentation</li>
+</ul>
+<h4 id="investigate">Investigate</h4>
+<ul>
+<li>use fancy noise https://github.com/Extraltodeus/noise_latent_perlinpinpin</li>
+<li>use latent upscaler https://github.com/city96/SD-Latent-Upscaler</li>
+<li>use latent interposer https://github.com/city96/SD-Latent-Interposer/tree/main</li>
+<li>https://github.com/madebyollin/taesd</li>
+<li>textdiffusers https://jingyechen.github.io/textdiffuser2/</li>
+<li>Fast diffusion with LCM Lora https://huggingface.co/latent-consistency/lcm-lora-sdv1-5/tree/main</li>
+<li>3d diffusion https://huggingface.co/stabilityai/stable-zero123</li>
+<li>magic animate</li>
+<li>consistency decoder</li>
+<li>https://github.com/XPixelGroup/HAT</li>
+</ul>
+<h3 id="old-todo">Old Todo</h3>
+<ul>
+<li>Inference Performance Optimizations</li>
+<li>✅ fp16</li>
+<li>✅ <a href="https://github.com/CompVis/stable-diffusion/compare/main...Doggettx:stable-diffusion:autocast-improvements#">Doggettx Sliced attention</a></li>
+<li>✅ xformers support https://www.photoroom.com/tech/stable-diffusion-100-percent-faster-with-memory-efficient-attention/</li>
+<li>https://github.com/neonsecret/stable-diffusion  </li>
+<li>https://github.com/CompVis/stable-diffusion/pull/177</li>
+<li>https://github.com/huggingface/diffusers/pull/532/files</li>
+<li>https://github.com/HazyResearch/flash-attention</li>
+<li>https://github.com/chavinlo/sda-node</li>
+<li>
+<p>https://github.com/AminRezaei0x443/memory-efficient-attention/issues/7</p>
+</li>
+<li>
+<p>Development Environment</p>
+</li>
+<li>✅ add tests</li>
+<li>✅ set up ci (test/lint/format)</li>
+<li>✅ unified pipeline (txt2img &amp; img2img combined)</li>
+<li>✅ setup parallel testing</li>
+<li>✅ add docs</li>
+<li>🚫 remove yaml config</li>
+<li>🚫 delete more unused code</li>
+<li>faster latent logging https://discuss.huggingface.co/t/decoding-latents-to-rgb-without-upscaling/23204/9</li>
+<li>Interface improvements</li>
+<li>✅ init-image at command line</li>
+<li>✅ prompt expansion</li>
+<li>✅ interactive cli</li>
+<li>Image Generation Features</li>
+<li>✅ add k-diffusion sampling methods</li>
+<li>✅ tiling</li>
+<li>✅ generation videos/gifs</li>
+<li>✅ controlnet<ul>
+<li>scribbles input</li>
+<li>segmentation input</li>
+<li>mlsd input</li>
+</ul>
+</li>
+<li><a href="https://attendandexcite.github.io/Attend-and-Excite/">Attend and Excite</a></li>
+<li>Compositional Visual Generation<ul>
+<li>https://github.com/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch</li>
+<li>https://colab.research.google.com/github/energy-based-model/Compositional-Visual-Generation-with-Composable-Diffusion-Models-PyTorch/blob/main/notebooks/demo.ipynb#scrollTo=wt_j3uXZGFAS</li>
+</ul>
+</li>
+<li>✅ negative prompting<ul>
+<li>some syntax to allow it in a text string</li>
+</ul>
+</li>
+<li><a href="https://www.reddit.com/r/StableDiffusion/comments/10lzgze/i_figured_out_a_way_to_apply_different_prompts_to/">paint with words</a><ul>
+<li>https://github.com/cloneofsimo/paint-with-words-sd </li>
+</ul>
+</li>
+<li>https://multidiffusion.github.io/</li>
+<li>images as actual prompts instead of just init images. <ul>
+<li>not directly possible due to model architecture.</li>
+<li>can it just be integrated into sampler? </li>
+<li>requires model fine-tuning since SD1.4 expects 77x768 text encoding input</li>
+<li>https://twitter.com/Buntworthy/status/1566744186153484288</li>
+<li>https://github.com/justinpinkney/stable-diffusion</li>
+<li>https://github.com/LambdaLabsML/lambda-diffusers</li>
+<li>https://www.reddit.com/r/MachineLearning/comments/x6k5bm/n_stable_diffusion_image_variations_released/</li>
+</ul>
+</li>
+<li>Image Editing</li>
+<li>✅outpainting<ul>
+<li>https://github.com/parlance-zz/g-diffuser-bot/search?q=noise&amp;type=issues</li>
+<li>lama cleaner</li>
+</ul>
+</li>
+<li>✅ inpainting<ul>
+<li>https://github.com/Jack000/glid-3-xl-stable </li>
+<li>https://github.com/andreas128/RePaint</li>
+<li>✅ img2img but keeps img stable</li>
+<li>https://www.reddit.com/r/StableDiffusion/comments/xboy90/a_better_way_of_doing_img2img_by_finding_the/</li>
+<li>https://gist.github.com/trygvebw/c71334dd127d537a15e9d59790f7f5e1</li>
+<li>https://github.com/pesser/stable-diffusion/commit/bbb52981460707963e2a62160890d7ecbce00e79</li>
+<li>https://github.com/SHI-Labs/FcF-Inpainting https://praeclarumjj3.github.io/fcf-inpainting/</li>
+</ul>
+</li>
+<li>✅ text based image masking<ul>
+<li>✅ ClipSeg - https://github.com/timojl/clipseg</li>
+<li>https://github.com/facebookresearch/detectron2</li>
+<li>https://x-decoder-vl.github.io/</li>
+</ul>
+</li>
+<li>Maskless editing<ul>
+<li>✅ instruct-pix2pix</li>
+<li></li>
+</ul>
+</li>
+<li>Attention Control Methods<ul>
+<li>https://github.com/bloc97/CrossAttentionControl</li>
+<li>https://github.com/ChenWu98/cycle-diffusion</li>
+</ul>
+</li>
+<li>Image Enhancement</li>
+<li>Photo Restoration - https://github.com/microsoft/Bringing-Old-Photos-Back-to-Life</li>
+<li>Upscaling<ul>
+<li>✅ realesrgan </li>
+<li>ldm</li>
+<li>https://github.com/lowfuel/progrock-stable</li>
+<li><a href="https://github.com/jquesnelle/txt2imghd/blob/master/txt2imghd.py">txt2imghd</a></li>
+<li>latent scaling + reprocessing</li>
+<li>stability upscaler</li>
+<li>rivers have wings upscaler</li>
+<li>stable super-res?</li>
+<li>todo: try with 1-0-0-0 mask at full image resolution (rencoding entire image+predicted image at every step)</li>
+<li>todo: use a gaussian pyramid and only include the "high-detail" level of the pyramid into the next step</li>
+<li>https://www.reddit.com/r/StableDiffusion/comments/xkjjf9/upscale_to_huge_sizes_and_add_detail_with_sd/</li>
+</ul>
+</li>
+<li>✅ face enhancers<ul>
+<li>✅ gfpgan - https://github.com/TencentARC/GFPGAN</li>
+<li>✅ codeformer - https://github.com/sczhou/CodeFormer</li>
+</ul>
+</li>
+<li>✅ image describe feature - <ul>
+<li>✅ https://github.com/salesforce/BLIP</li>
+<li>🚫 CLIP brute-force prompt reconstruction</li>
+<li>The accuracy of this approach is too low for me to include it in imaginAIry</li>
+<li>https://github.com/rmokady/CLIP_prefix_caption</li>
+<li>https://github.com/pharmapsychotic/clip-interrogator (blip + clip)</li>
+<li>https://github.com/KaiyangZhou/CoOp</li>
+</ul>
+</li>
+<li>🚫 CPU support.  While the code does actually work on some CPUs, the generation takes so long that I don't think it's
+    worth the effort to support this feature</li>
+<li>✅ img2img for plms</li>
+<li>✅ img2img for kdiff functions</li>
+<li>Other</li>
+<li>Enhancement pipelines</li>
+<li>text-to-3d https://dreamfusionpaper.github.io/<ul>
+<li>https://shihmengli.github.io/3D-Photo-Inpainting/</li>
+<li>https://github.com/thygate/stable-diffusion-webui-depthmap-script/discussions/50</li>
+<li>Depth estimation</li>
+<li>what is SOTA for monocular depth estimation?</li>
+<li>https://github.com/compphoto/BoostingMonocularDepth</li>
+</ul>
+</li>
+<li>make a video https://github.com/lucidrains/make-a-video-pytorch</li>
+<li>animations<ul>
+<li>https://github.com/francislabountyjr/stable-diffusion/blob/main/inferencing_notebook.ipynb</li>
+<li>https://www.youtube.com/watch?v=E7aAFEhdngI</li>
+<li>https://github.com/pytti-tools/frame-interpolation</li>
+</ul>
+</li>
+<li>guided generation <ul>
+<li>https://colab.research.google.com/drive/1dlgggNa5Mz8sEAGU0wFCHhGLFooW_pf1#scrollTo=UDeXQKbPTdZI</li>
+<li>https://colab.research.google.com/github/aicrumb/doohickey/blob/main/Doohickey_Diffusion.ipynb#scrollTo=PytCwKXCmPid</li>
+<li>https://github.com/mlfoundations/open_clip</li>
+<li>https://github.com/openai/guided-diffusion</li>
+</ul>
+</li>
+<li>image variations https://github.com/lstein/stable-diffusion/blob/main/VARIATIONS.md</li>
+<li>textual inversion <ul>
+<li>https://www.reddit.com/r/StableDiffusion/comments/xbwb5y/how_to_run_textual_inversion_locally_train_your/</li>
+<li>https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb#scrollTo=50JuJUM8EG1h</li>
+<li>https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/stable_diffusion_textual_inversion_library_navigator.ipynb</li>
+<li>https://github.com/Jack000/glid-3-xl-stable</li>
+</ul>
+</li>
+<li>fix saturation at high CFG https://www.reddit.com/r/StableDiffusion/comments/xalo78/fixing_excessive_contrastsaturation_resulting/</li>
+<li>https://www.reddit.com/r/StableDiffusion/comments/xbrrgt/a_rundown_of_twenty_new_methodsoptions_added_to/</li>
+<li>✅ deploy to pypi</li>
+<li>find similar images https://knn5.laion.ai/?back=https%3A%2F%2Fknn5.laion.ai%2F&amp;index=laion5B&amp;useMclip=false</li>
+<li>https://github.com/vicgalle/stable-diffusion-aesthetic-gradients</li>
+<li>Training</li>
+<li>Finetuning "dreambooth" style</li>
+<li><a href="https://arxiv.org/abs/2208.01618">Textual Inversion</a><ul>
+<li><a href="https://github.com/peterwilli/sd-leap-booster">Fast Textual Inversion</a> </li>
+</ul>
+</li>
+<li><a href="https://github.com/cloneofsimo/lora">Low-rank Adaptation for Fast Text-to-Image Diffusion Fine-tuning (LORA)</a><ul>
+<li>https://huggingface.co/spaces/lora-library/Low-rank-Adaptation </li>
+</ul>
+</li>
+<li>Performance Improvements<ul>
+<li><a href="https://github.com/hpcaitech/ColossalAI/tree/main/examples/images/diffusion">ColoassalAI</a> - almost got it working but it's not easy enough to install to merit inclusion in imaginairy. We should check back in on this.</li>
+<li>Xformers</li>
+<li>Deepspeed</li>
+</ul>
+</li>
+</ul>
+<h2 id="decided-against">Decided against</h2>
+<ul>
+<li>Scalecrafter https://yingqinghe.github.io/scalecrafter/  - doesn't look any better than img2img</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link", "content.code.copy"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+    
+  </body>
+</html>

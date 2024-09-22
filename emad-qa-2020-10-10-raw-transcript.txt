@@ -1,0 +1,1305 @@
+[00:00.000 --> 00:08.680]  1.5 isn't that big an improvement over 1.4, but it's still an improvement.
+[00:08.680 --> 00:14.240]  And as we go into version 3 and the Imagen models that are training away now, which is
+[00:14.240 --> 00:18.520]  like we have a 4.3 billion parameter one and others, we're considering what is the best
+[00:18.520 --> 00:19.520]  data for that?
+[00:19.520 --> 00:24.000]  What's the best system for that to avoid extreme edge cases, because there's always people
+[00:24.000 --> 00:26.440]  who want to spoil the party.
+[00:26.440 --> 00:30.120]  This has caused the developers themselves, and again, kind of I haven't done a big push
+[00:30.120 --> 00:35.640]  here, it has been from the developers, to ask for a bit more time to consult and come
+[00:35.640 --> 00:40.520]  up with a proper roadmap for releasing this particular class of model.
+[00:40.520 --> 00:44.560]  They will be released for research and other purposes, and again, I don't think the license
+[00:44.560 --> 00:48.480]  is going to change from the open rail end license, it's just that they want to make
+[00:48.480 --> 00:53.360]  sure that all the boxes are ticked rather than rushing them out, given, you know, some
+[00:53.360 --> 00:55.960]  of these edge cases of danger here.
+[00:55.960 --> 01:01.440]  The other part is the movement of the repository and the taking over from CompViz, which is
+[01:01.440 --> 01:06.760]  an academic research lab, again, who had full independence, relatively speaking, over the
+[01:06.760 --> 01:11.120]  creation of decisions around the model, to StabilityAI itself.
+[01:11.120 --> 01:15.960]  Now this may seem like just hitting a fork button, but you know, we've taken in legal
+[01:15.960 --> 01:20.480]  counsel and a whole bunch of other things, just making sure that we are doing the right
+[01:20.480 --> 01:25.440]  thing and are fully protected around releasing some of these models in this way.
+[01:25.440 --> 01:31.880]  I believe that that process is nearly complete, it certainly cost us a lot of money, but you
+[01:31.880 --> 01:36.720]  know, it will either be ourselves or an independent charity maintaining that particular repository
+[01:36.720 --> 01:41.040]  and releasing more of these generative models.
+[01:41.040 --> 01:45.480]  Stability itself, and again, kind of our associated entities, have been releasing over half a
+[01:45.480 --> 01:51.440]  dozen models in the last weeks, so a model a week effectively, and in the next couple
+[01:51.440 --> 01:57.280]  of days we will be making three releases, so the Discord bot will be open sourced, there
+[01:57.280 --> 02:03.440]  is a diffusion-based upscaler that is really quite snazzy that will be released as well,
+[02:03.440 --> 02:08.600]  and then finally there will be a new decoder architecture that Rivers Have Wings has been
+[02:08.600 --> 02:14.360]  working on for better human faces and other elements trained on the aesthetic and humans
+[02:14.360 --> 02:16.080]  thing.
+[02:16.080 --> 02:19.240]  The core models themselves are still a little bit longer while we sort out some of these
+[02:19.240 --> 02:22.880]  edge cases, but once that's in place, hopefully we should be able to release them as fast
+[02:22.880 --> 02:28.080]  as our other models, such as for example the open clip model that we released, and there
+[02:28.080 --> 02:33.040]  will be our clip guidance instructions released soon that will enable you to have mid-journey
+[02:33.040 --> 02:42.080]  level results utilising those two, which took 1.2 million A100 hours, so like almost eight
+[02:42.080 --> 02:45.720]  times as much as stable diffusion itself.
+[02:45.720 --> 02:50.120]  Similarly, we released our language models and other things, and those are pretty straightforward,
+[02:50.120 --> 02:54.800]  they are MIT, it's just again, this particular class of models needs to be released properly
+[02:54.800 --> 02:59.440]  and responsibly, otherwise it's going to get very messy.
+[02:59.440 --> 03:04.280]  Some of you will have seen a kind of congresswoman issue coming out and directly attacking us
+[03:04.280 --> 03:09.440]  and asking us to be classified as dual-use technology and be banned by the NSA, there
+[03:09.440 --> 03:13.960]  is European Parliament actions and others, because they just think the technology is
+[03:13.960 --> 03:19.040]  simple, we are working hard to avoid that, and again, we'll continue from there.
+[03:19.040 --> 03:24.000]  Okay, next question, oh wait, you've been pinning questions, thank you mods.
+[03:24.000 --> 03:31.080]  Okay, the next question was, interested in hearing SD's views on artistic freedom versus
+[03:31.080 --> 03:36.680]  censorship in models, so that's Cohen.
+[03:36.680 --> 03:42.040]  My view is basically if it's legal, then it should be allowed, if it's illegal, then we
+[03:42.040 --> 03:47.320]  should at least take some steps to try and adjust things around that, now that's obviously
+[03:47.320 --> 03:50.720]  a very complicated thing, as legal is different in a lot of different countries, but there
+[03:50.720 --> 03:58.120]  are certain things that you can look up the law, that's illegal to create anywhere.
+[03:58.120 --> 04:02.000]  I'm in favour of more permissiveness, and you know, leaving it up to localised ethics
+[04:02.000 --> 04:06.880]  and morality, because the reality is that that varies dramatically across many years,
+[04:06.880 --> 04:10.840]  and I think it's our place to kind of police that, similarly, as you've seen with Dream
+[04:10.840 --> 04:15.320]  Booth and all these other extensions on stable diffusion, these models are actually quite
+[04:15.320 --> 04:20.160]  easy to train, so if something's not in the dataset, you can train it back in, if it doesn't
+[04:20.160 --> 04:25.040]  fit in with the legal area of where we ourselves release from.
+[04:25.040 --> 04:32.600]  So I think, you know, again, what's legal is legal, ethical varies, et cetera, the main
+[04:32.600 --> 04:36.440]  thing that we want to try and do is that model produces what you want it to produce, I think
+[04:36.440 --> 04:37.440]  that's an important thing.
+[04:37.440 --> 04:41.600]  I think you guys saw at the start, before we had all the filters in place, that stable
+[04:41.600 --> 04:46.880]  diffusion trained on the snapshot of the internet, as it was, it's just, when you type to the
+[04:46.880 --> 04:51.140]  women, it had kind of toplessness for a lot of any type of artistic thing, because a lot
+[04:51.140 --> 04:59.800]  of topless women in art, even though art is less than like, 4.5% of the dataset, you know,
+[04:59.800 --> 05:02.760]  that's not what people wanted, and again, we're trying to make it so that it produces
+[05:02.760 --> 05:06.680]  what you want, as long as it is legal, I think that's probably the core thing here.
+[05:06.680 --> 05:11.400]  Okay, Sirius asks, any update on the updated credit pricing model that was mentioned a
+[05:11.400 --> 05:14.120]  couple of days ago, as in, is it getting much cheaper?
+[05:14.120 --> 05:21.960]  Yes, next week, there'll be a credit pricing, a credit pricing adjustment from our side.
+[05:21.960 --> 05:27.000]  There have been lots of innovations around inference and a whole bunch of other things,
+[05:27.000 --> 05:29.600]  and the team has been testing it in staging and hosting.
+[05:29.600 --> 05:32.640]  You've seen this as well in the diffusers library and other things, Facebook recently
+[05:32.640 --> 05:36.720]  came out with some really interesting fast attention kind of elements, and we'll be passing
+[05:36.720 --> 05:38.920]  on all of those savings.
+[05:38.920 --> 05:43.400]  The way that it'll probably be is that credits will remain as is, but you will be able to
+[05:43.400 --> 05:47.880]  do a lot more with your credits, as opposed to the credits being changed in price, because
+[05:47.880 --> 05:53.400]  I don't think that's fair to anyone if we change the price of the credits.
+[05:53.400 --> 05:57.600]  Can we get an official statement on why automatic was banned and why novel AI used this code?
+[05:57.600 --> 06:01.560]  Okay, so the official statement is as follows.
+[06:01.560 --> 06:06.560]  I don't particularly like discussing individual user bans and things like that, but this was
+[06:06.560 --> 06:12.920]  escalated to me because it's a very special case, and it comes at a time, again, of increased
+[06:12.920 --> 06:16.120]  notice on the community and a lot of these other things.
+[06:16.120 --> 06:18.740]  I've been working very hard around this.
+[06:18.740 --> 06:24.320]  Automatic created a wonderful web UI that increased the accessibility of stable diffusion
+[06:24.320 --> 06:25.320]  to a lot of different people.
+[06:25.320 --> 06:28.320]  You can see that by the styles and other things.
+[06:28.320 --> 06:34.040]  It's not open source, and I believe there is a copyright on it, but still, again, work
+[06:34.040 --> 06:35.040]  super hard.
+[06:35.040 --> 06:38.920]  A lot of people kind of helped out with that, and it was great to see.
+[06:38.920 --> 06:44.000]  However, we do have a very particular stance on community as to what's acceptable and what's
+[06:44.000 --> 06:45.000]  not.
+[06:45.000 --> 06:51.920]  I think it's important to kind of first take a step back and understand what stability
+[06:51.920 --> 06:56.600]  is and what stable diffusion is and what this community is, right?
+[06:56.600 --> 07:00.440]  AI is a company that's trying to do good.
+[07:00.440 --> 07:02.160]  We don't have profit as our main thing.
+[07:02.160 --> 07:04.440]  We are completely independent.
+[07:04.440 --> 07:08.320]  It does come a lot from me and me trying to do my best as I try to figure out governance
+[07:08.320 --> 07:11.240]  structures to fit things, but I do listen to the devs.
+[07:11.240 --> 07:13.680]  I do listen to my team members and other things.
+[07:13.680 --> 07:16.960]  Obviously, we have a profit model and all of that, but to be honest, we don't really
+[07:16.960 --> 07:21.600]  care about making revenue at the moment because it's more about the deep tech that we do.
+[07:21.600 --> 07:22.980]  We don't just do image.
+[07:22.980 --> 07:24.660]  We do protein folding.
+[07:24.660 --> 07:28.000]  We release language models, code models, the whole gamut of things.
+[07:28.000 --> 07:33.240]  In fact, we are the only multimodal AI company other than OpenAI, and we release just about
+[07:33.240 --> 07:37.920]  everything with the exception of generative models until we figure out the processes for
+[07:37.920 --> 07:38.920]  doing that.
+[07:38.920 --> 07:39.920]  MIT open-sourced.
+[07:39.920 --> 07:41.120]  What does that mean?
+[07:41.120 --> 07:45.720]  It means that literally everything is open-sourced.
+[07:45.720 --> 07:47.120]  Against that, we come under attack.
+[07:47.120 --> 07:51.440]  So our model weights, when we released it for academia, were leaked.
+[07:51.440 --> 07:55.280]  We collaborate with a lot of entities, so NovelAI is one of them, and their engineers
+[07:55.280 --> 07:58.580]  have hit with various code-based things, and I think we've helped as well.
+[07:58.580 --> 08:03.760]  They are very talented engineers, and you'll see they've just released a list of all the
+[08:03.760 --> 08:06.880]  things that they did to improve stable diffusion because they were actually going to open-source
+[08:06.880 --> 08:15.120]  it very soon, I believe it was next week, before the code was stolen from their system.
+[08:15.120 --> 08:22.080]  We have a very strict no-support policy for stolen code because this is a very sensitive
+[08:22.080 --> 08:23.080]  area for us.
+[08:23.080 --> 08:25.960]  We do not have a commercial partnership with NovelAI.
+[08:25.960 --> 08:27.000]  We do not pay them.
+[08:27.000 --> 08:28.000]  They do not pay us.
+[08:28.000 --> 08:31.440]  They're just members of the community like any other, but when you see these things,
+[08:31.440 --> 08:36.480]  if someone stole our code and released it and it was dangerous, I wouldn't find that
+[08:36.480 --> 08:37.480]  right.
+[08:37.480 --> 08:39.400]  If someone stole their code, if someone stole other codes, I don't believe that's right
+[08:39.400 --> 08:41.760]  either in terms of releasing.
+[08:41.760 --> 08:46.320]  Now in this particular case, what happened is that the community member and person was
+[08:46.320 --> 08:48.640]  contacted and there was a conversation made.
+[08:48.640 --> 08:50.800]  He made some messages public.
+[08:50.800 --> 08:52.520]  Other messages were not made public.
+[08:52.520 --> 08:53.640]  I looked at all the facts.
+[08:53.640 --> 08:58.800]  I decided that this was a banable offense on the community.
+[08:58.800 --> 09:00.240]  I'm not a stupid person.
+[09:00.240 --> 09:01.440]  I am technical.
+[09:01.440 --> 09:06.160]  I do understand a lot of things, and I put everyone there to kind of make this as a clear
+[09:06.160 --> 09:07.160]  point.
+[09:07.160 --> 09:11.120]  Stable diffusion community itself is one of community of stability AI, and it's one community
+[09:11.120 --> 09:12.120]  of stable diffusion.
+[09:12.120 --> 09:15.440]  Stable diffusion is a model that's available to the whole world, and you can build your
+[09:15.440 --> 09:18.560]  own communities and take this in a million different ways.
+[09:18.560 --> 09:23.360]  It is not healthy if stability AI is at the center of everything that we do, and that's
+[09:23.360 --> 09:25.240]  not what we're trying to create.
+[09:25.240 --> 09:29.600]  We're trying to create a multiplicity of different areas that you can discuss and take things
+[09:29.600 --> 09:35.200]  forward and communities that you feel you yourself are a stable part of.
+[09:35.200 --> 09:41.880]  Now, this particular one is regulated, and it is not a free-for-all.
+[09:41.880 --> 09:45.840]  It does have specific rules, and there are specific things within it.
+[09:45.840 --> 09:49.360]  Again, it doesn't mean that you can't go elsewhere to have these discussions.
+[09:49.360 --> 09:51.600]  We didn't take it down off GitHub or things like that.
+[09:51.600 --> 09:55.360]  We leave it up to them, but the manner in which this was done and there are other things
+[09:55.360 --> 10:00.240]  that aren't made public, I did not feel it was appropriate, and so I approved the banning
+[10:00.240 --> 10:02.320]  and the buck stops with me there.
+[10:02.320 --> 10:06.520]  If the individual in question wants to be unbanned and rejoin the community, there is
+[10:06.520 --> 10:08.040]  a process for repealing bans.
+[10:08.040 --> 10:12.080]  We have not received anything on that side, and I'd be willing to hear other stuff if
+[10:12.080 --> 10:17.240]  maybe I didn't have the full picture, but as it is, that's where it stands, and again,
+[10:17.240 --> 10:23.340]  like I said, we cannot support any illegal theft as direct theft in there.
+[10:23.340 --> 10:27.960]  With regards to the specific code point, you can ask novel AI themselves what happened
+[10:27.960 --> 10:28.960]  there.
+[10:28.960 --> 10:33.280]  They said that there was AGPL code copied over, and then they rescinded it as soon as
+[10:33.280 --> 10:35.080]  it was notified, and they apologized.
+[10:35.080 --> 10:39.740]  That did not happen in this case, and again, we cannot support any leaked models, and we
+[10:39.740 --> 10:42.960]  cannot support that because, again, the safety issues around this and the fact that if you
+[10:42.960 --> 10:48.560]  start using leaked and stolen code, there are some very dangerous liability concerns
+[10:48.560 --> 10:50.560]  that we wish to protect the community from.
+[10:50.560 --> 10:56.240]  We cannot support that particular code base at the moment, and we can't support that individual
+[10:56.240 --> 10:57.240]  being a member of the community.
+[10:57.240 --> 11:02.640]  Also, I would like to say that a lot of insulting things were said, and we let it slide this
+[11:02.640 --> 11:03.640]  once.
+[11:03.640 --> 11:05.140]  Don't be mean, man.
+[11:05.140 --> 11:06.140]  Just talk responsibly.
+[11:06.140 --> 11:12.120]  Again, we're happy to have considered and thought-out discussions offline and online.
+[11:12.120 --> 11:16.760]  If you do start insulting other members, then please flag it to moderators, and there will
+[11:16.760 --> 11:20.440]  be timeouts and bans because, again, what is this community meant to be?
+[11:20.440 --> 11:26.360]  It's meant to be quite a broad but core and stable community that is our private community
+[11:26.360 --> 11:32.760]  as Stability AI, but, like I said, the beauty of open source is that if this is not a community
+[11:32.760 --> 11:34.800]  you're comfortable with, you can go to other communities.
+[11:34.800 --> 11:36.600]  You can set up your own communities.
+[11:36.600 --> 11:38.900]  You can set up your notebooks and others.
+[11:38.900 --> 11:46.600]  In fact, when you look at it, just about every single web UI has a member of Stability contributing.
+[11:46.600 --> 11:53.280]  From Pharma Psychotic at DeForum through to Dango on Majesty through to Gandamu at Disco,
+[11:53.280 --> 11:58.600]  we have been trying to push open source front-ends with no real expectations of our own because
+[11:58.600 --> 12:02.860]  we believe in the ability for people to remix and build their own communities around that.
+[12:02.860 --> 12:06.600]  Stability has no presence in these other communities because those are not our communities.
+[12:06.600 --> 12:07.600]  This one is.
+[12:07.600 --> 12:13.480]  So, again, like I said, if Automattic does want to have a discussion, my inbox is open,
+[12:13.480 --> 12:17.440]  and if anyone feels that they're unjustly timed out or banned, they can appeal them.
+[12:17.440 --> 12:18.840]  Again, there is a process for that.
+[12:18.840 --> 12:22.640]  That hasn't happened in this case, and, again, it's a call that I made looking at some publicly
+[12:22.640 --> 12:26.920]  available information and some non-publicly available information, and I wish them all
+[12:26.920 --> 12:29.120]  the best.
+[12:29.120 --> 12:31.760]  I think that's it.
+[12:31.760 --> 12:35.160]  Will Stability provide, fund, and model to create new medicines?
+[12:35.160 --> 12:39.320]  We're currently working on DNA diffusion that will be announced next week for some of the
+[12:39.320 --> 12:41.880]  DNA expression things in our open Biomel community.
+[12:41.880 --> 12:42.880]  Feel free to join that.
+[12:42.880 --> 12:47.240]  It's about two and a half thousand members, and currently I believe it's been announced
+[12:47.240 --> 12:52.600]  LibraFold with Sergei Shrinikov's lab at Harvard and UCL, so that's probably going to be the
+[12:52.600 --> 12:56.720]  most advanced protein folding model in the world, more advanced than AlphaFold.
+[12:56.720 --> 12:59.840]  It's just currently undergoing ablations.
+[12:59.840 --> 13:02.600]  Repurposing of medicines and discovery of new medicines is something that's very close
+[13:02.600 --> 13:04.600]  to my heart.
+[13:04.600 --> 13:11.280]  Many of you may know that basically the origins of Stability were leading and architecting
+[13:11.280 --> 13:16.920]  and running the United Nations AI Initiative against COVID-19, so I was the lead architect
+[13:16.920 --> 13:23.280]  of that to try and get a lot of this knowledge coordinated around that.
+[13:23.280 --> 13:26.040]  We made all the COVID research in the world free and then helped organize it with the
+[13:26.040 --> 13:31.400]  backing of the UNESCO World Bank and others, so that's one of the genesis' alongside education.
+[13:31.400 --> 13:35.720]  For myself as well, if you listen to some of my podcasts, I quit being a hedge fund
+[13:35.720 --> 13:41.840]  manager for five years to work on repurposing drugs for my son, doing AI-based lit review
+[13:41.840 --> 13:45.560]  and repurposing of drugs through neurotransmitter analysis.
+[13:45.560 --> 13:53.320]  So taking things like nazepam and others to treat the symptoms of ASD, the papers around
+[13:53.320 --> 13:57.880]  that will be published and we have several initiatives in that area, again, to try and
+[13:57.880 --> 14:00.880]  just catalyze it going forward, because that's all we are, we're a catalyst.
+[14:00.880 --> 14:04.240]  Communities should take up what we do and run forward with that.
+[14:04.240 --> 14:11.640]  Okay, RM, RF, removing everything, do you think the new AI models push us closer to
+[14:11.640 --> 14:14.240]  a post-copyright world?
+[14:14.240 --> 14:16.040]  I don't know, I think that's a very good question, it might.
+[14:16.040 --> 14:19.360]  To be honest, no one knows what the copyright is around some of these things, like at what
+[14:19.360 --> 14:24.160]  point does free use stop and start and derivative works?
+[14:24.160 --> 14:28.320]  It hasn't been tested, it will be tested, I'm pretty sure there will be all sorts of
+[14:28.320 --> 14:33.080]  lawsuits and other things soon, again, that's something we're preparing for.
+[14:33.080 --> 14:36.400]  But I think one of the first AI pieces of art was recently granted a copyright.
+[14:36.400 --> 14:41.320]  I think the ability to create anything is an interesting one as well, because again,
+[14:41.320 --> 14:45.920]  it makes content more valuable, so in an abundance scarcity is there, but I'm not exactly sure
+[14:45.920 --> 14:47.080]  how this will play out.
+[14:47.080 --> 14:50.160]  I do think you'll be able to create anything you want for yourselves, it just becomes,
+[14:50.160 --> 14:53.760]  what happens when you put that into a social context and start selling that?
+[14:53.760 --> 14:59.000]  This comes down to the personal agency side of the models that we build as well, you know,
+[14:59.000 --> 15:02.760]  like you're responsible for the inputs and the outputs that result from that.
+[15:02.760 --> 15:06.540]  And so this is where I think copyright law will be tested the most, because people usually
+[15:06.540 --> 15:11.720]  did not have the means of creation, whereas now you have literally the means of creation.
+[15:11.720 --> 15:17.800]  Okay, Trekstel asks, prompt engineering may well become an elective class in schools over
+[15:17.800 --> 15:18.800]  the next decade.
+[15:18.800 --> 15:22.800]  With extremely fast paced development, what do you foresee as the biggest barriers of
+[15:22.800 --> 15:23.800]  entries?
+[15:23.800 --> 15:27.720]  Some talking points might induce a reluctance to adoption, death of the concept artist and
+[15:27.720 --> 15:30.360]  the dangers outweighing the benefits.
+[15:30.360 --> 15:38.760]  Well, you know, the interesting thing here is that a large part of life is the ability
+[15:38.760 --> 15:39.760]  to prompt.
+[15:39.760 --> 15:44.800]  So, you know, prompting humans is kind of the key thing, like my wife tries to prompt
+[15:44.800 --> 15:50.320]  me all the time, and she's not very successful, but she's been working on it for 16 years.
+[15:50.320 --> 15:54.520]  I think that a lot of the technologies that you're seeing right now from AI, because it
+[15:54.520 --> 15:57.980]  understands these latent spaces or hidden meanings, it also includes the hidden meanings
+[15:57.980 --> 16:02.560]  in prompts, and I think what you see is you have these generalized models like stable
+[16:02.560 --> 16:07.440]  diffusion and stable video fusion and dance diffusion and all these other things.
+[16:07.440 --> 16:11.760]  It pushes intelligence to the edge, but what you've done is you compressed 100,000 gigabytes
+[16:11.760 --> 16:17.360]  of images into a two gigabyte file of knowledge that understands all those contextualities.
+[16:17.360 --> 16:19.600]  The next step is adapting that to your local context.
+[16:19.600 --> 16:25.160]  So that's what you guys do when you use Dreambooth, or when you do textual inversion, you're injecting
+[16:25.160 --> 16:28.460]  a bit yourself into that model so it understands your prompts better.
+[16:28.460 --> 16:32.360]  And I think a combination of multiple models doing that will mean that prompt engineering
+[16:32.360 --> 16:36.840]  isn't really the thing, it's just understanding how to chain these tools together, so more
+[16:36.840 --> 16:38.680]  kind of context specific stuff.
+[16:38.680 --> 16:42.540]  This is why we're partnered with an example for Replit, so that people can build dynamic
+[16:42.540 --> 16:46.440]  systems and we've got some very interesting things on the way there.
+[16:46.440 --> 16:50.240]  I think the barriers to entry will drop dramatically, like do you really need a class on that?
+[16:50.240 --> 16:53.960]  For the next few years, yeah, but then soon it will not require that.
+[16:53.960 --> 16:57.000]  Okay, Ammonite says, how long does it usually take to train?
+[16:57.000 --> 16:58.960]  Well, that's a piece of string.
+[16:58.960 --> 17:00.200]  It depends.
+[17:00.200 --> 17:05.800]  We have models, so stable diffusion of 150,000 A100 hours, and A100 hours about $4 on Amazon,
+[17:05.800 --> 17:08.920]  which you need for the interconnect.
+[17:08.920 --> 17:11.180]  Open clip was 1.2 million hours.
+[17:11.180 --> 17:12.860]  That's literally hours of compute.
+[17:12.860 --> 17:16.640]  So for stable diffusion, can someone in the chat do this?
+[17:16.640 --> 17:20.400]  It's 256 A100s over 150,000 hours.
+[17:20.400 --> 17:22.520]  So divide one by the other.
+[17:22.520 --> 17:23.520]  What's the number?
+[17:23.520 --> 17:24.520]  Let me get it quick.
+[17:24.520 --> 17:25.520]  Quickest.
+[17:25.520 --> 17:26.520]  Ammonite?
+[17:26.520 --> 17:28.920]  Ammonite, you guys kind of calculate slow.
+[17:28.920 --> 17:30.640]  24 days, says Ninjaside.
+[17:30.640 --> 17:32.360]  There we go.
+[17:32.360 --> 17:34.340]  That's about how long it took to train the model.
+[17:34.340 --> 17:38.160]  To do the tests and other stuff, it took a lot longer.
+[17:38.160 --> 17:41.680]  And the bigger models, again, it depends because it doesn't really need any scale.
+[17:41.680 --> 17:45.600]  So it's not that you chuck 512 and it's more efficient.
+[17:45.600 --> 17:51.200]  It is really a lot of the heavy lifting is done by the super compute.
+[17:51.200 --> 17:56.640]  So what happens is that we're doing all this work up front, and then we release the model
+[17:56.640 --> 17:57.640]  to everyone.
+[17:57.640 --> 18:03.560]  And then as Joe said, DreamBooth takes about 15 minutes on an A100 to then fine tune.
+[18:03.560 --> 18:08.680]  Because all the work of those years of knowledge, the thousands of gigabytes, are all done for
+[18:08.680 --> 18:09.680]  you.
+[18:09.680 --> 18:13.040]  And that's why you can take it and extend it and kind of do what you want with it.
+[18:13.040 --> 18:16.760]  That's the beauty of this model over the old school internet, which was always computing
+[18:16.760 --> 18:17.760]  all the time.
+[18:17.760 --> 18:21.280]  So you can push intelligence to the edges.
+[18:21.280 --> 18:22.280]  All right.
+[18:22.280 --> 18:26.960]  So Mr. John Fingers asking, how close do you feel you might be able to show a full motion
+[18:26.960 --> 18:29.160]  video model like Google or Meta showed up recently?
+[18:29.160 --> 18:32.280]  We'll have it by the end of the year.
+[18:32.280 --> 18:35.360]  But better.
+[18:35.360 --> 18:39.220]  Reflyn Wolf asks, when do you think we will talk to an AI about the image?
+[18:39.220 --> 18:42.540]  Like can you fix his nose a little bit or make a hair longer and stuff like that?
+[18:42.540 --> 18:46.760]  To be honest, I'm kind of disappointed in the community has not built that yet.
+[18:46.760 --> 18:47.760]  It's not complicated.
+[18:47.760 --> 18:51.280]  All you have to do is whack whisper on the front end.
+[18:51.280 --> 18:52.280]  Thank you, OpenAI.
+[18:52.280 --> 18:57.240]  You know, obviously, you know, that was a great benefit and then have that input into
+[18:57.240 --> 19:00.700]  style clip or a kind of fit based thing.
+[19:00.700 --> 19:08.960]  So if you look up, Max Wolf has this wonderful thing on style clip that you can see how to
+[19:08.960 --> 19:13.960]  create various scary Zuckerberg's as if he wasn't scary himself.
+[19:13.960 --> 19:17.640]  And so I'm putting that into the pipeline basically allows you to do what it says there
+[19:17.640 --> 19:18.640]  with a bit of targeting.
+[19:18.640 --> 19:22.320]  So there's some star clip right there in the stage chat.
+[19:22.320 --> 19:26.180]  And again, with the new clip models that we have and a bunch of the other bit models that
+[19:26.180 --> 19:29.320]  Google have released recently, you should be able to do that literally now when you
+[19:29.320 --> 19:31.320]  can buy that with whisper.
+[19:31.320 --> 19:33.620]  All right.
+[19:33.620 --> 19:38.560]  And Rev. Ivy Dorey, how do you feel about the use of generative technology being used
+[19:38.560 --> 19:42.100]  by surveillance capitalists to further profit aimed goals?
+[19:42.100 --> 19:47.800]  What kind of stability I do about this thing we can really do is offer alternatives like
+[19:47.800 --> 19:52.600]  do you really want to be in a meta what do they call it, horizon first where you got
+[19:52.600 --> 19:59.160]  no legs or genitals, not really, you know, like legs are good, genitals good.
+[19:59.160 --> 20:02.480]  And so by providing open alternatives, we can basically out compete the rest like look
+[20:02.480 --> 20:06.200]  at the amount of innovation that's happened on the back of stable diffusion.
+[20:06.200 --> 20:11.120]  And again, you know, acknowledge our place in that we don't police it, we don't control
+[20:11.120 --> 20:13.520]  it, you know, like people can take it and extend it.
+[20:13.520 --> 20:14.880]  If you want to use our services, great.
+[20:14.880 --> 20:16.160]  If you don't, it's fine.
+[20:16.160 --> 20:20.760]  We're creating a brand new ecosystem that will out compete the legacy guys, because
+[20:20.760 --> 20:24.920]  thousands millions of people will be building and developing on this.
+[20:24.920 --> 20:29.160]  Like we are sponsoring the faster AI course on stable diffusion, so that anyone who's
+[20:29.160 --> 20:32.760]  a developer can rapidly learn to be a stable diffusion developer.
+[20:32.760 --> 20:36.160]  And you know, this isn't just kind of interfaces and things like that.
+[20:36.160 --> 20:37.760]  It's actually you'll be able to build your own models.
+[20:37.760 --> 20:38.760]  And how crazy is that?
+[20:38.760 --> 20:42.080]  Let's make it accessible to everyone and again, that's why we're working with gradios and
+[20:42.080 --> 20:44.080]  others on that.
+[20:44.080 --> 20:50.760]  All right, we got David, how realistic do you think dynamically creating realistic 3d
+[20:50.760 --> 20:53.720]  content with enough fidelity in a VR setting would be and what do you say the timeline
+[20:53.720 --> 20:55.720]  on something like that is?
+[20:55.720 --> 21:02.520]  You know, unless you're Elon Musk, self driving cars have always been five years away.
+[21:02.520 --> 21:10.680]  Always always, you know, $100 billion has been spent on self driving cars, and the research
+[21:10.680 --> 21:15.080]  and it's to me, it's not that much closer.
+[21:15.080 --> 21:19.880]  The dream of photorealistic VR though is very different with generative AI.
+[21:19.880 --> 21:29.000]  Like again, look at the 24 frames per second image and video look at the
+[21:29.000 --> 21:35.960]  long fanaki video as well and then consider Unreal Engine 5 what's Unreal Engine 6 going
+[21:35.960 --> 21:36.960]  to look like?
+[21:36.960 --> 21:40.920]  Well, it'll be photorealistic right and it'll be powered by nerf technology.
+[21:40.920 --> 21:46.120]  The same as Apple is pioneering for use on the neural engine chips that make up 16.8%
+[21:46.120 --> 21:49.260]  of your MacBook M1 GPU.
+[21:49.260 --> 21:55.620]  It's going to come within four to five years, fully high res, 2k in each eye resolution
+[21:55.620 --> 22:02.680]  via even 4k or 8k actually, it just needs an M2 chip with the specialist transformer
+[22:02.680 --> 22:04.240]  architecture in there.
+[22:04.240 --> 22:06.600]  And that will be available to a lot of people.
+[22:06.600 --> 22:10.680]  But then like I said, Unreal Engine 6 will also be out in about four or five years.
+[22:10.680 --> 22:12.980]  And so that will also up the ante.
+[22:12.980 --> 22:17.880]  There's a lot of amazing compression and customized stuff you can do around this.
+[22:17.880 --> 22:21.360]  And so I think it's just gonna be insane when you can create entire worlds.
+[22:21.360 --> 22:26.160]  And hopefully, it'll be built on the type of architectures that we help catalyze, whether
+[22:26.160 --> 22:27.920]  it's built by ourselves or others.
+[22:27.920 --> 22:32.840]  So we have a metric shit ton, I believe is the appropriate term of partnerships that
+[22:32.840 --> 22:37.840]  we'll be announcing over the next few months, where we're converting closed source AI companies
+[22:37.840 --> 22:43.680]  into open source AI companies, because, you know, it's better to work together.
+[22:43.680 --> 22:47.720]  And again, we shouldn't be at the center of all this with everything laying on our shoulders.
+[22:47.720 --> 22:51.720]  But it should be a teamwork initiative, because this is cool technology that will help a lot
+[22:51.720 --> 22:52.720]  of people.
+[22:52.720 --> 22:55.720]  All right, what guarantees is Spit Fortress 2?
+[22:55.720 --> 22:58.680]  What guarantees does the community have that stability AI won't go down on the same path
+[22:58.680 --> 23:00.000]  as open AI?
+[23:00.000 --> 23:03.780]  That one day you won't develop a good enough model, you decide to close things after benefiting
+[23:03.780 --> 23:06.440]  from all the work of the community and the visibility generated by it?
+[23:06.440 --> 23:07.440]  That's a good question.
+[23:07.440 --> 23:10.040]  I mean, it kind of sucks what happened with open AI, right?
+[23:10.040 --> 23:13.620]  You can say it's safety, you can say it's commercials, like whatever.
+[23:13.620 --> 23:18.640]  The R&D team and the developers have in their contracts, except for one person that we need
+[23:18.640 --> 23:24.680]  to send it to, that they can release any model that they work on open source.
+[23:24.680 --> 23:27.680]  So legally, we can't stop them.
+[23:27.680 --> 23:30.800]  Well, I think that's a pretty good kind of thing.
+[23:30.800 --> 23:34.280]  I don't think there's any company in the world that does that.
+[23:34.280 --> 23:39.380]  And again, if you look at it, the only thing that we haven't instantly released is this
+[23:39.380 --> 23:44.040]  particular class of generative models, because it's not straightforward.
+[23:44.040 --> 23:50.180]  And because you have frickin Congresswoman petitioning to ban us by the NSA.
+[23:50.180 --> 23:54.480]  And a lot more stuff behind that.
+[23:54.480 --> 24:00.960]  Look, you know, we're gonna get B Corp status soon, which puts in our official documents
+[24:00.960 --> 24:06.320]  that we are mission focused, not profit focused.
+[24:06.320 --> 24:10.320]  At the same time, I'm going to build $100 billion company that helps a billion people.
+[24:10.320 --> 24:13.420]  We have some other things around governance that we'll be introducing as well.
+[24:13.420 --> 24:19.840]  But currently, the governance structure is simple, yet not ideal, which is that I personally
+[24:19.840 --> 24:24.240]  have control of board, ordinary common everything.
+[24:24.240 --> 24:27.020]  And so a lot is resting on my shoulders are not sustainable.
+[24:27.020 --> 24:31.240]  As soon as we figure that out, and how to maintain the independence and how to maintain
+[24:31.240 --> 24:35.080]  it so that we are dedicated to open, which I think is a superior business model, a lot
+[24:35.080 --> 24:38.840]  of people agree with, will implement that posthaste any suggestions, please do send
+[24:38.840 --> 24:39.840]  them our way.
+[24:39.840 --> 24:45.600]  But like I said, one core thing is, if we stop being open source, and go down the open
+[24:45.600 --> 24:50.120]  AI route, there's nothing we can do to stop the developers from releasing the code.
+[24:50.120 --> 24:54.920]  And without developers, what are we, you know, nice front end company that does a bit of
+[24:54.920 --> 24:58.560]  model deployment, though it'd be killing ourselves.
+[24:58.560 --> 25:01.160]  All right.
+[25:01.160 --> 25:05.840]  Any plans for stability to this is pseudosilico, any plans for stability to tackle open source
+[25:05.840 --> 25:08.680]  alternatives to AI code generators, like copilot and alpha code?
+[25:08.680 --> 25:13.540]  Yeah, you can go over to karpa.ai, and see our code generation model that's training
+[25:13.540 --> 25:14.940]  right now.
+[25:14.940 --> 25:18.760]  We released one of the FID based language models that will be core to that plus our
+[25:18.760 --> 25:23.240]  instruct framework, so that you can have the ideal complement to that.
+[25:23.240 --> 25:29.120]  So I think by Q1 of next year, we will have better code models than copilot.
+[25:29.120 --> 25:32.700]  And there's some very interesting things in the works there, you just look at our partners
+[25:32.700 --> 25:33.700]  and other things.
+[25:33.700 --> 25:38.000]  And again, there'll be open source available to everyone.
+[25:38.000 --> 25:39.000]  Right.
+[25:39.000 --> 25:43.880]  Sunbury, will support be added for training at sizes other than 512 by default?
+[25:43.880 --> 25:44.880]  Training?
+[25:44.880 --> 25:46.520]  I suppose you meant inference.
+[25:46.520 --> 25:50.360]  Yeah, I mean, there are kind of things like that already.
+[25:50.360 --> 25:56.680]  So like, if you look at the recently released novel AI improvements to stable diffusion,
+[25:56.680 --> 26:00.460]  you'll see that there are details there as to how to implement arbitrary resolutions
+[26:00.460 --> 26:04.800]  similar to something like mid journey, I'll just post it there.
+[26:04.800 --> 26:08.960]  The model itself, like I said, enables that it's just that the kind of code wasn't there.
+[26:08.960 --> 26:12.280]  It was part of our expected upgrades.
+[26:12.280 --> 26:14.880]  And again, like different models have been trained at different sizes.
+[26:14.880 --> 26:21.200]  So we have a 768 model, a 512 model, et cetera, so 1024 model, et cetera, coming in the pipeline.
+[26:21.200 --> 26:24.320]  I mean, like, again, I think that not many people have actually tried to train models
+[26:24.320 --> 26:25.320]  yet.
+[26:25.320 --> 26:28.560]  You can get into grips with it, but you can train and extend this, again, view it as a
+[26:28.560 --> 26:34.240]  base of knowledge onto which you can adjust a bunch of other stuff.
+[26:34.240 --> 26:38.000]  Krakos, do you have any plans to improve the model in terms of face, limbs, and hand generation?
+[26:38.000 --> 26:40.520]  Is it possible to improve on specifics on this checkpoint?
+[26:40.520 --> 26:41.960]  Yep, 100%.
+[26:41.960 --> 26:48.680]  So I think in the next day or so, we'll be releasing a new fine-tuned decoder that's
+[26:48.680 --> 26:54.160]  just a drop-in for any latent diffusion or stable diffusion model that is fine-tuned
+[26:54.160 --> 27:00.200]  on the face-lion dataset, and that makes better faces.
+[27:00.200 --> 27:05.680]  Then, as well, you can train it on, like, Hagrid, which is the hand dataset to create
+[27:05.680 --> 27:07.880]  better hands, et cetera.
+[27:07.880 --> 27:11.160]  Some of this architecture is known as a VAE architecture for doing that.
+[27:11.160 --> 27:16.840]  And again, that's discussed a bit in the novel AI thing, because they do have better hands.
+[27:16.840 --> 27:22.400]  And again, this knowledge will proliferate around that.
+[27:22.400 --> 27:23.400]  What is the next question?
+[27:23.400 --> 27:27.240]  There's a lot of questions today.
+[27:27.240 --> 27:36.980]  Any – I saw your partnership with AI Grant with Nat and Daniel.
+[27:36.980 --> 27:40.760]  If you guys would support startups in case they aren't selected by them, any way startups
+[27:40.760 --> 27:43.400]  can connect with you folks to get mentorship or guidance.
+[27:43.400 --> 27:47.440]  We are building a grant program and more.
+[27:47.440 --> 27:51.000]  It's just that we're currently hiring people to come and run it.
+[27:51.000 --> 27:53.660]  That's the same as Bruce.Codes' question.
+[27:53.660 --> 27:59.400]  In the next couple of weeks, there will be competitions and all sorts of grants announced
+[27:59.400 --> 28:04.480]  to kind of stimulate the growth of some essential parts of infrastructure in the community.
+[28:04.480 --> 28:07.640]  And we're going to try and get more community involvement in that, so people who do great
+[28:07.640 --> 28:11.520]  things for the community are appropriately awarded.
+[28:11.520 --> 28:13.960]  There's a lot of work being done there.
+[28:13.960 --> 28:17.480]  All right.
+[28:17.480 --> 28:22.160]  So Ivy Dorey, is Stability AI considering working on climate crisis via models in some
+[28:22.160 --> 28:23.160]  way?
+[28:23.160 --> 28:26.560]  Yes, and this will be announced in November.
+[28:26.560 --> 28:27.840]  I can't announce it just yet.
+[28:27.840 --> 28:30.560]  They want to do a big, grand thing, but you know.
+[28:30.560 --> 28:31.560]  We're doing that.
+[28:31.560 --> 28:35.300]  We're supporting several entities that are doing climate forecasting functions and working
+[28:35.300 --> 28:40.160]  with a few governments on weather patterns using transformer-based technologies as well.
+[28:40.160 --> 28:41.720]  There's that.
+[28:41.720 --> 28:42.720]  Okay.
+[28:42.720 --> 28:45.920]  What else have we got?
+[28:45.920 --> 28:50.200]  We have Reflyn Wolf.
+[28:50.200 --> 28:52.840]  Which jobs do you think are most dangerous being taken by AI?
+[28:52.840 --> 28:54.840]  I don't know, man.
+[28:54.840 --> 28:57.200]  It's a complex one.
+[28:57.200 --> 29:01.440]  I think that probably the most dangerous ones are call center workers and anything that
+[29:01.440 --> 29:02.960]  involves human-to-human interaction.
+[29:02.960 --> 29:05.600]  I don't know if you guys have tried character.ai.
+[29:05.600 --> 29:14.120]  I don't know if they've stopped it because you could create some questionable entities.
+[29:14.120 --> 29:17.600]  The...
+[29:17.600 --> 29:19.080]  It's very good.
+[29:19.080 --> 29:21.960]  And it will just get better because I think you look at some of the voice models we have
+[29:21.960 --> 29:26.200]  coming up, you can basically do emotionally accurate voices and all sorts of stuff and
+[29:26.200 --> 29:29.440]  voice-to-voice, so you won't notice a call center worker.
+[29:29.440 --> 29:32.280]  But that goes to a lot of different things.
+[29:32.280 --> 29:34.440]  I think that's probably the first for disruption before anything else.
+[29:34.440 --> 29:37.760]  I don't think that artists get disrupted that much, to be honest, by what's going on here.
+[29:37.760 --> 29:41.100]  Unless you're a bad artist, in which case you can use this technology to become a great
+[29:41.100 --> 29:45.060]  artist, and the great artist will become even greater.
+[29:45.060 --> 29:47.400]  So I think that's probably my take on that.
+[29:47.400 --> 29:50.920]  Liquid Rhino has question two parts.
+[29:50.920 --> 29:55.240]  What work is being done to improve the attention mechanism of stable diffusion to better handle
+[29:55.240 --> 29:58.960]  and interpret composition while preserving artistic style?
+[29:58.960 --> 30:02.400]  There are natural language limitations when it comes to interpreting physics from simple
+[30:02.400 --> 30:03.400]  statements.
+[30:03.400 --> 30:06.520]  Artistic style further deforms and challenges this kind of interpretation.
+[30:06.520 --> 30:09.880]  Is stability AI working on high-level compositional language for use of generative models?
+[30:09.880 --> 30:11.680]  The answer is yes.
+[30:11.680 --> 30:17.200]  This is why we spent millions of dollars releasing the new CLIP.
+[30:17.200 --> 30:18.360]  CLIP is at the core of these models.
+[30:18.360 --> 30:22.280]  There's a generative component and there is a guidance component, and when you infuse
+[30:22.280 --> 30:25.920]  the two together, you get models like they are right now.
+[30:25.920 --> 30:32.280]  The guidance component, we used CLIP-L, which was CLIP-Large, which was the largest one that
+[30:32.280 --> 30:33.280]  OpenAI released.
+[30:33.280 --> 30:36.520]  They had two more, H and G, which I believe are huge and gigantic.
+[30:36.520 --> 30:41.640]  We released H in the first version of G, which should take like a million A100 hours to do,
+[30:41.640 --> 30:45.240]  and that improves compositional qualities so that as that gets integrated into a new
+[30:45.240 --> 30:51.040]  version of stable diffusion, it will be at the level of DALY2, just even with a small
+[30:51.040 --> 30:52.040]  size.
+[30:52.040 --> 30:57.040]  There are some problems around this in that the model learns from both things.
+[30:57.040 --> 31:02.080]  It learns from the stuff the generative thing is fine-tuned on and from the CLIP models,
+[31:02.080 --> 31:05.860]  and so we've been spending a lot of time over the last few weeks, and there's another reason
+[31:05.860 --> 31:10.440]  for the delay, seeing what exactly does this thing know, because even if an artist isn't
+[31:10.440 --> 31:13.720]  in our training dataset, it somehow knows about it, and it turns out it was CLIP all
+[31:13.720 --> 31:14.720]  along.
+[31:14.720 --> 31:18.120]  So we really wanted to output what we think it outputs and not output what it shouldn't
+[31:18.120 --> 31:20.440]  output, so we've been doing a lot of work around that.
+[31:20.440 --> 31:24.720]  Similarly, what we found is that embedding pure language models like T5, XXL, and we
+[31:24.720 --> 31:29.920]  tried UL2 and some of these other models, these are like pure language models like GPT-3,
+[31:29.920 --> 31:33.120]  improves the understanding of these models, which is kind of crazy.
+[31:33.120 --> 31:36.740]  And so there's some work being done around that for compositional accuracy, and again,
+[31:36.740 --> 31:41.800]  you can look at the blog by Novel.ai where they extended the context window so that it
+[31:41.800 --> 31:46.920]  can accept three times the amount of input from this.
+[31:46.920 --> 31:53.160]  So your prompts get longer from I think like 74 to 225 or something like that, and there
+[31:53.160 --> 31:56.480]  are various things you can do once you do proper latence place exploration, which I
+[31:56.480 --> 31:59.680]  think is probably another month away, to really hone down on this.
+[31:59.680 --> 32:04.560]  I think again, a lot of these other interfaces from the ones that we support to others have
+[32:04.560 --> 32:07.740]  already introduced negative prompting and all sorts of other stuff.
+[32:07.740 --> 32:12.280]  You should have kind of some vector-based initialization, et cetera, coming soon.
+[32:12.280 --> 32:13.280]  All right.
+[32:13.280 --> 32:20.240]  We've got Mav, what are the technical limitations around recreating SD with a 1024 dataset rather
+[32:20.240 --> 32:23.520]  than 512, and why not have varying resolutions for the dataset?
+[32:23.520 --> 32:25.360]  Is the new model going to be a ton bigger?
+[32:25.360 --> 32:29.360]  So version 3 right now has 1.4 billion parameters.
+[32:29.360 --> 32:34.320]  We've got a 4.3 billion parameter image in training and 900 million parameter image in
+[32:34.320 --> 32:35.320]  training.
+[32:35.320 --> 32:36.320]  We've got a lot of models training.
+[32:36.320 --> 32:39.000]  We're just waiting to get these things right before we just start releasing them one after
+[32:39.000 --> 32:40.000]  the other.
+[32:40.000 --> 32:44.520]  The main limitation is the lack of 1024 images in the training dataset.
+[32:44.520 --> 32:47.600]  Like Lion doesn't have a lot of high resolution images, and this is one of the things why
+[32:47.600 --> 32:53.760]  what we've been working on the last few weeks is to basically negotiate and license amazing
+[32:53.760 --> 32:59.840]  datasets that we can then put out to the world so that you can have much better models.
+[32:59.840 --> 33:03.520]  And we're going to pay a crap load for that, but again, release it for free and open source
+[33:03.520 --> 33:04.520]  to everyone.
+[33:04.520 --> 33:06.320]  And I think that should do well.
+[33:06.320 --> 33:09.400]  This is also why the upscaler that you're going to see is a two times upscaler.
+[33:09.400 --> 33:10.400]  That's good.
+[33:10.400 --> 33:12.760]  Four times upscaling is a bit difficult for us to do.
+[33:12.760 --> 33:17.600]  Like it's still decent because we're just waiting on the licensing of those images.
+[33:17.600 --> 33:19.720]  All right.
+[33:19.720 --> 33:23.880]  What's next?
+[33:23.880 --> 33:27.280]  Any plans for creating a worthy open source alternative, something like AI Dungeon or
+[33:27.280 --> 33:28.280]  Character AI?
+[33:28.280 --> 33:33.140]  Well, a lot of the Carper AI teams work around instruct models and contrastive learning should
+[33:33.140 --> 33:37.840]  enable Carper Character AI type systems on chatbots.
+[33:37.840 --> 33:41.400]  And you know, from narrative construction to others, again, it will be ideal there.
+[33:41.400 --> 33:45.640]  The open source versions of Novel AI and AI Dungeon, I believe the leading one is Cobold
+[33:45.640 --> 33:46.640]  AI.
+[33:46.640 --> 33:47.640]  So you might want to check that out.
+[33:47.640 --> 33:50.760]  I haven't seen what the case has been with that recently.
+[33:50.760 --> 33:51.760]  All right.
+[33:51.760 --> 33:53.560]  We've got Joe Rogan.
+[33:53.560 --> 33:56.080]  When we'll be able to create full on movies with AI?
+[33:56.080 --> 34:00.600]  I don't know, like five years again.
+[34:00.600 --> 34:03.240]  I'm just digging that out there.
+[34:03.240 --> 34:06.080]  Okay, if I was Elon Musk, I'd say one year.
+[34:06.080 --> 34:07.960]  I mean, it depends what you mean by a feature like movies.
+[34:07.960 --> 34:12.880]  So like animated movies, when you combine stable diffusion with some of the language
+[34:12.880 --> 34:17.480]  models and some of the code models, you should be able to create those.
+[34:17.480 --> 34:23.960]  Maybe not in a UFO table or Studio Bones style within two years, I'd say, but I'd say a five
+[34:23.960 --> 34:28.840]  year time frame for being able to create those in high quality, like super high res is reasonable
+[34:28.840 --> 34:34.560]  because that's the time it will take to create these high res dynamic VR kind of things.
+[34:34.560 --> 34:38.480]  To create fully photorealistic proper people movies, I mean, you can look at E.B.
+[34:38.480 --> 34:44.560]  Synth or some of these other kind of pathway analyses, it shouldn't be that long to be
+[34:44.560 --> 34:45.560]  honest.
+[34:45.560 --> 34:46.940]  It depends on how much budget and how quick you want to do it.
+[34:46.940 --> 34:50.800]  Real time is difficult, but you're going to see some really amazing real time stuff in
+[34:50.800 --> 34:51.800]  the next year.
+[34:51.800 --> 34:52.800]  Touch wood.
+[34:52.800 --> 34:53.800]  We're lining it up.
+[34:53.800 --> 34:55.040]  It's going to blow everyone's socks away.
+[34:55.040 --> 34:59.800]  That's going to require a freaking supercomputer, but it's not movie length.
+[34:59.800 --> 35:01.640]  It's something a bit different.
+[35:01.640 --> 35:02.840]  All right.
+[35:02.840 --> 35:06.040]  Querielmotor, did you read the installation of guided diffusion models paper?
+[35:06.040 --> 35:07.360]  Do you have any thoughts on it?
+[35:07.360 --> 35:10.480]  Like if it will improve things on consumer level hardware or just the high VRAM data
+[35:10.480 --> 35:11.480]  centers?
+[35:11.480 --> 35:16.520]  I mean, distillation and instructing these models is awesome.
+[35:16.520 --> 35:21.960]  And the step counts they have for kind of reaching cohesion are kind of crazy.
+[35:21.960 --> 35:26.120]  RiversideWigs has done a lot of work on a kind of DDPM fast solvent, but already reduced
+[35:26.120 --> 35:28.880]  the number of steps required to get to those stages.
+[35:28.880 --> 35:34.160]  And again, like I keep telling everyone, once you start chaining these models together,
+[35:34.160 --> 35:38.540]  you're going to get down really sub one second and further, because I think you guys have
+[35:38.540 --> 35:43.480]  seen image to image work so much better if you just even give a basic sketch than text
+[35:43.480 --> 35:44.480]  to image.
+[35:44.480 --> 35:47.200]  So why don't you change together different models, different modalities to kind of get
+[35:47.200 --> 35:48.200]  them?
+[35:48.200 --> 35:52.880]  And I think it'll be easier once we release our various model resolution sizes plus upscalers
+[35:52.880 --> 35:55.140]  so you can dynamically switch between models.
+[35:55.140 --> 36:01.140]  If you look at the dream studio kind of teaser that I posted six weeks ago, that's why we've
+[36:01.140 --> 36:04.480]  got model chaining integrated right in there.
+[36:04.480 --> 36:05.920]  All right.
+[36:05.920 --> 36:10.200]  RefleonWolf, who do you think should own the copyright of an image video made by an AI
+[36:10.200 --> 36:13.240]  or do you think there shouldn't be an owner?
+[36:13.240 --> 36:18.360]  I think that if it isn't based on copyrighted content, it should be owned by the prompter
+[36:18.360 --> 36:19.360]  of the AI.
+[36:19.360 --> 36:23.880]  If the AI is a public model and not owned by someone else, otherwise it is almost like
+[36:23.880 --> 36:26.680]  a code creation type of thing.
+[36:26.680 --> 36:34.920]  But I'm not a lawyer and I think this will be tested severely very soon.
+[36:34.920 --> 36:39.200]  Question by Prue Prue, update some more paying owner methods for dream studio.
+[36:39.200 --> 36:43.840]  I think we'll be introducing some alternate ones soon, the one that we won't introduce
+[36:43.840 --> 36:44.840]  is PayPal.
+[36:44.840 --> 36:49.880]  No, no PayPal, because that's just crazy what's going on there.
+[36:49.880 --> 36:53.800]  Jason, the artist with stable diffusion having been publicly released for over a month now
+[36:53.800 --> 36:57.620]  and with the release of version five around the corner, what is the most impressive implementation
+[36:57.620 --> 37:01.000]  you've seen someone create out of the application so far?
+[37:01.000 --> 37:02.680]  I really love the dream booth stuff.
+[37:02.680 --> 37:04.360]  I mean, come on, that shit's crazy.
+[37:04.360 --> 37:09.020]  You know, even though some of you fine tuned me into kind of weird poses.
+[37:09.020 --> 37:11.680]  I think it was pretty good.
+[37:11.680 --> 37:13.600]  I didn't think we would get that level of quality.
+[37:13.600 --> 37:16.240]  I thought it would be a textual and version level quality.
+[37:16.240 --> 37:23.520]  Beyond that, I think that, you know, there's been this well of creativity, like you're
+[37:23.520 --> 37:27.680]  starting to see some of the 3D stuff come out and again, I didn't think we'd get quite
+[37:27.680 --> 37:29.240]  there even with the chaining.
+[37:29.240 --> 37:32.600]  I think that's pretty darn impressive.
+[37:32.600 --> 37:36.560]  Okay, so what is next?
+[37:36.560 --> 37:41.360]  Okay, so I've just been going through all of these chat things.
+[37:41.360 --> 37:47.480]  Notepad, are there any areas of the industry that is currently overlooked that you'll be
+[37:47.480 --> 37:51.080]  excited to see the effects of diffusion based AI being used?
+[37:51.080 --> 37:55.640]  Again, like I can't get away from this PowerPoint thing.
+[37:55.640 --> 38:00.520]  Like it's such a straightforward thing that causes so much real annoyance.
+[38:00.520 --> 38:02.680]  I think we could kind of get it out there.
+[38:02.680 --> 38:07.160]  I think it just requires kind of a few fine tuned models plus a code model plus a language
+[38:07.160 --> 38:08.920]  model to kind of kick it together.
+[38:08.920 --> 38:14.000]  I mean, diffusion is all about de-noising and information is about noise.
+[38:14.000 --> 38:16.920]  So our brains filter out noise and de-noise all the time.
+[38:16.920 --> 38:20.240]  So these models can be used in a ridiculous number of scenarios.
+[38:20.240 --> 38:25.440]  Like I said, we've got DNA diffusion model going on in OpenBIM, all that shit crazy,
+[38:25.440 --> 38:26.440]  right?
+[38:26.440 --> 38:30.240]  But I think right now I really want to see some of these practical high impact use cases
+[38:30.240 --> 38:32.800]  like the PowerPoint kind of thing.
+[38:32.800 --> 38:34.040]  All right.
+[38:34.040 --> 38:39.760]  We've got S1, S2, do you have any plans to release a speech since this model likes script
+[38:39.760 --> 38:40.760]  overdone voices?
+[38:40.760 --> 38:46.560]  Yes, we have a plan to release a speech to speech model soon and some other ones around
+[38:46.560 --> 38:47.560]  that.
+[38:47.560 --> 38:50.720]  I think AudioLM by Google was super interesting recently.
+[38:50.720 --> 38:55.480]  For those who don't know, that's basically you give it a snippet of a voice or of music
+[38:55.480 --> 38:57.280]  or something and it just extends it.
+[38:57.280 --> 38:58.280]  It's kind of crazy.
+[38:58.280 --> 39:02.840]  But I think we get the arbitrary kind of length thing there and combined with some other models
+[39:02.840 --> 39:05.600]  that could be really interesting.
+[39:05.600 --> 39:13.800]  All right, maybe Dori, do you have any thoughts on increasing the awareness of generative
+[39:13.800 --> 39:14.800]  models?
+[39:14.800 --> 39:15.800]  Is this something you see as important?
+[39:15.800 --> 39:19.760]  How long do you think until the mass glow population becomes aware of these models?
+[39:19.760 --> 39:26.000]  I think I can't keep up as it is and I don't want to die.
+[39:26.000 --> 39:29.140]  But more realistically, we have a B2B2C model.
+[39:29.140 --> 39:33.720]  So we're partnering with the leading brands in the world and content creators to both
+[39:33.720 --> 39:38.120]  get their content so we can build better open models and to get this technology out to just
+[39:38.120 --> 39:39.120]  everyone.
+[39:39.120 --> 39:43.860]  Similar on a country basis, we have country level models coming out very soon.
+[39:43.860 --> 39:46.840]  So on the language side of things, you can see we released Polyglot, which is the best
+[39:46.840 --> 39:52.220]  Korean language model, for example, Vera, Luther AI and our support of them recently.
+[39:52.220 --> 39:57.040]  So I think you will see a lot of models coming soon, a lot of different kind of elements
+[39:57.040 --> 39:59.040]  around that.
+[39:59.040 --> 40:06.000]  Okie dokie, will we always be limited by the hardware cost to run AI or do you expect something
+[40:06.000 --> 40:07.000]  to change?
+[40:07.000 --> 40:09.980]  Yeah, I mean, like this will run on the edge, it'll run on your iPhone in a year.
+[40:09.980 --> 40:14.960]  Stable diffusion will run on an iPhone in probably seconds, that level of quality.
+[40:14.960 --> 40:16.960]  That's again, a bit crazy.
+[40:16.960 --> 40:22.160]  All right, Aziroshin, oh, this is a long one.
+[40:22.160 --> 40:25.960]  I'm unsure how to release licensed images based on SD output.
+[40:25.960 --> 40:30.400]  Some suggest creative commons zero is fine.
+[40:30.400 --> 40:33.280]  Some say raw output, warning of license, suggest reality.
+[40:33.280 --> 40:35.880]  Oh, sorry, that's just a really long question.
+[40:35.880 --> 40:38.280]  My brain's a bit fried.
+[40:38.280 --> 40:43.360]  Okay, so if someone takes a CCO out image and violates the license, then something can
+[40:43.360 --> 40:44.360]  be done around that.
+[40:44.360 --> 40:49.280]  I would suggest that if you're worried about some of this stuff, you, CCO licensing, and
+[40:49.280 --> 40:54.280]  again, I am not a lawyer, please consult with a lawyer, does not preclude copyright.
+[40:54.280 --> 40:57.560]  And there's a transformational element that incorporates that.
+[40:57.560 --> 41:02.480]  If you look at artists like Necro 13 and Claire Selva and others, you will see that the outputs
+[41:02.480 --> 41:05.520]  usually aren't one shot, they are multi-sesic.
+[41:05.520 --> 41:09.280]  And then that means that this becomes one part of that, a CCO license part that's part
+[41:09.280 --> 41:10.280]  of your process.
+[41:10.280 --> 41:14.880]  Like, even if you use GFPGAN or upscaling or something like that, again, I'm not a lawyer,
+[41:14.880 --> 41:15.880]  please consult with one.
+[41:15.880 --> 41:19.360]  I think that should be sufficiently transformative that you can assert full copyright over the
+[41:19.360 --> 41:21.800]  output of your work.
+[41:21.800 --> 41:25.000]  Kingping is, stability are going to give commissions to artists.
+[41:25.000 --> 41:29.560]  We have some very exciting in-house artists coming online soon.
+[41:29.560 --> 41:34.400]  Some very interesting ones, I'm afraid that's all I can say right now.
+[41:34.400 --> 41:37.680]  But yeah, we will have more art programs and things like that as part of our community
+[41:37.680 --> 41:38.680]  engagement.
+[41:38.680 --> 41:43.680]  It's just that right now it's been a struggle even to keep Discord and other things going
+[41:43.680 --> 41:44.680]  and growing the team.
+[41:44.680 --> 41:48.320]  Like, we're just over a hundred people now, God knows how many we actually need.
+[41:48.320 --> 41:50.600]  I think we probably need to hire another hundred more.
+[41:50.600 --> 41:54.600]  All right, RMRF, a text-to-speech model too?
+[41:54.600 --> 41:55.600]  Yep.
+[41:55.600 --> 42:00.520]  I couldn't release it just yet as my sister-in-law was running Synantic, but now that she's been
+[42:00.520 --> 42:04.760]  absorbed by Spotify, we can release emotional text-to-speech.
+[42:04.760 --> 42:10.240]  Not soon though, I think that we want to do some extra work around that and build that
+[42:10.240 --> 42:11.240]  up.
+[42:11.240 --> 42:12.240]  All right.
+[42:12.240 --> 42:17.920]  Anisham, is it possible to get vector images like an SVG file from stable diffusion or
+[42:17.920 --> 42:20.800]  related systems?
+[42:20.800 --> 42:22.720]  Not at the moment.
+[42:22.720 --> 42:28.800]  You can actually do that with a language model, as you'll find out probably in the next month.
+[42:28.800 --> 42:32.240]  But right now I would say just use a converter, and that's probably going to be the best way
+[42:32.240 --> 42:33.240]  to do that.
+[42:33.240 --> 42:38.440]  All right, Ruffling Wolf, is there a place to find all stable AI-made models in one place?
+[42:38.440 --> 42:40.800]  No, there is not, because we are disorganized.
+[42:40.800 --> 42:46.160]  We barely have a careers page up, and we're not really keeping a track of everything.
+[42:46.160 --> 42:51.440]  We are employing someone as an AI librarian to come and help coordinate the community
+[42:51.440 --> 42:53.000]  and some of these other things.
+[42:53.000 --> 42:56.440]  Again, that's just a one-stop shop there.
+[42:56.440 --> 43:01.080]  But yeah, also there's this collaborative thing where we're involved in a lot of stuff.
+[43:01.080 --> 43:05.120]  There's a blurring line between what we need and what we don't need.
+[43:05.120 --> 43:07.000]  We just are going to want to be the catalyst for all of this.
+[43:07.000 --> 43:09.440]  I think the best models go viral anyway.
+[43:09.440 --> 43:13.160]  All right, Infinite Monkey, where do you see stability AI in five years?
+[43:13.160 --> 43:17.400]  Hopefully with someone else leading the damn thing so I can finish Elden Ring.
+[43:17.400 --> 43:23.480]  No, I mean, our aim is basically to build AI subsidiaries in every single country so
+[43:23.480 --> 43:29.600]  that there's localized models for every country and race that are all open and to basically
+[43:29.600 --> 43:33.240]  be the biggest, best company in the world that's actually aligned with you rather than
+[43:33.240 --> 43:35.800]  trying to suck up your attention to serve you ads.
+[43:35.800 --> 43:41.640]  I really don't like ads, honestly, unless they're artistic, I like artistic ads.
+[43:41.640 --> 43:47.440]  So the aim is to build a big company to list and to give it back to the people so ultimately
+[43:47.440 --> 43:48.560]  it's all owned by the people.
+[43:48.560 --> 43:55.000]  For myself, my main aim is to ramp this up and spread as much profit as possible into
+[43:55.000 --> 43:59.680]  Imagine Worldwide, our education arm run by our co-founder, which currently is teaching
+[43:59.680 --> 44:05.120]  kids literacy and numeracy in refugee camps in 13 months on one hour a day.
+[44:05.120 --> 44:10.800]  We've just been doing the remit to extend this and incorporate AI to teach tens of millions
+[44:10.800 --> 44:14.600]  of kids around the world that will be open source, hosted at the UN.
+[44:14.600 --> 44:17.060]  One laptop per child, but really one AI per child.
+[44:17.060 --> 44:20.680]  That's one of my main focuses because I think I did a podcast about this.
+[44:20.680 --> 44:24.320]  A lot of people talk about human rights and ethics and morals and things like that.
+[44:24.320 --> 44:29.160]  One of the frames I found really interesting from Vinay Gupta, who's a bit of a crazy guy,
+[44:29.160 --> 44:33.160]  but a great thinker, was that we should think about human rights in terms of the rights
+[44:33.160 --> 44:38.040]  of children because they don't have any agency and they can't control things and what is
+[44:38.040 --> 44:42.200]  their right to have a climate, what is their right to food and education and other things.
+[44:42.200 --> 44:46.320]  We should really provide for them and I'm going to use this technology to provide for
+[44:46.320 --> 44:51.200]  them so there's literally no child left behind, they have access to all the tools and technology
+[44:51.200 --> 44:52.200]  they need.
+[44:52.200 --> 44:56.760]  That's why creativity was a core component of that and communication, education and healthcare.
+[44:56.760 --> 45:01.760]  Again, it's not just us, all we are is the catalyst and it's the community that comes
+[45:01.760 --> 45:06.680]  and helps and extends that.
+[45:06.680 --> 45:10.920]  As Zeroshin, my question was about whether I have to pass down the rail license limitations
+[45:10.920 --> 45:13.840]  when licensing SD based images or I can release as good.
+[45:13.840 --> 45:18.480]  Ah yes, you don't have to do rail license, you can release as is.
+[45:18.480 --> 45:22.400]  It's only if you are running the model or distributing the model to other people that
+[45:22.400 --> 45:26.160]  you have to do that.
+[45:26.160 --> 45:30.040]  If you'd like to learn more about our education initiative, they're at Magic Worldwide.
+[45:30.040 --> 45:34.720]  Lots more on that soon as we scale up to tens of millions of kids.
+[45:34.720 --> 45:39.220]  We have Chuck Still, as a composer and audio engineer myself, I cannot imagine AI will
+[45:39.220 --> 45:42.920]  approach the emotional intricacies and depths of complexity found in music by world class
+[45:42.920 --> 45:45.080]  musicians, at least not anytime soon.
+[45:45.080 --> 45:48.600]  That said, I'm interested in AI as a tool, would love to explore how it can be used to
+[45:48.600 --> 45:50.400]  help in this production process.
+[45:50.400 --> 45:51.400]  Are we involved in this?
+[45:51.400 --> 45:56.180]  Yes we are, I think someone just linked to harm when I play and we will be releasing
+[45:56.180 --> 46:02.440]  a whole suite of tools soon to extend the capability of musicians and make more people
+[46:02.440 --> 46:03.440]  into musicians.
+[46:03.440 --> 46:07.040]  And this is one of the interesting ones, like these models, they pay attention to the important
+[46:07.040 --> 46:08.680]  parts of any media.
+[46:08.680 --> 46:14.000]  So there's always this question about expressivity and humanity, I mean they are trained on humanity
+[46:14.000 --> 46:18.840]  and so they resonate and I think that's something that you kind of have to acknowledge and then
+[46:18.840 --> 46:25.160]  it's about aesthetics have been solved to a degree by this type of AI.
+[46:25.160 --> 46:29.240]  So something can be aesthetically pleasing, but aesthetics are not enough.
+[46:29.240 --> 46:35.680]  If you are an artist, a musician or otherwise, I'd say a coder, it's largely about narrative
+[46:35.680 --> 46:36.680]  and story.
+[46:36.680 --> 46:39.760]  And what does that look like around all of this?
+[46:39.760 --> 46:44.920]  Because things don't exist in a vacuum, it can be a beautiful thing or a piece of music,
+[46:44.920 --> 46:48.540]  but you remember it because you were driving a car when you were 18 with your best friends,
+[46:48.540 --> 46:51.360]  you know, or it was at your wedding or something like that.
+[46:51.360 --> 46:56.440]  That's when story matters, for music, for art, for other things as well like that.
+[46:56.440 --> 46:58.960]  All right, one second.
+[46:58.960 --> 47:03.960]  Man, I just drank a tea.
+[47:03.960 --> 47:09.560]  All right, we've got GHP Kishore, are you guys working on LMs as well, something to
+[47:09.560 --> 47:11.560]  compete with OpenAI GPT-3?
+[47:11.560 --> 47:12.560]  Yes.
+[47:12.560 --> 47:18.280]  We recently released from the Carpa Lab, the instruct framework and we are training to
+[47:18.280 --> 47:25.840]  achieve chiller optimal models, which outperformed GPT-3 on a fraction of the parameters.
+[47:25.840 --> 47:27.380]  They will get better and better and better.
+[47:27.380 --> 47:32.140]  And then as we create localized data sets and the education data sets, those are ideal
+[47:32.140 --> 47:39.360]  for training foundation models at ridiculous power relative to the parameters.
+[47:39.360 --> 47:44.320]  So I think that it will be pretty great to say the least as we kind of focus on that.
+[47:44.320 --> 47:49.600]  LutherAI, which was the first community that we properly supported and a number of stability
+[47:49.600 --> 47:53.360]  employees help lead that community.
+[47:53.360 --> 47:58.840]  The focus was GPT Neo and GPT-J, which were the open source implementations of GPT-3 but
+[47:58.840 --> 48:04.280]  on a smaller parameter scale, which had been downloaded 25 million times by developers,
+[48:04.280 --> 48:07.280]  which I think is a lot more use than GPT-3 has got.
+[48:07.280 --> 48:12.160]  But GPT-3 is fantastic or instruct GPT, which it really is.
+[48:12.160 --> 48:14.920]  I think this instruct model that took it down a hundred times.
+[48:14.920 --> 48:19.080]  Again, if you're technical, you can look at the Carpa community and you can see the framework
+[48:19.080 --> 48:21.080]  around that.
+[48:21.080 --> 48:22.560]  All right.
+[48:22.560 --> 48:24.960]  What is the next question here?
+[48:24.960 --> 48:28.120]  Oh, no, I've tapped the wrong thing.
+[48:28.120 --> 48:29.120]  I've lost the questions.
+[48:29.120 --> 48:31.120]  I have found them.
+[48:31.120 --> 48:33.120]  Yes.
+[48:33.120 --> 48:34.400]  Gimmick from the FAQ.
+[48:34.400 --> 48:38.160]  In the future for other models, we are building an opt-in and opt-out system for artists and
+[48:38.160 --> 48:40.820]  others that will lead to use in partnerships leading organizations.
+[48:40.820 --> 48:45.160]  This model has some principles, the outputs are not direct for any single piece or initiatives
+[48:45.160 --> 48:46.160]  of motion with regards to this.
+[48:46.160 --> 48:52.320]  There will be announcements next week about this and various entities that we're bringing
+[48:52.320 --> 48:53.320]  in place for that.
+[48:53.320 --> 48:57.000]  That's all I can say, because I'm not allowed to spoil announcements, but we've been working
+[48:57.000 --> 48:59.440]  super hard on this.
+[48:59.440 --> 49:05.720]  I think there's two or maybe three announcements, it'll be 17th and 18th will be the dates of
+[49:05.720 --> 49:06.720]  those.
+[49:06.720 --> 49:11.800]  Aha, I'm through the questions, I think.
+[49:11.800 --> 49:16.320]  Mod team, are we through the questions?
+[49:16.320 --> 49:19.640]  Okay.
+[49:19.640 --> 49:22.560]  I think now go back to center stage.
+[49:22.560 --> 49:26.800]  I do not know how, there are no requests, so I can't do requests.
+[49:26.800 --> 49:29.320]  Are there any other questions from anyone?
+[49:29.320 --> 49:30.920]  Okay.
+[49:30.920 --> 49:34.560]  As the mod team are not posting, I'm going to look in the chat.
+[49:34.560 --> 49:42.400]  When will stability and Luther be able to translate geese to speech in real time?
+[49:42.400 --> 49:46.280]  I think the kind of honking models are very complicated.
+[49:46.280 --> 49:49.200]  Actually, this is actually very interesting.
+[49:49.200 --> 49:53.640]  People have actually been using diffusion models to translate animal speech and understand
+[49:53.640 --> 49:54.640]  it.
+[49:54.640 --> 49:58.040]  If you look at something like whisper, it might actually be in reach.
+[49:58.040 --> 50:02.360]  Whisper by open AI, they open sourced it kindly, I wonder what caused them to do that, is a
+[50:02.360 --> 50:05.240]  fantastic speech to text model.
+[50:05.240 --> 50:07.920]  One of the interesting things about it is you can change the language you're speaking
+[50:07.920 --> 50:10.700]  in the middle of a sentence and it'll still pick that up.
+[50:10.700 --> 50:14.020]  So if you train it enough, then you'll be able to kind of do that.
+[50:14.020 --> 50:17.880]  So one of the entities we're talking with wants to train based on whale song to understand
+[50:17.880 --> 50:18.880]  whales.
+[50:18.880 --> 50:21.720]  Now this sounds a bit like Star Trek, but that's okay, I like Star Trek.
+[50:21.720 --> 50:25.800]  So we'll see how that goes.
+[50:25.800 --> 50:29.400]  Will dream studio front-end be open source so it can be used on local GPUs?
+[50:29.400 --> 50:32.360]  I do not believe there's any plans for that at the moment because dream studio is kind
+[50:32.360 --> 50:36.700]  of our pro CMR end kind of thing, but you'll see more and more local GPU usage.
+[50:36.700 --> 50:40.960]  So like, you know, you've got visions of chaos at the moment on windows machines by softology
+[50:40.960 --> 50:46.160]  is fantastic, where you can run just about any of these notebooks like D forum and others
+[50:46.160 --> 50:49.360]  or HLKY or whatever.
+[50:49.360 --> 50:51.280]  And so I think that's kind of a good step.
+[50:51.280 --> 50:55.280]  Similarly, if you look at the work being done on the Photoshop plugin, it will have local
+[50:55.280 --> 50:57.560]  inference in a week or two.
+[50:57.560 --> 51:01.720]  So you can use that directly from Photoshop and soon many other plugins.
+[51:01.720 --> 51:07.400]  All right, Aldana says, what do you think of the situation where a Google engineer believed
+[51:07.400 --> 51:09.240]  the AI chatbot achieved sentience?
+[51:09.240 --> 51:10.240]  It did not.
+[51:10.240 --> 51:11.240]  He was stupid.
+[51:11.240 --> 51:17.120]  Um, unless you have a very low bar of sentience pose, you could, I mean, some people are barely
+[51:17.120 --> 51:18.120]  sentient.
+[51:18.120 --> 51:21.640]  It must be said, especially when they're arguing on the internet, never went an argument on
+[51:21.640 --> 51:22.640]  the internet.
+[51:22.640 --> 51:26.520]  That's another thing like facts don't really work on the internet.
+[51:26.520 --> 51:28.120]  A lot of people have preconceived notions.
+[51:28.120 --> 51:33.200]  Instead, you should try to just be like, you know, as open minded as possible and let people
+[51:33.200 --> 51:34.200]  agree to disagree.
+[51:34.200 --> 51:35.200]  All right.
+[51:35.200 --> 51:40.700]  Andy Cochran says, thoughts on getting seamless equirectangular 360 degree and 180 degree
+[51:40.700 --> 51:46.920]  and HDR outputs in one shot for image to text and text to image.
+[51:46.920 --> 51:51.580]  I mean, you could use things like, I think I called it stream fusion, which was dream
+[51:51.580 --> 51:54.540]  fusions, stable diffusion kind of combined.
+[51:54.540 --> 51:59.080]  There are a bunch of data sets that we're working on to enable this kind of thing, especially
+[51:59.080 --> 52:00.080]  from GoPro and others.
+[52:00.080 --> 52:04.680]  Um, but I think it'd probably be a year or two away still.
+[52:04.680 --> 52:08.080]  Funky McShot, Emma, has any plans for text and three diffusion models?
+[52:08.080 --> 52:09.080]  Yes, there are.
+[52:09.080 --> 52:10.960]  And they are in the works.
+[52:10.960 --> 52:13.920]  Malcontender with some of the recent backlash from artists.
+[52:13.920 --> 52:17.200]  Is there anything you wish that SD did differently in the earliest stages that would have changed
+[52:17.200 --> 52:19.080]  the framing around image synthesis?
+[52:19.080 --> 52:20.680]  No, really.
+[52:20.680 --> 52:24.680]  I mean, like the point is that these things can be fine tuned anyway.
+[52:24.680 --> 52:26.920]  So I think people have attacked fine tuning.
+[52:26.920 --> 52:33.840]  Um, I mean, ultimately it's like, I understand the fear, this is threatening to their jobs
+[52:33.840 --> 52:38.440]  and the thing cause anyone can kind of do it, but it's not like ethically correct for
+[52:38.440 --> 52:40.800]  them to say, actually, we don't want everyone to be artists.
+[52:40.800 --> 52:45.560]  So instead they focus on, it's taken my art and trained on my art and you know, it's impossible
+[52:45.560 --> 52:47.720]  for this to work without my art.
+[52:47.720 --> 52:48.720]  Not really.
+[52:48.720 --> 52:51.480]  So you train on ImageNet and it can still create just about any composition.
+[52:51.480 --> 52:55.680]  Um, again, part of the problem was having the clip model embedded in there because the
+[52:55.680 --> 52:57.080]  clip model knows a lot of stuff.
+[52:57.080 --> 53:03.000]  We don't know what's in the open AI dataset, um, as should we do kind of, and it's interesting.
+[53:03.000 --> 53:07.600]  Um, I think that all we can do is kind of learn from the feedback from the people that
+[53:07.600 --> 53:13.400]  aren't shouting at us or like, uh, you know, members of the team have received death threats
+[53:13.400 --> 53:15.680]  and other things which are completely over the line.
+[53:15.680 --> 53:21.160]  Um, this is again, a reason why I think caution is the better part of what we're doing right
+[53:21.160 --> 53:22.160]  now.
+[53:22.160 --> 53:25.520]  Um, like, you know, we have put ourselves in our way, like my inbox does look a bit
+[53:25.520 --> 53:30.560]  ugly, uh, in certain places, um, to try and calm things down and really listen to the
+[53:30.560 --> 53:35.360]  calmer voices there and try and build systems so people can be represented appropriately.
+[53:35.360 --> 53:36.360]  It's not an easy question.
+[53:36.360 --> 53:42.640]  Um, but again, like I think it's incumbent on us to try and help facilitate this conversation
+[53:42.640 --> 53:45.920]  because it's an important question.
+[53:45.920 --> 53:50.480]  Um, all right.
+[53:50.480 --> 53:51.760]  See what's next.
+[53:51.760 --> 53:55.560]  How does are you looking to decentralize GPU AI compute?
+[53:55.560 --> 54:01.980]  Uh, yeah, we've got kind of models that enable that, um, hive minds that you'll see, um,
+[54:01.980 --> 54:07.600]  on the decentralized learning side as an example whereby I'm trained on distributed GPUs, um,
+[54:07.600 --> 54:08.600]  actually models.
+[54:08.600 --> 54:13.720]  I think that we need the best version of that is on reinforcement learning models.
+[54:13.720 --> 54:30.320]  I think those are deep learning models, especially when considering things like, uh, community
+[54:30.320 --> 54:36.560]  models, et cetera, because as those proliferate and create their own custom models bind to
+[54:36.560 --> 54:40.240]  your dream booth or others, there's no way that centralized systems can keep up.
+[54:40.240 --> 54:43.680]  But I think decentralized compute is pretty cheap though.
+[54:43.680 --> 54:45.520]  All right.
+[54:45.520 --> 54:54.640]  Um, so, uh, oops, did I kind of disappear there for a second?
+[54:54.640 --> 54:55.640]  Testing, testing.
+[54:55.640 --> 54:56.640]  All right.
+[54:56.640 --> 54:57.640]  I'm back.
+[54:57.640 --> 54:59.640]  Can you hear me?
+[54:59.640 --> 55:00.640]  All right.
+[55:00.640 --> 55:01.640]  Sorry.
+[55:01.640 --> 55:09.160]  Okay, um, are we going to do nerf type models?
+[55:09.160 --> 55:10.160]  Yes.
+[55:10.160 --> 55:12.820]  Um, I think nerfs are going to be the big thing.
+[55:12.820 --> 55:18.120]  They are, um, going to be supported by Apple and Apple hardware.
+[55:18.120 --> 55:20.960]  So I think you'll see lots of nerf type models there.
+[55:20.960 --> 55:21.960]  Oops, sorry.
+[55:21.960 --> 55:23.960]  I need my laptop now.
+[55:23.960 --> 55:27.120]  Do you guys hate it when there's like a lack of battery?
+[55:27.120 --> 55:31.560]  I think it's so small, but I can't remember if it was a TV show or if it was in real life.
+[55:31.560 --> 55:36.520]  But there was like this app called, um, like I'm dying or something like that, that you
+[55:36.520 --> 55:41.600]  could only use to message people when your battery life was like below 5% or something
+[55:41.600 --> 55:42.600]  like that.
+[55:42.600 --> 55:47.120]  I think that's a great idea if it doesn't exist for someone to create an actual life,
+[55:47.120 --> 55:53.040]  like, you know, feeling a solidarity for that tension that occurs, you know, I think makes
+[55:53.040 --> 55:55.920]  you realize the fragility of the human condition.
+[55:55.920 --> 55:56.920]  All right.
+[55:56.920 --> 56:02.320]  Um, wait, sorry, I meant to be doing center stage.
+[56:02.320 --> 56:05.920]  Well, there's nobody who can help me.
+[56:05.920 --> 56:09.240]  Can't figure out how to get loud people up on the stage.
+[56:09.240 --> 56:15.280]  So back to the questions, will AI lead to UBI, Casey Edwin, maybe it'll either lead
+[56:15.280 --> 56:20.760]  to UBI and utopia or panopticon that we can never escape from because the models that
+[56:20.760 --> 56:28.120]  were previously used to focus our attention and service ads will be used to control our
+[56:28.120 --> 56:29.120]  brains instead.
+[56:29.120 --> 56:30.920]  And they're really good at that.
+[56:30.920 --> 56:35.960]  So, you know, no big deal, just two forks in the road.
+[56:35.960 --> 56:39.960]  That's the way we kind of do.
+[56:39.960 --> 56:43.240]  Um, let's see.
+[56:43.240 --> 56:44.240]  Who's next?
+[56:44.240 --> 56:47.280]  Joe Rogan, when will we be able to generate games with AI?
+[56:47.280 --> 56:50.160]  You can already generate games with AI.
+[56:50.160 --> 56:54.280]  So the code models allow you to create basic games, but then we've had generative games
+[56:54.280 --> 56:55.640]  for many years already.
+[56:55.640 --> 57:02.320]  Um, so I'm just trying to figure out how to get people on stage or do this.
+[57:02.320 --> 57:04.600]  Maybe we don't.
+[57:04.600 --> 57:05.600]  Okay.
+[57:05.600 --> 57:11.160]  Um, Mars says, how's your faith influence your mission?
+[57:11.160 --> 57:15.680]  I mean, it's just like all faiths are the same.
+[57:15.680 --> 57:17.880]  Do you want to others as you'd have done unto yourself, right?
+[57:17.880 --> 57:20.800]  The golden rule, um, for all the stuff around there.
+[57:20.800 --> 57:24.840]  I think people forget that we are just trying to do our best.
+[57:24.840 --> 57:26.840]  Like it can lead to bad things though.
+[57:26.840 --> 57:32.880]  So Robert chief rabbi, Jonathan Sacks, sadly past very smart guy had this concept of altruistic
+[57:32.880 --> 57:36.820]  evil with people who tried to do good, can do the worst evil because they believe they're
+[57:36.820 --> 57:37.820]  doing good.
+[57:37.820 --> 57:41.120]  No one wants to be in our soul and bad, even if we have our arguments and it makes us forget
+[57:41.120 --> 57:42.120]  our humanity.
+[57:42.120 --> 57:47.080]  So I think again, like what I really want to focus on is this idea of public interest
+[57:47.080 --> 57:51.440]  and bring this technology to the masses because I don't want to have this world where I looked
+[57:51.440 --> 57:56.520]  at the future and there's this AI God that is controlled by a private enterprise.
+[57:56.520 --> 58:02.600]  Like that enterprise would be more powerful than any nation unelected and in control of
+[58:02.600 --> 58:03.600]  everything.
+[58:03.600 --> 58:05.560]  And that's not a future that I want from my children.
+[58:05.560 --> 58:10.340]  I think, um, because again, I would not want that done unto me and I think it should be
+[58:10.340 --> 58:13.760]  made available for people who have different viewpoints to me as well.
+[58:13.760 --> 58:17.000]  This is why, like I said, look, I know that there was a lot of tension over the weekend
+[58:17.000 --> 58:21.160]  and everything on the community, but we really shouldn't be the only community for this.
+[58:21.160 --> 58:24.280]  And we don't want to be the sole arbiter of everything here.
+[58:24.280 --> 58:27.800]  We're not open AI or deep mind or anyone like that.
+[58:27.800 --> 58:31.840]  We're really trying to just be the catalyst to build ecosystems where you can find your
+[58:31.840 --> 58:35.280]  own place, whether you agree with us or disagree with us.
+[58:35.280 --> 58:40.840]  Um, having said that, I mean like the stable diffusion hashtag has been taken over by wife
+[58:40.840 --> 58:44.000]  who diffusion, like big boobs.
+[58:44.000 --> 58:45.000]  It's fine.
+[58:45.000 --> 58:48.080]  Maybe just stick to the wife who diffusion tag, cause it's harder for me to find the
+[58:48.080 --> 58:50.680]  stable diffusion pictures in my own media now.
+[58:50.680 --> 58:55.640]  Um, so yeah, I think that also it'd be nice when people of other faiths or no faith can
+[58:55.640 --> 58:57.000]  actually talk together reasonably.
+[58:57.000 --> 59:00.440]  Um, and that's one of the reasons that we accelerated AR and faith.org.
+[59:00.440 --> 59:03.520]  Again, you don't have to agree with it, but just realize these are some of the stories
+[59:03.520 --> 59:08.440]  that people subscribe to and everyone's got their own faith in something or other, literally
+[59:08.440 --> 59:09.440]  not.
+[59:09.440 --> 59:12.840]  Well, if he says, how are you going to train speed cost and TPUs versus a one hundreds
+[59:12.840 --> 59:17.600]  or the cost of switching TensorFlow from PyTorch to great, we have code that works on both.
+[59:17.600 --> 59:22.600]  And we have had great results on TPU V4s, the horizontal and vertical scaling works
+[59:22.600 --> 59:23.600]  really nicely.
+[59:23.600 --> 59:25.920]  And gosh, there is something called a V5 coming soon.
+[59:25.920 --> 59:27.480]  That'd be interesting.
+[59:27.480 --> 59:31.600]  Um, you will see models trained across a variety of different architectures and we're trying
+[59:31.600 --> 59:33.600]  just about all the top ones there.
+[59:33.600 --> 59:38.240]  Uh, Glincey says, does StabilityEye have plans to take on investors at any point or have
+[59:38.240 --> 59:39.240]  they already?
+[59:39.240 --> 59:40.240]  We have taken on investors.
+[59:40.240 --> 59:42.000]  There will be an announcement on that.
+[59:42.000 --> 59:45.480]  We have given up zero control and we will not give up any control.
+[59:45.480 --> 59:47.200]  I am very good at this.
+[59:47.200 --> 59:53.240]  Um, as I mentioned previously, the original stable diffusion model was financed by some
+[59:53.240 --> 59:56.280]  of the leading AI artists in the world and collectors.
+[59:56.280 --> 59:58.320]  And so, you know, we've been kind of community focused.
+[59:58.320 --> 01:00:03.360]  I wish that we could do a token sale or an IPO or something and be community focused,
+[01:00:03.360 --> 01:00:05.080]  but it just doesn't fit with regulations right now.
+[01:00:05.080 --> 01:00:09.080]  So anything that I can say is that we will and will always be independent.
+[01:00:09.080 --> 01:00:14.960]  Uh, no one's going to tell us what to do because otherwise we can't pivot to waifus if it turns
+[01:00:14.960 --> 01:00:17.520]  out that waifu diffusion is the next big thing.
+[01:00:17.520 --> 01:00:18.520]  All right.
+[01:00:18.520 --> 01:00:20.600]  Um, who have we got now?
+[01:00:20.600 --> 01:00:24.680]  We've got Notepad.
+[01:00:24.680 --> 01:00:28.360]  How much of an impact do you think AI will impact neural implant cybernetics?
+[01:00:28.360 --> 01:00:34.000]  It appears one of the limiting facts of cybernetics is the input method, not necessarily the hardware.
+[01:00:34.000 --> 01:00:35.000]  I don't know.
+[01:00:35.000 --> 01:00:39.200]  I guess you have no idea too much, I never thought about that.
+[01:00:39.200 --> 01:00:44.560]  Um, yeah, like I think that it's probably required for the interface layer.
+[01:00:44.560 --> 01:00:48.400]  The way that you should look at this technology is that you've got the highest structure to
+[01:00:48.400 --> 01:00:50.480]  the unstructured world, right?
+[01:00:50.480 --> 01:00:52.400]  And this acts as a bridge between it.
+[01:00:52.400 --> 01:00:57.720]  So like with stable diffusion, you can communicate in images that you couldn't do otherwise.
+[01:00:57.720 --> 01:01:01.640]  Cybernetics is about the kind of interface layer between humans and computers.
+[01:01:01.640 --> 01:01:05.160]  And again, you're removing that in one direction and the cybernetics allow you to remove it
+[01:01:05.160 --> 01:01:06.160]  in the other direction.
+[01:01:06.160 --> 01:01:08.360]  So you're going to have much better information flow.
+[01:01:08.360 --> 01:01:11.400]  So I think it will have a massive impact from these foundation devices.
+[01:01:11.400 --> 01:01:13.240]  All right.
+[01:01:13.240 --> 01:01:18.560]  Um, over my AI cannot make cyberpunk 2077 not broken now.
+[01:01:18.560 --> 01:01:24.320]  I was the largest investor in CD project at one point and it is a crying shame what happened
+[01:01:24.320 --> 01:01:25.320]  there.
+[01:01:25.320 --> 01:01:28.440]  Uh, I have a lot of viewpoints on that one.
+[01:01:28.440 --> 01:01:33.200]  Um, but you know, we can create like cyberpunk worlds of our own in what did I say?
+[01:01:33.200 --> 01:01:34.200]  Five years.
+[01:01:34.200 --> 01:01:35.200]  Yeah.
+[01:01:35.200 --> 01:01:36.200]  Not Elon Musk in there.
+[01:01:36.200 --> 01:01:38.800]  So that's going to be pretty exciting.
+[01:01:38.800 --> 01:01:43.000]  Um, do what is next?
+[01:01:43.000 --> 01:01:48.080]  Uh, are you guys sure you guys planning on creating any hardware devices?
+[01:01:48.080 --> 01:01:51.120]  So we can see more oriented one, which has AI as OS.
+[01:01:51.120 --> 01:01:55.880]  Uh, we have been looking into customized ones.
+[01:01:55.880 --> 01:02:01.680]  Um, so some of the kind of edge architecture, but it won't be for a few years on the AI
+[01:02:01.680 --> 01:02:02.680]  side.
+[01:02:02.680 --> 01:02:05.120]  Actually, that will be, it'll probably be towards the next year because we've got that
+[01:02:05.120 --> 01:02:06.520]  on our tablets.
+[01:02:06.520 --> 01:02:10.640]  So we've got basically a fully integrated stack or tablets for education, healthcare,
+[01:02:10.640 --> 01:02:11.640]  and others.
+[01:02:11.640 --> 01:02:13.960]  And again, we were trying to open source as much as possible.
+[01:02:13.960 --> 01:02:19.360]  So looking to risk five and alternative architectures there, um, probably announcement there in
+[01:02:19.360 --> 01:02:25.840]  Q1, I think, um, anything specific you'd like to see out of the community I'm at?
+[01:02:25.840 --> 01:02:28.960]  I just like people to be nice to each other, right?
+[01:02:28.960 --> 01:02:31.440]  Like communities are hard.
+[01:02:31.440 --> 01:02:32.840]  It's hard to scale community.
+[01:02:32.840 --> 01:02:38.320]  Like humans are designed for one to 150 and what happens is that as we scale communities
+[01:02:38.320 --> 01:02:45.080]  bigger than that, this dark monster of our being, Moloch, kind of comes out.
+[01:02:45.080 --> 01:02:49.880]  People get like really angsty and there's always going to be education, there's always
+[01:02:49.880 --> 01:02:50.880]  going to be drama.
+[01:02:50.880 --> 01:02:54.120]  How many communities do you know that aren't drama and like, just consider what your aunts
+[01:02:54.120 --> 01:02:55.980]  do and they chat all the time.
+[01:02:55.980 --> 01:02:56.980]  It's all kind of drama.
+[01:02:56.980 --> 01:03:02.640]  Um, I like to focus on being positive and constructive as much as possible and acknowledging
+[01:03:02.640 --> 01:03:04.200]  that everyone is bored humans.
+[01:03:04.200 --> 01:03:06.640]  But again, sometimes you make tough decisions.
+[01:03:06.640 --> 01:03:08.200]  I made a tough decision this weekend.
+[01:03:08.200 --> 01:03:09.200]  It might be right.
+[01:03:09.200 --> 01:03:13.620]  It might be wrong, but you know, it's what I thought was best for the community.
+[01:03:13.620 --> 01:03:17.080]  We wanted to have checks and balances and things, but it's a work in progress.
+[01:03:17.080 --> 01:03:23.200]  Like I don't know how many people we've got in the community right now, um, like 60,000
+[01:03:23.200 --> 01:03:24.200]  or something like that.
+[01:03:24.200 --> 01:03:32.480]  Um, that's a lot of people and you know, I think it's, um, 78,000, that's a lot of fricking
+[01:03:32.480 --> 01:03:33.480]  people.
+[01:03:33.480 --> 01:03:38.560]  That's like a small town in the U S or like a city in Finland or something like that.
+[01:03:38.560 --> 01:03:39.560]  Right.
+[01:03:39.560 --> 01:03:44.920]  Um, so yeah, I just like people to be excellent to each other and Mr. M says, how are you
+[01:03:44.920 --> 01:03:45.920]  Ahmad?
+[01:03:45.920 --> 01:03:47.080]  I'm a bit tired.
+[01:03:47.080 --> 01:03:52.000]  Back in London for the first time in a long time, I was traveling, trying to get the education
+[01:03:52.000 --> 01:03:53.000]  thing set up.
+[01:03:53.000 --> 01:03:54.800]  There's a stability Africa set up as well.
+[01:03:54.800 --> 01:03:59.080]  Um, there's some work that we're doing in Lebanon, which unfortunately is really bad.
+[01:03:59.080 --> 01:04:03.560]  Um, I said stability does a lot more than image and it's just been a bit of a stretch
+[01:04:03.560 --> 01:04:05.640]  even now with a hundred people.
+[01:04:05.640 --> 01:04:08.580]  But the reason that we're doing everything so aggressively is cause you kind of have
+[01:04:08.580 --> 01:04:13.480]  to, um, because there's just a lot of unfortunateness in the world.
+[01:04:13.480 --> 01:04:17.080]  And I think you'd feel worse about yourself if you don't have to.
+[01:04:17.080 --> 01:04:22.760]  And there's an interesting piece I read recently, um, it's like, I know Simon freed, uh, FTX,
+[01:04:22.760 --> 01:04:24.560]  you know, he's got this thing about effective altruism.
+[01:04:24.560 --> 01:04:26.940]  He talks about this thing of expected utility.
+[01:04:26.940 --> 01:04:28.440]  How much impact can you make on the world?
+[01:04:28.440 --> 01:04:29.600]  And you have to make big bets.
+[01:04:29.600 --> 01:04:31.000]  So I made some really big bets.
+[01:04:31.000 --> 01:04:33.640]  I put all my money into fricking GPU's.
+[01:04:33.640 --> 01:04:35.800]  I really created together a team.
+[01:04:35.800 --> 01:04:41.160]  I got government international backing and a lot of stuff because I think you, everyone
+[01:04:41.160 --> 01:04:45.120]  has agency and you have to figure out where you can add the most agency and accelerate
+[01:04:45.120 --> 01:04:46.120]  things up there.
+[01:04:46.120 --> 01:04:50.480]  Uh, we have to bring in the best systems and we've built this multivariate system with
+[01:04:50.480 --> 01:04:55.460]  multiple communities and now we're doing joint ventures in every single country because we
+[01:04:55.460 --> 01:04:57.240]  think that is a whole new world.
+[01:04:57.240 --> 01:05:01.880]  Again, like there's another great piece Sequoia did recently about generative AI being a whole
+[01:05:01.880 --> 01:05:03.360]  new world that will create trillions.
+[01:05:03.360 --> 01:05:06.300]  We're at this tipping point right now.
+[01:05:06.300 --> 01:05:09.280]  And so I think unfortunately you've got to work hard to do that because it's a once in
+[01:05:09.280 --> 01:05:10.280]  a lifetime opportunity.
+[01:05:10.280 --> 01:05:14.440]  Just like everyone in this community here has a once in a lifetime opportunity.
+[01:05:14.440 --> 01:05:18.800]  You know about this technology that how many people in your community know about now?
+[01:05:18.800 --> 01:05:22.680]  Everyone in the world, everyone that you know will be using this in a few years and no one
+[01:05:22.680 --> 01:05:28.000]  knows the way it's going to go.
+[01:05:28.000 --> 01:05:32.880]  Forced to feel and communities, what's a good way to handle possible tribalism, extremism?
+[01:05:32.880 --> 01:05:38.480]  So if you Google me and me, my name, you'll see me writing in the wall street journal
+[01:05:38.480 --> 01:05:41.120]  and Reuters and all sorts of places about counter extremism.
+[01:05:41.120 --> 01:05:45.800]  It's one of my expert topics and unfortunately it's difficult with the social media echo
+[01:05:45.800 --> 01:05:50.720]  changers to kind of get out of that and you find people going in loops because sometimes
+[01:05:50.720 --> 01:05:51.720]  things aren't fair.
+[01:05:51.720 --> 01:05:54.240]  Like, you know, again, let's take our community.
+[01:05:54.240 --> 01:05:57.800]  For example, this weekend actions were taken, you know, the banning that we could sit down
+[01:05:57.800 --> 01:05:58.800]  fair.
+[01:05:58.800 --> 01:06:04.720]  And again, that's understandable because it's not a cut and dry, easy decision.
+[01:06:04.720 --> 01:06:06.860]  You had kind of the discussions going on loop.
+[01:06:06.860 --> 01:06:10.060]  You had people saying some really unpleasant things, you know, some of the stuff made me
+[01:06:10.060 --> 01:06:13.980]  kind of sad because I was exhausted and you know, people questioning my motivations and
+[01:06:13.980 --> 01:06:14.980]  things like that.
+[01:06:14.980 --> 01:06:20.680]  And again, it's your prerogative, but as a community member myself, it made me feel bad.
+[01:06:20.680 --> 01:06:23.600]  I think the only way that you can really fight extremism and some things like that is to
+[01:06:23.600 --> 01:06:26.080]  have checks and balances and processes in place.
+[01:06:26.080 --> 01:06:27.760]  The mod team have been working super hard on that.
+[01:06:27.760 --> 01:06:32.840]  I think this community has been really well behaved, like, you know, it was super difficult
+[01:06:32.840 --> 01:06:36.780]  and some of the community members got really burned out during the beta because they had
+[01:06:36.780 --> 01:06:39.280]  to put up with a lot of shit, to put it quite simply.
+[01:06:39.280 --> 01:06:44.000]  But getting people on the same page, getting a common mission and kind of having a degree
+[01:06:44.000 --> 01:06:47.880]  of psychological safety where people can say what they want, which is really difficult
+[01:06:47.880 --> 01:06:50.080]  in a community where you don't know where everyone is.
+[01:06:50.080 --> 01:06:53.040]  That's the only way that you can get around some of this extremism and some of this hate
+[01:06:53.040 --> 01:06:54.040]  element.
+[01:06:54.040 --> 01:06:55.520]  Again, I think the common mission is the main thing.
+[01:06:55.520 --> 01:06:59.560]  I think everyone here is in a common mission to build cool shit, create cool shit.
+[01:06:59.560 --> 01:07:05.440]  And you know, like I said, the tagline kind of create, don't hate, right?
+[01:07:05.440 --> 01:07:08.120]  People said, Emad, in real meetup for us members.
+[01:07:08.120 --> 01:07:12.640]  Yeah, we're going to have little stability societies all over the place and hackathons.
+[01:07:12.640 --> 01:07:15.880]  We're just putting an events team together to really make sure they're well organized
+[01:07:15.880 --> 01:07:17.800]  and not our usual disorganized shambles.
+[01:07:17.800 --> 01:07:23.180]  But you know, feel free to do it yourselves, you know, like, we're happy to amplify it
+[01:07:23.180 --> 01:07:25.680]  when community members take that forward.
+[01:07:25.680 --> 01:07:28.840]  And the things we're trying to encourage are going to be like artistic oriented things,
+[01:07:28.840 --> 01:07:32.240]  get into the real world, go and see galleries, go and understand things, go and paint, that's
+[01:07:32.240 --> 01:07:34.040]  good painting lessons, etc.
+[01:07:34.040 --> 01:07:41.320]  As well as hackathons and all this more techy stuff, techy kind of stuff.
+[01:07:41.320 --> 01:07:44.640]  You can be part of the events team by messaging careers at stability.ai.
+[01:07:44.640 --> 01:07:48.640]  Again, we will have a careers page up soon with all the roles, we'll probably go to like
+[01:07:48.640 --> 01:07:52.280]  250 people in the next few months.
+[01:07:52.280 --> 01:07:57.080]  And yeah, it's going very fast.
+[01:07:57.080 --> 01:07:58.960]  Protrins says, any collaboration in China yet?
+[01:07:58.960 --> 01:08:02.500]  Can we use Chinese clip to guide the current one or do we need to retrain the model, embed
+[01:08:02.500 --> 01:08:04.440]  the language clip into the model?
+[01:08:04.440 --> 01:08:09.000]  I think you'll see a Chinese variant of stable diffusion coming out very soon.
+[01:08:09.000 --> 01:08:11.180]  Can't remember what the current status is.
+[01:08:11.180 --> 01:08:15.200]  We do have a lot of plans in China, we're talking to some of the coolest entities there.
+[01:08:15.200 --> 01:08:20.880]  As you know, it's difficult due to sanctions and the Chinese market, but it's been heartening
+[01:08:20.880 --> 01:08:23.720]  to see the community expand in China so quickly.
+[01:08:23.720 --> 01:08:32.560]  And again, as it's open source, it didn't need us to go in there to kind of do that.
+[01:08:32.560 --> 01:08:37.400]  I'd say that on the community side, we're going to try and accelerate a lot of the engagement
+[01:08:37.400 --> 01:08:38.400]  things.
+[01:08:38.400 --> 01:08:44.760]  I think that the Doctor Fusion one's ongoing, you know, shout out to Dreitweik for Nerf
+[01:08:44.760 --> 01:08:49.720]  Gun and Almost 80 for kind of the really amazing kind of output there.
+[01:08:49.720 --> 01:08:54.120]  I don't think we do enough to appreciate the things that you guys post up and simplify
+[01:08:54.120 --> 01:08:55.120]  them.
+[01:08:55.120 --> 01:08:56.440]  And I really hope we can do better in future.
+[01:08:56.440 --> 01:08:59.580]  The mod team are doing as much as they can right now.
+[01:08:59.580 --> 01:09:05.120]  And again, will we try to amplify the voices of the artistic members of our community as
+[01:09:05.120 --> 01:09:12.680]  well, more and more, and give support through grants, credits, events and other things as
+[01:09:12.680 --> 01:09:15.680]  we go forward.
+[01:09:15.680 --> 01:09:20.040]  All right, who's next?
+[01:09:20.040 --> 01:09:21.040]  We've got Almark.
+[01:09:21.040 --> 01:09:24.920]  Is there going to be a time when we have AI friends we create ourselves, personal companions
+[01:09:24.920 --> 01:09:29.200]  speaking to us via our monitor, much of the same way a webcam call is done, high quality,
+[01:09:29.200 --> 01:09:30.200]  et cetera?
+[01:09:30.200 --> 01:09:34.680]  Yes, you will have her from Joachim Phoenix's movie, Her, with Scarlett Johansson.
+[01:09:34.680 --> 01:09:35.680]  Disparic in your ear.
+[01:09:35.680 --> 01:09:40.680]  Hopefully she won't dub you at the end, but you can't guarantee that.
+[01:09:40.680 --> 01:09:48.160]  If you look at some of the text to speech being emotionally resonant, then, you know,
+[01:09:48.160 --> 01:09:50.420]  it's kind of creepy, but it's very immersive.
+[01:09:50.420 --> 01:09:52.800]  So I think voice will definitely be there first.
+[01:09:52.800 --> 01:09:56.160]  Again, try talking to a character.AI model and you'll see how good some of these chat
+[01:09:56.160 --> 01:09:57.160]  bots can be.
+[01:09:57.160 --> 01:09:59.040]  There are much better ones coming.
+[01:09:59.040 --> 01:10:06.440]  We've seen this already with Xiaoshi in China, so Alice, which a lot of people use for mental
+[01:10:06.440 --> 01:10:09.480]  health support and then Elisa in Iran.
+[01:10:09.480 --> 01:10:12.600]  So millions of people use these right now as their friends.
+[01:10:12.600 --> 01:10:15.080]  Again, it's good to have friends.
+[01:10:15.080 --> 01:10:20.080]  Again, we recommend sevencups.com if you want to have someone to talk to, but it's not the
+[01:10:20.080 --> 01:10:24.440]  same person each time or, you know, like just going out and making friends, but it's not
+[01:10:24.440 --> 01:10:25.440]  easy.
+[01:10:25.440 --> 01:10:28.960]  I think this will help a lot of people with their mental health, et cetera.
+[01:10:28.960 --> 01:10:32.280]  He basically says, how early do you think we are in this AI wave that's emerging?
+[01:10:32.280 --> 01:10:33.480]  How fast it's changing?
+[01:10:33.480 --> 01:10:35.360]  Sometimes it's hard to feel FOMO.
+[01:10:35.360 --> 01:10:38.440]  It is actually literally exponential.
+[01:10:38.440 --> 01:10:45.660]  So like when you do a log normal return of the number of AI papers that are coming out,
+[01:10:45.660 --> 01:10:47.240]  it's a straight line.
+[01:10:47.240 --> 01:10:50.040]  So it's literally an exponential kind of curve.
+[01:10:50.040 --> 01:10:51.780]  Like I can't keep up with it.
+[01:10:51.780 --> 01:10:53.040]  No one can keep up with it.
+[01:10:53.040 --> 01:10:54.440]  We have no idea what's going on.
+[01:10:54.440 --> 01:10:58.760]  And the technology advances like there's that meme.
+[01:10:58.760 --> 01:11:02.680]  Like one hour here is seven years on earth.
+[01:11:02.680 --> 01:11:07.480]  Like from interstellar, that's how life kind of feels like I was on top of it for a few
+[01:11:07.480 --> 01:11:11.400]  years and now it's like, I didn't even know what's happening.
+[01:11:11.400 --> 01:11:12.800]  Here we go.
+[01:11:12.800 --> 01:11:17.920]  It's a doubling rate of 24 months.
+[01:11:17.920 --> 01:11:20.140]  It's a bit insane.
+[01:11:20.140 --> 01:11:21.140]  So yeah.
+[01:11:21.140 --> 01:11:22.960]  As wonky says any comments on Harmony AI?
+[01:11:22.960 --> 01:11:26.000]  How close do you think we are to having music sound AI with the same accessibility afforded
+[01:11:26.000 --> 01:11:27.360]  by stable diffusion?
+[01:11:27.360 --> 01:11:31.520]  Now, Harmony has done a slightly different model of releasing dance diffusion gradually.
+[01:11:31.520 --> 01:11:37.680]  We're putting it out there as we license more and more data sets, some of the O and X and
+[01:11:37.680 --> 01:11:39.280]  other work that's going on.
+[01:11:39.280 --> 01:11:43.840]  I mean, basically considering that you're at the VQGAN moment right now, if you guys
+[01:11:43.840 --> 01:11:50.080]  can remember that from all of a year ago or 18 months ago, it'll go exponential again
+[01:11:50.080 --> 01:11:55.720]  because the amount of stuff here is going to go crazy.
+[01:11:55.720 --> 01:12:00.480]  Like generative AI, look at that Sequoia link I posted is going to be the biggest investment
+[01:12:00.480 --> 01:12:05.000]  theme of the next few years and literally tens of billions of dollars are going to be
+[01:12:05.000 --> 01:12:09.100]  deployed like probably next year alone into this sector.
+[01:12:09.100 --> 01:12:13.360]  And most of it will go to stupid stuff, some will go to good stuff, most will go to stupid
+[01:12:13.360 --> 01:12:17.960]  stuff but a decent amount will go to forwarding music in particular because the interesting
+[01:12:17.960 --> 01:12:22.760]  thing about musicians is that they're already digitally intermediated versus artists who
+[01:12:22.760 --> 01:12:23.760]  are not.
+[01:12:23.760 --> 01:12:27.480]  So artists, some of them use Procreate and Photoshop, a lot of them don't.
+[01:12:27.480 --> 01:12:32.440]  But musicians use synthesizers and DSPs and software all the time.
+[01:12:32.440 --> 01:12:34.960]  So it's a lot easier to introduce some of these things to their workflow and then make
+[01:12:34.960 --> 01:12:37.040]  it accessible to the people.
+[01:12:37.040 --> 01:12:40.200]  Yeah, musicians just want more snares.
+[01:12:40.200 --> 01:12:41.560]  You see the drum bass guy there.
+[01:12:41.560 --> 01:12:45.920]  Safety mark, when do we launch the full Dream Studio and will it be able to do animations?
+[01:12:45.920 --> 01:12:49.380]  If so, do you think it'll be more cost effective than using Colab?
+[01:12:49.380 --> 01:12:53.640]  Very soon, yes, and yes, there we go.
+[01:12:53.640 --> 01:12:55.680]  Keep an eye here.
+[01:12:55.680 --> 01:13:01.480]  Then the next announcements won't be hopefully quite so controversial, but instead very exciting,
+[01:13:01.480 --> 01:13:04.480]  shall we say.
+[01:13:04.480 --> 01:13:09.240]  I'm running out of energy.
+[01:13:09.240 --> 01:13:12.240]  So I think we're gonna take three more questions and then I'm going to be done.
+[01:13:12.240 --> 01:13:14.520]  And then I'm going to go and have a nap.
+[01:13:14.520 --> 01:13:18.900]  Do you think an AI therapist could be something to address the lack of access to qualified
+[01:13:18.900 --> 01:13:21.600]  mental health experts, Racer X?
+[01:13:21.600 --> 01:13:25.880]  I would rather have volunteers augmented by that.
+[01:13:25.880 --> 01:13:31.160]  So again, with 7Cups.com, we have 480,000 volunteers helping 78 million people each
+[01:13:31.160 --> 01:13:35.960]  month train on active listening that hopefully will augment by AI as we help them build their
+[01:13:35.960 --> 01:13:36.960]  models.
+[01:13:36.960 --> 01:13:45.040]  AI can only go so far, but the edge cases and the failure cases I think are too strong.
+[01:13:45.040 --> 01:13:47.400]  And I think again, a lot of care needs to be taken around that because people's mental
+[01:13:47.400 --> 01:13:48.400]  health is super important.
+[01:13:48.400 --> 01:13:55.920]  At the same time, we're trialing art therapy with stable diffusion as a mental health adjunct
+[01:13:55.920 --> 01:14:02.280]  in various settings from survivors of domestic violence to veterans and others.
+[01:14:02.280 --> 01:14:07.120]  And I think it will have amazing results because there's nothing quite like the magic of using
+[01:14:07.120 --> 01:14:08.120]  this technology.
+[01:14:08.120 --> 01:14:14.320]  And I think, again, magic is kind of the operative word here that we have.
+[01:14:14.320 --> 01:14:20.000]  That's how you know technology is cool.
+[01:14:20.000 --> 01:14:22.000]  There's a nice article on magic.
+[01:14:22.000 --> 01:14:24.000]  Two more questions.
+[01:14:24.000 --> 01:14:31.840]  Ah, Disco, what are your thoughts on Buckminster Fuller's work and his thoughts on how to build
+[01:14:31.840 --> 01:14:33.080]  a world that doesn't destroy himself?
+[01:14:33.080 --> 01:14:35.760]  To be honest, I'm not familiar with it.
+[01:14:35.760 --> 01:14:39.100]  But I think the world is destroying itself at the moment and we've got to do everything
+[01:14:39.100 --> 01:14:40.100]  we can to stop it.
+[01:14:40.100 --> 01:14:43.960]  Again, I mentioned earlier, one of the nice frames I've thought about this is really thinking
+[01:14:43.960 --> 01:14:46.640]  about the rights of children because they can't defend themselves.
+[01:14:46.640 --> 01:14:50.440]  And are we doing our big actions with a view to the rights of those children?
+[01:14:50.440 --> 01:14:53.780]  I think that children have a right to this technology and that's every child, not just
+[01:14:53.780 --> 01:14:55.040]  ones in the West.
+[01:14:55.040 --> 01:14:58.740]  And that's why I think we need to create personalized systems for them and infrastructure so they
+[01:14:58.740 --> 01:15:02.080]  can go up and kind of get out.
+[01:15:02.080 --> 01:15:07.240]  All right, Ira, how will generative models and unlimited custom tailored content to an
+[01:15:07.240 --> 01:15:10.160]  audience of one impact how we value content?
+[01:15:10.160 --> 01:15:13.640]  The paradox of choice is more options tend to make people more anxious.
+[01:15:13.640 --> 01:15:15.840]  And we get infinite choice right now.
+[01:15:15.840 --> 01:15:19.840]  How do we get adapted to our new god-like powers in this hedonic treadmill?
+[01:15:19.840 --> 01:15:21.840]  It's a net positive for humanity.
+[01:15:21.840 --> 01:15:25.680]  How much consideration are we given to potential bad outcomes?
+[01:15:25.680 --> 01:15:30.440]  I think this is kind of one of those interesting things whereby, like I was talking to Alexander
+[01:15:30.440 --> 01:15:35.560]  Wang at scale about this and he posted something on everyone being in their own echo chambers
+[01:15:35.560 --> 01:15:40.600]  as you basically get hedonic to death, entertained to death.
+[01:15:40.600 --> 01:15:43.760]  Kind of like this WALL-E, you remember the fat guys with their VR headsets?
+[01:15:43.760 --> 01:15:44.760]  Yeah, kind of like that.
+[01:15:44.760 --> 01:15:45.760]  I don't think that's the case.
+[01:15:45.760 --> 01:15:49.720]  I think people will use this to create stories because we're prosocial narrative creatures
+[01:15:49.720 --> 01:15:53.840]  and the n equals one echo chambers are a result of the existing internet without intelligence
+[01:15:53.840 --> 01:15:54.920]  on the edge.
+[01:15:54.920 --> 01:16:01.040]  We want to communicate unless you have Asperger's like me and social communication disorder,
+[01:16:01.040 --> 01:16:05.960]  in which case communicating is actually quite hard, but we learned how to do it.
+[01:16:05.960 --> 01:16:08.840]  And I think, again, we're prosocial creatures that love seeing people listen to what we
+[01:16:08.840 --> 01:16:09.840]  do.
+[01:16:09.840 --> 01:16:15.000]  You've got likes and, you know, you've got this kind of hook model where you input something
+[01:16:15.000 --> 01:16:20.600]  you're triggered and then you wait for verification and validation.
+[01:16:20.600 --> 01:16:24.400]  So I think actually this will allow us to create our stories better and create a more
+[01:16:24.400 --> 01:16:29.320]  egalitarian internet because right now the internet itself is this intelligence amplifier
+[01:16:29.320 --> 01:16:33.080]  that means that some of the voices are more heard than others because some people know
+[01:16:33.080 --> 01:16:36.720]  how to use the internet and they drown out those who do not and a lot of people don't
+[01:16:36.720 --> 01:16:40.000]  even have access to this, so yeah.
+[01:16:40.000 --> 01:16:50.520]  Alrighty, I am going to answer one more question because I'm tired now.
+[01:16:50.520 --> 01:16:55.280]  Ivy Dory, when do you think multi-models will emerge combining language, video and image?
+[01:16:55.280 --> 01:16:59.120]  I think they'll be here by Q1 of next year and they'll be good.
+[01:16:59.120 --> 01:17:03.020]  I think that by 2024 they'll be truly excellent.
+[01:17:03.020 --> 01:17:07.440]  You can look at the DeepMind Gato paper on the autoregression of different modalities
+[01:17:07.440 --> 01:17:10.440]  on reinforcement learning to see some of the potential on this.
+[01:17:10.440 --> 01:17:16.520]  So Gato is just a 1.3 billion parameter model that is a generalist agent.
+[01:17:16.520 --> 01:17:21.120]  As we've kind of showed by merging image and others, these things can cross-learn just
+[01:17:21.120 --> 01:17:25.000]  like humans and I think that's fascinating and that's why we have to create models for
+[01:17:25.000 --> 01:17:28.980]  every culture, for every country, for every individual so we can learn from the diversity
+[01:17:28.980 --> 01:17:33.240]  and plurality of humanity to create models that are aligned for us instead of against
+[01:17:33.240 --> 01:17:34.240]  us.
+[01:17:34.240 --> 01:17:38.280]  And I think that's much better than stack more layers and build giant freaking supercomputers
+[01:17:38.280 --> 01:17:41.040]  to train models to serve ads or whatever.
+[01:17:41.040 --> 01:17:43.680]  So with that, I bid you adieu.
+[01:17:43.680 --> 01:17:48.560]  My apologies that I didn't bring anyone to the stage, the whole team is kind of busy
+[01:17:48.560 --> 01:17:53.780]  right now and yeah, I am not good at technology right now and my brain is dead state.
+[01:17:53.780 --> 01:17:56.800]  But hopefully it won't be too long until we kind of connect again, there will be a lot
+[01:17:56.800 --> 01:18:00.040]  more community events coming up and engagement.
+[01:18:00.040 --> 01:18:04.640]  Again I think it's been seven weeks, feels like seven years or seven minutes, I'm not
+[01:18:04.640 --> 01:18:08.000]  even sure anymore, like I think we made a time machine.
+[01:18:08.000 --> 01:18:11.400]  But hopefully we can start building stuff a lot more structured.
+[01:18:11.400 --> 01:18:28.080]  So thanks all and you know, stay cool, rock on, bye.

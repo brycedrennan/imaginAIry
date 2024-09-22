@@ -1,0 +1,1299 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../docs/Python/WeightedPrompt/">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.36">
+    
+    
+      
+        <title>Changelog - ImaginAIry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.06209087.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="cyan" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="ImaginAIry" class="md-header__button md-logo" aria-label="ImaginAIry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ImaginAIry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="ImaginAIry" class="md-nav__button md-logo" aria-label="ImaginAIry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    ImaginAIry
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Docs
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Docs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CLI
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            CLI
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/imagine/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/videogen/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create Video
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/edit/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Edit Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/upscale/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Upscale Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/colorize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Colorize Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/CLI/describe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Describe Image
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Python
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Python
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/imagine/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    imagine()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/imagine-image-files/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    imagine_image_files()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/generate-video/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    generate_video()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/colorize-img/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    colorize_img()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/upscale/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    upscale()
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/ImaginePrompt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ImaginePrompt
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/ControlInput/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ControlInput
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/LazyLoadingImage/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LazyLoadingImage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/Python/WeightedPrompt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    WeightedPrompt
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      ChangeLog
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      ChangeLog
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  <h1>Changelog</h1>
+
+<h2 id="changelog">ChangeLog</h2>
+<p><strong>14.3.0</strong></p>
+<ul>
+<li>feature: integrates <a href="https://github.com/chaiNNer-org/spandrel">spandrel</a> for upscaling </li>
+<li>fix: allow loading sdxl models from local paths. </li>
+</ul>
+<p><strong>14.2.0</strong>
+- 🎉 feature: add image prompt support via <code>--image-prompt</code> and <code>--image-prompt-strength</code> (IPAdapter)</p>
+<p><strong>14.1.1</strong>
+- tests: add installation tests for windows, mac, and conda
+- fix: dependency issues</p>
+<p><strong>14.1.0</strong></p>
+<ul>
+<li>🎉 feature: make video generation smooth by adding frame interpolation</li>
+<li>feature: SDXL weights in the compvis format can now be used</li>
+<li>feature: allow video generation at any size specified by user</li>
+<li>feature: video generations output in "bounce" format</li>
+<li>feature: choose video output format: mp4, webp, or gif</li>
+<li>feature: fix random seed handling in video generation</li>
+<li>docs: auto-publish docs on push to master</li>
+<li>build: remove imageio dependency</li>
+<li>build: vendorize facexlib so we don't install its unneeded dependencies</li>
+</ul>
+<p><strong>14.0.4</strong></p>
+<ul>
+<li>docs: add a documentation website at https://brycedrennan.github.io/imaginAIry/</li>
+<li>build: remove fairscale dependency</li>
+<li>fix: video generation was broken</li>
+</ul>
+<p><strong>14.0.3</strong></p>
+<ul>
+<li>fix: several critical bugs with package</li>
+<li>tests: add a wheel smoketest to detect these issues in the future</li>
+</ul>
+<p><strong>14.0.0</strong></p>
+<ul>
+<li>🎉 video generation using <a href="https://github.com/Stability-AI/generative-models">Stable Video Diffusion</a></li>
+<li>add <code>--videogen</code> to any image generation to create a short video from the generated image</li>
+<li>or use <code>aimg videogen</code> to generate a video from an image</li>
+<li>🎉 SDXL (Stable Diffusion Extra Large) models are now supported.</li>
+<li>try <code>--model opendalle</code> or <code>--model sdxl</code></li>
+<li>inpainting and controlnets are not yet supported for SDXL</li>
+<li>🎉 imaginairy is now backed by the <a href="https://github.com/finegrain-ai/refiners">refiners library</a></li>
+<li>This was a huge rewrite which is why some features are not yet supported.  On the plus side, refiners supports
+cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.</li>
+<li><a href="https://github.com/SusungHong/Self-Attention-Guidance">self-attention guidance</a> which makes details of images more accurate</li>
+<li>🎉 feature: larger image generations now work MUCH better and stay faithful to the same image as it looks at a smaller size. 
+For example <code>--size 720p --seed 1</code> and <code>--size 1080p --seed 1</code> will produce the same image for SD15</li>
+<li>🎉 feature: loading diffusers based models now supported. Example <code>--model https://huggingface.co/ainz/diseny-pixar --model-architecture sd15</code></li>
+<li>🎉 feature: qrcode controlnet!</li>
+<li>feature: generate word images automatically. great for use with qrcode controlnet: <code>imagine "flowers" --gif --size hd --control-mode qrcode --control-image "textimg='JOY' font_color=white background_color=gray" -r 10</code></li>
+<li>feature: opendalle 1.1 added. <code>--model opendalle</code> to use it</li>
+<li>feature: added <code>--size</code> parameter for more intuitive sizing (e.g. 512, 256x256, 4k, uhd, FHD, VGA, etc)</li>
+<li>feature: detect if wrong torch version is installed and provide instructions on how to install proper version</li>
+<li>feature: better logging output: color, error handling</li>
+<li>feature: support for pytorch 2.0</li>
+<li>feature: command line output significantly cleaned up and easier to read</li>
+<li>feature: adds --composition-strength parameter to cli (#416)</li>
+<li>performance: lower memory usage for upscaling</li>
+<li>performance: lower memory usage at startup</li>
+<li>performance: add sliced attention to several models (lowers memory use)</li>
+<li>fix: simpler memory management that avoids some of the previous bugs</li>
+<li>deprecated: support for python 3.8, 3.9</li>
+<li>deprecated: support for torch 1.13</li>
+<li>deprecated: support for Stable Diffusion versions 1.4, 2.0, and 2.1</li>
+<li>deprecated: image training</li>
+<li>broken: samplers other than ddim</li>
+</ul>
+<p><strong>13.2.1</strong></p>
+<ul>
+<li>fix: pydantic models for http server working now. Fixes #380</li>
+<li>fix: install triton so annoying message is gone</li>
+</ul>
+<p><strong>13.2.0</strong></p>
+<ul>
+<li>fix: allow tile_mode to be set to True or False for backward compatibility</li>
+<li>fix: various pydantic issues have been resolved</li>
+<li>feature: switch to pydantic 2.3 (faster but was a pain to migrate)</li>
+</ul>
+<p><strong>13.1.0</strong></p>
+<ul>
+<li>feature: <em>api server now has feature parity with the python API</em>. View the docs at http://127.0.0.1:8000/docs after running <code>aimg server</code></li>
+<li><code>ImaginePrompt</code> is now a pydantic model and can thus be sent over the rest API</li>
+<li>images are expected in base64 string format</li>
+<li>fix: pin pydantic to 2.0 for now</li>
+<li>build: better python 3.11 incompatibility messaging (fixes #342)</li>
+<li>build: add minimum versions to requirements to improve dependency resolution</li>
+<li>docs: add a discord link</li>
+</ul>
+<p><strong>13.0.1</strong></p>
+<ul>
+<li>feature: show full stack trace when there is an api error</li>
+<li>fix: make lack of support for python 3.11 explicit</li>
+<li>fix: add some routes to match StableStudio routes</li>
+</ul>
+<p><strong>13.0.0</strong></p>
+<ul>
+<li>🎉 feature: multi-controlnet support. pass in multiple <code>--control-mode</code>, <code>--control-image</code>, and <code>--control-image-raw</code> arguments.</li>
+<li>🎉 feature: add colorization controlnet. improve <code>aimg colorize</code> command</li>
+<li>🎉🧪 feature: Graphical Web Interface <a href="https://github.com/Stability-AI/StableStudio">StableStudio</a>. run <code>aimg server</code> and visit http://127.0.0.1:8000/</li>
+<li>🎉🧪 feature: API server <code>aimg server</code> command. Runs a http webserver (not finished). After running, visit http://127.0.0.1:8000/docs for api.</li>
+<li>🎉🧪 feature: API support for <a href="https://github.com/Stability-AI/StableStudio">Stablity AI's new open-source Generative AI interface, StableStudio</a>.</li>
+<li>🎉🧪 feature: "better" memory management. If GPU is full, least-recently-used model is moved to RAM. I'm not confident this works well.</li>
+<li>feature: [disabled] inpainting controlnet can be used instead of finetuned inpainting model</li>
+<li>The inpainting controlnet doesn't work as well as the finetuned model</li>
+<li>feature: python interface allows configuration of controlnet strength</li>
+<li>feature: show full stack trace on error in cli</li>
+<li>fix: hide the "triton" error messages</li>
+<li>fix: package will not try to install xformers on <code>aarch64</code> machines. While this will allow the dockerfile to build on 
+MacOS M1, <a href="https://github.com/pytorch/pytorch/issues/81224#issuecomment-1499741152">torch will not be able to use the M1 when generating images.</a></li>
+<li>build: specify proper Pillow minimum version (fixes #325)</li>
+<li>build: check for torch version at runtime (fixes #329)</li>
+</ul>
+<p><strong>12.0.3</strong></p>
+<ul>
+<li>fix: exclude broken versions of timm as dependencies</li>
+</ul>
+<p><strong>12.0.2</strong></p>
+<ul>
+<li>fix: move normal map preprocessor for conda compatibility</li>
+</ul>
+<p><strong>12.0.1</strong></p>
+<ul>
+<li>fix: use correct device for depth images on mps. Fixes #300</li>
+</ul>
+<p><strong>12.0.0</strong></p>
+<ul>
+<li>🎉 feature: add "detail" control mode.  Add details to an image. Great for upscaling an image.</li>
+<li>🎉 feature: add "edit" control mode.  Edit images using text instructions with any SD 1.5 based model. Similar to instructPix2Pix.</li>
+<li>🎉 feature: add "shuffle" control mode. Image is generated from elements of control image. Similar to style transfer.</li>
+<li>🎉 feature: upgrade to <a href="https://github.com/lllyasviel/ControlNet-v1-1-nightly">controlnet 1.1</a></li>
+<li>🎉 fix: controlnet now works with all SD 1.5 based models</li>
+<li>feature: add openjourney-v4</li>
+<li>fix: raw control images are now properly loaded. fixes #296</li>
+<li>fix: filenames start numbers after latest image, even if some previous images were deleted</li>
+</ul>
+<p><strong>11.1.1</strong></p>
+<ul>
+<li>fix: fix globbing bug with input image path handling</li>
+<li>fix: changed sample to True to generate caption using blip model</li>
+</ul>
+<p><strong>11.1.0</strong></p>
+<ul>
+<li>docs: add some example use cases</li>
+<li>feature: add art-scene, desktop-background, interior-style, painting-style phraselists</li>
+<li>fix: compilation animations create normal slideshows instead of "bounces"</li>
+<li>fix: file globbing works in the interactive shell</li>
+<li>fix: fix model downloads that were broken by <a href="https://github.com/huggingface/transformers/commit/8f3b4a1d5bd97045541c43179efe8cd9c58adb76">library change in transformers 4.27.0</a></li>
+</ul>
+<p><strong>11.0.0</strong></p>
+<ul>
+<li>all these changes together mean same seed/sampler will not be guaranteed to produce same image (thus the version bump)</li>
+<li>fix: image composition didn't work very well. Works well now but probably very slow on non-cuda platforms</li>
+<li>fix: remove upscaler tiling message</li>
+<li>fix: improve k-diffusion sampler schedule. significantly improves image quality of default sampler</li>
+<li>fix: img2img was broken for all samplers except plms and ddim when init image strength was &gt;~0.25</li>
+</ul>
+<p><strong>10.2.0</strong></p>
+<ul>
+<li>feature: input raw control images (a pose, canny map, depth map, etc) directly using <code>--control-image-raw</code>
+   This is opposed to current behavior of extracting the control signal from an input image via <code>--control-image</code></li>
+<li>feature: <code>aimg model-list</code> command lists included models</li>
+<li>feature: system memory added to <code>aimg system-info</code> command</li>
+<li>feature: add <code>--fix-faces</code> options to <code>aimg upscale</code> command</li>
+<li>fix: add missing metadata attributes to generated images</li>
+<li>fix: image composition step was producing unnecessarily blurry images </li>
+<li>refactor: split <code>aimg</code> cli code into multiple files</li>
+<li>docs: pypi docs now link properly to github automatically</li>
+</ul>
+<p><strong>10.1.0</strong></p>
+<ul>
+<li>feature: 🎉 ControlNet integration!  Control the structure of generated images.</li>
+<li>feature: <code>aimg colorize</code> attempts to use controlnet to colorize images</li>
+<li>feature: <code>--caption-text</code> command adds text at the bottom left of an image</li>
+</ul>
+<p><strong>10.0.1</strong></p>
+<ul>
+<li>fix: <code>edit</code> was broken</li>
+</ul>
+<p><strong>10.0.0</strong></p>
+<ul>
+<li>feature: 🎉🎉 Make large images while retaining composition. Try <code>imagine "a flower" -w 1920 -h 1080</code></li>
+<li>fix: create compilations directory automatically</li>
+<li>perf: sliced encoding of images to latents (removes memory bottleneck)</li>
+<li>perf: use Silu for performance improvement over nonlinearity</li>
+<li>perf: <code>xformers</code> added as a dependency for linux and windows.  Gives a nice speed boost.</li>
+<li>perf: sliced attention now runs on MacOS. A typo prevented that from happening previously.</li>
+<li>perf: sliced latent decoding - now possible to make much bigger images. 3310x3310 on 11 GB GPU.</li>
+</ul>
+<p><strong>9.0.2</strong></p>
+<ul>
+<li>fix: edit interface was broken</li>
+</ul>
+<p><strong>9.0.1</strong></p>
+<ul>
+<li>fix: use entry_points for windows since setup.py scripts doesn't work on windows <a href="https://github.com/brycedrennan/imaginAIry/issues/239">#239</a></li>
+</ul>
+<p><strong>9.0.0</strong></p>
+<ul>
+<li>perf: cli now has minimal overhead such that <code>aimg --help</code> runs in ~650ms instead of ~3400ms</li>
+<li>feature: <code>edit</code> and <code>imagine</code> commands now accept multiple images (which they will process separately).  This allows 
+batch editing of images as requested in <a href="https://github.com/brycedrennan/imaginAIry/issues/229">#229</a></li>
+<li>refactor: move <code>--surprise-me</code> to its own subcommand <code>edit-demo</code></li>
+<li>feature: allow selection of output image format with <code>--output-file-extension</code></li>
+<li>docs: make training fail on MPS platform with useful error message</li>
+<li>docs: add directions on how to change model cache path</li>
+</ul>
+<p><strong>8.3.1</strong></p>
+<ul>
+<li>fix: init-image-strength type</li>
+</ul>
+<p><strong>8.3.0</strong></p>
+<ul>
+<li>feature: create <code>gifs</code> or <code>mp4s</code> from any images made in a single run with <code>--compilation-anim gif</code></li>
+<li>feature: create a series of images or edits by iterating over a parameter with the <code>--arg-schedule</code> argument</li>
+<li>feature: <code>openjourney-v1</code> and <code>openjourney-v2</code> models added. available via <code>--model openjourney-v2</code></li>
+<li>feature: add upscale command line function: <code>aimg upscale</code></li>
+<li>feature: <code>--gif</code> option will create a gif showing the generation process for a single image</li>
+<li>feature: <code>--compare-gif</code> option will create a comparison gif for any image edits</li>
+<li>fix: tile mode was broken since latest perf improvements</li>
+</ul>
+<p><strong>8.2.0</strong></p>
+<ul>
+<li>feature: added <code>aimg system-info</code> command to help debug issues</li>
+</ul>
+<p><strong>8.1.0</strong></p>
+<ul>
+<li>feature: some memory optimizations and documentation</li>
+<li>feature: surprise-me improvements</li>
+<li>feature: image sizes can now be multiples of 8 instead of 64. Inputs will be silently rounded down.</li>
+<li>feature: cleaned up <code>aimg</code> shell logs  </li>
+<li>feature: auto-regen for unsafe images</li>
+<li>fix: make blip filename windows compatible</li>
+<li>fix: make captioning work with alpha pngs</li>
+</ul>
+<p><strong>8.0.5</strong></p>
+<ul>
+<li>fix: bypass huggingface cache retrieval bug</li>
+</ul>
+<p><strong>8.0.4</strong></p>
+<ul>
+<li>fix: limit attention slice size on MacOS machines with 64gb (#175)</li>
+</ul>
+<p><strong>8.0.3</strong></p>
+<ul>
+<li>fix: use python 3.7 compatible lru_cache</li>
+<li>fix: use windows compatible filenames</li>
+</ul>
+<p><strong>8.0.2</strong></p>
+<ul>
+<li>fix: hf_hub_download() got an unexpected keyword argument 'token'</li>
+</ul>
+<p><strong>8.0.1</strong></p>
+<ul>
+<li>fix: spelling mistake of "surprise"</li>
+</ul>
+<p><strong>8.0.0</strong></p>
+<ul>
+<li>feature: 🎉 edit images with instructions alone!</li>
+<li>feature: when editing an image add <code>--gif</code> to create a comparision gif</li>
+<li>feature: <code>aimg edit --surprise-me --gif my-image.jpg</code> for some fun pre-programmed edits</li>
+<li>feature: prune-ckpt command also removes the non-ema weights</li>
+</ul>
+<p><strong>7.6.0</strong></p>
+<ul>
+<li>fix: default model config was broken</li>
+<li>feature: print version with <code>--version</code></li>
+<li>feature: ability to load safetensors</li>
+<li>feature:  🎉 outpainting. Examples: <code>--outpaint up10,down300,left50,right50</code> or <code>--outpaint all100</code> or <code>--outpaint u100,d200,l300,r400</code></li>
+</ul>
+<p><strong>7.4.3</strong></p>
+<ul>
+<li>fix: handle old pytorch lightning imports with a graceful failure (fixes #161)</li>
+<li>fix: handle failed image generations better (fixes #83)</li>
+</ul>
+<p><strong>7.4.2</strong></p>
+<ul>
+<li>fix: run face enhancement on GPU for 10x speedup</li>
+</ul>
+<p><strong>7.4.1</strong></p>
+<ul>
+<li>fix: incorrect config files being used for non-1.0 models</li>
+</ul>
+<p><strong>7.4.0</strong></p>
+<ul>
+<li>feature: 🎉 finetune your own image model. kind of like dreambooth. Read instructions on <a href="docs/concept-training.md">"Concept Training"</a> page</li>
+<li>feature: image prep command. crops to face or other interesting parts of photo</li>
+<li>fix: back-compat for hf_hub_download</li>
+<li>feature: add prune-ckpt command</li>
+<li>feature: allow specification of model config file</li>
+</ul>
+<p><strong>7.3.0</strong></p>
+<ul>
+<li>feature: 🎉 depth-based image-to-image generations (and inpainting) </li>
+<li>fix: k_euler_a produces more consistent images per seed (randomization respects the seed again)</li>
+</ul>
+<p><strong>7.2.0</strong></p>
+<ul>
+<li>feature: 🎉 tile in a single dimension ("x" or "y").  This enables, with a bit of luck, generation of 360 VR images.
+Try this for example: <code>imagine --tile-x -w 1024 -h 512 "360 degree equirectangular panorama photograph of the mountains"  --upscale</code></li>
+</ul>
+<p><strong>7.1.1</strong></p>
+<ul>
+<li>fix: memory/speed regression introduced in 6.1.0</li>
+<li>fix: model switching now clears memory better, thus avoiding out of memory errors</li>
+</ul>
+<p><strong>7.1.0</strong></p>
+<ul>
+<li>feature: 🎉 Stable Diffusion 2.1.  Generated people are no longer (completely) distorted. 
+Use with <code>--model SD-2.1</code> or <code>--model SD-2.0-v</code> </li>
+</ul>
+<p><strong>7.0.0</strong></p>
+<ul>
+<li>feature: negative prompting.  <code>--negative-prompt</code> or <code>ImaginePrompt(..., negative_prompt="ugly, deformed, extra arms, etc")</code></li>
+<li>feature: a default negative prompt is added to all generations. Images in SD-2.0 don't look bad anymore. Images in 1.5 look improved as well.</li>
+</ul>
+<p><strong>6.1.2</strong></p>
+<ul>
+<li>fix: add back in memory-efficient algorithms</li>
+</ul>
+<p><strong>6.1.1</strong></p>
+<ul>
+<li>feature: xformers will be used if available (for faster generation)</li>
+<li>fix: version metadata was broken</li>
+</ul>
+<p><strong>6.1.0</strong></p>
+<ul>
+<li>feature: use different default steps and image sizes depending on sampler and model selected</li>
+<li>fix: #110 use proper version in image metadata</li>
+<li>refactor: solvers all have their own class that inherits from ImageSolver</li>
+<li>feature: 🎉🎉🎉 Stable Diffusion 2.0</li>
+<li><code>--model SD-2.0</code> to use (it makes worse images than 1.5 though...) </li>
+<li>Tested on macOS and Linux</li>
+<li>All samplers working for new 512x512 model</li>
+<li>New inpainting model working</li>
+<li>768x768 model working for all samplers except PLMS (<code>--model SD-2.0-v</code>)</li>
+</ul>
+<p><strong>5.1.0</strong></p>
+<ul>
+<li>feature: add progress image callback</li>
+</ul>
+<p><strong>5.0.1</strong></p>
+<ul>
+<li>fix: support larger images on M1. Fixes #8</li>
+<li>fix: support CPU generation by disabling autocast on CPU. Fixes #81</li>
+</ul>
+<p><strong>5.0.0</strong></p>
+<ul>
+<li>feature: 🎉 inpainting support using new inpainting model from RunwayML. It works really well! By default, the 
+inpainting model will automatically be used for any image-masking task </li>
+<li>feature: 🎉 new default sampler makes image generation more than twice as fast</li>
+<li>feature: added <code>DPM++ 2S a</code> and <code>DPM++ 2M</code> samplers.</li>
+<li>feature: improve progress image logging</li>
+<li>fix: fix bug with <code>--show-work</code>. fixes #84</li>
+<li>fix: add workaround for pytorch bug affecting macOS users using the new <code>DPM++ 2S a</code> and <code>DPM++ 2M</code> samplers.</li>
+<li>fix: add workaround for pytorch mps bug affecting <code>k_dpm_fast</code> sampler. fixes #75</li>
+<li>fix: larger image sizes now work on macOS. fixes #8</li>
+</ul>
+<p><strong>4.1.0</strong></p>
+<ul>
+<li>feature: allow dynamic switching between models/weights <code>--model SD-1.5</code> or <code>--model SD-1.4</code> or <code>--model path/my-custom-weights.ckpt</code>)</li>
+<li>feature: log total progress when generating images (image X out of Y)</li>
+</ul>
+<p><strong>4.0.0</strong></p>
+<ul>
+<li>feature: stable diffusion 1.5 (slightly improved image quality)</li>
+<li>feature: dilation and erosion of masks
+ Previously the <code>+</code> and <code>-</code> characters in a mask (example: <code>face{+0.1}</code>) added to the grayscale value of any masked areas. This wasn't very useful. The new behavior is that the mask will expand or contract by the number of pixel specified. The technical terms for this are dilation and erosion.  This allows much greater control over the masked area.</li>
+<li>feature: update k-diffusion samplers. add k_dpm_adaptive and k_dpm_fast</li>
+<li>feature: img2img/inpainting supported on all samplers</li>
+<li>refactor: consolidates img2img/txt2img code. consolidates schedules. consolidates masking</li>
+<li>ci: minor logging improvements</li>
+</ul>
+<p><strong>3.0.1</strong></p>
+<ul>
+<li>fix: k-samplers were broken</li>
+</ul>
+<p><strong>3.0.0</strong></p>
+<ul>
+<li>feature: improved safety filter</li>
+</ul>
+<p><strong>2.4.0</strong></p>
+<ul>
+<li>🎉 feature: prompt expansion</li>
+<li>feature: make (blip) photo captions more descriptive</li>
+</ul>
+<p><strong>2.3.1</strong></p>
+<ul>
+<li>fix: face fidelity default was broken</li>
+</ul>
+<p><strong>2.3.0</strong></p>
+<ul>
+<li>feature: model weights file can be specified via <code>--model-weights-path</code> argument at the command line</li>
+<li>fix: set face fidelity default back to old value</li>
+<li>fix: handle small images without throwing exception. credit to @NiclasEriksen</li>
+<li>docs: add setuptools-rust as dependency for macos </li>
+</ul>
+<p><strong>2.2.1</strong></p>
+<ul>
+<li>fix: init image is fully ignored if init-image-strength = 0</li>
+</ul>
+<p><strong>2.2.0</strong></p>
+<ul>
+<li>feature: face enhancement fidelity is now configurable</li>
+</ul>
+<p><strong>2.1.0</strong></p>
+<ul>
+<li><a href="https://github.com/timojl/clipseg/issues/8#issuecomment-1259150865">improved masking accuracy from clipseg</a></li>
+</ul>
+<p><strong>2.0.3</strong></p>
+<ul>
+<li>fix memory leak in face enhancer</li>
+<li>fix blurry inpainting </li>
+<li>fix for pillow compatibility</li>
+</ul>
+<p><strong>2.0.0</strong></p>
+<ul>
+<li>🎉 fix: inpainted areas correlate with surrounding image, even at 100% generation strength.  Previously if the generation strength was high enough the generated image
+would be uncorrelated to the rest of the surrounding image.  It created terrible looking images.   </li>
+<li>🎉 feature: interactive prompt added. access by running <code>aimg</code></li>
+<li>🎉 feature: Specify advanced text based masks using boolean logic and strength modifiers. Mask descriptions must be lowercase. Keywords uppercase.
+   Valid symbols: <code>AND</code>, <code>OR</code>, <code>NOT</code>, <code>()</code>, and mask strength modifier <code>{+0.1}</code> where <code>+</code> can be any of <code>+ - * /</code>. Single character boolean operators also work (<code>|</code>, <code>&amp;</code>, <code>!</code>)</li>
+<li>🎉 feature: apply mask edits to original files with <code>mask_modify_original</code> (on by default)</li>
+<li>feature: auto-rotate images if exif data specifies to do so</li>
+<li>fix: mask boundaries are more accurate</li>
+<li>fix: accept mask images in command line</li>
+<li>fix: img2img algorithm was wrong and wouldn't at values close to 0 or 1</li>
+</ul>
+<p><strong>1.6.2</strong></p>
+<ul>
+<li>fix: another bfloat16 fix</li>
+</ul>
+<p><strong>1.6.1</strong></p>
+<ul>
+<li>fix: make sure image tensors come to the CPU as float32 so there aren't compatibility issues with non-bfloat16 cpus</li>
+</ul>
+<p><strong>1.6.0</strong></p>
+<ul>
+<li>fix: <em>maybe</em> address #13 with <code>expected scalar type BFloat16 but found Float</code></li>
+<li>at minimum one can specify <code>--precision full</code> now and that will probably fix the issue  </li>
+<li>feature: tile mode can now be specified per-prompt</li>
+</ul>
+<p><strong>1.5.3</strong></p>
+<ul>
+<li>fix: missing config file for describe feature</li>
+</ul>
+<p><strong>1.5.1</strong></p>
+<ul>
+<li>img2img now supported with PLMS (instead of just DDIM)</li>
+<li>added image captioning feature <code>aimg describe dog.jpg</code> =&gt; <code>a brown dog sitting on grass</code></li>
+<li>added new commandline tool <code>aimg</code> for additional image manipulation functionality</li>
+</ul>
+<p><strong>1.4.0</strong></p>
+<ul>
+<li>support multiple additive targets for masking with <code>|</code> symbol.  Example: "fruit|stem|fruit stem"</li>
+</ul>
+<p><strong>1.3.0</strong></p>
+<ul>
+<li>added prompt based image editing. Example: "fruit =&gt; gold coins"</li>
+<li>test coverage improved</li>
+</ul>
+<p><strong>1.2.0</strong></p>
+<ul>
+<li>allow urls as init-images</li>
+</ul>
+<p><strong>previous</strong></p>
+<ul>
+<li>img2img actually does # of steps you specify  </li>
+<li>performance optimizations</li>
+<li>numerous other changes</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link", "content.code.copy"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+    
+  </body>
+</html>
