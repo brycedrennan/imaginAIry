@@ -59,7 +59,7 @@ def load_flux_models():
 
     # Load or create quantized models
     if os.path.exists(transformer_path):
-        transformer = torch.load(transformer_path)
+        transformer = torch.load(transformer_path, weights_only=False)
     else:
         transformer = FluxTransformer2DModel.from_pretrained(
             bfl_repo, subfolder="transformer", torch_dtype=dtype, revision=revision
@@ -69,7 +69,7 @@ def load_flux_models():
         torch.save(transformer, transformer_path)
 
     if os.path.exists(text_encoder_2_path):
-        text_encoder_2 = torch.load(text_encoder_2_path)
+        text_encoder_2 = torch.load(text_encoder_2_path, weights_only=False)
     else:
         text_encoder_2 = T5EncoderModel.from_pretrained(
             bfl_repo, subfolder="text_encoder_2", torch_dtype=dtype, revision=revision
