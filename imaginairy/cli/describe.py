@@ -3,8 +3,8 @@
 import click
 
 
-@click.argument("image_filepaths", nargs=-1)
 @click.command()
+@click.argument("image_filepaths", nargs=-1)
 def describe_cmd(image_filepaths):
     """Generate text descriptions of images."""
     import os

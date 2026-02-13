@@ -5,6 +5,7 @@ from functools import lru_cache
 
 import torch
 from diffusers.pipelines.stable_diffusion import safety_checker as safety_checker_mod
+from PIL import Image
 from transformers import AutoImageProcessor
 
 from imaginairy.enhancers.blur_detect import is_blurry
@@ -160,13 +161,13 @@ def create_safety_score(img, safety_mode=SafetyMode.STRICT):
     safety_result = safety_checker(clip_input)[0]
 
     if safety_result.is_special_care_nsfw:
-        img.paste((150, 0, 0), (0, 0, img.size[0], img.size[1]))
+        img.paste(Image.new("RGB", img.size, (150, 0, 0)))
         safety_result.is_filtered = True
         logger.info(
             f"    ⚠️🔞️  Filtering NSFW image. nsfw score: {safety_result.nsfw_score}"
         )
     elif safety_mode == SafetyMode.STRICT and safety_result.is_nsfw:
-        img.paste((50, 0, 0), (0, 0, img.size[0], img.size[1]))
+        img.paste(Image.new("RGB", img.size, (50, 0, 0)))
         safety_result.is_filtered = True
         logger.info(
             f"    ⚠️  Filtering NSFW image. nsfw score: {safety_result.nsfw_score}"

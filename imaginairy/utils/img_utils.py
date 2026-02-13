@@ -242,6 +242,11 @@ def combine_image(original_img, generated_img, mask_img):
     )
     log_img(mask_for_orig_size, "mask for original image size")
 
+    # Pillow 12 requires actual PIL Image instances for Image.composite;
+    # LazyLoadingImage proxies won't pass isinstance checks.
+    if not isinstance(original_img, Image.Image):
+        original_img = original_img.copy()
+
     rebuilt_orig_img = Image.composite(
         original_img,
         generated_img,

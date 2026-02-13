@@ -137,11 +137,15 @@ def prepare_image_for_outpaint(
         _all=_all,
         snap_multiple=snap_multiple,
     )
+
     ran_img_t = torch.randn((1, 3, new_height, new_width), device="cpu")
     expanded_image = torch_img_to_pillow_img(ran_img_t)
-    # expanded_image = Image.new(
-    #     "RGB", (img.width + left + right, img.height + up + down), (0, 0, 0)
-    # )
+
+    # Pillow 12 requires actual PIL Image instances for paste;
+    # LazyLoadingImage proxies won't pass isinstance checks.
+    if not isinstance(img, Image.Image):
+        img = img.copy()
+
     expanded_image.paste(img, (left, up))
 
     # extend border pixels outward, this helps prevents lines at the boundary because masks getting reduced to

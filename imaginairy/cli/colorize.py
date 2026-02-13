@@ -7,6 +7,7 @@ import click
 logger = logging.getLogger(__name__)
 
 
+@click.command("colorize")
 @click.argument("image_filepaths", nargs=-1)
 @click.option(
     "--outdir",
@@ -29,7 +30,6 @@ logger = logging.getLogger(__name__)
     show_default=False,
     help="Description of the photo. If not provided, it will be generated automatically.",
 )
-@click.command("colorize")
 def colorize_cmd(image_filepaths, outdir, repeats, caption):
     """
     Colorize images using AI. Doesn't work very well yet.
