@@ -257,6 +257,16 @@ vendorize_whole_repo:
 	touch ./imaginairy/vendored/$(PKG)/version.py
 	echo "vendored from $(REPO)" | tee ./imaginairy/vendored/$(PKG)/readme.txt
 
+sync:  ## Bidirectional sync with desktop with 4090 GPU
+	unison ~/projects/sandbox-img-gen/imaginairy ssh://bd/projects/sandbox-img-gen/imaginairy \
+		-auto -perms 0 -repeat watch -prefer newer \
+		-ignore 'Name .venv' \
+		-ignore 'Name .ruff_cache' \
+		-ignore 'Name .mypy_cache' \
+		-ignore 'Name .pytest_cache' \
+		-ignore 'Name *.egg-info' \
+		-ignore 'Name *.pyc' \
+		-ignore 'Name .DS_Store'
 
 help: ## Show this help message.
 	@## https://gist.github.com/prwhite/8168133#gistcomment-1716694
