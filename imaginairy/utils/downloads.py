@@ -7,7 +7,7 @@ from functools import lru_cache, wraps
 import requests
 from huggingface_hub import (
     HfFileSystem,
-    HfFolder,
+    get_token as hf_get_token,
     hf_hub_download as _hf_hub_download,
     try_to_load_from_cache,
 )
@@ -40,7 +40,7 @@ def get_cached_url_path(url: str, category=None) -> str:
             return huggingface_cached_path(url)
         except (OSError, ValueError):
             pass
-    filename = url.split("/")[-1]
+    filename = url.rsplit("/", maxsplit=1)[-1]
     dest = get_cache_dir()
     if category:
         dest = os.path.join(dest, category)
@@ -68,7 +68,7 @@ def get_cached_url_path(url: str, category=None) -> str:
 def check_huggingface_url_authorized(url: str) -> None:
     if not url.startswith("https://huggingface.co/"):
         return None
-    token = HfFolder.get_token()
+    token = hf_get_token()
     headers = {}
     if token is not None:
         headers["authorization"] = f"Bearer {token}"
@@ -106,7 +106,7 @@ def huggingface_cached_path(url: str) -> str:
 
     if not dest_path or dest_path == _CACHED_NO_EXIST:
         check_huggingface_url_authorized(url)
-        token = HfFolder.get_token()
+        token = hf_get_token()
         logger.info(f"Downloading {url} from huggingface")
         dest_path = hf_hub_download(
             repo_id=repo, revision=commit_hash, filename=filepath, token=token

@@ -1,15 +1,14 @@
 """
- * Copyright (c) 2022, salesforce.com, inc.
- * All rights reserved.
- * SPDX-License-Identifier: BSD-3-Clause
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- * By Junnan Li
- * Based on huggingface code base
- * https://github.com/huggingface/transformers/blob/v4.15.0/src/transformers/models/bert.
+* Copyright (c) 2022, salesforce.com, inc.
+* All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
+* For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+* By Junnan Li
+* Based on huggingface code base
+* https://github.com/huggingface/transformers/blob/v4.15.0/src/transformers/models/bert.
 """
 
 import math
-from typing import Tuple
 
 import torch
 import torch.utils.checkpoint
@@ -21,16 +20,30 @@ from transformers.modeling_outputs import (
     BaseModelOutputWithPoolingAndCrossAttentions,
     CausalLMOutputWithCrossAttentions,
 )
-from transformers.modeling_utils import (
-    PreTrainedModel,
+from transformers.modeling_utils import PreTrainedModel
+from transformers.models.bert.configuration_bert import BertConfig
+from transformers.pytorch_utils import (
     apply_chunking_to_forward,
-    find_pruneable_heads_and_indices,
     prune_linear_layer,
 )
-from transformers.models.bert.configuration_bert import BertConfig
 from transformers.utils import logging
 
 logger = logging.get_logger(__name__)
+
+
+def find_pruneable_heads_and_indices(heads, n_heads, head_size, already_pruned_heads):
+    """Find heads and their indices that can be pruned.
+
+    Vendored from transformers<5 since it was removed in v5.
+    """
+    mask = torch.ones(n_heads, head_size)
+    heads = set(heads) - already_pruned_heads
+    for head in heads:
+        head = head - sum(1 if h < head else 0 for h in already_pruned_heads)
+        mask[head] = 0
+    mask = mask.view(-1).contiguous().eq(1)
+    index = torch.arange(len(mask))[mask].long()
+    return heads, index
 
 
 class BertEmbeddings(nn.Module):
@@ -400,9 +413,9 @@ class BertLayer(nn.Module):
         present_key_value = self_attention_outputs[-1]
 
         if mode == "multimodal":
-            assert (
-                encoder_hidden_states is not None
-            ), "encoder_hidden_states must be given for cross-attention layers"
+            assert encoder_hidden_states is not None, (
+                "encoder_hidden_states must be given for cross-attention layers"
+            )
 
             cross_attention_outputs = self.crossattention(
                 attention_output,
@@ -475,7 +488,7 @@ class BertEncoder(nn.Module):
 
             if self.gradient_checkpointing and self.training:
                 if use_cache:
-                    logger.warn(
+                    logger.warning(
                         "`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`..."
                     )
                     use_cache = False
@@ -661,7 +674,7 @@ class BertModel(BertPreTrainedModel):
     def get_extended_attention_mask(
         self,
         attention_mask: Tensor,
-        input_shape: Tuple[int],
+        input_shape: tuple[int],
         device: device,
         is_decoder: bool,
     ) -> Tensor:
@@ -720,9 +733,7 @@ class BertModel(BertPreTrainedModel):
                 extended_attention_mask = attention_mask[:, None, None, :]
         else:
             raise ValueError(
-                "Wrong shape for input_ids (shape {}) or attention_mask (shape {})".format(
-                    input_shape, attention_mask.shape
-                )
+                f"Wrong shape for input_ids (shape {input_shape}) or attention_mask (shape {attention_mask.shape})"
             )
 
         # Since attention_mask is 1.0 for positions we want to attend and 0.0 for
@@ -1048,8 +1059,8 @@ class BertLMHeadModel(BertPreTrainedModel):
             "input_ids": input_ids,
             "attention_mask": attention_mask,
             "past_key_values": past,
-            "encoder_hidden_states": model_kwargs.get("encoder_hidden_states", None),
-            "encoder_attention_mask": model_kwargs.get("encoder_attention_mask", None),
+            "encoder_hidden_states": model_kwargs.get("encoder_hidden_states"),
+            "encoder_attention_mask": model_kwargs.get("encoder_attention_mask"),
             "is_decoder": True,
         }
 

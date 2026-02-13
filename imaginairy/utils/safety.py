@@ -5,7 +5,7 @@ from functools import lru_cache
 
 import torch
 from diffusers.pipelines.stable_diffusion import safety_checker as safety_checker_mod
-from transformers import AutoFeatureExtractor
+from transformers import AutoImageProcessor
 
 from imaginairy.enhancers.blur_detect import is_blurry
 from imaginairy.schema import SafetyMode
@@ -119,7 +119,7 @@ class EnhancedStableDiffusionSafetyChecker(
 def safety_models():
     safety_model_id = "CompVis/stable-diffusion-safety-checker"
     monkeypatch_safety_cosine_distance()
-    safety_feature_extractor = AutoFeatureExtractor.from_pretrained(safety_model_id)
+    safety_feature_extractor = AutoImageProcessor.from_pretrained(safety_model_id)
     safety_checker = EnhancedStableDiffusionSafetyChecker.from_pretrained(
         safety_model_id
     )
