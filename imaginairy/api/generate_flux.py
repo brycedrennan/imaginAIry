@@ -28,14 +28,16 @@ def load_flux_models():
     revision = "refs/pr/1"
     quant_type = "qfloat8"  # Define the quantization type
 
+    repo_slug = bfl_repo.replace("/", "_")
+
     # Define paths for saved quantized models
     quantized_dir = os.path.join(get_cache_dir(), "quantized_flux_models")
     os.makedirs(quantized_dir, exist_ok=True)
     transformer_path = os.path.join(
-        quantized_dir, f"quantized_transformer_{quant_type}.pt"
+        quantized_dir, f"quantized_transformer_{repo_slug}_{quant_type}.pt"
     )
     text_encoder_2_path = os.path.join(
-        quantized_dir, f"quantized_text_encoder_2_{quant_type}.pt"
+        quantized_dir, f"quantized_text_encoder_2_{repo_slug}_{quant_type}.pt"
     )
 
     # Load and set up models
