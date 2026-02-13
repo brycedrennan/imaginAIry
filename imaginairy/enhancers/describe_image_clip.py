@@ -1,7 +1,7 @@
 """Functions for image-text similarity assessment"""
 
+from collections.abc import Sequence
 from functools import lru_cache
-from typing import Sequence
 
 import torch
 from PIL import Image

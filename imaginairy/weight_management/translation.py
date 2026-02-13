@@ -1,6 +1,5 @@
 import re
 from dataclasses import asdict, dataclass, field
-from typing import Dict
 
 import torch
 from safetensors import safe_open
@@ -11,7 +10,7 @@ from imaginairy.utils.log_utils import getLogger
 logger = getLogger(__name__)
 
 
-TensorDict = Dict[str, torch.Tensor]
+TensorDict = dict[str, torch.Tensor]
 
 
 @dataclass
@@ -25,7 +24,7 @@ class WeightTranslationMap:
     def load_untranslated_weights(
         self, source_path: str, device: Device | str = "cpu"
     ) -> TensorDict:
-        extension = source_path.split(".")[-1]
+        extension = source_path.rsplit(".", maxsplit=1)[-1]
         if extension in ["pth", "pt", "bin"]:
             source_weights = torch.load(source_path, map_location="cpu")
 

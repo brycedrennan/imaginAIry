@@ -1,7 +1,5 @@
 """Classes for diffusion model loss calculation"""
 
-from typing import Dict, List, Optional, Tuple, Union
-
 import torch
 import torch.nn as nn
 
@@ -20,7 +18,7 @@ class StandardDiffusionLoss(nn.Module):
         loss_weighting_config: dict,
         loss_type: str = "l2",
         offset_noise_level: float = 0.0,
-        batch2model_keys: Optional[Union[str, List[str]]] = None,
+        batch2model_keys: str | list[str] | None = None,
     ):
         super().__init__()
 
@@ -55,7 +53,7 @@ class StandardDiffusionLoss(nn.Module):
         denoiser: Denoiser,
         conditioner: GeneralConditioner,
         input_tensor: torch.Tensor,
-        batch: Dict,
+        batch: dict,
     ) -> torch.Tensor:
         cond = conditioner(batch)
         return self._forward(network, denoiser, cond, input_tensor, batch)
@@ -64,10 +62,10 @@ class StandardDiffusionLoss(nn.Module):
         self,
         network: nn.Module,
         denoiser: Denoiser,
-        cond: Dict,
+        cond: dict,
         input_tensor: torch.Tensor,
-        batch: Dict,
-    ) -> Tuple[torch.Tensor, Dict]:
+        batch: dict,
+    ) -> tuple[torch.Tensor, dict]:
         additional_model_inputs = {
             key: batch[key] for key in self.batch2model_keys.intersection(batch)
         }

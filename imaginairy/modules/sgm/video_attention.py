@@ -1,7 +1,6 @@
 """Classes for video sequence transformation"""
 
 import logging
-from typing import Optional
 
 import torch
 from einops import rearrange, repeat
@@ -130,7 +129,7 @@ class VideoTransformerBlock(nn.Module):
         self,
         x: torch.Tensor,
         context: torch.Tensor = None,
-        timesteps: Optional[int] = None,
+        timesteps: int | None = None,
     ) -> torch.Tensor:
         if self.checkpoint:
             return checkpoint(self._forward, x, context, timesteps)
@@ -261,10 +260,10 @@ class SpatialVideoTransformer(SpatialTransformer):
     def forward(
         self,
         x: torch.Tensor,
-        context: Optional[torch.Tensor] = None,
-        time_context: Optional[torch.Tensor] = None,
-        timesteps: Optional[int] = None,
-        image_only_indicator: Optional[torch.Tensor] = None,
+        context: torch.Tensor | None = None,
+        time_context: torch.Tensor | None = None,
+        timesteps: int | None = None,
+        image_only_indicator: torch.Tensor | None = None,
     ) -> torch.Tensor:
         _, _, h, w = x.shape
         x_in = x
@@ -273,9 +272,9 @@ class SpatialVideoTransformer(SpatialTransformer):
             spatial_context = context
 
         if self.use_spatial_context:
-            assert (
-                context.ndim == 3
-            ), f"n dims of spatial context should be 3 but are {context.ndim}"
+            assert context.ndim == 3, (
+                f"n dims of spatial context should be 3 but are {context.ndim}"
+            )
 
             time_context = context
             time_context_first_timestep = time_context[::timesteps]

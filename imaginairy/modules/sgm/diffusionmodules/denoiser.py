@@ -1,6 +1,6 @@
 """Classes for image denoising operations"""
 
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING
 
 import torch
 import torch.nn as nn
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class Denoiser(nn.Module):
-    def __init__(self, scaling_config: Dict):
+    def __init__(self, scaling_config: dict):
         super().__init__()
 
         self.scaling: DenoiserScaling = instantiate_from_config(scaling_config)
@@ -30,7 +30,7 @@ class Denoiser(nn.Module):
         network: nn.Module,
         input_tensor: torch.Tensor,
         sigma: torch.Tensor,
-        cond: Dict,
+        cond: dict,
         **additional_model_inputs,
     ) -> torch.Tensor:
         sigma = self.possibly_quantize_sigma(sigma)
@@ -48,9 +48,9 @@ class Denoiser(nn.Module):
 class DiscreteDenoiser(Denoiser):
     def __init__(
         self,
-        scaling_config: Dict,
+        scaling_config: dict,
         num_idx: int,
-        discretization_config: Dict,
+        discretization_config: dict,
         do_append_zero: bool = False,
         quantize_c_noise: bool = True,
         flip: bool = True,
@@ -68,7 +68,7 @@ class DiscreteDenoiser(Denoiser):
         dists = sigma - self.sigmas[:, None]
         return dists.abs().argmin(dim=0).view(sigma.shape)
 
-    def idx_to_sigma(self, idx: Union[torch.Tensor, int]) -> torch.Tensor:
+    def idx_to_sigma(self, idx: torch.Tensor | int) -> torch.Tensor:
         return self.sigmas[idx]
 
     def possibly_quantize_sigma(self, sigma: torch.Tensor) -> torch.Tensor:

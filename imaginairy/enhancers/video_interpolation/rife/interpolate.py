@@ -5,7 +5,6 @@ import shutil
 import time
 from functools import lru_cache
 from queue import Queue
-from typing import List
 
 import cv2
 import numpy as np
@@ -366,7 +365,7 @@ def interpolate_images(
     fps_multiplier=2,
     model_weights_path=None,
     device=None,
-) -> List[Image.Image]:
+) -> list[Image.Image]:
     assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]
     torch.set_grad_enabled(False)
     device = device if device else get_device()

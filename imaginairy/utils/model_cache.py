@@ -128,9 +128,9 @@ class GPUModelCache:
         import psutil
 
         msg = (
-            f"    GPU cache: {len(self.gpu_cache)} items; {self.gpu_cache.memory_usage / (1024 ** 2):.1f} MB; Max: {self.max_gpu_memory / (1024 ** 2):.1f} MB;\n"
-            f"    CPU cache: {len(self.cpu_cache)} items; {self.cpu_cache.memory_usage / (1024 ** 2):.1f} MB; Max: {self.max_cpu_memory / (1024 ** 2):.1f} MB;\n"
-            f"    mem_free_total: {get_mem_free_total(self.device) / (1024 ** 2):.1f} MB; Ram Free: {psutil.virtual_memory().available / (1024 ** 2):.1f} MB;"
+            f"    GPU cache: {len(self.gpu_cache)} items; {self.gpu_cache.memory_usage / (1024**2):.1f} MB; Max: {self.max_gpu_memory / (1024**2):.1f} MB;\n"
+            f"    CPU cache: {len(self.cpu_cache)} items; {self.cpu_cache.memory_usage / (1024**2):.1f} MB; Max: {self.max_cpu_memory / (1024**2):.1f} MB;\n"
+            f"    mem_free_total: {get_mem_free_total(self.device) / (1024**2):.1f} MB; Ram Free: {psutil.virtual_memory().available / (1024**2):.1f} MB;"
         )
         return msg
 
@@ -153,7 +153,7 @@ class GPUModelCache:
         import torch.cuda
 
         log(self.stats_msg())
-        log(f"Ensuring {bytes_to_free / (1024 ** 2):.1f} MB of GPU space.")
+        log(f"Ensuring {bytes_to_free / (1024**2):.1f} MB of GPU space.")
 
         while self.gpu_cache and (
             self.gpu_cache.memory_usage + bytes_to_free > self.max_gpu_memory
@@ -173,7 +173,7 @@ class GPUModelCache:
             or self.gpu_cache.memory_usage + bytes_to_free
             > get_mem_free_total(self.device)
         ):
-            msg = f"Unable to make {bytes_to_free / (1024 ** 2):.1f} MB space on {self.device}. \n{self.stats_msg()}"
+            msg = f"Unable to make {bytes_to_free / (1024**2):.1f} MB space on {self.device}. \n{self.stats_msg()}"
             raise RuntimeError(msg)
 
     def make_cpu_space(self, bytes_to_free):
@@ -182,7 +182,7 @@ class GPUModelCache:
         import psutil
 
         log(self.stats_msg())
-        log(f"Ensuring {bytes_to_free / (1024 ** 2):.1f} MB of RAM space.")
+        log(f"Ensuring {bytes_to_free / (1024**2):.1f} MB of RAM space.")
         while self.cpu_cache and (
             self.cpu_cache.memory_usage + bytes_to_free > self.max_gpu_memory
             or self.cpu_cache.memory_usage + bytes_to_free
@@ -233,7 +233,7 @@ class GPUModelCache:
         model_size = get_model_size(model)
         if self.gpu_cache.memory_usage + model_size > self.max_gpu_memory:
             if len(self.gpu_cache) == 0:
-                msg = f"GPU cache maximum ({self.max_gpu_memory / (1024 ** 2)} MB) is smaller than the item being cached ({model_size / 1024 ** 2} MB)."
+                msg = f"GPU cache maximum ({self.max_gpu_memory / (1024**2)} MB) is smaller than the item being cached ({model_size / 1024**2} MB)."
                 raise RuntimeError(msg)
             self.make_gpu_space(model_size)
 

@@ -2,7 +2,8 @@
 
 import logging
 import os.path
-from typing import TYPE_CHECKING, List, Sequence
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 import cv2
 import torch
@@ -65,9 +66,9 @@ def make_bounce_animation(
 
 
 def _ensure_pillow_images(
-    imgs: "List[Image.Image | LazyLoadingImage | torch.Tensor]",
-) -> "List[Image.Image]":
-    converted_frames: List[Image.Image] = []
+    imgs: "list[Image.Image | LazyLoadingImage | torch.Tensor]",
+) -> "list[Image.Image]":
+    converted_frames: list[Image.Image] = []
     for frame in imgs:
         if isinstance(frame, torch.Tensor):
             converted_frames.append(model_latents_to_pillow_imgs(frame)[0])
@@ -76,7 +77,7 @@ def _ensure_pillow_images(
     return converted_frames
 
 
-def _ensure_images_same_size(imgs: "List[Image.Image]") -> "List[Image.Image]":
+def _ensure_images_same_size(imgs: "list[Image.Image]") -> "list[Image.Image]":
     max_size = max([frame.size for frame in imgs])
     converted_frames = []
     for frame in imgs:
@@ -104,7 +105,7 @@ def make_slideshow_animation(
 
 
 def make_animation(
-    imgs, outpath, frame_duration_ms: int | List[int] = 100, captions=None
+    imgs, outpath, frame_duration_ms: int | list[int] = 100, captions=None
 ):
     imgs = imgpaths_to_imgs(imgs)
     ext = os.path.splitext(outpath)[1].lower().strip(".")

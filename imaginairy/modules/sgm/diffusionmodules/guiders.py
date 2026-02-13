@@ -2,7 +2,6 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Union
 
 import torch
 from einops import rearrange, repeat
@@ -19,8 +18,8 @@ class Guider(ABC):
         pass
 
     def prepare_inputs(
-        self, x: torch.Tensor, s: float, c: Dict, uc: Dict
-    ) -> Tuple[torch.Tensor, float, Dict]:
+        self, x: torch.Tensor, s: float, c: dict, uc: dict
+    ) -> tuple[torch.Tensor, float, dict]:
         pass
 
 
@@ -50,8 +49,8 @@ class IdentityGuider(Guider):
         return x
 
     def prepare_inputs(
-        self, x: torch.Tensor, s: float, c: Dict, uc: Dict
-    ) -> Tuple[torch.Tensor, float, Dict]:
+        self, x: torch.Tensor, s: float, c: dict, uc: dict
+    ) -> tuple[torch.Tensor, float, dict]:
         c_out = {}
 
         for k in c:
@@ -66,7 +65,7 @@ class LinearPredictionGuider(Guider):
         max_scale: float,
         num_frames: int,
         min_scale: float = 1.0,
-        additional_cond_keys: Optional[Union[List[str], str]] = None,
+        additional_cond_keys: list[str] | str | None = None,
     ):
         self.min_scale = min_scale
         self.max_scale = max_scale
@@ -90,7 +89,7 @@ class LinearPredictionGuider(Guider):
 
     def prepare_inputs(
         self, x: torch.Tensor, s: torch.Tensor, c: dict, uc: dict
-    ) -> Tuple[torch.Tensor, torch.Tensor, dict]:
+    ) -> tuple[torch.Tensor, torch.Tensor, dict]:
         c_out = {}
 
         for k in c:

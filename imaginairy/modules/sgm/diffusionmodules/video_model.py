@@ -1,7 +1,5 @@
 """Classes for video generation models"""
 
-from typing import List, Optional, Union
-
 import torch as th
 import torch.nn as nn
 from einops import rearrange
@@ -34,10 +32,10 @@ class VideoResBlock(ResBlock):
         channels: int,
         emb_channels: int,
         dropout: float,
-        video_kernel_size: Union[int, List[int]] = 3,
+        video_kernel_size: int | list[int] = 3,
         merge_strategy: str = "fixed",
         merge_factor: float = 0.5,
-        out_channels: Optional[int] = None,
+        out_channels: int | None = None,
         use_conv: bool = False,
         use_scale_shift_norm: bool = False,
         dims: int = 2,
@@ -83,7 +81,7 @@ class VideoResBlock(ResBlock):
         x: th.Tensor,
         emb: th.Tensor,
         num_video_frames: int,
-        image_only_indicator: Optional[th.Tensor] = None,
+        image_only_indicator: th.Tensor | None = None,
     ) -> th.Tensor:
         x = super().forward(x, emb)
 
@@ -109,29 +107,29 @@ class VideoUNet(nn.Module):
         num_res_blocks: int,
         attention_resolutions: int,
         dropout: float = 0.0,
-        channel_mult: List[int] = (1, 2, 4, 8),
+        channel_mult: list[int] = (1, 2, 4, 8),
         conv_resample: bool = True,
         dims: int = 2,
-        num_classes: Optional[int] = None,
+        num_classes: int | None = None,
         use_checkpoint: bool = False,
         num_heads: int = -1,
         num_head_channels: int = -1,
         num_heads_upsample: int = -1,
         use_scale_shift_norm: bool = False,
         resblock_updown: bool = False,
-        transformer_depth: Union[List[int], int] = 1,
-        transformer_depth_middle: Optional[int] = None,
-        context_dim: Optional[int] = None,
+        transformer_depth: list[int] | int = 1,
+        transformer_depth_middle: int | None = None,
+        context_dim: int | None = None,
         time_downup: bool = False,
-        time_context_dim: Optional[int] = None,
+        time_context_dim: int | None = None,
         extra_ff_mix_layer: bool = False,
         use_spatial_context: bool = False,
         merge_strategy: str = "fixed",
         merge_factor: float = 0.5,
         spatial_transformer_attn_type: str = "softmax",
-        video_kernel_size: Union[int, List[int]] = 3,
+        video_kernel_size: int | list[int] = 3,
         use_linear_in_transformer: bool = False,
-        adm_in_channels: Optional[int] = None,
+        adm_in_channels: int | None = None,
         disable_temporal_crossattention: bool = False,
         max_ddpm_temb_period: int = 10000,
     ):
@@ -462,15 +460,15 @@ class VideoUNet(nn.Module):
         self,
         x: th.Tensor,
         timesteps: th.Tensor,
-        context: Optional[th.Tensor] = None,
-        y: Optional[th.Tensor] = None,
-        time_context: Optional[th.Tensor] = None,
-        num_video_frames: Optional[int] = None,
-        image_only_indicator: Optional[th.Tensor] = None,
+        context: th.Tensor | None = None,
+        y: th.Tensor | None = None,
+        time_context: th.Tensor | None = None,
+        num_video_frames: int | None = None,
+        image_only_indicator: th.Tensor | None = None,
     ):
-        assert (
-            (y is not None) == (self.num_classes is not None)
-        ), "must specify y if and only if the model is class-conditional -> no, relax this TODO"
+        assert (y is not None) == (self.num_classes is not None), (
+            "must specify y if and only if the model is class-conditional -> no, relax this TODO"
+        )
         hs = []
         t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
         emb = self.time_embed(t_emb)

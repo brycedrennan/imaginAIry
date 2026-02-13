@@ -78,7 +78,7 @@ def instantiate_from_config(config: dict) -> Any:
     start = time.perf_counter()
     c = _cls(**params)
     end = time.perf_counter()
-    logger.debug(f"Instantiation of {_cls} took {end-start} seconds")
+    logger.debug(f"Instantiation of {_cls} took {end - start} seconds")
     return c
 
 
@@ -101,9 +101,9 @@ def platform_appropriate_autocast(precision="autocast", enabled=True):
 
 def _fixed_layer_norm(
     input: Tensor,  # noqa
-    normalized_shape: List[int],
-    weight: Optional[Tensor] = None,
-    bias: Optional[Tensor] = None,
+    normalized_shape: list[int],
+    weight: Tensor | None = None,
+    bias: Tensor | None = None,
     eps: float = 1e-5,
 ) -> Tensor:
     """
@@ -159,8 +159,8 @@ def fix_torch_group_norm():
     def _group_norm_wrapper(
         input: Tensor,  # noqa
         num_groups: int,
-        weight: Optional[Tensor] = None,
-        bias: Optional[Tensor] = None,
+        weight: Tensor | None = None,
+        bias: Tensor | None = None,
         eps: float = 1e-5,
     ) -> Tensor:
         if weight is not None and weight.dtype != input.dtype:
@@ -179,7 +179,7 @@ def fix_torch_group_norm():
         functional.group_norm = orig_group_norm
 
 
-def randn_seeded(seed: int, size: List[int]) -> Tensor:
+def randn_seeded(seed: int, size: list[int]) -> Tensor:
     """Generate a random tensor with a given seed."""
     from hashlib import md5
 

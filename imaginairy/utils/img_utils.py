@@ -10,7 +10,7 @@ Torch       (B), C, H, W    R, G, B             -1.0-1.0        torch.Tensor
 
 """
 
-from typing import Sequence
+from collections.abc import Sequence
 
 import numpy as np
 import PIL

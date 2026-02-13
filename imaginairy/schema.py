@@ -11,7 +11,7 @@ import random
 from datetime import datetime, timezone
 from enum import Enum
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, List, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from pydantic import (
     BaseModel,
@@ -326,8 +326,8 @@ InpaintMethod = Literal["finetune", "control"]
 class ImaginePrompt(BaseModel, protected_namespaces=()):
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
-    prompt: List[WeightedPrompt] = Field(default=None, validate_default=True)  # type: ignore
-    negative_prompt: List[WeightedPrompt] = Field(
+    prompt: list[WeightedPrompt] = Field(default=None, validate_default=True)  # type: ignore
+    negative_prompt: list[WeightedPrompt] = Field(
         default_factory=list, validate_default=True
     )
     prompt_strength: float = Field(default=7.5, le=50, ge=-50, validate_default=True)
@@ -337,9 +337,9 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     init_image_strength: float | None = Field(
         ge=0, le=1, default=None, validate_default=True
     )
-    image_prompt: List[LazyLoadingImage] | None = Field(None, validate_default=True)
+    image_prompt: list[LazyLoadingImage] | None = Field(None, validate_default=True)
     image_prompt_strength: float = Field(ge=0, le=1, default=0.0)
-    control_inputs: List[ControlInput] = Field(
+    control_inputs: list[ControlInput] = Field(
         default_factory=list, validate_default=True
     )
     mask_prompt: str | None = Field(
@@ -380,9 +380,9 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         prompt_strength: float | None = 7.5,
         init_image: LazyLoadingImage | None = None,
         init_image_strength: float | None = None,
-        image_prompt: LazyLoadingImage | List[LazyLoadingImage] | None = None,
+        image_prompt: LazyLoadingImage | list[LazyLoadingImage] | None = None,
         image_prompt_strength: float | None = 0.35,
-        control_inputs: List[ControlInput] | None = None,
+        control_inputs: list[ControlInput] | None = None,
         mask_prompt: str | None = None,
         mask_image: LazyLoadingImage | None = None,
         mask_mode: MaskInput = MaskMode.REPLACE,
@@ -464,7 +464,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
                 if all(isinstance(item, str) for item in value):
                     return [WeightedPrompt(text=str(p)) for p in value]
                 elif all(isinstance(item, WeightedPrompt) for item in value):
-                    return cast(List[WeightedPrompt], value)
+                    return cast("list[WeightedPrompt]", value)
         raise ValueError("Invalid prompt input")
 
     @field_validator("prompt", "negative_prompt", mode="after")
@@ -907,7 +907,7 @@ class ImagineResult:
         if not self.performance_stats:
             return ""
         return " ".join(
-            f"{k}:{v[stat_name]/(10**6):.1f}MB"
+            f"{k}:{v[stat_name] / (10**6):.1f}MB"
             for k, v in self.performance_stats.items()
         )
 

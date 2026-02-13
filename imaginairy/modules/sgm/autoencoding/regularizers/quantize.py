@@ -2,7 +2,8 @@
 
 import logging
 from abc import abstractmethod
-from typing import Dict, Iterator, Literal, Optional, Tuple, Union
+from collections.abc import Iterator
+from typing import Literal
 
 import numpy as np
 import torch
@@ -21,9 +22,9 @@ class AbstractQuantizer(AbstractRegularizer):
         super().__init__()
         # Define these in your init
         # shape (N,)
-        self.used: Optional[torch.Tensor]
+        self.used: torch.Tensor | None
         self.re_embed: int
-        self.unknown_index: Union[Literal["random"], int]
+        self.unknown_index: Literal["random"] | int
 
     def remap_to_used(self, inds: torch.Tensor) -> torch.Tensor:
         assert self.used is not None, "You need to define used indices for remap"
@@ -55,7 +56,7 @@ class AbstractQuantizer(AbstractRegularizer):
 
     @abstractmethod
     def get_codebook_entry(
-        self, indices: torch.Tensor, shape: Optional[Tuple[int, ...]] = None
+        self, indices: torch.Tensor, shape: tuple[int, ...] | None = None
     ) -> torch.Tensor:
         raise NotImplementedError()
 
@@ -80,7 +81,7 @@ class GumbelQuantizer(AbstractQuantizer):
         straight_through: bool = True,
         kl_weight: float = 5e-4,
         temp_init: float = 1.0,
-        remap: Optional[str] = None,
+        remap: str | None = None,
         unknown_index: str = "random",
         loss_key: str = "loss/vq",
     ) -> None:
@@ -108,9 +109,9 @@ class GumbelQuantizer(AbstractQuantizer):
             self.unknown_index = self.re_embed
             self.re_embed = self.re_embed + 1
         else:
-            assert unknown_index == "random" or isinstance(
-                unknown_index, int
-            ), "unknown index needs to be 'random', 'extra' or any integer"
+            assert unknown_index == "random" or isinstance(unknown_index, int), (
+                "unknown index needs to be 'random', 'extra' or any integer"
+            )
             self.unknown_index = unknown_index  # "random" or "extra" or integer
         if self.remap is not None:
             logpy.info(
@@ -119,8 +120,8 @@ class GumbelQuantizer(AbstractQuantizer):
             )
 
     def forward(
-        self, z: torch.Tensor, temp: Optional[float] = None, return_logits: bool = False
-    ) -> Tuple[torch.Tensor, Dict]:
+        self, z: torch.Tensor, temp: float | None = None, return_logits: bool = False
+    ) -> tuple[torch.Tensor, dict]:
         # force hard = True when we are in eval mode, as we must quantize.
         # actually, always true seems to work
         hard = self.straight_through if self.training else True
@@ -188,7 +189,7 @@ class VectorQuantizer(AbstractQuantizer):
         n_e: int,
         e_dim: int,
         beta: float = 0.25,
-        remap: Optional[str] = None,
+        remap: str | None = None,
         unknown_index: str = "random",
         sane_index_shape: bool = False,
         log_perplexity: bool = False,
@@ -220,9 +221,9 @@ class VectorQuantizer(AbstractQuantizer):
             self.unknown_index = self.re_embed
             self.re_embed = self.re_embed + 1
         else:
-            assert unknown_index == "random" or isinstance(
-                unknown_index, int
-            ), "unknown index needs to be 'random', 'extra' or any integer"
+            assert unknown_index == "random" or isinstance(unknown_index, int), (
+                "unknown index needs to be 'random', 'extra' or any integer"
+            )
             self.unknown_index = unknown_index  # "random" or "extra" or integer
         if self.remap is not None:
             logpy.info(
@@ -236,7 +237,7 @@ class VectorQuantizer(AbstractQuantizer):
     def forward(
         self,
         z: torch.Tensor,
-    ) -> Tuple[torch.Tensor, Dict]:
+    ) -> tuple[torch.Tensor, dict]:
         do_reshape = z.ndim == 4
         if do_reshape:
             #     # reshape z -> (batch, height, width, channel) and flatten
@@ -302,7 +303,7 @@ class VectorQuantizer(AbstractQuantizer):
         return z_q, loss_dict
 
     def get_codebook_entry(
-        self, indices: torch.Tensor, shape: Optional[Tuple[int, ...]] = None
+        self, indices: torch.Tensor, shape: tuple[int, ...] | None = None
     ) -> torch.Tensor:
         # shape specifying (batch, height, width, channel)
         if self.remap is not None:
@@ -362,7 +363,7 @@ class EMAVectorQuantizer(AbstractQuantizer):
         beta: float,
         decay: float = 0.99,
         eps: float = 1e-5,
-        remap: Optional[str] = None,
+        remap: str | None = None,
         unknown_index: str = "random",
         loss_key: str = "loss/vq",
     ):
@@ -385,9 +386,9 @@ class EMAVectorQuantizer(AbstractQuantizer):
             self.unknown_index = self.re_embed
             self.re_embed = self.re_embed + 1
         else:
-            assert unknown_index == "random" or isinstance(
-                unknown_index, int
-            ), "unknown index needs to be 'random', 'extra' or any integer"
+            assert unknown_index == "random" or isinstance(unknown_index, int), (
+                "unknown index needs to be 'random', 'extra' or any integer"
+            )
             self.unknown_index = unknown_index  # "random" or "extra" or integer
         if self.remap is not None:
             logpy.info(
@@ -395,7 +396,7 @@ class EMAVectorQuantizer(AbstractQuantizer):
                 f"Using {self.unknown_index} for unknown indices."
             )
 
-    def forward(self, z: torch.Tensor) -> Tuple[torch.Tensor, Dict]:
+    def forward(self, z: torch.Tensor) -> tuple[torch.Tensor, dict]:
         # reshape z -> (batch, height, width, channel) and flatten
         # z, 'b c h w -> b h w c'
         z = rearrange(z, "b c h w -> b h w c")
@@ -452,7 +453,7 @@ class VectorQuantizerWithInputProjection(VectorQuantizer):
         n_codes: int,
         codebook_dim: int,
         beta: float = 1.0,
-        output_dim: Optional[int] = None,
+        output_dim: int | None = None,
         **kwargs,
     ):
         super().__init__(n_codes, codebook_dim, beta, **kwargs)
@@ -463,7 +464,7 @@ class VectorQuantizerWithInputProjection(VectorQuantizer):
         else:
             self.proj_out = nn.Identity()
 
-    def forward(self, z: torch.Tensor) -> Tuple[torch.Tensor, Dict]:
+    def forward(self, z: torch.Tensor) -> tuple[torch.Tensor, dict]:
         rearr = False
         in_shape = z.shape
 

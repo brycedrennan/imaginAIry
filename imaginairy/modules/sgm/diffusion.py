@@ -3,7 +3,7 @@
 import logging
 import math
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import torch
 from omegaconf import ListConfig, OmegaConf
@@ -36,22 +36,22 @@ class DiffusionEngine(nn.Module):
         network_config,
         denoiser_config,
         first_stage_config,
-        conditioner_config: Union[None, Dict, ListConfig, OmegaConf] = None,
-        sampler_config: Union[None, Dict, ListConfig, OmegaConf] = None,
-        optimizer_config: Union[None, Dict, ListConfig, OmegaConf] = None,
-        scheduler_config: Union[None, Dict, ListConfig, OmegaConf] = None,
-        loss_fn_config: Union[None, Dict, ListConfig, OmegaConf] = None,
-        network_wrapper: Union[None, str] = None,
-        ckpt_path: Union[None, str] = None,
+        conditioner_config: None | dict | ListConfig | OmegaConf = None,
+        sampler_config: None | dict | ListConfig | OmegaConf = None,
+        optimizer_config: None | dict | ListConfig | OmegaConf = None,
+        scheduler_config: None | dict | ListConfig | OmegaConf = None,
+        loss_fn_config: None | dict | ListConfig | OmegaConf = None,
+        network_wrapper: None | str = None,
+        ckpt_path: None | str = None,
         use_ema: bool = False,
         ema_decay_rate: float = 0.9999,
         scale_factor: float = 1.0,
         disable_first_stage_autocast=False,
         input_key: str = "jpg",
-        log_keys: Union[List, None] = None,
+        log_keys: list | None = None,
         no_cond_log: bool = False,
         compile_model: bool = False,
-        en_and_decode_n_samples_a_time: Optional[int] = None,
+        en_and_decode_n_samples_a_time: int | None = None,
     ):
         super().__init__()
         self.log_keys = log_keys
@@ -173,7 +173,7 @@ class DiffusionEngine(nn.Module):
         loss_dict = {"loss": loss_mean}
         return loss_mean, loss_dict
 
-    def shared_step(self, batch: Dict) -> Any:
+    def shared_step(self, batch: dict) -> Any:
         x = self.get_input(batch)
         x = self.encode_first_stage(x)
         batch["global_step"] = self.global_step
@@ -254,10 +254,10 @@ class DiffusionEngine(nn.Module):
     @torch.no_grad()
     def sample(
         self,
-        cond: Dict,
-        uc: Union[Dict, None] = None,
+        cond: dict,
+        uc: dict | None = None,
         batch_size: int = 16,
-        shape: Union[None, Tuple, List] = None,
+        shape: None | tuple | list = None,
         **kwargs,
     ):
         randn = torch.randn(batch_size, *shape).to(self.device)
@@ -271,12 +271,12 @@ class DiffusionEngine(nn.Module):
     @torch.no_grad()
     def log_images(
         self,
-        batch: Dict,
+        batch: dict,
         N: int = 8,
         sample: bool = True,
-        ucg_keys: Optional[List[str]] = None,
+        ucg_keys: list[str] | None = None,
         **kwargs,
-    ) -> Dict:
+    ) -> dict:
         conditioner_input_keys = [e.input_key for e in self.conditioner.embedders]
         if ucg_keys:
             assert all(x in conditioner_input_keys for x in ucg_keys), (

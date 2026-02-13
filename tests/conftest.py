@@ -76,7 +76,11 @@ def _pre_setup():
     # torch.randn = randn_tattle
     configure_logging("DEBUG")
 
-    with fix_torch_nn_layer_norm(), fix_torch_group_norm(), platform_appropriate_autocast():
+    with (
+        fix_torch_nn_layer_norm(),
+        fix_torch_group_norm(),
+        platform_appropriate_autocast(),
+    ):
         yield
 
 

@@ -12,7 +12,6 @@ import itertools
 import logging
 from contextlib import contextmanager, nullcontext
 from functools import partial
-from typing import Optional
 
 import numpy as np
 import torch
@@ -230,9 +229,9 @@ class DDPM(nn.Module):
         self.num_timesteps = int(timesteps)
         self.linear_start = linear_start
         self.linear_end = linear_end
-        assert (
-            alphas_cumprod.shape[0] == self.num_timesteps
-        ), "alphas have to be defined for each timestep"
+        assert alphas_cumprod.shape[0] == self.num_timesteps, (
+            "alphas have to be defined for each timestep"
+        )
 
         to_torch = partial(torch.tensor, dtype=torch.float32)
 
@@ -1199,9 +1198,9 @@ class LatentDiffusion(DDPM):
                 cond_list = [{c_key: [c[:, :, :, :, i]]} for i in range(c.shape[-1])]
 
             elif self.cond_stage_key == "coordinates_bbox":
-                assert (
-                    "original_image_size" in self.split_input_params
-                ), "BoudingBoxRescaling is missing original_image_size"
+                assert "original_image_size" in self.split_input_params, (
+                    "BoudingBoxRescaling is missing original_image_size"
+                )
 
                 # assuming padding of unfold is always 0 and its dilation is always 1
                 n_patches_per_row = int((w - ks[0]) / stride[0] + 1)
@@ -1719,7 +1718,7 @@ class DiffusionWrapper(nn.Module):
         assert self.conditioning_key in [None, "concat", "crossattn", "hybrid", "adm"]
 
     def forward(
-        self, x, t, c_concat: Optional[list] = None, c_crossattn: Optional[list] = None
+        self, x, t, c_concat: list | None = None, c_crossattn: list | None = None
     ):
         if self.conditioning_key is None:
             out = self.diffusion_model(x, t)
@@ -1799,9 +1798,9 @@ class LatentFinetuneDiffusion(LatentDiffusion):
                             f"modifying key '{name}' and keeping its original {self.keep_dims} (channels) dimensions only"
                         )
                         new_entry = torch.zeros_like(param)  # zero init
-                assert (
-                    new_entry is not None
-                ), "did not find matching parameter to modify"
+                assert new_entry is not None, (
+                    "did not find matching parameter to modify"
+                )
                 new_entry[:, : self.keep_dims, ...] = sd[k]
                 sd[k] = new_entry
 
@@ -1948,9 +1947,9 @@ class LatentInpaintDiffusion(LatentDiffusion):
         self, batch, k, cond_key=None, bs=None, return_first_stage_outputs=False
     ):
         # note: restricted to non-trainable encoders currently
-        assert (
-            not self.cond_stage_trainable
-        ), "trainable cond stages not yet supported for inpainting"
+        assert not self.cond_stage_trainable, (
+            "trainable cond stages not yet supported for inpainting"
+        )
         z, c, x, xrec, xc = super().get_input(
             batch,
             self.first_stage_key,
@@ -2018,9 +2017,9 @@ class LatentUpscaleFinetuneDiffusion(LatentFinetuneDiffusion):
         self, batch, k, cond_key=None, bs=None, return_first_stage_outputs=False
     ):
         # note: restricted to non-trainable encoders currently
-        assert (
-            not self.cond_stage_trainable
-        ), "trainable cond stages not yet supported for upscaling-ft"
+        assert not self.cond_stage_trainable, (
+            "trainable cond stages not yet supported for upscaling-ft"
+        )
         z, c, x, xrec, xc = super().get_input(
             batch,
             self.first_stage_key,

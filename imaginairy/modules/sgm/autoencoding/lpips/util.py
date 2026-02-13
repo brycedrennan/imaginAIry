@@ -17,9 +17,13 @@ MD5_MAP = {"vgg_lpips": "d507d7349b931f0638a25a48a722f98a"}
 
 def download(url, local_path, chunk_size=1024):
     os.makedirs(os.path.split(local_path)[0], exist_ok=True)
-    with requests.get(url, stream=True) as r, tqdm(
-        total=int(r.headers.get("content-length", 0)), unit="B", unit_scale=True
-    ) as pbar, open(local_path, "wb") as f:
+    with (
+        requests.get(url, stream=True) as r,
+        tqdm(
+            total=int(r.headers.get("content-length", 0)), unit="B", unit_scale=True
+        ) as pbar,
+        open(local_path, "wb") as f,
+    ):
         for data in r.iter_content(chunk_size=chunk_size):
             if data:
                 f.write(data)

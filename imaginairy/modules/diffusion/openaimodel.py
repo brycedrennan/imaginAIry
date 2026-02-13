@@ -2,7 +2,6 @@
 
 import math
 from abc import abstractmethod
-from typing import Optional
 
 import numpy as np
 import torch as th
@@ -41,7 +40,7 @@ class AttentionPool2d(nn.Module):
         spacial_dim: int,
         embed_dim: int,
         num_heads_channels: int,
-        output_dim: Optional[int] = None,
+        output_dim: int | None = None,
     ):
         super().__init__()
         self.positional_embedding = nn.Parameter(
@@ -309,9 +308,9 @@ class AttentionBlock(nn.Module):
         if num_head_channels == -1:
             self.num_heads = num_heads
         else:
-            assert (
-                channels % num_head_channels == 0
-            ), f"q,k,v channels {channels} is not divisible by num_head_channels {num_head_channels}"
+            assert channels % num_head_channels == 0, (
+                f"q,k,v channels {channels} is not divisible by num_head_channels {num_head_channels}"
+            )
             self.num_heads = channels // num_head_channels
         self.use_checkpoint = use_checkpoint
         self.norm = normalization(channels)
@@ -489,12 +488,14 @@ class UNetModel(nn.Module):
     ):
         super().__init__()
         if use_spatial_transformer:
-            assert (
-                context_dim is not None
-            ), "Fool!! You forgot to include the dimension of your cross-attention conditioning..."
+            assert context_dim is not None, (
+                "Fool!! You forgot to include the dimension of your cross-attention conditioning..."
+            )
 
         if context_dim is not None:
-            assert use_spatial_transformer, "Fool!! You forgot to use the spatial transformer for your cross-attention conditioning..."
+            assert use_spatial_transformer, (
+                "Fool!! You forgot to use the spatial transformer for your cross-attention conditioning..."
+            )
 
             if isinstance(context_dim, ListConfig):
                 context_dim = list(context_dim)
@@ -503,14 +504,14 @@ class UNetModel(nn.Module):
             num_heads_upsample = num_heads
 
         if num_heads == -1:
-            assert (
-                num_head_channels != -1
-            ), "Either num_heads or num_head_channels has to be set"
+            assert num_head_channels != -1, (
+                "Either num_heads or num_head_channels has to be set"
+            )
 
         if num_head_channels == -1:
-            assert (
-                num_heads != -1
-            ), "Either num_heads or num_head_channels has to be set"
+            assert num_heads != -1, (
+                "Either num_heads or num_head_channels has to be set"
+            )
 
         self.image_size = image_size
         self.in_channels = in_channels
@@ -818,9 +819,9 @@ class UNetModel(nn.Module):
         :param y: an [N] Tensor of labels, if class-conditional.
         :return: an [N x C x ...] Tensor of outputs.
         """
-        assert (y is not None) == (
-            self.num_classes is not None
-        ), "must specify y if and only if the model is class-conditional"
+        assert (y is not None) == (self.num_classes is not None), (
+            "must specify y if and only if the model is class-conditional"
+        )
         hs = []
         t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
         emb = self.time_embed(t_emb)

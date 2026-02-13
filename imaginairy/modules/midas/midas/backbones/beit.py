@@ -1,5 +1,4 @@
 import types
-from typing import Optional
 
 import numpy as np
 import timm
@@ -76,7 +75,7 @@ def _get_rel_pos_bias(self, window_size):
 
 
 def attention_forward(
-    self, x, resolution, shared_rel_pos_bias: Optional[torch.Tensor] = None
+    self, x, resolution, shared_rel_pos_bias: torch.Tensor | None = None
 ):
     """
     Modification of timm.models.beit.py: Attention.forward to support arbitrary window sizes.
@@ -110,9 +109,7 @@ def attention_forward(
     return x
 
 
-def block_forward(
-    self, x, resolution, shared_rel_pos_bias: Optional[torch.Tensor] = None
-):
+def block_forward(self, x, resolution, shared_rel_pos_bias: torch.Tensor | None = None):
     """
     Modification of timm.models.beit.py: Block.forward to support arbitrary window sizes.
     See https://github.com/isl-org/MiDaS/pull/234

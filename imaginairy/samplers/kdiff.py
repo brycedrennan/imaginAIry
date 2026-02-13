@@ -2,7 +2,7 @@
 
 # pylama:ignore=W0613
 from abc import ABC
-from typing import Callable
+from collections.abc import Callable
 
 import torch
 from torch import nn

@@ -97,12 +97,14 @@ class ControlNet(nn.Module):
     ):
         super().__init__()
         if use_spatial_transformer:
-            assert (
-                context_dim is not None
-            ), "Fool!! You forgot to include the dimension of your cross-attention conditioning..."
+            assert context_dim is not None, (
+                "Fool!! You forgot to include the dimension of your cross-attention conditioning..."
+            )
 
         if context_dim is not None:
-            assert use_spatial_transformer, "Fool!! You forgot to use the spatial transformer for your cross-attention conditioning..."
+            assert use_spatial_transformer, (
+                "Fool!! You forgot to use the spatial transformer for your cross-attention conditioning..."
+            )
             from omegaconf.listconfig import ListConfig
 
             if isinstance(context_dim, ListConfig):
@@ -112,14 +114,14 @@ class ControlNet(nn.Module):
             num_heads_upsample = num_heads
 
         if num_heads == -1:
-            assert (
-                num_head_channels != -1
-            ), "Either num_heads or num_head_channels has to be set"
+            assert num_head_channels != -1, (
+                "Either num_heads or num_head_channels has to be set"
+            )
 
         if num_head_channels == -1:
-            assert (
-                num_heads != -1
-            ), "Either num_heads or num_head_channels has to be set"
+            assert num_heads != -1, (
+                "Either num_heads or num_head_channels has to be set"
+            )
 
         self.dims = dims
         self.image_size = image_size

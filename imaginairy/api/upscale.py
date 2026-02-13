@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from imaginairy.config import DEFAULT_UPSCALE_MODEL
 
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 def upscale_image(
-    img: "Union[LazyLoadingImage, Image.Image, str]",
+    img: "LazyLoadingImage | Image.Image | str",
     upscale_model: str = DEFAULT_UPSCALE_MODEL,
     tile_size: int = 512,
     tile_pad: int = 50,

@@ -1,7 +1,7 @@
 """Functions for generating and processing image masks"""
 
+from collections.abc import Sequence
 from functools import lru_cache
-from typing import Optional, Sequence
 
 import cv2
 import numpy as np
@@ -37,7 +37,7 @@ def clip_mask_model():
 def get_img_mask(
     img: PIL.Image.Image | LazyLoadingImage,
     mask_description_statement: str,
-    threshold: Optional[float] = None,
+    threshold: float | None = None,
 ):
     from imaginairy.enhancers.bool_masker import MASK_PROMPT
 

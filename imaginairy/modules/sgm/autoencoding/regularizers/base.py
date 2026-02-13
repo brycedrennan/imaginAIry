@@ -1,7 +1,7 @@
 """Classes and functions for tensor regularization"""
 
 from abc import abstractmethod
-from typing import Any, Tuple
+from typing import Any
 
 import torch
 import torch.nn.functional as F
@@ -12,7 +12,7 @@ class AbstractRegularizer(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, z: torch.Tensor) -> Tuple[torch.Tensor, dict]:
+    def forward(self, z: torch.Tensor) -> tuple[torch.Tensor, dict]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -21,7 +21,7 @@ class AbstractRegularizer(nn.Module):
 
 
 class IdentityRegularizer(AbstractRegularizer):
-    def forward(self, z: torch.Tensor) -> Tuple[torch.Tensor, dict]:
+    def forward(self, z: torch.Tensor) -> tuple[torch.Tensor, dict]:
         return z, {}
 
     def get_trainable_parameters(self) -> Any:
@@ -30,7 +30,7 @@ class IdentityRegularizer(AbstractRegularizer):
 
 def measure_perplexity(
     predicted_indices: torch.Tensor, num_centroids: int
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor]:
     # src: https://github.com/karpathy/deep-vector-quantization/blob/main/model.py
     # eval cluster perplexity. when perplexity == num_embeddings then all clusters are used exactly equally
     encodings = (

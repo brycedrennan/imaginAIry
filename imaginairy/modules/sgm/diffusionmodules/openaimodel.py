@@ -3,7 +3,7 @@
 import logging
 import math
 from abc import abstractmethod
-from typing import Iterable, List, Optional, Tuple, Union
+from collections.abc import Iterable
 
 import torch as th
 import torch.nn as nn
@@ -39,7 +39,7 @@ class AttentionPool2d(nn.Module):
         spacial_dim: int,
         embed_dim: int,
         num_heads_channels: int,
-        output_dim: Optional[int] = None,
+        output_dim: int | None = None,
     ):
         super().__init__()
         self.positional_embedding = nn.Parameter(
@@ -83,10 +83,10 @@ class TimestepEmbedSequential(nn.Sequential, TimestepBlock):
         self,
         x: th.Tensor,
         emb: th.Tensor,
-        context: Optional[th.Tensor] = None,
-        image_only_indicator: Optional[th.Tensor] = None,
-        time_context: Optional[int] = None,
-        num_video_frames: Optional[int] = None,
+        context: th.Tensor | None = None,
+        image_only_indicator: th.Tensor | None = None,
+        time_context: int | None = None,
+        num_video_frames: int | None = None,
     ):
         from imaginairy.modules.sgm.diffusionmodules.video_model import VideoResBlock
 
@@ -128,7 +128,7 @@ class Upsample(nn.Module):
         channels: int,
         use_conv: bool,
         dims: int = 2,
-        out_channels: Optional[int] = None,
+        out_channels: int | None = None,
         padding: int = 1,
         third_up: bool = False,
         kernel_size: int = 3,
@@ -181,7 +181,7 @@ class Downsample(nn.Module):
         channels: int,
         use_conv: bool,
         dims: int = 2,
-        out_channels: Optional[int] = None,
+        out_channels: int | None = None,
         padding: int = 1,
         third_down: bool = False,
     ):
@@ -238,7 +238,7 @@ class ResBlock(TimestepBlock):
         channels: int,
         emb_channels: int,
         dropout: float,
-        out_channels: Optional[int] = None,
+        out_channels: int | None = None,
         use_conv: bool = False,
         use_scale_shift_norm: bool = False,
         dims: int = 2,
@@ -384,9 +384,9 @@ class AttentionBlock(nn.Module):
         if num_head_channels == -1:
             self.num_heads = num_heads
         else:
-            assert (
-                channels % num_head_channels == 0
-            ), f"q,k,v channels {channels} is not divisible by num_head_channels {num_head_channels}"
+            assert channels % num_head_channels == 0, (
+                f"q,k,v channels {channels} is not divisible by num_head_channels {num_head_channels}"
+            )
             self.num_heads = channels // num_head_channels
         self.use_checkpoint = use_checkpoint
         self.norm = normalization(channels)
@@ -517,10 +517,10 @@ class UNetModel(nn.Module):
         num_res_blocks: int,
         attention_resolutions: int,
         dropout: float = 0.0,
-        channel_mult: Union[List, Tuple] = (1, 2, 4, 8),
+        channel_mult: list | tuple = (1, 2, 4, 8),
         conv_resample: bool = True,
         dims: int = 2,
-        num_classes: Optional[Union[int, str]] = None,
+        num_classes: int | str | None = None,
         use_checkpoint: bool = False,
         num_heads: int = -1,
         num_head_channels: int = -1,
@@ -528,14 +528,14 @@ class UNetModel(nn.Module):
         use_scale_shift_norm: bool = False,
         resblock_updown: bool = False,
         transformer_depth: int = 1,
-        context_dim: Optional[int] = None,
-        disable_self_attentions: Optional[List[bool]] = None,
-        num_attention_blocks: Optional[List[int]] = None,
+        context_dim: int | None = None,
+        disable_self_attentions: list[bool] | None = None,
+        num_attention_blocks: list[int] | None = None,
         disable_middle_self_attn: bool = False,
         disable_middle_transformer: bool = False,
         use_linear_in_transformer: bool = False,
         spatial_transformer_attn_type: str = "softmax",
-        adm_in_channels: Optional[int] = None,
+        adm_in_channels: int | None = None,
     ):
         super().__init__()
 
@@ -543,14 +543,14 @@ class UNetModel(nn.Module):
             num_heads_upsample = num_heads
 
         if num_heads == -1:
-            assert (
-                num_head_channels != -1
-            ), "Either num_heads or num_head_channels has to be set"
+            assert num_head_channels != -1, (
+                "Either num_heads or num_head_channels has to be set"
+            )
 
         if num_head_channels == -1:
-            assert (
-                num_heads != -1
-            ), "Either num_heads or num_head_channels has to be set"
+            assert num_heads != -1, (
+                "Either num_heads or num_head_channels has to be set"
+            )
 
         self.in_channels = in_channels
         self.model_channels = model_channels
@@ -822,9 +822,9 @@ class UNetModel(nn.Module):
     def forward(
         self,
         x: th.Tensor,
-        timesteps: Optional[th.Tensor] = None,
-        context: Optional[th.Tensor] = None,
-        y: Optional[th.Tensor] = None,
+        timesteps: th.Tensor | None = None,
+        context: th.Tensor | None = None,
+        y: th.Tensor | None = None,
         **kwargs,
     ) -> th.Tensor:
         """
@@ -835,9 +835,9 @@ class UNetModel(nn.Module):
         :param y: an [N] Tensor of labels, if class-conditional.
         :return: an [N x C x ...] Tensor of outputs.
         """
-        assert (y is not None) == (
-            self.num_classes is not None
-        ), "must specify y if and only if the model is class-conditional"
+        assert (y is not None) == (self.num_classes is not None), (
+            "must specify y if and only if the model is class-conditional"
+        )
         hs = []
         t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
         emb = self.time_embed(t_emb)

@@ -3,7 +3,8 @@
 # pytorch_diffusion + derived encoder decoder
 import logging
 import math
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import torch
 import torch.nn as nn
@@ -228,7 +229,7 @@ class MemoryEfficientAttnBlock(nn.Module):
         self.proj_out = torch.nn.Conv2d(
             in_channels, in_channels, kernel_size=1, stride=1, padding=0
         )
-        self.attention_op: Optional[Any] = None
+        self.attention_op: Any | None = None
 
     def attention(self, h_: torch.Tensor) -> torch.Tensor:
         h_ = self.norm(h_)

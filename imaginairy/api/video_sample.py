@@ -8,7 +8,7 @@ import re
 import time
 from glob import glob
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 import numpy as np
@@ -46,9 +46,9 @@ def generate_video(
     output_fps: int = 6,
     motion_bucket_id: int = 127,
     cond_aug: float = 0.02,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     decoding_t: int = 1,  # Number of frames decoded at a time! This eats most VRAM. Reduce if necessary.
-    device: Optional[str] = None,
+    device: str | None = None,
     repetitions=1,
     output_format="webp",
 ):

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from imaginairy.config import DEFAULT_UPSCALE_MODEL
 from imaginairy.utils import get_device
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def upscale_image(
-    img: "Union[LazyLoadingImage, Image.Image]",
+    img: "LazyLoadingImage | Image.Image",
     upscaler_model: str = DEFAULT_UPSCALE_MODEL,
     tile_size: int = 512,
     tile_pad: int = 50,
@@ -96,7 +96,7 @@ def upscale_image(
     return image
 
 
-def load_image(img: "Union[LazyLoadingImage, Image.Image]"):
+def load_image(img: "LazyLoadingImage | Image.Image"):
     """
     Converts a LazyLoadingImage or PIL Image into a PyTorch tensor.
     """

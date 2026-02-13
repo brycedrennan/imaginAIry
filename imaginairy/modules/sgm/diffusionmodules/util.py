@@ -10,7 +10,6 @@ thanks!
 """
 
 import math
-from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -317,9 +316,9 @@ class AlphaBlender(nn.Module):
         self.merge_strategy = merge_strategy
         self.rearrange_pattern = rearrange_pattern
 
-        assert (
-            merge_strategy in self.strategies
-        ), f"merge_strategy needs to be in {self.strategies}"
+        assert merge_strategy in self.strategies, (
+            f"merge_strategy needs to be in {self.strategies}"
+        )
 
         if self.merge_strategy == "fixed":
             self.register_buffer("mix_factor", torch.Tensor([alpha]))
@@ -355,7 +354,7 @@ class AlphaBlender(nn.Module):
         self,
         x_spatial: torch.Tensor,
         x_temporal: torch.Tensor,
-        image_only_indicator: Optional[torch.Tensor] = None,
+        image_only_indicator: torch.Tensor | None = None,
     ) -> torch.Tensor:
         alpha = self.get_alpha(image_only_indicator)
         x = (

@@ -5,7 +5,7 @@ import math
 import re
 from abc import abstractmethod
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 import torch
 import torch.nn as nn
@@ -40,8 +40,8 @@ class AbstractAutoencoder(nn.Module):
 
     def __init__(
         self,
-        ema_decay: Union[None, float] = None,
-        monitor: Union[None, str] = None,
+        ema_decay: None | float = None,
+        monitor: None | str = None,
         input_key: str = "jpg",
     ):
         super().__init__()
@@ -58,7 +58,7 @@ class AbstractAutoencoder(nn.Module):
         if version.parse(torch.__version__) >= version.parse("2.0.0"):
             self.automatic_optimization = False
 
-    def apply_ckpt(self, ckpt: Union[None, str, dict]):
+    def apply_ckpt(self, ckpt: None | str | dict):
         if ckpt is None:
             return
         if isinstance(ckpt, str):
@@ -119,21 +119,21 @@ class AutoencodingEngine(AbstractAutoencoder):
     def __init__(
         self,
         *args,
-        encoder_config: Dict,
-        decoder_config: Dict,
-        loss_config: Dict,
-        regularizer_config: Dict,
-        optimizer_config: Union[Dict, None] = None,
+        encoder_config: dict,
+        decoder_config: dict,
+        loss_config: dict,
+        regularizer_config: dict,
+        optimizer_config: dict | None = None,
         lr_g_factor: float = 1.0,
-        trainable_ae_params: Optional[List[List[str]]] = None,
-        ae_optimizer_args: Optional[List[dict]] = None,
-        trainable_disc_params: Optional[List[List[str]]] = None,
-        disc_optimizer_args: Optional[List[dict]] = None,
+        trainable_ae_params: list[list[str]] | None = None,
+        ae_optimizer_args: list[dict] | None = None,
+        trainable_disc_params: list[list[str]] | None = None,
+        disc_optimizer_args: list[dict] | None = None,
         disc_start_iter: int = 0,
         diff_boost_factor: float = 3.0,
-        ckpt_engine: Union[None, str, dict] = None,
-        ckpt_path: Optional[str] = None,
-        additional_decode_keys: Optional[List[str]] = None,
+        ckpt_engine: None | str | dict = None,
+        ckpt_path: str | None = None,
+        additional_decode_keys: list[str] | None = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -179,7 +179,7 @@ class AutoencodingEngine(AbstractAutoencoder):
         self.apply_ckpt(default(ckpt_path, ckpt_engine))
         self.additional_decode_keys = set(default(additional_decode_keys, []))
 
-    def get_input(self, batch: Dict) -> torch.Tensor:
+    def get_input(self, batch: dict) -> torch.Tensor:
         # assuming unified data format, dataloader returns a dict.
         # image tensors should be scaled to -1 ... 1 and in channels-first
         # format (e.g., bchw instead if bhwc)
@@ -210,7 +210,7 @@ class AutoencodingEngine(AbstractAutoencoder):
         x: torch.Tensor,
         return_reg_log: bool = False,
         unregularized: bool = False,
-    ) -> Union[torch.Tensor, Tuple[torch.Tensor, dict]]:
+    ) -> torch.Tensor | tuple[torch.Tensor, dict]:
         z = self.encoder(x)
         if unregularized:
             return z, {}
@@ -225,7 +225,7 @@ class AutoencodingEngine(AbstractAutoencoder):
 
     def forward(
         self, x: torch.Tensor, **additional_decode_kwargs
-    ) -> Tuple[torch.Tensor, torch.Tensor, dict]:
+    ) -> tuple[torch.Tensor, torch.Tensor, dict]:
         z, reg_log = self.encode(x, return_reg_log=True)
         dec = self.decode(z, **additional_decode_kwargs)
         return z, dec, reg_log
@@ -308,14 +308,14 @@ class AutoencodingEngine(AbstractAutoencoder):
             self.manual_backward(loss)
         opt.step()
 
-    def validation_step(self, batch: dict, batch_idx: int) -> Dict:
+    def validation_step(self, batch: dict, batch_idx: int) -> dict:
         log_dict = self._validation_step(batch, batch_idx)
         with self.ema_scope():
             log_dict_ema = self._validation_step(batch, batch_idx, postfix="_ema")
             log_dict.update(log_dict_ema)
         return log_dict
 
-    def _validation_step(self, batch: dict, batch_idx: int, postfix: str = "") -> Dict:
+    def _validation_step(self, batch: dict, batch_idx: int, postfix: str = "") -> dict:
         x = self.get_input(batch)
 
         z, xrec, regularization_log = self(x)
@@ -354,8 +354,8 @@ class AutoencodingEngine(AbstractAutoencoder):
         return full_log_dict
 
     def get_param_groups(
-        self, parameter_names: List[List[str]], optimizer_args: List[dict]
-    ) -> Tuple[List[Dict[str, Any]], int]:
+        self, parameter_names: list[list[str]], optimizer_args: list[dict]
+    ) -> tuple[list[dict[str, Any]], int]:
         groups = []
         num_params = 0
         for names, args in zip(parameter_names, optimizer_args):
@@ -373,7 +373,7 @@ class AutoencodingEngine(AbstractAutoencoder):
             groups.append({"params": params, **args})
         return groups, num_params
 
-    def configure_optimizers(self) -> List[torch.optim.Optimizer]:
+    def configure_optimizers(self) -> list[torch.optim.Optimizer]:
         if self.trainable_ae_params is None:
             ae_params = self.get_autoencoder_params()
         else:
@@ -406,7 +406,7 @@ class AutoencodingEngine(AbstractAutoencoder):
 
     @torch.no_grad()
     def log_images(
-        self, batch: dict, additional_log_kwargs: Optional[Dict] = None, **kwargs
+        self, batch: dict, additional_log_kwargs: dict | None = None, **kwargs
     ) -> dict:
         log = {}
         additional_decode_kwargs = {}
@@ -480,7 +480,7 @@ class AutoencodingEngineLegacy(AutoencodingEngine):
 
     def encode(
         self, x: torch.Tensor, return_reg_log: bool = False
-    ) -> Union[torch.Tensor, Tuple[torch.Tensor, dict]]:
+    ) -> torch.Tensor | tuple[torch.Tensor, dict]:
         if self.max_batch_size is None:
             z = self.encoder(x)
             z = self.quant_conv(z)
@@ -578,9 +578,9 @@ class AEIntegerWrapper(nn.Module):
     def __init__(
         self,
         model: nn.Module,
-        shape: Union[None, Tuple[int, int], List[int]] = (16, 16),
+        shape: None | tuple[int, int] | list[int] = (16, 16),
         regularization_key: str = "regularization",
-        encoder_kwargs: Optional[Dict[str, Any]] = None,
+        encoder_kwargs: dict[str, Any] | None = None,
     ):
         super().__init__()
         self.model = model
@@ -591,16 +591,16 @@ class AEIntegerWrapper(nn.Module):
         self.encoder_kwargs = default(encoder_kwargs, {"return_reg_log": True})
 
     def encode(self, x) -> torch.Tensor:
-        assert (
-            not self.training
-        ), f"{self.__class__.__name__} only supports inference currently"
+        assert not self.training, (
+            f"{self.__class__.__name__} only supports inference currently"
+        )
         _, log = self.model.encode(x, **self.encoder_kwargs)
         assert isinstance(log, dict)
         inds = log["min_encoding_indices"]
         return rearrange(inds, "b ... -> b (...)")
 
     def decode(
-        self, inds: torch.Tensor, shape: Union[None, tuple, list] = None
+        self, inds: torch.Tensor, shape: None | tuple | list = None
     ) -> torch.Tensor:
         # expect inds shape (b, s) with s = h*w
         shape = default(shape, self.shape)  # Optional[(h, w)]

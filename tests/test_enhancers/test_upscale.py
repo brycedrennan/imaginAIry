@@ -23,11 +23,14 @@ def test_upscale_cmd_format_option():
     mock_img.save = Mock()
     mock_img.height = 1000
 
-    with patch.multiple(
-        "imaginairy.enhancers.upscale", upscale_image=Mock(return_value=mock_img)
-    ), patch(
-        "imaginairy.utils.glob_expand_paths",
-        new=Mock(return_value=[f"{TESTS_FOLDER}/data/sand_upscale_difficult.jpg"]),
+    with (
+        patch.multiple(
+            "imaginairy.enhancers.upscale", upscale_image=Mock(return_value=mock_img)
+        ),
+        patch(
+            "imaginairy.utils.glob_expand_paths",
+            new=Mock(return_value=[f"{TESTS_FOLDER}/data/sand_upscale_difficult.jpg"]),
+        ),
     ):
         result = runner.invoke(
             upscale_cmd,

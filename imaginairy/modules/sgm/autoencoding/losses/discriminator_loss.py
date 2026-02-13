@@ -1,6 +1,6 @@
 """Classes for discriminator loss computation"""
 
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from collections.abc import Iterator
 
 import numpy as np
 import torch
@@ -31,9 +31,9 @@ class GeneralLPIPSWithDiscriminator(nn.Module):
         scale_input_to_tgt_size: bool = False,
         dims: int = 2,
         learn_logvar: bool = False,
-        regularization_weights: Union[None, Dict[str, float]] = None,
-        additional_log_keys: Optional[List[str]] = None,
-        discriminator_config: Optional[Dict] = None,
+        regularization_weights: None | dict[str, float] = None,
+        additional_log_keys: list[str] | None = None,
+        discriminator_config: dict | None = None,
     ):
         super().__init__()
         self.dims = dims
@@ -96,7 +96,7 @@ class GeneralLPIPSWithDiscriminator(nn.Module):
     @torch.no_grad()
     def log_images(
         self, inputs: torch.Tensor, reconstructions: torch.Tensor
-    ) -> Dict[str, torch.Tensor]:
+    ) -> dict[str, torch.Tensor]:
         from matplotlib import colormaps, pyplot as plt
 
         # calc logits of real/fake
@@ -214,13 +214,13 @@ class GeneralLPIPSWithDiscriminator(nn.Module):
         inputs: torch.Tensor,
         reconstructions: torch.Tensor,
         *,  # added because I changed the order here
-        regularization_log: Dict[str, torch.Tensor],
+        regularization_log: dict[str, torch.Tensor],
         optimizer_idx: int,
         global_step: int,
         last_layer: torch.Tensor,
         split: str = "train",
-        weights: Union[None, float, torch.Tensor] = None,
-    ) -> Tuple[torch.Tensor, dict]:
+        weights: None | float | torch.Tensor = None,
+    ) -> tuple[torch.Tensor, dict]:
         if self.scale_input_to_tgt_size:
             inputs = torch.nn.functional.interpolate(
                 inputs, reconstructions.shape[2:], mode="bicubic", antialias=True
@@ -300,8 +300,8 @@ class GeneralLPIPSWithDiscriminator(nn.Module):
     def get_nll_loss(
         self,
         rec_loss: torch.Tensor,
-        weights: Optional[Union[float, torch.Tensor]] = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        weights: float | torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         nll_loss = rec_loss / torch.exp(self.logvar) + self.logvar
         weighted_nll_loss = nll_loss
         if weights is not None:

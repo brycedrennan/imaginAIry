@@ -39,9 +39,9 @@ class AbstractLowScaleModel(nn.Module):
         self.num_timesteps = int(timesteps)
         self.linear_start = linear_start
         self.linear_end = linear_end
-        assert (
-            alphas_cumprod.shape[0] == self.num_timesteps
-        ), "alphas have to be defined for each timestep"
+        assert alphas_cumprod.shape[0] == self.num_timesteps, (
+            "alphas have to be defined for each timestep"
+        )
 
         to_torch = partial(torch.tensor, dtype=torch.float32)
 

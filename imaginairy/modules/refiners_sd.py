@@ -3,7 +3,7 @@
 import logging
 import math
 from functools import lru_cache
-from typing import Any, List, Literal
+from typing import Any, Literal
 
 import numpy as np
 import torch
@@ -220,8 +220,8 @@ class StableDiffusion_1(TileModeMixin, SD1ImagePromptMixin, RefinerStableDiffusi
 
     def calculate_text_conditioning_kwargs(
         self,
-        positive_prompts: List[WeightedPrompt],
-        negative_prompts: List[WeightedPrompt],
+        positive_prompts: list[WeightedPrompt],
+        negative_prompts: list[WeightedPrompt],
         positive_conditioning_override: Tensor | None = None,
     ):
         import torch
@@ -242,7 +242,7 @@ class StableDiffusion_1(TileModeMixin, SD1ImagePromptMixin, RefinerStableDiffusi
         )
         return {"clip_text_embedding": clip_text_embedding}
 
-    def prompts_to_embeddings(self, prompts: List[WeightedPrompt]) -> Tensor:
+    def prompts_to_embeddings(self, prompts: list[WeightedPrompt]) -> Tensor:
         import torch
 
         total_weight = sum(wp.weight for wp in prompts)
@@ -400,8 +400,8 @@ class StableDiffusion_XL(
 
     def calculate_text_conditioning_kwargs(
         self,
-        positive_prompts: List[WeightedPrompt],
-        negative_prompts: List[WeightedPrompt],
+        positive_prompts: list[WeightedPrompt],
+        negative_prompts: list[WeightedPrompt],
         positive_conditioning_override: Tensor | None = None,
     ):
         import torch
@@ -436,7 +436,7 @@ class StableDiffusion_XL(
         }
 
     def prompts_to_embeddings(
-        self, prompts: List[WeightedPrompt]
+        self, prompts: list[WeightedPrompt]
     ) -> tuple[Tensor, Tensor]:
         import torch
 
@@ -507,8 +507,8 @@ class StableDiffusion_1_Inpainting(
 
     def calculate_text_conditioning_kwargs(
         self,
-        positive_prompts: List[WeightedPrompt],
-        negative_prompts: List[WeightedPrompt],
+        positive_prompts: list[WeightedPrompt],
+        negative_prompts: list[WeightedPrompt],
         positive_conditioning_override: Tensor | None = None,
     ):
         import torch
@@ -529,7 +529,7 @@ class StableDiffusion_1_Inpainting(
         )
         return {"clip_text_embedding": clip_text_embedding}
 
-    def prompts_to_embeddings(self, prompts: List[WeightedPrompt]) -> Tensor:
+    def prompts_to_embeddings(self, prompts: list[WeightedPrompt]) -> Tensor:
         import torch
 
         total_weight = sum(wp.weight for wp in prompts)

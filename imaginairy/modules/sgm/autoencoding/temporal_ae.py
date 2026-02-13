@@ -1,7 +1,7 @@
 """Classes for spatio-temporal video processing"""
 
 import logging
-from typing import Callable, Iterable, Union
+from collections.abc import Callable, Iterable
 
 import torch
 from einops import rearrange, repeat
@@ -305,7 +305,7 @@ class VideoDecoder(Decoder):
     def __init__(
         self,
         *args,
-        video_kernel_size: Union[int, list] = 3,
+        video_kernel_size: int | list = 3,
         alpha: float = 0.0,
         merge_strategy: str = "learned",
         time_mode: str = "conv-only",
@@ -315,9 +315,9 @@ class VideoDecoder(Decoder):
         self.alpha = alpha
         self.merge_strategy = merge_strategy
         self.time_mode = time_mode
-        assert (
-            self.time_mode in self.available_time_modes
-        ), f"time_mode parameter has to be in {self.available_time_modes}"
+        assert self.time_mode in self.available_time_modes, (
+            f"time_mode parameter has to be in {self.available_time_modes}"
+        )
         super().__init__(*args, **kwargs)
 
     def get_last_layer(self, skip_time_mix=False, **kwargs):

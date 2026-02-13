@@ -2,8 +2,6 @@
 Partially ported from https://github.com/crowsonkb/k-diffusion/blob/master/k_diffusion/sampling.py
 """
 
-from typing import Dict, Union
-
 import torch
 from omegaconf import ListConfig, OmegaConf
 from tqdm import tqdm
@@ -26,9 +24,9 @@ DEFAULT_GUIDER = {
 class BaseDiffusionSampler:
     def __init__(
         self,
-        discretization_config: Union[Dict, ListConfig, OmegaConf],
-        num_steps: Union[int, None] = None,
-        guider_config: Union[Dict, ListConfig, OmegaConf, None] = None,
+        discretization_config: dict | ListConfig | OmegaConf,
+        num_steps: int | None = None,
+        guider_config: dict | ListConfig | OmegaConf | None = None,
         verbose: bool = False,
         # device: Optional[str] = None,
     ):

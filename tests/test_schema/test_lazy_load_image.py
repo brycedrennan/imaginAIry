@@ -1,5 +1,4 @@
 import os.path
-from typing import Optional
 
 import pytest
 from PIL import Image
@@ -10,7 +9,7 @@ from tests import TESTS_FOLDER
 
 
 class TestModel(BaseModel):
-    header_img: Optional[LazyLoadingImage]
+    header_img: LazyLoadingImage | None
 
 
 @pytest.fixture(name="red_url")

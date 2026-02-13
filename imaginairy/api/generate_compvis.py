@@ -296,10 +296,8 @@ def _generate_single_image(
                     raise RuntimeError("Control image must have 3 channels")
 
                 if (
-                    control_input.mode != "inpaint"
-                    and control_image_t.min() < 0
-                    or control_image_t.max() > 1
-                ):
+                    control_input.mode != "inpaint" and control_image_t.min() < 0
+                ) or control_image_t.max() > 1:
                     msg = f"Control image must be in [0, 1] but we received {control_image_t.min()} and {control_image_t.max()}"
                     raise RuntimeError(msg)
 

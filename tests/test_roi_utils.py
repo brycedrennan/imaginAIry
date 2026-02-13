@@ -23,9 +23,9 @@ def test_square_roi_coordinate():
                 x1, y1, x2, y2 = square_roi_coordinate(roi, img_width, img_height)
             except RoiNotInBoundsError:
                 continue
-            assert (
-                x2 - x1 == y2 - y1
-            ), f"ROI is not square: img_width: {img_width}, img_height: {img_height}, roi: {roi}"
+            assert x2 - x1 == y2 - y1, (
+                f"ROI is not square: img_width: {img_width}, img_height: {img_height}, roi: {roi}"
+            )
 
 
 # resize_roi_coordinates
@@ -57,13 +57,13 @@ def test_square_resize_roi_coordinates():
                 x1, y1, x2, y2 = resize_roi_coordinates(
                     squared_roi, factor, img_width, img_height
                 )
-                assert (
-                    x2 - x1 == y2 - y1
-                ), f"ROI is not square: img_width: {img_width}, img_height: {img_height}, roi: {roi}"
+                assert x2 - x1 == y2 - y1, (
+                    f"ROI is not square: img_width: {img_width}, img_height: {img_height}, roi: {roi}"
+                )
 
                 x1, y1, x2, y2 = resize_roi_coordinates(
                     squared_roi, factor, img_width, img_height, expand_up=False
                 )
-                assert (
-                    x2 - x1 == y2 - y1
-                ), f"ROI is not square: img_width: {img_width}, img_height: {img_height}, roi: {roi}"
+                assert x2 - x1 == y2 - y1, (
+                    f"ROI is not square: img_width: {img_width}, img_height: {img_height}, roi: {roi}"
+                )

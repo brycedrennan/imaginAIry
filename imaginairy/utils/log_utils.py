@@ -5,10 +5,10 @@ import logging.config
 import re
 import time
 import warnings
+from collections.abc import Callable
 from contextlib import contextmanager
 from functools import lru_cache
 from logging import Logger
-from typing import Callable
 
 import torch.cuda
 

@@ -3,7 +3,7 @@ import logging
 import math
 from enum import IntEnum
 from functools import lru_cache
-from typing import List, Tuple, Union
+from typing import Union
 
 import cv2
 import numpy as np
@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 N_PART_LABELS = 24
 
 
-_RawBoxType = Union[List[float], Tuple[float, ...], torch.Tensor, np.ndarray]
-IntTupleBox = Tuple[int, int, int, int]
+_RawBoxType = Union[list[float], tuple[float, ...], torch.Tensor, np.ndarray]
+IntTupleBox = tuple[int, int, int, int]
 
 
 def safer_memory(x):
@@ -404,9 +404,9 @@ class BoxMode(IntEnum):
         ], "Relative mode not yet supported!"
 
         if from_mode == BoxMode.XYWHA_ABS and to_mode == BoxMode.XYXY_ABS:
-            assert (
-                arr.shape[-1] == 5
-            ), "The last dimension of input shape must be 5 for XYWHA format"
+            assert arr.shape[-1] == 5, (
+                "The last dimension of input shape must be 5 for XYWHA format"
+            )
             original_dtype = arr.dtype
             arr = arr.double()
 

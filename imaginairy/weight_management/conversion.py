@@ -2,7 +2,7 @@
 
 import os.path
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from typing import TYPE_CHECKING
 
 from imaginairy.weight_management import utils
@@ -93,7 +93,7 @@ class WeightMap:
         return converted_state_dict
 
 
-@lru_cache(maxsize=None)
+@cache
 def load_state_dict_conversion_maps() -> dict[str, dict]:
     import json
 

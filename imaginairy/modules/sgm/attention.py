@@ -3,7 +3,7 @@
 import logging
 import math
 from inspect import isfunction
-from typing import Any, Optional
+from typing import Any
 
 import torch
 import torch.nn.functional as F
@@ -65,7 +65,7 @@ def exists(val):
 
 
 def uniq(arr):
-    return {el: True for el in arr}.keys()
+    return dict.fromkeys(arr, True).keys()
 
 
 def default(val, d):
@@ -161,7 +161,7 @@ class SelfAttention(nn.Module):
         dim: int,
         num_heads: int = 8,
         qkv_bias: bool = False,
-        qk_scale: Optional[float] = None,
+        qk_scale: float | None = None,
         attn_drop: float = 0.0,
         proj_drop: float = 0.0,
         attn_mode: str = "xformers",
@@ -413,7 +413,7 @@ class MemoryEfficientCrossAttention(nn.Module):
         self.to_out = nn.Sequential(
             nn.Linear(inner_dim, query_dim), nn.Dropout(dropout)
         )
-        self.attention_op: Optional[Any] = None
+        self.attention_op: Any | None = None
 
     def forward(
         self,
@@ -708,9 +708,9 @@ class SpatialTransformer(nn.Module):
                     f"to {depth * [context_dim[0]]} now."
                 )
                 # depth does not match context dims.
-                assert all(
-                    x == context_dim[0] for x in context_dim
-                ), "need homogenous context_dim to match depth automatically"
+                assert all(x == context_dim[0] for x in context_dim), (
+                    "need homogenous context_dim to match depth automatically"
+                )
                 context_dim = depth * [context_dim[0]]
         elif context_dim is None:
             context_dim = [None] * depth
@@ -780,7 +780,7 @@ class SimpleTransformer(nn.Module):
         depth: int,
         heads: int,
         dim_head: int,
-        context_dim: Optional[int] = None,
+        context_dim: int | None = None,
         dropout: float = 0.0,
         checkpoint: bool = True,
     ):
@@ -802,7 +802,7 @@ class SimpleTransformer(nn.Module):
     def forward(
         self,
         x: torch.Tensor,
-        context: Optional[torch.Tensor] = None,
+        context: torch.Tensor | None = None,
     ) -> torch.Tensor:
         for layer in self.layers:
             x = layer(x, context)

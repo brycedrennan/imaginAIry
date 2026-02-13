@@ -1,7 +1,7 @@
 """Classes for image generation API models"""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Extra, Field, HttpUrl, validator
 
@@ -10,59 +10,59 @@ from imaginairy.schema import ImaginePrompt
 
 
 class StableStudioPrompt(BaseModel):
-    text: Optional[str] = None
-    weight: Optional[float] = Field(None, ge=-1, le=1)
+    text: str | None = None
+    weight: float | None = Field(None, ge=-1, le=1)
 
 
 class StableStudioModel(BaseModel):
     id: str
-    name: Optional[str] = None
-    description: Optional[str] = None
-    image: Optional[HttpUrl] = None
+    name: str | None = None
+    description: str | None = None
+    image: HttpUrl | None = None
 
 
 class StableStudioStyle(BaseModel):
     id: str
-    name: Optional[str] = None
-    description: Optional[str] = None
-    image: Optional[HttpUrl] = None
+    name: str | None = None
+    description: str | None = None
+    image: HttpUrl | None = None
 
 
 class StableStudioSolver(BaseModel):
     id: str
-    name: Optional[str] = None
+    name: str | None = None
 
 
 class StableStudioInputImage(BaseModel):
-    blob: Optional[Base64Bytes] = None
-    weight: Optional[float] = Field(None, ge=0, le=1)
+    blob: Base64Bytes | None = None
+    weight: float | None = Field(None, ge=0, le=1)
 
 
 class StableStudioImage(BaseModel):
     id: str
-    created_at: Optional[datetime] = None
+    created_at: datetime | None = None
     input: Optional["StableStudioInput"] = None
-    blob: Optional[Base64Bytes] = None
+    blob: Base64Bytes | None = None
 
 
 class StableStudioImages(BaseModel):
     id: str
-    exclusive_start_image_id: Optional[str] = None
-    images: Optional[List[StableStudioImage]] = None
+    exclusive_start_image_id: str | None = None
+    images: list[StableStudioImage] | None = None
 
 
 class StableStudioInput(BaseModel, extra=Extra.forbid):
-    prompts: Optional[List[StableStudioPrompt]] = None
-    model: Optional[str] = None
-    style: Optional[str] = None
-    width: Optional[int] = None
-    height: Optional[int] = None
-    solver: Optional[StableStudioSolver] = Field(None, alias="sampler")
-    cfg_scale: Optional[float] = Field(None, alias="cfgScale")
-    steps: Optional[int] = None
-    seed: Optional[int] = None
-    mask_image: Optional[StableStudioInputImage] = Field(None, alias="maskImage")
-    initial_image: Optional[StableStudioInputImage] = Field(None, alias="initialImage")
+    prompts: list[StableStudioPrompt] | None = None
+    model: str | None = None
+    style: str | None = None
+    width: int | None = None
+    height: int | None = None
+    solver: StableStudioSolver | None = Field(None, alias="sampler")
+    cfg_scale: float | None = Field(None, alias="cfgScale")
+    steps: int | None = None
+    seed: int | None = None
+    mask_image: StableStudioInputImage | None = Field(None, alias="maskImage")
+    initial_image: StableStudioInputImage | None = Field(None, alias="initialImage")
 
     @validator("seed")
     def validate_seed(cls, v):
@@ -114,7 +114,7 @@ class StableStudioBatchRequest(BaseModel):
 
 
 class StableStudioBatchResponse(BaseModel):
-    images: List[StableStudioImage]
+    images: list[StableStudioImage]
 
 
 StableStudioInput.model_rebuild()

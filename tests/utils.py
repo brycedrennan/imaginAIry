@@ -14,9 +14,9 @@ def assert_image_similar_to_expectation(img, img_path, threshold=100):
         diff_img = Image.fromarray(np.asarray(img) - np.asarray(expected_img))
         diff_img.save(img_path + f"_diff_{norm_sum_sq_diff:.1f}.png")
         expected_img.save(img_path + "_expected.png")
-        assert (
-            norm_sum_sq_diff < threshold
-        ), f"{norm_sum_sq_diff:.3f} is bigger than threshold {threshold}"
+        assert norm_sum_sq_diff < threshold, (
+            f"{norm_sum_sq_diff:.3f} is bigger than threshold {threshold}"
+        )
 
 
 def calc_norm_sum_sq_diff(img, img2):
@@ -42,4 +42,4 @@ class Timer:
         self.end = time.perf_counter()
         self.elapsed = self.end - self.start
 
-        print(f"{self.name} took {self.elapsed*1000:.2f} ms")
+        print(f"{self.name} took {self.elapsed * 1000:.2f} ms")

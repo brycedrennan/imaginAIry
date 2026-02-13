@@ -1,5 +1,5 @@
 import contextlib
-from typing import Callable, List
+from collections.abc import Callable
 
 import torch
 
@@ -7,7 +7,7 @@ import torch
 class TorchRAMTracker(contextlib.ContextDecorator):
     """Tracks peak CUDA memory usage for a block of code."""
 
-    _memory_stack: List[int] = []
+    _memory_stack: list[int] = []
     mem_interface = torch.cuda
 
     def __init__(

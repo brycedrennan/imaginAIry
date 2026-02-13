@@ -40,7 +40,7 @@ def tile_process(
     output = img.new_zeros(output_shape)
     tiles_x = math.ceil(width / tile_size)
     tiles_y = math.ceil(height / tile_size)
-    logger.debug(f"Tiling with {tiles_x}x{tiles_y} ({tiles_x*tiles_y}) tiles")
+    logger.debug(f"Tiling with {tiles_x}x{tiles_y} ({tiles_x * tiles_y}) tiles")
 
     for y in range(tiles_y):
         for x in range(tiles_x):

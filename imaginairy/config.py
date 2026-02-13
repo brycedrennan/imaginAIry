@@ -1,7 +1,7 @@
 """Classes and constants for AI model configuration"""
 
 from dataclasses import dataclass
-from typing import Any, List
+from typing import Any
 
 DEFAULT_MODEL_WEIGHTS = "sd15"
 DEFAULT_SOLVER = "ddim"
@@ -20,7 +20,7 @@ DEFAULT_NEGATIVE_PROMPT = (
 @dataclass
 class ModelArchitecture:
     name: str
-    aliases: List[str]
+    aliases: list[str]
     output_modality: str
     defaults: dict[str, Any]
     config_path: str | None = None
@@ -118,7 +118,7 @@ for m in MODEL_ARCHITECTURES:
 @dataclass
 class ModelWeightsConfig:
     name: str
-    aliases: List[str]
+    aliases: list[str]
     architecture: ModelArchitecture
     defaults: dict[str, Any]
     weights_location: str
@@ -277,7 +277,7 @@ IMAGE_WEIGHTS_SHORT_NAMES.sort()
 @dataclass
 class ControlConfig:
     name: str
-    aliases: List[str]
+    aliases: list[str]
     control_type: str
     config_path: str
     weights_location: str
@@ -381,9 +381,9 @@ for cc in CONTROL_CONFIGS:
 class SolverConfig:
     name: str
     short_name: str
-    aliases: List[str]
-    papers: List[str]
-    implementations: List[str]
+    aliases: list[str]
+    papers: list[str]
+    implementations: list[str]
 
 
 SOLVER_CONFIGS = [

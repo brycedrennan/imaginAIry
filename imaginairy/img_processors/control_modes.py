@@ -1,6 +1,7 @@
 """Functions to create hint images for controlnet."""
 
-from typing import TYPE_CHECKING, Callable, Dict, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     import numpy as np
@@ -316,7 +317,7 @@ def adaptive_threshold_binarize(img: "Tensor") -> "Tensor":
     return binary.repeat(1, 3, 1, 1)
 
 
-CONTROL_MODES: Dict[str, FunctionType] = {
+CONTROL_MODES: dict[str, FunctionType] = {
     "canny": create_canny_edges,
     "depth": create_depth_map,
     "normal": create_normal_map,

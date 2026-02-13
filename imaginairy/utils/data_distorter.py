@@ -5,7 +5,6 @@ import math
 import sys
 from copy import deepcopy
 from decimal import Decimal
-from typing import Dict, Tuple, Union
 
 NODE_DELETE = object()
 
@@ -113,7 +112,7 @@ class DataDistorter:
 # nested dictionary helper functions
 
 
-def create_node_map(data: Union[dict, list, tuple]) -> Tuple[Dict[int, list], set]:
+def create_node_map(data: dict | list | tuple) -> tuple[dict[int, list], set]:
     """
     Create a map of node numbers to paths in a nested dictionary.
 

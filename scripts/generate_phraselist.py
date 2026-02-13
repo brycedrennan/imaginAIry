@@ -10,7 +10,7 @@ def generate_phrase_list(subject, num_phrases=100, max_words=6):
     prompt = (
         f'Make list of archetypal imagery about "{subject}". These will provide composition ideas to an artist.  '
         f"No more than {max_words} words per idea.  Make {num_phrases} ideas. Provide the output as plaintext with each idea on a new line. "
-        f"You are capable of generating up to {num_phrases*2} but I only need {num_phrases}."
+        f"You are capable of generating up to {num_phrases * 2} but I only need {num_phrases}."
     )
     messages = [
         {"role": "user", "content": prompt},

@@ -3,7 +3,6 @@
 import math
 from contextlib import nullcontext
 from functools import partial
-from typing import Dict, List, Optional, Tuple, Union
 
 import kornia
 import numpy as np
@@ -57,7 +56,7 @@ class AbstractEmbModel(nn.Module):
         return self._is_trainable
 
     @property
-    def ucg_rate(self) -> Union[float, torch.Tensor]:
+    def ucg_rate(self) -> float | torch.Tensor:
         return self._ucg_rate
 
     @property
@@ -69,7 +68,7 @@ class AbstractEmbModel(nn.Module):
         self._is_trainable = value
 
     @ucg_rate.setter
-    def ucg_rate(self, value: Union[float, torch.Tensor]):
+    def ucg_rate(self, value: float | torch.Tensor):
         self._ucg_rate = value
 
     @input_key.setter
@@ -93,14 +92,14 @@ class GeneralConditioner(nn.Module):
     OUTPUT_DIM2KEYS = {2: "vector", 3: "crossattn", 4: "concat", 5: "concat"}
     KEY2CATDIM = {"vector": 1, "crossattn": 2, "concat": 1}
 
-    def __init__(self, emb_models: Union[List, ListConfig]):
+    def __init__(self, emb_models: list | ListConfig):
         super().__init__()
         embedders = []
         for n, embconfig in enumerate(emb_models):
             embedder = instantiate_from_config(embconfig)
-            assert isinstance(
-                embedder, AbstractEmbModel
-            ), f"embedder model {embedder.__class__.__name__} has to inherit from AbstractEmbModel"
+            assert isinstance(embedder, AbstractEmbModel), (
+                f"embedder model {embedder.__class__.__name__} has to inherit from AbstractEmbModel"
+            )
             embedder.is_trainable = embconfig.get("is_trainable", False)
             embedder.ucg_rate = embconfig.get("ucg_rate", 0.0)
             if not embedder.is_trainable:
@@ -128,7 +127,7 @@ class GeneralConditioner(nn.Module):
             embedders.append(embedder)
         self.embedders = nn.ModuleList(embedders)
 
-    def possibly_get_ucg_val(self, embedder: AbstractEmbModel, batch: Dict) -> Dict:
+    def possibly_get_ucg_val(self, embedder: AbstractEmbModel, batch: dict) -> dict:
         assert embedder.legacy_ucg_val is not None
         p = embedder.ucg_rate
         val = embedder.legacy_ucg_val
@@ -137,9 +136,7 @@ class GeneralConditioner(nn.Module):
                 batch[embedder.input_key][i] = val
         return batch
 
-    def forward(
-        self, batch: Dict, force_zero_embeddings: Optional[List] = None
-    ) -> Dict:
+    def forward(self, batch: dict, force_zero_embeddings: list | None = None) -> dict:
         output = {}
         if force_zero_embeddings is None:
             force_zero_embeddings = []
@@ -152,9 +149,9 @@ class GeneralConditioner(nn.Module):
                     emb_out = embedder(batch[embedder.input_key])
                 elif hasattr(embedder, "input_keys"):
                     emb_out = embedder(*[batch[k] for k in embedder.input_keys])
-            assert isinstance(
-                emb_out, (torch.Tensor, list, tuple)
-            ), f"encoder outputs must be tensors or a sequence, but got {type(emb_out)}"
+            assert isinstance(emb_out, (torch.Tensor, list, tuple)), (
+                f"encoder outputs must be tensors or a sequence, but got {type(emb_out)}"
+            )
             if not isinstance(emb_out, (list, tuple)):
                 emb_out = [emb_out]
             for emb in emb_out:
@@ -185,10 +182,10 @@ class GeneralConditioner(nn.Module):
 
     def get_unconditional_conditioning(
         self,
-        batch_c: Dict,
-        batch_uc: Optional[Dict] = None,
-        force_uc_zero_embeddings: Optional[List[str]] = None,
-        force_cond_zero_embeddings: Optional[List[str]] = None,
+        batch_c: dict,
+        batch_uc: dict | None = None,
+        force_uc_zero_embeddings: list[str] | None = None,
+        force_cond_zero_embeddings: list[str] | None = None,
     ):
         if force_uc_zero_embeddings is None:
             force_uc_zero_embeddings = []
@@ -884,9 +881,9 @@ class LowScaleEncoder(nn.Module):
         self.num_timesteps = int(timesteps)
         self.linear_start = linear_start
         self.linear_end = linear_end
-        assert (
-            alphas_cumprod.shape[0] == self.num_timesteps
-        ), "alphas have to be defined for each timestep"
+        assert alphas_cumprod.shape[0] == self.num_timesteps, (
+            "alphas have to be defined for each timestep"
+        )
 
         to_torch = partial(torch.tensor, dtype=torch.float32)
 
@@ -963,7 +960,7 @@ class GaussianEncoder(Encoder, AbstractEmbModel):
         self.weight = weight
         self.flatten_output = flatten_output
 
-    def forward(self, x) -> Tuple[Dict, torch.Tensor]:
+    def forward(self, x) -> tuple[dict, torch.Tensor]:
         z = super().forward(x)
         z, log = self.posterior(z)
         log["loss"] = log["kl_loss"]
@@ -979,12 +976,12 @@ class VideoPredictionEmbedderWithEncoder(AbstractEmbModel):
         n_cond_frames: int,
         n_copies: int,
         encoder_config: dict,
-        sigma_sampler_config: Optional[dict] = None,
-        sigma_cond_config: Optional[dict] = None,
+        sigma_sampler_config: dict | None = None,
+        sigma_cond_config: dict | None = None,
         is_ae: bool = False,
         scale_factor: float = 1.0,
         disable_encoder_autocast: bool = False,
-        en_and_decode_n_samples_a_time: Optional[int] = None,
+        en_and_decode_n_samples_a_time: int | None = None,
     ):
         super().__init__()
 
@@ -1008,12 +1005,12 @@ class VideoPredictionEmbedderWithEncoder(AbstractEmbModel):
 
     def forward(
         self, vid: torch.Tensor
-    ) -> Union[
-        torch.Tensor,
-        Tuple[torch.Tensor, torch.Tensor],
-        Tuple[torch.Tensor, dict],
-        Tuple[Tuple[torch.Tensor, torch.Tensor], dict],
-    ]:
+    ) -> (
+        torch.Tensor
+        | tuple[torch.Tensor, torch.Tensor]
+        | tuple[torch.Tensor, dict]
+        | tuple[tuple[torch.Tensor, torch.Tensor], dict]
+    ):
         if self.sigma_sampler is not None:
             b = vid.shape[0] // self.n_cond_frames
             sigmas = self.sigma_sampler(b).to(vid.device)
@@ -1053,7 +1050,7 @@ class VideoPredictionEmbedderWithEncoder(AbstractEmbModel):
 class FrozenOpenCLIPImagePredictionEmbedder(AbstractEmbModel):
     def __init__(
         self,
-        open_clip_embedding_config: Dict,
+        open_clip_embedding_config: dict,
         n_cond_frames: int,
         n_copies: int,
     ):
