@@ -81,7 +81,7 @@ class LinearAttention(nn.Module):
         self.to_out = nn.Conv2d(hidden_dim, dim, 1)
 
     def forward(self, x):
-        b, c, h, w = x.shape
+        _b, _c, h, w = x.shape
         qkv = self.to_qkv(x)
         q, k, v = rearrange(
             qkv, "b (qkv heads c) h w -> qkv b heads c (h w)", heads=self.heads, qkv=3
@@ -429,7 +429,7 @@ class SpatialTransformer(nn.Module):
         # note: if no context is given, cross-attention defaults to self-attention
         if not isinstance(context, list):
             context = [context]
-        b, c, h, w = x.shape
+        _b, _c, h, w = x.shape
         x_in = x
         x = self.norm(x)
         if self.use_linear:

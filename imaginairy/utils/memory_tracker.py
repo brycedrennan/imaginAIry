@@ -29,7 +29,7 @@ class TorchRAMTracker(contextlib.ContextDecorator):
 
     def stop(self):
         end_peak = self.mem_interface.max_memory_allocated()
-        peaks = TorchRAMTracker._memory_stack[self._stack_depth :] + [end_peak]
+        peaks = [*TorchRAMTracker._memory_stack[self._stack_depth :], end_peak]
         self.peak_memory = max(peaks)
         del TorchRAMTracker._memory_stack[self._stack_depth :]
         self.end_memory = self.mem_interface.memory_allocated()

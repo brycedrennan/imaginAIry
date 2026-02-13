@@ -400,7 +400,7 @@ class DDPM(nn.Module):
 
                     sd[name] = new_param
 
-        missing, unexpected = (
+        _missing, _unexpected = (
             self.load_state_dict(sd, strict=False)
             if not only_model
             else self.model.load_state_dict(sd, strict=False)
@@ -968,7 +968,7 @@ class LatentDiffusion(DDPM):
         :param x: img of size (bs, c, h, w)
         :return: n img crops of size (n, bs, c, kernel_size[0], kernel_size[1])
         """
-        bs, nc, h, w = x.shape
+        _bs, _nc, h, w = x.shape
 
         # number of crops in image
         Ly = (h - kernel_size[0]) // stride[0] + 1
@@ -1168,7 +1168,7 @@ class LatentDiffusion(DDPM):
             ks = self.split_input_params["ks"]  # eg. (128, 128)
             stride = self.split_input_params["stride"]  # eg. (64, 64)
 
-            h, w = x_noisy.shape[-2:]
+            _h, w = x_noisy.shape[-2:]
 
             fold, unfold, normalization, weighting = self.get_fold_unfold(
                 x_noisy, ks, stride
@@ -1644,7 +1644,7 @@ class LatentDiffusion(DDPM):
 
         if plot_progressive_rows:
             with ema_scope("Plotting Progressives"):
-                img, progressives = self.progressive_denoising(
+                _img, progressives = self.progressive_denoising(
                     c,
                     shape=(self.channels, self.image_size, self.image_size),
                     batch_size=N,
@@ -1804,7 +1804,7 @@ class LatentFinetuneDiffusion(LatentDiffusion):
                 new_entry[:, : self.keep_dims, ...] = sd[k]
                 sd[k] = new_entry
 
-        missing, unexpected = (
+        _missing, _unexpected = (
             self.load_state_dict(sd, strict=False)
             if not only_model
             else self.model.load_state_dict(sd, strict=False)

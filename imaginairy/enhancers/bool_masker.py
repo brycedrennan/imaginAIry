@@ -91,7 +91,7 @@ class ModifiedMask(Mask):
         mask = self.mask.apply_masks(mask_cache)
         if self.operand_str in {"+", "-"}:
             # kernel must be odd
-            kernel_size = int(round(self.value))
+            kernel_size = round(self.value)
             kernel_size = kernel_size if kernel_size % 2 else kernel_size + 1
             morph_method = dilation if self.operand_str == "+" else erosion
             mask = mask.unsqueeze_(0).unsqueeze_(0)

@@ -30,7 +30,7 @@ def blip_model():
 
     model = BLIP_Decoder(image_size=BLIP_EVAL_SIZE, vit="base", med_config=config_path)
     cached_url_path = get_cached_url_path(url)
-    model, msg = load_checkpoint(model, cached_url_path)
+    model, _msg = load_checkpoint(model, cached_url_path)
     model.eval()
     model = model.to(device)
     return model

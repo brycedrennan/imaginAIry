@@ -9,12 +9,12 @@ import torch
 
 
 def mask_tile(tile, overlap, std_overlap, side="bottom"):
-    b, c, h, w = tile.shape
+    _b, c, h, w = tile.shape
     top_overlap, bottom_overlap, right_overlap, left_overlap = overlap
     (
         std_top_overlap,
         std_bottom_overlap,
-        std_right_overlap,
+        _std_right_overlap,
         std_left_overlap,
     ) = std_overlap
 
@@ -76,7 +76,7 @@ def mask_tile(tile, overlap, std_overlap, side="bottom"):
 
 
 def get_tile_coords(d, tile_dim, overlap=0):
-    move = int(math.ceil(round(tile_dim * (1 - overlap), 10)))
+    move = math.ceil(round(tile_dim * (1 - overlap), 10))
     c, tile_start, coords = 1, 0, [0]
     while tile_start + tile_dim < d:
         tile_start = move * c
@@ -179,8 +179,8 @@ def tile_setup(tile_size, overlap_percent, base_size):
 
     x_coords = get_tile_coords(base_size[1], tile_size[1], overlap_percent[1])
     y_coords = get_tile_coords(base_size[0], tile_size[0], overlap_percent[0])
-    y_ovlp = int(math.floor(round(tile_size[0] * overlap_percent[0], 10)))
-    x_ovlp = int(math.floor(round(tile_size[1] * overlap_percent[1], 10)))
+    y_ovlp = math.floor(round(tile_size[0] * overlap_percent[0], 10))
+    x_ovlp = math.floor(round(tile_size[1] * overlap_percent[1], 10))
     if len(x_coords) == 1:
         x_ovlp = 0
     if len(y_coords) == 1:

@@ -37,10 +37,10 @@ def make_bounce_animation(
     middle_imgs = imgs[1:-1]
     last_img = imgs[-1]
 
-    max_frames = int(round(transition_duration_ms / 1000 * max_fps))
+    max_frames = round(transition_duration_ms / 1000 * max_fps)
     min_duration = int(1000 / max_fps)
     if middle_imgs:
-        progress_duration = int(round(transition_duration_ms / len(middle_imgs)))
+        progress_duration = round(transition_duration_ms / len(middle_imgs))
     else:
         progress_duration = 0
     progress_duration = max(progress_duration, min_duration)
@@ -157,7 +157,7 @@ def select_images_by_duration_at_fps(images, durations_ms, fps=30):
     """select the proper image to show for each frame of a video."""
     for i, image in enumerate(images):
         duration = durations_ms[i] / 1000
-        num_frames = int(round(duration * fps))
+        num_frames = round(duration * fps)
         # print(
         #     f"Showing image {i} for {num_frames} frames for {durations_ms[i]}ms at {fps} fps."
         # )

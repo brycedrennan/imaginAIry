@@ -57,7 +57,7 @@ def test_feather_tile_simple(img_ratio, tile_size, overlap_pct):
     img = img[:, :, : img.shape[2], : int(img.shape[3] * img_ratio)]
     img_sum = img.sum()
     tiles = tile_image(img, tile_size=tile_size, overlap_percent=overlap_pct)
-    tile_coords, tile_size, overlap = tile_setup(
+    _tile_coords, tile_size, _overlap = tile_setup(
         tile_size, overlap_pct, (img.size(2), img.size(3))
     )
 
@@ -89,7 +89,7 @@ def test_feather_tile_brute():
     def tile_untile(img, tile_size, overlap_percent):
         img_sum = img.sum()
         tiles = tile_image(img, tile_size=tile_size, overlap_percent=overlap_percent)
-        tile_coords, tile_size, overlap = tile_setup(
+        _tile_coords, tile_size, _overlap = tile_setup(
             tile_size, overlap_percent, (img.size(2), img.size(3))
         )
         # print(

@@ -1,0 +1,176 @@
+[build-system]
+requires = ["setuptools>=76"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imaginAIry"
+version = "15.0.0"
+description = "AI imagined images. Pythonic generation of images."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Bryce Drennan" }]
+dependencies = [
+    "click>=8.0.0",
+    "click-help-colors>=0.9.1",
+    "click-shell>=2.0",
+    "protobuf!=3.20.2,!=3.19.5",
+    "fastapi>=0.70.0",
+    "ftfy>=6.0.1",
+    "torch>=2.1.0",
+    "numpy>=1.22.0",
+    "tqdm>=4.64.0",
+    "diffusers>=0.30.3",
+    "Pillow>=9.1.0",
+    "psutil>5.7.3",
+    "omegaconf>=2.1.1",
+    "open-clip-torch>=2.0.0",
+    "opencv-python>=4.4.0.46",
+    "pydantic>=2.3.0",
+    "pyparsing>=3.0.0",
+    "requests>=2.28.1",
+    "jaxtyping>=0.2.23",
+    "einops>=0.3.0",
+    "safetensors>=0.4.0",
+    "scipy>=1.8",
+    "termcolor",
+    "timm>=0.4.12,!=0.9.0,!=0.9.1",
+    "torchdiffeq>=0.2.0",
+    "torchvision>=0.13.1",
+    "transformers>=4.19.2",
+    "triton>=2.0.0; sys_platform=='linux' and platform_machine!='aarch64'",
+    "kornia>=0.6",
+    "uvicorn>=0.16.0",
+    "spandrel>=0.1.8",
+    "optimum-quanto>=0.2.4",
+    "sentencepiece>=0.2.0",
+    "accelerate>=0.24.0",
+]
+
+[project.urls]
+Documentation = "https://github.com/brycedrennan/imaginAIry/blob/master/README.md"
+Source = "https://github.com/brycedrennan/imaginAIry"
+
+[project.scripts]
+imagine = "imaginairy.cli.main:imagine_cmd"
+aimg = "imaginairy.cli.main:aimg"
+
+[tool.setuptools.packages.find]
+include = ["imaginairy", "imaginairy.*"]
+
+[tool.setuptools.package-data]
+imaginairy = [
+    "configs/*.yaml",
+    "weight_management/weight_maps/*.json",
+    "data/*.*",
+    "cli/bin/*.*",
+    "http_app/stablestudio/dist/*.*",
+    "http_app/stablestudio/dist/assets/*.*",
+    "http_app/stablestudio/dist/LICENSE",
+    "enhancers/phraselists/*.txt",
+    "vendored/clip/*.txt.gz",
+    "vendored/clipseg/*.pth",
+    "vendored/blip/configs/*.*",
+    "vendored/noodle_soup_prompts/*.*",
+    "vendored/noodle_soup_prompts/LICENSE",
+    "vendored/refiners/foundationals/clip/bpe_simple_vocab_16e6.txt.gz",
+]
+
+[dependency-groups]
+dev = [
+    "coverage",
+    "httpx",
+    "mkdocs-material",
+    "mkdocs-click",
+    "mkdocstrings[python]",
+    "ruff",
+    "ty",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-randomly",
+    "pytest-sugar",
+    "responses",
+]
+
+[tool.pytest.ini_options]
+addopts = "-s --tb=native -v --durations=10"
+norecursedirs = "build dist downloads other prolly_delete imaginairy/vendored scripts"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
+markers = ["gputest: uses the gpu"]
+
+[tool.ruff]
+extend-exclude = ["imaginairy/vendored", "downloads", "other"]
+
+[tool.ruff.lint]
+extend-ignore = [
+    "E501", "G004", "RET504", "SIM114",
+    "TRY003", "TRY400", "TRY401", "RUF012", "RUF100", "ISC001",
+    "TC002", "TC003", "PLC0415", "PLC0206",
+]
+extend-select = [
+    "I", "E", "W", "UP", "ASYNC", "BLE", "A001", "A002",
+    "C4", "DTZ", "T10", "EM", "ISC", "ICN", "G", "PIE", "PT",
+    "Q", "SIM", "TID", "TCH", "PLC", "PLE", "TRY", "RUF",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-errmsg]
+max-string-length = 50
+
+[tool.ty]
+[tool.ty.src]
+exclude = ["imaginairy/vendored/"]
+
+[tool.ty.environment]
+python-version = "3.11"
+
+[tool.ty.rules]
+# Start permissive, tighten over time
+invalid-type-form = "ignore"
+call-non-callable = "ignore"
+not-iterable = "ignore"
+invalid-assignment = "ignore"
+invalid-return-type = "ignore"
+missing-argument = "ignore"
+unknown-argument = "ignore"
+too-many-positional-arguments = "ignore"
+invalid-exception-caught = "ignore"
+unresolved-import = "ignore"
+unresolved-reference = "ignore"
+unresolved-attribute = "ignore"
+unused-type-ignore-comment = "ignore"
+undefined-reveal = "ignore"
+redundant-cast = "ignore"
+invalid-type-variable-constraints = "ignore"
+invalid-legacy-type-variable = "ignore"
+unsupported-operator = "ignore"
+no-matching-overload = "ignore"
+parameter-already-assigned = "ignore"
+invalid-context-manager = "ignore"
+not-subscriptable = "ignore"
+index-out-of-bounds = "ignore"
+invalid-argument-type = "ignore"
+conflicting-declarations = "ignore"
+conflicting-metaclass = "ignore"
+inconsistent-mro = "ignore"
+possibly-missing-attribute = "ignore"
+deprecated = "ignore"
+invalid-method-override = "ignore"
+invalid-overload = "ignore"
+empty-body = "ignore"
+invalid-parameter-default = "ignore"
+
+[tool.coverage.run]
+source = ["imaginairy"]
+omit = [
+    "*/site-packages/*",
+    "*/distutils/*",
+    "*/downloads/*",
+    "*/imaginairy/vendored/*",
+    "*/prolly_delete/*",
+    "*/other/*",
+]

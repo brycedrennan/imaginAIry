@@ -117,7 +117,7 @@ class AutoencoderKL(nn.Module):
         """
         encodes the image in slices.
         """
-        b, c, h, w = x.size()
+        _b, _c, h, w = x.size()
         final_tensor = torch.zeros(
             [1, 4, math.ceil(h / 8), math.ceil(w / 8)], device=x.device
         )
@@ -218,7 +218,7 @@ class AutoencoderKL(nn.Module):
         This results in images that don't exactly match, so we overlap, feather, and merge to reduce
         (but not completely elminate) impact.
         """
-        b, c, h, w = z.size()
+        _b, _c, h, w = z.size()
         final_tensor = torch.zeros([1, 3, h * 8, w * 8], device=z.device)
         for z_latent in z.split(1):
             decoded_chunks = []
@@ -368,7 +368,7 @@ class AutoencoderKL(nn.Module):
     def _validation_step(self, batch, batch_idx, postfix=""):
         inputs = self.get_input(batch, self.image_key)
         reconstructions, posterior = self(inputs)
-        aeloss, log_dict_ae = self.loss(
+        _aeloss, log_dict_ae = self.loss(
             inputs,
             reconstructions,
             posterior,
@@ -378,7 +378,7 @@ class AutoencoderKL(nn.Module):
             split="val" + postfix,
         )
 
-        discloss, log_dict_disc = self.loss(
+        _discloss, log_dict_disc = self.loss(
             inputs,
             reconstructions,
             posterior,
@@ -483,7 +483,7 @@ class AutoencoderKL(nn.Module):
         :param x: img of size (bs, c, h, w)
         :return: n img crops of size (n, bs, c, kernel_size[0], kernel_size[1])
         """
-        bs, nc, h, w = x.shape
+        _bs, _nc, h, w = x.shape
 
         # number of crops in image
         Ly = (h - kernel_size[0]) // stride[0] + 1
@@ -609,11 +609,11 @@ class IdentityFirstStage(torch.nn.Module):
 
 def chunk_latent(tensor, chunk_size=64, overlap_size=8):
     # Get the shape of the tensor
-    batch_size, num_channels, height, width = tensor.shape
+    _batch_size, _num_channels, height, width = tensor.shape
 
     # Calculate the number of chunks along each dimension
-    num_rows = int(math.ceil(height / chunk_size))
-    num_cols = int(math.ceil(width / chunk_size))
+    num_rows = math.ceil(height / chunk_size)
+    num_cols = math.ceil(width / chunk_size)
 
     # Initialize a list to store the chunks
     chunks = []

@@ -820,7 +820,7 @@ class SpatialRescaler(nn.Module):
 
     def forward(self, x):
         if self.wrap_video and x.ndim == 5:
-            B, C, T, H, W = x.shape
+            B, C, T, _H, _W = x.shape
             x = rearrange(x, "b c t h w -> b t c h w")
             x = rearrange(x, "b t c h w -> (b t) c h w")
 

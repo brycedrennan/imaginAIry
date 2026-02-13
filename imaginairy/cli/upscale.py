@@ -2,7 +2,7 @@
 
 import logging
 import os.path
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import click
 
@@ -112,7 +112,7 @@ def upscale_cmd(
             file_base_name, extension = os.path.splitext(os.path.basename(p))
             base_count = len(os.listdir(outdir))
 
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
             if model.startswith(("https://", "http://")):
                 model_name = get_url_file_name(model)

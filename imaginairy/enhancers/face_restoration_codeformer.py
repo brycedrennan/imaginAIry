@@ -122,7 +122,7 @@ def enhance_faces(img, fidelity=0):
 
     # face restoration for each cropped face
     for face_box, cropped_face in zip(face_helper.det_faces, face_helper.cropped_faces):
-        x1, y1, x2, y2, scaling = face_box
+        x1, y1, x2, y2, _scaling = face_box
         face_width = x2 - x1
         face_height = y2 - y1
         logger.debug(f"Face detected. size: {face_width:1f}x{face_height:.1f}")

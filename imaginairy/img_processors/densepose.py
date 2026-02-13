@@ -3,7 +3,6 @@ import logging
 import math
 from enum import IntEnum
 from functools import lru_cache
-from typing import Union
 
 import cv2
 import numpy as np
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 N_PART_LABELS = 24
 
 
-_RawBoxType = Union[list[float], tuple[float, ...], torch.Tensor, np.ndarray]
+_RawBoxType = list[float] | tuple[float, ...] | torch.Tensor | np.ndarray
 IntTupleBox = tuple[int, int, int, int]
 
 
@@ -34,10 +33,10 @@ def pad64(x):
 def resize_image_with_pad_torch(
     img, resolution, upscale_method="bicubic", mode="constant"
 ):
-    B, C, H_raw, W_raw = img.shape
+    _B, _C, H_raw, W_raw = img.shape
     k = float(resolution) / float(min(H_raw, W_raw))
-    H_target = int(math.ceil(float(H_raw) * k))
-    W_target = int(math.ceil(float(W_raw) * k))
+    H_target = math.ceil(float(H_raw) * k)
+    W_target = math.ceil(float(W_raw) * k)
 
     if k > 1:
         img = F.interpolate(
@@ -67,7 +66,7 @@ def HWC3(x: np.ndarray) -> np.ndarray:
     if x.ndim == 2:
         x = x[:, :, None]
     assert x.ndim == 3
-    H, W, C = x.shape
+    _H, _W, C = x.shape
     assert C == 1 or C == 3 or C == 4
     if C == 3:
         return x
@@ -603,7 +602,7 @@ def resample_fine_and_coarse_segm_tensors_to_bbox(
     Return:
         Labels for each pixel of the bounding box, a long tensor of size [1, H, W]
     """
-    x, y, w, h = box_xywh_abs
+    _x, _y, w, h = box_xywh_abs
     w = max(int(w), 1)
     h = max(int(h), 1)
     # coarse segmentation
@@ -641,7 +640,7 @@ def resample_uv_tensors_to_bbox(
     Return:
        Resampled U and V coordinates - a tensor [2, H, W] of float
     """
-    x, y, w, h = box_xywh_abs
+    _x, _y, w, h = box_xywh_abs
     w = max(int(w), 1)
     h = max(int(h), 1)
     u_bbox = F.interpolate(u, (h, w), mode="bilinear", align_corners=False)

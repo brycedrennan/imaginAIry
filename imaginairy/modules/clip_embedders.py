@@ -104,7 +104,7 @@ class FrozenClipImageEmbedder(nn.Module):
         antialias=False,
     ):
         super().__init__()
-        self.model, preprocess = clip.load(name=model_name, device=device, jit=jit)
+        self.model, _preprocess = clip.load(name=model_name, device=device, jit=jit)
 
         self.antialias = antialias
 

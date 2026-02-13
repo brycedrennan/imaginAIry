@@ -343,7 +343,7 @@ class AutoencodingEngine(AbstractAutoencoder):
 
         if "optimizer_idx" in extra_info:
             extra_info["optimizer_idx"] = 1
-            discloss, log_dict_disc = self.loss(x, xrec, **extra_info)
+            _discloss, log_dict_disc = self.loss(x, xrec, **extra_info)
             full_log_dict.update(log_dict_disc)
         self.log(
             f"val{postfix}/loss/rec",
@@ -487,7 +487,7 @@ class AutoencodingEngineLegacy(AutoencodingEngine):
         else:
             N = x.shape[0]
             bs = self.max_batch_size
-            n_batches = int(math.ceil(N / bs))
+            n_batches = math.ceil(N / bs)
             z = []
             for i_batch in range(n_batches):
                 z_batch = self.encoder(x[i_batch * bs : (i_batch + 1) * bs])
@@ -507,7 +507,7 @@ class AutoencodingEngineLegacy(AutoencodingEngine):
         else:
             N = z.shape[0]
             bs = self.max_batch_size
-            n_batches = int(math.ceil(N / bs))
+            n_batches = math.ceil(N / bs)
             dec = []
             for i_batch in range(n_batches):
                 dec_batch = self.post_quant_conv(z[i_batch * bs : (i_batch + 1) * bs])

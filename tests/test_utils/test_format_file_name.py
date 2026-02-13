@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -19,7 +19,7 @@ base_data = {
     "original": "file",
     "number": 1,
     "algorithm": "alg",
-    "now": datetime(2023, 1, 23, 12, 30, 45, tzinfo=timezone.utc),
+    "now": datetime(2023, 1, 23, 12, 30, 45, tzinfo=UTC),
     "ext": ".jpg",
 }
 

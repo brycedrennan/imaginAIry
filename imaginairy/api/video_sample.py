@@ -331,7 +331,7 @@ def save_video_bounce(
     frames_pil = [Image.fromarray(frame) for frame in frames_np]
     if interpolate_fps:
         # bring it up to at least 60 fps
-        fps_multiplier = int(math.ceil(interpolate_fps / output_fps))
+        fps_multiplier = math.ceil(interpolate_fps / output_fps)
         frames_pil = interpolate_images(frames_pil, fps_multiplier=fps_multiplier)
 
     transition_duration_ms = transition_duration * 1000

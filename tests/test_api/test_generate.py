@@ -306,7 +306,7 @@ control_modes = list(CONTROL_MODES.keys())
 
 
 @pytest.mark.parametrize("control_mode", control_modes)
-@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
+@pytest.mark.gputest
 def test_controlnet(filename_base_for_outputs, control_mode):
     prompt_text = "a photo of a woman sitting on a bench"
     img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png")

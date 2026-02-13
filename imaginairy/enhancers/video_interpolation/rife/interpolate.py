@@ -154,7 +154,7 @@ def interpolate_video_file(
         videogen = skvideo.io.vreader(video_path)
         lastframe = next(videogen)
         fourcc = cv2.VideoWriter_fourcc("m", "p", "4", "v")  # type: ignore
-        video_path_wo_ext, ext = os.path.splitext(video_path)
+        video_path_wo_ext, _ext = os.path.splitext(video_path)
         print(
             f"{video_path_wo_ext}.{output_extension}, {tot_frame} frames in total, {fps}FPS to {target_fps}FPS"
         )

@@ -689,7 +689,7 @@ class SlicedEncoderMixin(nn.Module):
         """
         Encodes the image in slices (for lower memory usage).
         """
-        b, c, h, w = x.size()
+        _b, _c, h, w = x.size()
         final_tensor = torch.zeros(
             [1, 4, math.floor(h / 8), math.floor(w / 8)], device=x.device
         )
@@ -754,7 +754,7 @@ class SlicedEncoderMixin(nn.Module):
         This results in image portions that don't exactly match, so we overlap, feather, and merge to reduce
         (but not completely eliminate) impact.
         """
-        b, c, h, w = x.size()
+        _b, _c, h, w = x.size()
         final_tensor = torch.zeros([1, 3, h * 8, w * 8], device=x.device)
         for x_latent in x.split(1):
             decoded_chunks = []

@@ -176,7 +176,7 @@ def shuffle_map_np(img: "np.ndarray", h=None, w=None, f=256) -> "np.ndarray":
     import cv2
     import numpy as np
 
-    H, W, C = img.shape
+    H, W, _C = img.shape
     if h is None:
         h = H
     if w is None:
@@ -192,7 +192,7 @@ def shuffle_map_torch(tensor: "Tensor", h=None, w=None, f=256) -> "Tensor":
     import torch
 
     # Assuming the input tensor is in shape (B, C, H, W)
-    B, C, H, W = tensor.shape
+    B, _C, _H, _W = tensor.shape
     device = tensor.device
     tensor = tensor.cpu()
 

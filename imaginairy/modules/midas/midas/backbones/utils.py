@@ -80,7 +80,7 @@ def forward_default(pretrained, x, function_name="forward_features"):
 
 
 def forward_adapted_unflatten(pretrained, x, function_name="forward_features"):
-    b, c, h, w = x.shape
+    _b, _c, h, w = x.shape
 
     exec(f"glob = pretrained.model.{function_name}(x)")
 

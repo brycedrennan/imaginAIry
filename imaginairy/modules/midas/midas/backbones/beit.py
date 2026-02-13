@@ -80,7 +80,7 @@ def attention_forward(
     """
     Modification of timm.models.beit.py: Attention.forward to support arbitrary window sizes.
     """
-    B, N, C = x.shape
+    B, N, _C = x.shape
 
     qkv_bias = (
         torch.cat((self.q_bias, self.k_bias, self.v_bias))

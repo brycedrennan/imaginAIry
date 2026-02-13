@@ -711,8 +711,8 @@ def create_body_pose(original_img_t):
                     vec_x = np.array(
                         [
                             score_mid[
-                                int(round(startend[I][1])),
-                                int(round(startend[I][0])),
+                                round(startend[I][1]),
+                                round(startend[I][0]),
                                 0,
                             ]
                             for I in range(len(startend))  # noqa
@@ -721,8 +721,8 @@ def create_body_pose(original_img_t):
                     vec_y = np.array(
                         [
                             score_mid[
-                                int(round(startend[I][1])),
-                                int(round(startend[I][0])),
+                                round(startend[I][1]),
+                                round(startend[I][0]),
                                 1,
                             ]
                             for I in range(len(startend))  # noqa

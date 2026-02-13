@@ -339,7 +339,7 @@ class MemoryEfficientAttnBlock(nn.Module):
 
 class MemoryEfficientCrossAttentionWrapper(MemoryEfficientCrossAttention):
     def forward(self, x, context=None, mask=None):
-        b, c, h, w = x.shape
+        _b, c, h, w = x.shape
         x = rearrange(x, "b c h w -> b (h w) c")
         out = super().forward(x, context=context, mask=mask)
         out = rearrange(out, "b (h w) c -> b c h w", h=h, w=w, c=c)
@@ -965,8 +965,8 @@ class LatentRescaler(nn.Module):
         x = torch.nn.functional.interpolate(
             x,
             size=(
-                int(round(x.shape[2] * self.factor)),
-                int(round(x.shape[3] * self.factor)),
+                round(x.shape[2] * self.factor),
+                round(x.shape[3] * self.factor),
             ),
         )
         x = self.attn(x)

@@ -8,10 +8,10 @@ import json
 import logging
 import os.path
 import random
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, Self, cast
 
 from pydantic import (
     BaseModel,
@@ -22,7 +22,6 @@ from pydantic import (
     model_validator,
 )
 from pydantic_core import core_schema
-from typing_extensions import Self
 
 from imaginairy import config
 
@@ -313,7 +312,7 @@ class WeightedPrompt(BaseModel):
         return f"{self.weight}*({self.text})"
 
 
-class MaskMode(str, Enum):
+class MaskMode(StrEnum):
     REPLACE = "replace"
     KEEP = "keep"
 
@@ -879,7 +878,7 @@ class ImagineResult:
 
         self.is_nsfw = is_nsfw
         self.safety_score = safety_score
-        self.created_at = datetime.now(tz=timezone.utc)
+        self.created_at = datetime.now(tz=UTC)
         self.torch_backend = get_device()
         self.hardware_name = get_hardware_description(get_device())
 
@@ -935,6 +934,6 @@ class ImagineResult:
         img.convert("RGB").save(save_path, exif=self._exif())
 
 
-class SafetyMode(str, Enum):
+class SafetyMode(StrEnum):
     STRICT = "strict"
     RELAXED = "relaxed"

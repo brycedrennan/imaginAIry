@@ -1,74 +1,40 @@
 SHELL := /bin/bash
-python_version = 3.10.13
-venv_prefix = imaginairy
-venv_name = $(venv_prefix)-$(python_version)
-pyenv_instructions=https://github.com/pyenv/pyenv#installation
-pyenv_virt_instructions=https://github.com/pyenv/pyenv-virtualenv#pyenv-virtualenv
 
-
-init: require_pyenv  ## Setup a dev environment for local development.
-	@pyenv install $(python_version) -s
-	@echo -e "\033[0;32m ✔️  🐍 $(python_version) installed \033[0m"
-	@if ! [ -d "$$(pyenv root)/versions/$(venv_name)" ]; then \
-		pyenv virtualenv $(python_version) $(venv_name); \
-	fi
-	@pyenv local $(venv_name)
-	@echo -e "\033[0;32m ✔️  🐍 $(venv_name) virtualenv activated \033[0m"
-	@export VIRTUAL_ENV=$$(pyenv prefix); \
-	if command -v uv >/dev/null 2>&1; then \
-		uv pip install --upgrade uv; \
-	else \
-		pip install --upgrade pip uv; \
-	fi; \
-	uv pip sync requirements-dev.txt; \
-	uv pip install -e .
-	@echo -e "\nEnvironment setup! ✨ 🍰 ✨ 🐍 \n\nCopy this path to tell PyCharm where your virtualenv is. You may have to click the refresh button in the PyCharm file explorer.\n"
-	@echo -e "\033[0;32m$$(pyenv which python)\033[0m\n"
-	@echo -e "The following commands are available to run in the Makefile:\n"
-	@make -s help
-
+init:  ## Setup dev environment
+	uv sync --all-groups
+	@echo -e "\nEnvironment ready. Run 'make help' to see available commands.\n"
 
 af: autoformat  ## Alias for `autoformat`
-autoformat:  ## Run the autoformatter.
-	@-ruff check --config tests/ruff.toml . --fix-only
-	@ruff format --config tests/ruff.toml .
+autoformat:  ## Run the autoformatter
+	@-uv run -- ruff check . --fix-only --unsafe-fixes
+	@uv run -- ruff format .
 
-test:  ## Run the tests.
-	@pytest
-	@echo -e "The tests pass! ✨ 🍰 ✨"
+test:  ## Run all tests
+	@uv run -- pytest
+	@echo -e "The tests pass!"
 
-test-fast:  ## Run the fast tests.
-	@pytest -m "not gputest"
-	@echo -e "The non-gpu tests pass! ✨ 🍰 ✨"
+test-fast:  ## Run non-GPU tests
+	@uv run -- pytest -m "not gputest"
+	@echo -e "The non-gpu tests pass!"
 
-lint:  ## Run the code linter.
-	@ruff check --config tests/ruff.toml .
-	@echo -e "No linting errors - well done! ✨ 🍰 ✨"
+lint:  ## Run the linter
+	@uv run -- ruff check .
+	@echo -e "No linting errors."
 
-type-check: ## Run the type checker.
-	@mypy --config-file tox.ini .
+typecheck:  ## Run the type checker
+	@uv run -- ty check
 
-check-fast:  ## Run autoformatter, linter, typechecker, and fast tests
-	@make autoformat
-	@make lint
-	@make type-check
-	@make test-fast
+check: autoformat lint typecheck test-fast  ## Format + lint + typecheck + fast tests
 
 build-pkg:  ## Build the package
-	python setup.py sdist bdist_wheel
-	python setup.py bdist_wheel --plat-name=win-amd64
+	uv build
 
-deploy:  ## Deploy the package to pypi.org
-	pip install twine wheel
-	-git tag $$(python setup.py -V)
-	git push --tags
+deploy:  ## Deploy to pypi.org
 	rm -rf dist
-	make build-pkg
-	#python setup.py sdist
-	@twine upload --verbose dist/* -u __token__;
-	rm -rf build
+	uv build
+	uv publish
 	rm -rf dist
-	@echo "Deploy successful! ✨ 🍰 ✨"
+	@echo "Deploy successful!"
 
 build-dev-image:
 	docker build -f tests/Dockerfile -t imaginairy-dev .
@@ -76,21 +42,10 @@ build-dev-image:
 run-dev: build-dev-image
 	docker run -it -v $$HOME/.cache/huggingface:/root/.cache/huggingface -v $$HOME/.cache/torch:/root/.cache/torch -v `pwd`/outputs:/outputs imaginairy-dev /bin/bash
 
-requirements:  ## Freeze the requirements.txt file
-	pip-compile setup.py requirements-dev.in --output-file=requirements-dev.txt --upgrade --resolver=backtracking
-
-require_pyenv:
-	@if ! [ -x "$$(command -v pyenv)" ]; then\
-	  echo -e '\n\033[0;31m ❌ pyenv is not installed.  Follow instructions here: $(pyenv_instructions)\n\033[0m';\
-	  exit 1;\
-	else\
-	  echo -e "\033[0;32m ✔️  pyenv installed\033[0m";\
-	fi
-
 .PHONY: docs
 
 docs:
-	mkdocs serve
+	uv run -- mkdocs serve
 
 update-stablestudio:
 	@echo "Updating stablestudio"
@@ -145,18 +100,15 @@ vendorize_blip:
 vendorize_kdiffusion:
 	rm -rf ./imaginairy/vendored/k_diffusion
 	rm -rf ./downloads/k_diffusion
-    # version 0.0.9
+	# version 0.0.9
 	make vendorize REPO=git@github.com:crowsonkb/k-diffusion.git PKG=k_diffusion COMMIT=5b3af030dd83e0297272d861c19477735d0317ec
-	#sed -i '' -e 's/import\sclip/from\simaginairy.vendored\simport\sclip/g' imaginairy/vendored/k_diffusion/evaluation.py
 	mv ./downloads/k_diffusion/LICENSE ./imaginairy/vendored/k_diffusion/
 	rm imaginairy/vendored/k_diffusion/evaluation.py
 	touch imaginairy/vendored/k_diffusion/evaluation.py
 	rm imaginairy/vendored/k_diffusion/config.py
 	touch imaginairy/vendored/k_diffusion/config.py
-	# without this most of the k-diffusion samplers didn't work
 	sed -i '' -e 's#return (x - denoised) / utils.append_dims(sigma, x.ndim)#return (x - denoised) / sigma#g' imaginairy/vendored/k_diffusion/sampling.py
 	sed -i '' -e 's#torch.randn_like(x)#torch.randn_like(x, device="cpu").to(x.device)#g' imaginairy/vendored/k_diffusion/sampling.py
- 	# https://github.com/AUTOMATIC1111/stable-diffusion-webui/issues/4558#issuecomment-1310387114
 	sed -i '' -e 's#t_fn = lambda sigma: sigma.log().neg()#t_fn = lambda sigma: sigma.to("cpu").log().neg().to(x.device)#g' imaginairy/vendored/k_diffusion/sampling.py
 	sed -i '' -e 's#return (x - denoised) / sigma#return ((x - denoised) / sigma.to("cpu")).to(x.device)#g' imaginairy/vendored/k_diffusion/sampling.py
 	sed -i '' -e 's#return t.neg().exp()#return t.to("cpu").neg().exp().to(self.model.device)#g' imaginairy/vendored/k_diffusion/sampling.py
@@ -180,7 +132,6 @@ vendorize_controlnet_annotators:
 	cp -R ./downloads/controlnet11/annotator/* ./imaginairy/vendored/controlnet_annotators/
 	rm -rf ./imaginairy/vendored/controlnet_annotators/canny
 	rm -rf ./imaginairy/vendored/controlnet_annotators/ckpts
-	#black imaginairy/vendored/controlnet_annotators
 	sed -i '' -e 's#from annotator.uniformer.mmseg#from .mmseg#g' imaginairy/vendored/controlnet_annotators/uniformer/__init__.py
 	find imaginairy/vendored/controlnet_annotators -type f -name "__init__.py" -exec sed -i '' -e 's#checkpoint_file#remote_model_path#g' {} \;
 	find imaginairy/vendored/controlnet_annotators -type f -name "__init__.py" -exec sed -i '' -e 's#modelpath#model_path#g' {} \;
@@ -195,15 +146,12 @@ vendorize_controlnet_annotators:
 	rm -rf ./imaginairy/vendored/controlnet_annotators/zoe/zoedepth/models/base_models/midas_repo/mobile
 	make af
 
-
-
 vendorize_normal_map:
 	make download_repo REPO=git@github.com:brycedrennan/imaginairy-normal-map.git PKG=imaginairy_normal_map COMMIT=6b3b1692cbdc21d55c84a01e0b7875df030b6d79
 	mkdir -p ./imaginairy/vendored/imaginairy_normal_map
 	rm -rf ./imaginairy/vendored/imaginairy_normal_map/*
 	cp -R ./downloads/imaginairy_normal_map/imaginairy_normal_map/* ./imaginairy/vendored/imaginairy_normal_map/
 	make af
-
 
 vendorize_refiners:
 	export REPO=git@github.com:finegrain-ai/refiners.git PKG=refiners COMMIT=91aea9b7ff63ddf93f99e2ce6a4452bd658b1948 && \
@@ -231,7 +179,7 @@ vendorize_facexlib:
 	sed -i '' '/from \.version import __gitsha__, __version__/d' ./imaginairy/vendored/facexlib/__init__.py
 	make af
 
-vendorize:  ## vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
+vendorize:  ## Vendorize a github repo.  `make vendorize REPO=git@github.com:openai/CLIP.git PKG=clip`
 	mkdir -p ./downloads
 	-cd ./downloads && git clone $(REPO) $(PKG)
 	cd ./downloads/$(PKG) && git fetch && git checkout $(COMMIT)
@@ -257,7 +205,7 @@ vendorize_whole_repo:
 	touch ./imaginairy/vendored/$(PKG)/version.py
 	echo "vendored from $(REPO)" | tee ./imaginairy/vendored/$(PKG)/readme.txt
 
-sync:  ## Bidirectional sync with desktop with 4090 GPU
+sync:  ## Bidirectional sync with bd GPU box
 	unison ~/projects/sandbox-img-gen/imaginairy ssh://bd/projects/sandbox-img-gen/imaginairy \
 		-auto -perms 0 -repeat watch -prefer newer \
 		-ignore 'Name .venv' \

@@ -6,7 +6,7 @@ import re
 import time
 from contextlib import contextmanager, nullcontext
 from functools import lru_cache
-from typing import Any, List, Optional
+from typing import Any
 
 import numpy as np
 import torch

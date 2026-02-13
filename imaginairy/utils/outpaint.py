@@ -33,10 +33,10 @@ def outpaint_calculations(
     new_height = round((img_height + up + down) / snap_multiple) * snap_multiple
     height_addition = max(new_height - img_height, 0)
     width_addition = max(new_width - img_width, 0)
-    up = int(round(height_addition * up_pct))
-    down = int(round(height_addition * dwn_pct))
-    left = int(round(width_addition * lft_pct))
-    right = int(round(width_addition * rgt_pct))
+    up = round(height_addition * up_pct)
+    down = round(height_addition * dwn_pct)
+    left = round(width_addition * lft_pct)
+    right = round(width_addition * rgt_pct)
 
     return up, down, left, right, new_width, new_height
 
@@ -44,7 +44,7 @@ def outpaint_calculations(
 def prepare_tensor_for_outpaint(
     img, mask=None, up=None, down=None, left=None, right=None, _all=0, snap_multiple=8
 ):
-    up, down, left, right, new_width, new_height = outpaint_calculations(
+    up, down, left, right, _new_width, _new_height = outpaint_calculations(
         img_width=img.shape[2],
         img_height=img.shape[1],
         up=up,

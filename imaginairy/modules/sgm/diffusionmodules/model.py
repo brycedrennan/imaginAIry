@@ -270,7 +270,7 @@ class MemoryEfficientAttnBlock(nn.Module):
 
 class MemoryEfficientCrossAttentionWrapper(MemoryEfficientCrossAttention):
     def forward(self, x, context=None, mask=None, **unused_kwargs):
-        b, c, h, w = x.shape
+        _b, c, h, w = x.shape
         x = rearrange(x, "b c h w -> b (h w) c")
         out = super().forward(x, context=context, mask=mask)
         out = rearrange(out, "b (h w) c -> b c h w", h=h, w=w, c=c)

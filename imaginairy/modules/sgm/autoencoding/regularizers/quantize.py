@@ -160,7 +160,7 @@ class GumbelQuantizer(AbstractQuantizer):
 
     def get_codebook_entry(self, indices, shape):
         # TODO: shape not yet optional
-        b, h, w, c = shape
+        b, h, w, _c = shape
         assert b * h * w == indices.shape[0]
         indices = rearrange(indices, "(b h w) -> b h w", b=b, h=h, w=w)
         if self.remap is not None:

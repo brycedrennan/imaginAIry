@@ -72,7 +72,7 @@ class VideoResBlock(ResnetBlock):
         if timesteps is None:
             timesteps = self.timesteps
 
-        b, c, h, w = x.shape
+        b, _c, _h, _w = x.shape
 
         x = super().forward(x, temb)
 
