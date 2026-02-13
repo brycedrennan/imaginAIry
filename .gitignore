@@ -33,3 +33,4 @@ tests/vastai_cli.py
 /.env
 *.ipynb
 .ipynb_checkpoints
+AGENTS.md
