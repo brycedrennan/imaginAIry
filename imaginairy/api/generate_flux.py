@@ -184,9 +184,10 @@ def generate_single_image(
         result_images = {}
         progress_latents: list[torch.Tensor] = []
 
-        # If the image is unsafe, we can discard it or handle it accordingly
+        final_image = image
+
         if is_filtered:
-            image = None  # Discard the unsafe image
+            progress_latents.clear()
         else:
             result_images["generated"] = image
 
@@ -196,8 +197,6 @@ def generate_single_image(
                     upscaled_img = upscale_image(image)
                     result_images["upscaled"] = upscaled_img
                 final_image = upscaled_img
-            else:
-                final_image = image
 
             if add_caption:
                 with lc.timing("caption-img"):
