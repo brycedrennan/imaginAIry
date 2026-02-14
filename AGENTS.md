@@ -36,3 +36,4 @@ tests/               # pytest tests (mirror source layout)
 
 - GPU tests require the bd box (4090). Files sync via `make sync` (unison).
 - `imaginairy/vendored/` is excluded from linting and type-checking.
+- ALWAYS run `make test` on the bd box after changes to confirm things are working

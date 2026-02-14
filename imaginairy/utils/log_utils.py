@@ -3,6 +3,7 @@
 import logging
 import logging.config
 import re
+import sys
 import time
 import warnings
 from collections.abc import Callable
@@ -368,6 +369,20 @@ def conditioning_to_img(conditioning):
     return ToPILImage()(conditioning)
 
 
+class LiveStreamHandler(logging.StreamHandler):
+    """StreamHandler that resolves sys.stdout at emit time, not config time.
+
+    The default StreamHandler with ext://sys.stdout captures the file object
+    once. If pytest (or anything else) later replaces sys.stdout, the handler
+    holds a stale reference to a closed file and every log call dumps an 80-line
+    traceback via handleError().
+    """
+
+    def emit(self, record):
+        self.stream = sys.stdout
+        super().emit(record)
+
+
 class ColorIndentingFormatter(logging.Formatter):
     RED = "\033[31m"
     GREEN = "\033[32m"
@@ -413,8 +428,7 @@ def configure_logging(level="INFO"):
             "default": {
                 "level": level,
                 "formatter": "standard",
-                "class": "logging.StreamHandler",
-                "stream": "ext://sys.stdout",  # Default is stderr
+                "class": "imaginairy.utils.log_utils.LiveStreamHandler",
             },
         },
         "loggers": {
