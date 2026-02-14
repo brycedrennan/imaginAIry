@@ -33,7 +33,7 @@ tests/               # pytest tests (mirror source layout)
 ```
 
 ## Notes
-
-- GPU tests require the bd box (4090). Files sync via `make sync` (unison).
+- Generating images should always be done on the bd box, which has the GPU.
+- GPU tests require the bd box (Nvidia 4090). Files sync via `make sync` (unison).
 - `imaginairy/vendored/` is excluded from linting and type-checking.
 - ALWAYS run `make test` on the bd box after changes to confirm things are working

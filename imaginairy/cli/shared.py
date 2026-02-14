@@ -56,6 +56,7 @@ def _imagine_cmd(
     tile_x,
     tile_y,
     allow_compose_phase,
+    compose_phase_controlnet,
     mask_image,
     mask_prompt,
     mask_mode,
@@ -215,6 +216,7 @@ def _imagine_cmd(
                     fix_faces_fidelity=fix_faces_fidelity,
                     tile_mode=_tile_mode,
                     allow_compose_phase=allow_compose_phase,
+                    compose_phase_controlnet=compose_phase_controlnet,
                     model_weights=model_weights_path,
                     caption_text=caption_text,
                     composition_strength=composition_strength,
@@ -435,6 +437,11 @@ common_options = [
         "--allow-compose-phase/--no-compose-phase",
         default=True,
         help="Allow the image to be composed at a lower resolution.",
+    ),
+    click.option(
+        "--compose-phase-controlnet/--no-compose-phase-controlnet",
+        default=True,
+        help="Use a details controlnet during the composition refinement phase.",
     ),
     click.option(
         "--mask-image",

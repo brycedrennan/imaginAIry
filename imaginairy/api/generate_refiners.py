@@ -250,9 +250,13 @@ def generate_single_image(
                     comp_image_t = comp_image_t.to(sd.lda.device, dtype=sd.lda.dtype)
                     init_latent = sd.lda.encode(comp_image_t)
                     compose_control_inputs: list[ControlInput]
-                    if prompt.model_weights.architecture.primary_alias in (
-                        "sdxl",
-                        "sdxlinpaint",
+                    if (
+                        not prompt.compose_phase_controlnet
+                        or prompt.model_weights.architecture.primary_alias
+                        in (
+                            "sdxl",
+                            "sdxlinpaint",
+                        )
                     ):
                         compose_control_inputs = []
                     else:
