@@ -262,6 +262,28 @@ def test_inpainting_bench(filename_base_for_outputs, filename_base_for_orig_outp
 
 
 @pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
+def test_inpainting_bench_sdxl_patch(
+    filename_base_for_outputs, filename_base_for_orig_outputs
+):
+    img = LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2.png")
+    prompt = ImaginePrompt(
+        "a wise old man",
+        init_image=img,
+        mask_image=LazyLoadingImage(filepath=f"{TESTS_FOLDER}/data/bench2_mask.png"),
+        inpaint_method="patch",
+        model_weights="sdxl",
+        size=1024,
+        steps=30,
+        seed=1,
+    )
+    result = next(imagine(prompt))
+
+    pillow_fit_image_within(img).save(f"{filename_base_for_orig_outputs}_orig.jpg")
+    img_path = f"{filename_base_for_outputs}.png"
+    result.img.save(img_path)
+
+
+@pytest.mark.skipif(get_device() == "cpu", reason="Too slow to run on CPU")
 def test_cliptext_inpainting_pearl_doctor(
     filename_base_for_outputs, filename_base_for_orig_outputs
 ):

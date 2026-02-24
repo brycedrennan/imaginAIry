@@ -319,7 +319,7 @@ class MaskMode(StrEnum):
 
 MaskInput = MaskMode | str
 PromptInput = str | WeightedPrompt | list[WeightedPrompt] | list[str] | None
-InpaintMethod = Literal["finetune", "control"]
+InpaintMethod = Literal["finetune", "control", "patch"]
 
 
 class ImaginePrompt(BaseModel, protected_namespaces=()):

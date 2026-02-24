@@ -71,6 +71,7 @@ tests/test_api/test_generate.py::test_img_to_img_fruit_2_gold[dpmpp-0]
 tests/test_api/test_generate.py::test_img_to_img_fruit_2_gold[dpmpp-1]
 tests/test_api/test_generate.py::test_img_to_img_fruit_2_gold_repeat
 tests/test_api/test_generate.py::test_inpainting_bench
+tests/test_api/test_generate.py::test_inpainting_bench_sdxl_patch
 tests/test_api/test_generate.py::test_large_image
 tests/test_api/test_generate.py::test_model_versions[SD-1.5]
 tests/test_api/test_generate.py::test_tile_mode
@@ -90,6 +91,7 @@ tests/test_enhancers/test_describe_image_blip.py::test_describe_picture
 tests/test_enhancers/test_describe_image_clip.py::test_clip_text_comparison
 tests/test_enhancers/test_face_restoration_codeformer.py::test_fix_faces
 tests/test_enhancers/test_upscale_realesrgan.py::test_upscale_textured_image
+tests/test_fooocus_inpaint.py::test_fooocus_inpaint_generates_image
 tests/test_modules/diffusion/test_model.py::test_nonlinearity
 tests/test_outpaint.py::test_outpainting_outpaint
 tests/test_safety.py::test_is_nsfw

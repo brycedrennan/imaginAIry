@@ -168,6 +168,13 @@ def generate_single_image(
                 and prompt.inpaint_method == "finetune",
                 dtype=dtype,
             )
+            if prompt.inpaint_method == "patch" and prompt.should_use_inpainting:
+                from imaginairy.modules.fooocus_inpaint import (
+                    apply_fooocus_patch_to_unet,
+                )
+
+                with lc.timing("fooocus-patch"):
+                    apply_fooocus_patch_to_unet(sd.unet)
         lc.model = sd
         seed_everything(prompt.seed)
         downsampling_factor = 8
@@ -194,6 +201,7 @@ def generate_single_image(
 
         init_latent = None
         noise_step = None
+        _patch_latent_mask = None  # set when using fooocus patch inpainting
 
         control_modes = []
         control_inputs = prompt.control_inputs or []
@@ -399,11 +407,6 @@ def generate_single_image(
         sd.set_inference_steps(prompt.steps, first_step=first_step)
 
         if hasattr(sd, "mask_latents") and mask_image is not None:
-            # import numpy as np
-            # init_size = init_image.size
-            # noise_image = Image.fromarray(np.random.randint(0, 255, (init_size[1], init_size[0], 3), dtype=np.uint8))
-            # masked_image = Image.composite(init_image, noise_image, mask_image)
-
             masked_image = Image.composite(
                 init_image, mask_image.convert("RGB"), mask_image
             )
@@ -418,6 +421,42 @@ def generate_single_image(
             )
             sd.mask_latents = sd.mask_latents.to(
                 dtype=sd.unet.dtype, device=sd.unet.device
+            )
+        elif prompt.inpaint_method == "patch" and mask_image is not None:
+            import numpy as np
+            import torch
+            import torch.nn.functional as F
+
+            from imaginairy.modules.fooocus_inpaint import (
+                compute_inpaint_conditioning,
+                inject_inpaint_features,
+            )
+
+            masked_image = Image.composite(
+                init_image, mask_image.convert("RGB"), mask_image
+            )
+            result_images["masked_image"] = masked_image
+            # mask_image here has white=keep after MaskMode inversion.
+            # compute_inpaint_conditioning expects white=inpaint, so invert.
+            inpaint_mask = ImageOps.invert(mask_image)
+            with lc.timing("fooocus-conditioning"):
+                features = compute_inpaint_conditioning(
+                    sd=sd,
+                    init_image=init_image,
+                    mask_image=inpaint_mask,
+                )
+                inject_inpaint_features(sd.unet, features)
+
+            # Prepare latent-space mask for per-step compositing (1=inpaint, 0=keep)
+            mask_np = np.array(inpaint_mask).astype(np.float32) / 255.0
+            _patch_latent_mask = torch.tensor(mask_np).unsqueeze(0).unsqueeze(0)
+            _patch_latent_mask = F.max_pool2d(
+                _patch_latent_mask,
+                kernel_size=downsampling_factor,
+                stride=downsampling_factor,
+            ).round()
+            _patch_latent_mask = _patch_latent_mask.to(
+                device=sd.unet.device, dtype=sd.unet.dtype
             )
 
         if init_latent is not None:
@@ -465,6 +504,9 @@ def generate_single_image(
                 )
                 # full-size controlnet conditions (already set on line 292)
                 cn_full_conds = {id(cn): cond_t for cn, cond_t in controlnets}
+                # full-size inpainting conditions (for sdxlinpaint model)
+                _full_mask_latents = getattr(sd, "mask_latents", None)
+                _full_target_latents = getattr(sd, "target_image_latents", None)
                 px = downsampling_factor  # latent-to-pixel ratio
                 for step in tqdm(
                     sd.steps, bar_format="    {l_bar}{bar}{r_bar}", leave=False
@@ -486,6 +528,13 @@ def generate_single_image(
                                         :, :, ty * px : te * px, tx * px : re * px
                                     ]
                                 )
+                            # crop inpainting conditions to matching tile region
+                            if _full_mask_latents is not None:
+                                sd.mask_latents = _full_mask_latents[:, :, ty:te, tx:re]
+                            if _full_target_latents is not None:
+                                sd.target_image_latents = _full_target_latents[
+                                    :, :, ty:te, tx:re
+                                ]
                             tile_kwargs = tile_conditioning.get(
                                 (ty, tx), text_conditioning_kwargs
                             )
@@ -500,20 +549,39 @@ def generate_single_image(
                     x = cumulative / num_updates
                     if lc.progress_latent_callback:
                         lc.progress_latent_callback(x)
-                # restore full-size controlnet conditions
+                # restore full-size conditions
                 for cn, _ in controlnets:
                     cn.set_controlnet_condition(cn_full_conds[id(cn)])
+                if _full_mask_latents is not None:
+                    sd.mask_latents = _full_mask_latents
+                if _full_target_latents is not None:
+                    sd.target_image_latents = _full_target_latents
             else:
                 for step in tqdm(
                     sd.steps, bar_format="    {l_bar}{bar}{r_bar}", leave=False
                 ):
                     log_latent(x, "noisy_latent")
+                    if _patch_latent_mask is not None:
+                        # Per-step latent masking: blend noised original into unmasked region
+                        noised_orig = sd.scheduler.add_noise(
+                            x=init_latent.to(x.device, x.dtype),
+                            noise=noise,
+                            step=step,
+                        )
+                        x = x * _patch_latent_mask + noised_orig * (
+                            1 - _patch_latent_mask
+                        )
                     x = sd(
                         x,
                         step=step,
                         condition_scale=prompt.prompt_strength,
                         **text_conditioning_kwargs,
                     )
+                    if _patch_latent_mask is not None:
+                        # Hard-set unmasked region to clean original after each step
+                        x = x * _patch_latent_mask + init_latent.to(
+                            x.device, x.dtype
+                        ) * (1 - _patch_latent_mask)
                     if lc.progress_latent_callback:
                         lc.progress_latent_callback(x)
             # trying to clear memory. not sure if this helps

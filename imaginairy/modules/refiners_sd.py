@@ -683,7 +683,9 @@ class SlicedEncoderMixin(nn.Module):
     min_chunk_size = 32
 
     def encode(self, x: Tensor) -> Tensor:
-        return self.sliced_encode(x)
+        # VAE must run in float32 — intermediate values exceed float16 range
+        with torch.autocast(device_type=str(x.device).split(":")[0], enabled=False):
+            return self.sliced_encode(x.float())
 
     def sliced_encode(self, x: Tensor, chunk_size: int = 128 * 8) -> Tensor:
         """
@@ -711,6 +713,11 @@ class SlicedEncoderMixin(nn.Module):
         return final_tensor
 
     def decode(self, x):
+        # VAE must run in float32 — intermediate values exceed float16 range
+        with torch.autocast(device_type=str(x.device).split(":")[0], enabled=False):
+            return self._decode_impl(x.float())
+
+    def _decode_impl(self, x):
         while self.__class__.max_chunk_size > self.__class__.min_chunk_size:
             if self.max_chunk_size**2 > x.shape[2] * x.shape[3]:
                 try:
