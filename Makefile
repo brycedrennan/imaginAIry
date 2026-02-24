@@ -206,11 +206,12 @@ vendorize_whole_repo:
 	echo "vendored from $(REPO)" | tee ./imaginairy/vendored/$(PKG)/readme.txt
 
 N ?= 3
-vast-cluster:  ## Rent N vast.ai instances and prepare them
-	uv run -- python -u -c "from testing_support.vast_cluster import get_ready_cluster; get_ready_cluster(n=$(N))"
+EXTRA ?= 2
+vast-cluster:  ## Rent N+EXTRA instances, benchmark, keep best N
+	uv run -- python -u -c "from tests.vast.vast_cluster import get_ready_cluster; get_ready_cluster(n=$(N), extra=$(EXTRA))"
 
 vast-test:  ## Full flow: rent cluster + run distributed tests
-	uv run -- python -u -c "from testing_support.vast_cluster import get_ready_cluster, run_distributed_tests; run_distributed_tests(get_ready_cluster(n=$(N)))"
+	uv run -- python -u -c "from tests.vast.vast_cluster import run_full_pipeline; run_full_pipeline(n=$(N), extra=$(EXTRA))"
 
 sync:  ## Bidirectional sync with bd GPU box
 	unison ~/projects/sandbox-img-gen/imaginairy ssh://bd/projects/sandbox-img-gen/imaginairy \
