@@ -143,8 +143,9 @@ def save_image_result(
     if prompt.init_image:
         img_str = f"_img2img-{prompt.init_image_strength}"
 
+    arch = prompt.model_architecture.primary_alias
     basefilename = (
-        f"{base_count:06}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
+        f"{base_count:06}_{arch}_{prompt.seed}_{prompt.solver_type.replace('_', '')}{prompt.steps}_"
         f"PS{prompt.prompt_strength}{img_str}_{prompt_normalized(prompt.prompt_text)}"
     )
     primary_filename = None
