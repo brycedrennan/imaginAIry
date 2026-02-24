@@ -135,6 +135,22 @@ def generate_single_image(
         seed_everything(prompt.seed)
         clear_gpu_cache()
 
+        # Cap generation resolution for Flux (~1 megapixel max) and upscale
+        # to reach the target size if needed.
+        max_pixels = 1024 * 1024
+        target_w, target_h = prompt.width, prompt.height
+        gen_w, gen_h = target_w, target_h
+        needs_resize = False
+
+        if gen_w * gen_h > max_pixels:
+            scale = (max_pixels / (gen_w * gen_h)) ** 0.5
+            gen_w = int(gen_w * scale) // 8 * 8
+            gen_h = int(gen_h * scale) // 8 * 8
+            needs_resize = True
+            logger.info(
+                f"    Generating at {gen_w}x{gen_h}, will upscale to {target_w}x{target_h}"
+            )
+
         # Load models
         with lc.timing("model-load"):
             (
@@ -164,8 +180,8 @@ def generate_single_image(
         with lc.timing("image-generation"):
             output = pipe(
                 prompt=prompt.prompt_text,
-                width=prompt.width,
-                height=prompt.height,
+                width=gen_w,
+                height=gen_h,
                 num_inference_steps=prompt.steps,
                 guidance_scale=prompt.prompt_strength,
                 generator=generator,
@@ -191,10 +207,14 @@ def generate_single_image(
         else:
             result_images["generated"] = image
 
-            # Optionally upscale the image
-            if prompt.upscale:
+            # Upscale if requested or if we generated at a reduced resolution
+            if prompt.upscale or needs_resize:
                 with lc.timing("upscaling"):
                     upscaled_img = upscale_image(image)
+                    if needs_resize:
+                        upscaled_img = upscaled_img.resize(
+                            (target_w, target_h), resample=3
+                        )
                     result_images["upscaled"] = upscaled_img
                 final_image = upscaled_img
 
