@@ -11,6 +11,75 @@ from imaginairy.utils.log_utils import ImageLoggingContext
 
 logger = logging.getLogger(__name__)
 
+MULTIDIFFUSION_TILE_SIZE = 128  # latent units (1024px)
+MULTIDIFFUSION_STRIDE = 64  # 50% overlap
+
+
+def _get_tile_positions(size: int, tile_size: int, stride: int) -> list[int]:
+    """Return tile start positions covering `size` with given tile/stride.
+
+    Last position snaps to `size - tile_size` to ensure full coverage.
+    """
+    if size <= tile_size:
+        return [0]
+    positions = list(range(0, size - tile_size, stride))
+    last = size - tile_size
+    if positions[-1] != last:
+        positions.append(last)
+    return positions
+
+
+def _caption_tile_regions(
+    comp_image,
+    tile_ys: list[int],
+    tile_xs: list[int],
+    tile_size: int,
+    downsampling_factor: int,
+    global_prompts,
+    negative_prompts,
+    sd,
+):
+    """Caption each tile region of comp_image with BLIP; return per-tile conditioning.
+
+    Deduplicates identical captions so `calculate_text_conditioning_kwargs` is
+    called at most once per unique caption string.
+    """
+    from imaginairy.enhancers.describe_image_blip import generate_caption
+    from imaginairy.schema import WeightedPrompt
+
+    px = downsampling_factor
+    caption_to_kwargs: dict[str, dict] = {}
+    tile_conditioning: dict[tuple[int, int], dict] = {}
+
+    for ty in tile_ys:
+        for tx in tile_xs:
+            crop_box = (
+                tx * px,
+                ty * px,
+                (tx + tile_size) * px,
+                (ty + tile_size) * px,
+            )
+            crop = comp_image.crop(crop_box)
+            caption = generate_caption(crop, min_length=5)
+
+            if caption not in caption_to_kwargs:
+                global_text = " ".join(wp.text for wp in global_prompts)
+                combined = f"{global_text}, {caption}"
+                kwargs = sd.calculate_text_conditioning_kwargs(
+                    positive_prompts=[WeightedPrompt(text=combined)],
+                    negative_prompts=negative_prompts,
+                )
+                for k, v in kwargs.items():
+                    kwargs[k] = v.to(device=sd.unet.device, dtype=sd.unet.dtype)
+                caption_to_kwargs[caption] = kwargs
+
+            tile_conditioning[(ty, tx)] = caption_to_kwargs[caption]
+
+    unique = len(caption_to_kwargs)
+    total = len(tile_ys) * len(tile_xs)
+    logger.info(f"Per-tile captioning: {total} tiles, {unique} unique captions")
+    return tile_conditioning
+
 
 def generate_single_image(
     prompt: ImaginePrompt,
@@ -114,6 +183,7 @@ def generate_single_image(
         progress_latents: list[torch.Tensor] = []
         first_step = 0
         mask_grayscale = None
+        tile_conditioning: dict[tuple[int, int], dict] = {}
 
         shape = [
             batch_size,
@@ -280,6 +350,32 @@ def generate_single_image(
                         )
                         controlnets.append((controlnet, control_image_t))
 
+                    _latent_h = init_latent.shape[2]
+                    _latent_w = init_latent.shape[3]
+                    if prompt.multidiffusion and (
+                        _latent_h > MULTIDIFFUSION_TILE_SIZE
+                        or _latent_w > MULTIDIFFUSION_TILE_SIZE
+                    ):
+                        with lc.timing("tile-captioning"):
+                            tile_conditioning = _caption_tile_regions(
+                                comp_image=comp_image,
+                                tile_ys=_get_tile_positions(
+                                    _latent_h,
+                                    MULTIDIFFUSION_TILE_SIZE,
+                                    MULTIDIFFUSION_STRIDE,
+                                ),
+                                tile_xs=_get_tile_positions(
+                                    _latent_w,
+                                    MULTIDIFFUSION_TILE_SIZE,
+                                    MULTIDIFFUSION_STRIDE,
+                                ),
+                                tile_size=MULTIDIFFUSION_TILE_SIZE,
+                                downsampling_factor=downsampling_factor,
+                                global_prompts=prompt.prompts,
+                                negative_prompts=prompt.negative_prompt,
+                                sd=sd,
+                            )
+
         if prompt.image_prompt:
             sd.set_image_prompt(
                 prompt.image_prompt,
@@ -348,19 +444,78 @@ def generate_single_image(
         x = x.to(device=sd.unet.device, dtype=sd.unet.dtype)
         clear_gpu_cache()
 
+        latent_h, latent_w = x.shape[2], x.shape[3]
+        use_multidiffusion = prompt.multidiffusion and (
+            latent_h > MULTIDIFFUSION_TILE_SIZE or latent_w > MULTIDIFFUSION_TILE_SIZE
+        )
+
         with lc.timing("unet"):
-            for step in tqdm(
-                sd.steps, bar_format="    {l_bar}{bar}{r_bar}", leave=False
-            ):
-                log_latent(x, "noisy_latent")
-                x = sd(
-                    x,
-                    step=step,
-                    condition_scale=prompt.prompt_strength,
-                    **text_conditioning_kwargs,
+            if use_multidiffusion:
+                import torch
+
+                tile_ys = _get_tile_positions(
+                    latent_h, MULTIDIFFUSION_TILE_SIZE, MULTIDIFFUSION_STRIDE
                 )
-                if lc.progress_latent_callback:
-                    lc.progress_latent_callback(x)
+                tile_xs = _get_tile_positions(
+                    latent_w, MULTIDIFFUSION_TILE_SIZE, MULTIDIFFUSION_STRIDE
+                )
+                logger.info(
+                    f"MultiDiffusion: {len(tile_ys)}x{len(tile_xs)} tiles "
+                    f"({len(tile_ys) * len(tile_xs)} per step) for {latent_w * 8}x{latent_h * 8} image"
+                )
+                # full-size controlnet conditions (already set on line 292)
+                cn_full_conds = {id(cn): cond_t for cn, cond_t in controlnets}
+                px = downsampling_factor  # latent-to-pixel ratio
+                for step in tqdm(
+                    sd.steps, bar_format="    {l_bar}{bar}{r_bar}", leave=False
+                ):
+                    log_latent(x, "noisy_latent")
+                    cumulative = torch.zeros_like(x)
+                    num_updates = torch.zeros_like(x)
+                    for ty in tile_ys:
+                        for tx in tile_xs:
+                            te, re = (
+                                ty + MULTIDIFFUSION_TILE_SIZE,
+                                tx + MULTIDIFFUSION_TILE_SIZE,
+                            )
+                            tile = x[:, :, ty:te, tx:re]
+                            # crop each controlnet condition to matching pixel region
+                            for cn, _ in controlnets:
+                                cn.set_controlnet_condition(
+                                    cn_full_conds[id(cn)][
+                                        :, :, ty * px : te * px, tx * px : re * px
+                                    ]
+                                )
+                            tile_kwargs = tile_conditioning.get(
+                                (ty, tx), text_conditioning_kwargs
+                            )
+                            result = sd(
+                                tile,
+                                step=step,
+                                condition_scale=prompt.prompt_strength,
+                                **tile_kwargs,
+                            )
+                            cumulative[:, :, ty:te, tx:re] += result
+                            num_updates[:, :, ty:te, tx:re] += 1
+                    x = cumulative / num_updates
+                    if lc.progress_latent_callback:
+                        lc.progress_latent_callback(x)
+                # restore full-size controlnet conditions
+                for cn, _ in controlnets:
+                    cn.set_controlnet_condition(cn_full_conds[id(cn)])
+            else:
+                for step in tqdm(
+                    sd.steps, bar_format="    {l_bar}{bar}{r_bar}", leave=False
+                ):
+                    log_latent(x, "noisy_latent")
+                    x = sd(
+                        x,
+                        step=step,
+                        condition_scale=prompt.prompt_strength,
+                        **text_conditioning_kwargs,
+                    )
+                    if lc.progress_latent_callback:
+                        lc.progress_latent_callback(x)
             # trying to clear memory. not sure if this helps
             sd.unet.set_context(context="self_attention_map", value={})
             sd.unet._reset_context()

@@ -87,6 +87,7 @@ def edit_cmd(
     make_compilation_animation,
     caption_text,
     composition_strength,
+    multidiffusion,
 ):
     """
     Edit an image via AI.
@@ -147,4 +148,5 @@ def edit_cmd(
         caption_text=caption_text,
         composition_strength=composition_strength,
         control_inputs=control_inputs,
+        multidiffusion=multidiffusion,
     )

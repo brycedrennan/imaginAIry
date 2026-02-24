@@ -76,6 +76,7 @@ def _imagine_cmd(
     caption_text="",
     control_inputs=None,
     videogen=False,
+    multidiffusion=True,
 ):
     """Have the AI generate images. alias:imagine."""
 
@@ -217,6 +218,7 @@ def _imagine_cmd(
                     tile_mode=_tile_mode,
                     allow_compose_phase=allow_compose_phase,
                     compose_phase_controlnet=compose_phase_controlnet,
+                    multidiffusion=multidiffusion,
                     model_weights=model_weights_path,
                     caption_text=caption_text,
                     composition_strength=composition_strength,
@@ -562,5 +564,10 @@ common_options = [
         show_default=False,
         type=float,
         help=("Strength of the composition phase."),
+    ),
+    click.option(
+        "--multidiffusion/--no-multidiffusion",
+        default=True,
+        help="Enable MultiDiffusion tiling for images larger than 1024px.",
     ),
 ]

@@ -370,3 +370,103 @@ def test_large_image(filename_base_for_outputs):
 
     img_path = f"{filename_base_for_outputs}.png"
     assert_image_similar_to_expectation(result.img, img_path=img_path, threshold=35000)
+
+
+@pytest.mark.parametrize(
+    ("size", "tile_size", "stride", "expected"),
+    [
+        (128, 128, 64, [0]),  # exactly one tile
+        (
+            64,
+            128,
+            64,
+            [0],
+        ),  # smaller than tile — single pass, tile gets clamped by slicing
+        (192, 128, 64, [0, 64]),  # two tiles with overlap
+        (256, 128, 64, [0, 64, 128]),  # three tiles
+        (135, 128, 64, [0, 7]),  # 1080p height in latent (1080/8)
+        (240, 128, 64, [0, 64, 112]),  # 1920px width in latent
+    ],
+)
+def test_get_tile_positions(size, tile_size, stride, expected):
+    from imaginairy.api.generate_refiners import _get_tile_positions
+
+    result = _get_tile_positions(size, tile_size, stride)
+    assert result == expected
+    assert result[0] == 0
+    # when size >= tile_size, every tile must fit and cover the full extent
+    if size >= tile_size:
+        for pos in result:
+            assert pos + tile_size <= size
+        assert result[-1] + tile_size == size
+
+
+def test_caption_tile_regions(monkeypatch):
+    """Per-tile captioning: correct tile count, dedup of identical captions."""
+    from unittest.mock import MagicMock
+
+    from PIL import Image
+
+    from imaginairy.api.generate_refiners import (
+        MULTIDIFFUSION_STRIDE,
+        MULTIDIFFUSION_TILE_SIZE,
+        _caption_tile_regions,
+        _get_tile_positions,
+    )
+    from imaginairy.schema import WeightedPrompt
+
+    # Fake comp image large enough for tiling (1920x1080)
+    comp_image = Image.new("RGB", (1920, 1080), color="blue")
+    latent_h, latent_w = 1080 // 8, 1920 // 8  # 135, 240
+
+    tile_ys = _get_tile_positions(
+        latent_h, MULTIDIFFUSION_TILE_SIZE, MULTIDIFFUSION_STRIDE
+    )
+    tile_xs = _get_tile_positions(
+        latent_w, MULTIDIFFUSION_TILE_SIZE, MULTIDIFFUSION_STRIDE
+    )
+    expected_tile_count = len(tile_ys) * len(tile_xs)
+
+    # Monkeypatch BLIP to return a fixed caption per crop
+    captions_returned = []
+
+    def fake_caption(img, min_length=30):
+        # Return same caption for all tiles to test dedup
+        captions_returned.append(True)
+        return "a blue background"
+
+    monkeypatch.setattr(
+        "imaginairy.enhancers.describe_image_blip.generate_caption", fake_caption
+    )
+
+    # Mock sd with a fake calculate_text_conditioning_kwargs
+    import torch
+
+    fake_conditioning = {"clip_text_embedding": torch.zeros(1, 77, 768)}
+    sd = MagicMock()
+    sd.calculate_text_conditioning_kwargs.return_value = fake_conditioning
+    sd.unet.device = torch.device("cpu")
+    sd.unet.dtype = torch.float32
+
+    result = _caption_tile_regions(
+        comp_image=comp_image,
+        tile_ys=tile_ys,
+        tile_xs=tile_xs,
+        tile_size=MULTIDIFFUSION_TILE_SIZE,
+        downsampling_factor=8,
+        global_prompts=[WeightedPrompt(text="a mountain landscape")],
+        negative_prompts=[WeightedPrompt(text="")],
+        sd=sd,
+    )
+
+    # Should have conditioning for every tile
+    assert len(result) == expected_tile_count
+    assert len(captions_returned) == expected_tile_count
+
+    # All captions identical → calculate_text_conditioning_kwargs called once (dedup)
+    assert sd.calculate_text_conditioning_kwargs.call_count == 1
+
+    # All tiles share the same dict object
+    values = list(result.values())
+    for v in values[1:]:
+        assert v is values[0]

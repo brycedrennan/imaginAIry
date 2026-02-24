@@ -371,6 +371,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
     )
     composition_strength: float = Field(ge=0, le=1, validate_default=True)
     inpaint_method: InpaintMethod = "finetune"
+    multidiffusion: bool = True
 
     def __init__(
         self,
@@ -405,6 +406,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         caption_text: str = "",
         composition_strength: float | None = 0.5,
         inpaint_method: InpaintMethod = "finetune",
+        multidiffusion: bool = True,
     ):
         if image_prompt and not isinstance(image_prompt, list):
             image_prompt = [image_prompt]
@@ -443,6 +445,7 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             caption_text=caption_text,
             composition_strength=composition_strength,
             inpaint_method=inpaint_method,
+            multidiffusion=multidiffusion,
         )
         self._default_negative_prompt = None
 

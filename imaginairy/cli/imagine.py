@@ -126,6 +126,7 @@ def imagine_cmd(
     control_strength,
     control_mode,
     videogen,
+    multidiffusion,
 ):
     """
     Generate images via AI.
@@ -234,6 +235,7 @@ def imagine_cmd(
         caption_text=caption_text,
         control_inputs=control_inputs,
         videogen=videogen,
+        multidiffusion=multidiffusion,
     )
 
 
