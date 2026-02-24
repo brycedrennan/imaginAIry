@@ -217,6 +217,8 @@ vast-test:  ## Full flow: rent cluster + run distributed tests
 	uv run -- python -u -c "from tests.vast.vast_cluster import run_full_pipeline; run_full_pipeline(n=$(N), extra=$(EXTRA))"
 
 sync:  ## Bidirectional sync with bd GPU box
+	@pgrep -f 'unison.*sandbox-img-gen/imaginairy.*ssh://bd' >/dev/null && \
+		{ echo "sync is already running"; exit 0; } || true
 	unison ~/projects/sandbox-img-gen/imaginairy ssh://bd/projects/sandbox-img-gen/imaginairy \
 		-auto -perms 0 -repeat watch -prefer newer \
 		-ignore 'Name .venv' \
