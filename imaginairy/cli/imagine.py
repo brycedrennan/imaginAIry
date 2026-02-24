@@ -63,9 +63,18 @@ from imaginairy.cli.shared import (
             "colorize",
             "qrcode",
             "densepose",
+            "t2i-canny-sdxl",
+            "t2i-depth-sdxl",
+            "t2i-sketch-sdxl",
+            "t2i-canny-sd15",
+            "t2i-canny",
+            "t2i-depth-sd15",
+            "t2i-depth",
+            "t2i-sketch-sd15",
+            "t2i-sketch",
         ]
     ),
-    help="how the control image is used as signal",
+    help="How the control image is used as signal. Modes starting with 't2i-' use T2I Adapters.",
     multiple=True,
 )
 @click.option(
@@ -127,6 +136,8 @@ def imagine_cmd(
     control_mode,
     videogen,
     multidiffusion,
+    lora_weights,
+    lora_strength,
 ):
     """
     Generate images via AI.
@@ -180,12 +191,14 @@ def imagine_cmd(
                 control_image_raw = option[1]
                 if control_image_raw and control_image_raw.startswith("http"):
                     control_image_raw = LazyLoadingImage(url=control_image_raw)
+            adapter_type = "t2i" if cm.startswith("t2i-") else "controlnet"
             control_inputs.append(
                 ControlInput(
                     image=control_image,
                     image_raw=control_image_raw,
                     strength=float(control_strength),
                     mode=cm,
+                    adapter_type=adapter_type,
                 )
             )
 
@@ -236,6 +249,8 @@ def imagine_cmd(
         control_inputs=control_inputs,
         videogen=videogen,
         multidiffusion=multidiffusion,
+        lora_weights=lora_weights,
+        lora_strength=lora_strength,
     )
 
 

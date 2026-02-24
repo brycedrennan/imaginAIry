@@ -77,6 +77,8 @@ def _imagine_cmd(
     control_inputs=None,
     videogen=False,
     multidiffusion=True,
+    lora_weights=None,
+    lora_strength=0.8,
 ):
     """Have the AI generate images. alias:imagine."""
 
@@ -222,6 +224,8 @@ def _imagine_cmd(
                     model_weights=model_weights_path,
                     caption_text=caption_text,
                     composition_strength=composition_strength,
+                    lora_weights=lora_weights,
+                    lora_strength=lora_strength,
                 )
                 from imaginairy.utils.prompt_schedules import (
                     parse_schedule_strs,
@@ -569,5 +573,19 @@ common_options = [
         "--multidiffusion/--no-multidiffusion",
         default=True,
         help="Enable MultiDiffusion tiling for images larger than 1024px.",
+    ),
+    click.option(
+        "--lora",
+        "lora_weights",
+        metavar="PATH|URL",
+        default=None,
+        help="LoRA weights file (.safetensors) to apply during generation.",
+    ),
+    click.option(
+        "--lora-strength",
+        default=0.8,
+        show_default=True,
+        type=float,
+        help="LoRA strength (0-2).",
     ),
 ]

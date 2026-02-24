@@ -862,3 +862,15 @@ def load_sdxl_compvis_weights(url):
         refiners_vae_state_dict,
         refiners_text_encoder_weights,
     )
+
+
+def load_t2i_adapter_weights(
+    weights_location: str, arch: str = "sdxl"
+) -> dict[str, torch.Tensor]:
+    """Download and translate T2I adapter weights from diffusers to refiners format."""
+    weights_path = get_cached_url_path(weights_location, category="weights")
+    if arch == "sdxl":
+        translator = translators.diffusers_t2i_adapter_sdxl_to_refiners_translator()
+    else:
+        translator = translators.diffusers_t2i_adapter_sd15_to_refiners_translator()
+    return translator.load_and_translate_weights(source_path=weights_path, device="cpu")

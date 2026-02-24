@@ -4,7 +4,7 @@ import logging
 from contextlib import nullcontext
 from typing import Any
 
-from imaginairy.config import CONTROL_CONFIG_SHORTCUTS
+from imaginairy.config import CONTROL_CONFIG_SHORTCUTS, T2I_ADAPTER_CONFIG_SHORTCUTS
 from imaginairy.schema import ControlInput, ImaginePrompt, MaskMode
 from imaginairy.utils import clear_gpu_cache, seed_everything
 from imaginairy.utils.log_utils import ImageLoggingContext
@@ -176,6 +176,31 @@ def generate_single_image(
                 with lc.timing("fooocus-patch"):
                     apply_fooocus_patch_to_unet(sd.unet)
         lc.model = sd
+
+        # LoRA injection (on the structural copy, safe for cached base model)
+        lora_manager = None
+        if prompt.lora_weights:
+            with lc.timing("lora-load"):
+                from imaginairy.utils.downloads import resolve_path_or_url
+                from imaginairy.utils.model_manager import open_weights
+                from imaginairy.vendored.refiners.foundationals.latent_diffusion.lora import (
+                    SDLoraManager,
+                )
+
+                lora_manager = SDLoraManager(sd)
+                lora_path = resolve_path_or_url(prompt.lora_weights)
+                lora_tensors = open_weights(lora_path, device="cpu")
+                # Cast LoRA weights to match model dtype (e.g. bfloat16 → float16)
+                model_dtype = sd.unet.dtype
+                lora_tensors = {
+                    k: v.to(dtype=model_dtype) for k, v in lora_tensors.items()
+                }
+                lora_manager.load(lora_tensors, scale=prompt.lora_strength)
+                logger.info(
+                    f"Loaded LoRA from {prompt.lora_weights} "
+                    f"(strength={prompt.lora_strength})"
+                )
+
         seed_everything(prompt.seed)
         downsampling_factor = 8
         latent_channels = 4
@@ -202,6 +227,12 @@ def generate_single_image(
         init_latent = None
         noise_step = None
         _patch_latent_mask = None  # set when using fooocus patch inpainting
+        _patch_fill_latent = None  # fill latent for compositing
+        _patch_morph_mask = None  # morphological mask for final blend
+        _inpaint_feat_mod = None
+        _inpaint_crop = None  # set when using fooocus patch inpainting
+        _full_init_image = None
+        _full_mask_image_orig = None
 
         control_modes = []
         control_inputs = prompt.control_inputs or []
@@ -292,7 +323,7 @@ def generate_single_image(
                     result_images[f"control-{control_input.mode}"] = control_image_disp
                     controlnets.append((controlnet, control_image_t))
 
-        if prompt.allow_compose_phase:
+        if prompt.allow_compose_phase and not prompt.should_use_inpainting:
             with lc.timing("composition"):
                 cutoff_size = get_model_default_image_size(prompt.model_architecture)
                 cutoff_size = (int(cutoff_size[0] * 1.00), int(cutoff_size[1] * 1.00))
@@ -391,13 +422,24 @@ def generate_single_image(
                 model_type="plus",
             )
         for controlnet, control_image_t in controlnets:
-            controlnet.set_controlnet_condition(
-                control_image_t.to(device=sd.unet.device, dtype=sd.unet.dtype)
-            )
+            if hasattr(controlnet, "set_controlnet_condition"):
+                # ControlNet path
+                controlnet.set_controlnet_condition(
+                    control_image_t.to(device=sd.unet.device, dtype=sd.unet.dtype)
+                )
+            # T2I adapters have features pre-computed in _prep_t2i_adapter
             controlnet.inject()
 
+        _use_karras = prompt.inpaint_method == "patch" and mask_image is not None
         if prompt.solver_type.lower() == SolverName.DPMPP:
-            sd.scheduler = DPMSolver(num_inference_steps=prompt.steps)
+            solver_kwargs: dict[str, Any] = {"num_inference_steps": prompt.steps}
+            if _use_karras:
+                from imaginairy.vendored.refiners.foundationals.latent_diffusion.schedulers.scheduler import (
+                    NoiseSchedule,
+                )
+
+                solver_kwargs["noise_schedule"] = NoiseSchedule.KARRAS
+            sd.scheduler = DPMSolver(**solver_kwargs)
         elif prompt.solver_type.lower() == SolverName.DDIM:
             sd.scheduler = DDIM(num_inference_steps=prompt.steps)
         else:
@@ -429,7 +471,10 @@ def generate_single_image(
 
             from imaginairy.modules.fooocus_inpaint import (
                 compute_inpaint_conditioning,
+                fooocus_fill,
                 inject_inpaint_features,
+                morphological_open_mask,
+                prepare_inpaint_crop,
             )
 
             masked_image = Image.composite(
@@ -439,22 +484,69 @@ def generate_single_image(
             # mask_image here has white=keep after MaskMode inversion.
             # compute_inpaint_conditioning expects white=inpaint, so invert.
             inpaint_mask = ImageOps.invert(mask_image)
+
+            # Always crop to interested area and resize to ~1024
+            _full_init_image = init_image
+            _full_mask_image_orig = mask_image_orig
+            cropped_img, cropped_mask, _inpaint_crop = prepare_inpaint_crop(
+                init_image, inpaint_mask
+            )
+            init_image = cropped_img
+            inpaint_mask = cropped_mask
+            mask_image_orig = ImageOps.invert(inpaint_mask)
+            # Re-encode cropped image to latent
+            init_image_t = pillow_img_to_torch_image(init_image)
+            init_image_t = init_image_t.to(device=sd.lda.device, dtype=sd.lda.dtype)
+            init_latent = sd.lda.encode(init_image_t)
+            shape = list(init_latent.shape)
+            # Regenerate noise for new shape
+            noise = randn_seeded(seed=prompt.seed, size=shape).to(
+                sd.unet.device, dtype=sd.unet.dtype
+            )
+            logger.info(
+                f"Inpaint crop: {_inpaint_crop.crop_box}, "
+                f"working size={init_image.size}"
+            )
+
+            # Compute morphological mask for final pixel-space compositing.
+            # This is applied to the FULL-SIZE mask (like Fooocus), but if we
+            # ROI-cropped, apply to the cropped mask and we'll handle full-size
+            # compositing after paste-back.
+            _patch_morph_mask = morphological_open_mask(inpaint_mask)
+
+            # Compute fill image (blurred surroundings into masked region)
+            filled_img = fooocus_fill(init_image.convert("RGB"), inpaint_mask)
+
             with lc.timing("fooocus-conditioning"):
+                # InpaintHead sees image with 0.5-filled masked pixels
                 features = compute_inpaint_conditioning(
                     sd=sd,
                     init_image=init_image,
                     mask_image=inpaint_mask,
                 )
-                inject_inpaint_features(sd.unet, features)
+                _inpaint_feat_mod = inject_inpaint_features(sd.unet, features)
 
-            # Prepare latent-space mask for per-step compositing (1=inpaint, 0=keep)
+            # Encode fill image — used as starting latent AND per-step
+            # compositing target (matching Fooocus's pipeline)
+            fill_t = pillow_img_to_torch_image(filled_img).to(
+                device=sd.lda.device, dtype=sd.lda.dtype
+            )
+            _patch_fill_latent = sd.lda.encode(fill_t).to(
+                device=sd.unet.device, dtype=sd.unet.dtype
+            )
+            # Override init_latent so noised_latent starts from fill
+            init_latent = _patch_fill_latent
+
+            # Binary latent mask for per-step compositing (1=inpaint, 0=keep)
+            # Fooocus uses encode_vae_inpaint which does max_pool2d + round
             mask_np = np.array(inpaint_mask).astype(np.float32) / 255.0
             _patch_latent_mask = torch.tensor(mask_np).unsqueeze(0).unsqueeze(0)
-            _patch_latent_mask = F.max_pool2d(
+            _patch_latent_mask = F.interpolate(
                 _patch_latent_mask,
-                kernel_size=downsampling_factor,
-                stride=downsampling_factor,
+                size=(shape[2] * 8, shape[3] * 8),
+                mode="bilinear",
             ).round()
+            _patch_latent_mask = F.max_pool2d(_patch_latent_mask, kernel_size=8).round()
             _patch_latent_mask = _patch_latent_mask.to(
                 device=sd.unet.device, dtype=sd.unet.dtype
             )
@@ -502,8 +594,12 @@ def generate_single_image(
                     f"MultiDiffusion: {len(tile_ys)}x{len(tile_xs)} tiles "
                     f"({len(tile_ys) * len(tile_xs)} per step) for {latent_w * 8}x{latent_h * 8} image"
                 )
-                # full-size controlnet conditions (already set on line 292)
-                cn_full_conds = {id(cn): cond_t for cn, cond_t in controlnets}
+                # full-size controlnet conditions (T2I adapters excluded — not tileable)
+                cn_full_conds = {
+                    id(cn): cond_t
+                    for cn, cond_t in controlnets
+                    if hasattr(cn, "set_controlnet_condition")
+                }
                 # full-size inpainting conditions (for sdxlinpaint model)
                 _full_mask_latents = getattr(sd, "mask_latents", None)
                 _full_target_latents = getattr(sd, "target_image_latents", None)
@@ -523,11 +619,12 @@ def generate_single_image(
                             tile = x[:, :, ty:te, tx:re]
                             # crop each controlnet condition to matching pixel region
                             for cn, _ in controlnets:
-                                cn.set_controlnet_condition(
-                                    cn_full_conds[id(cn)][
-                                        :, :, ty * px : te * px, tx * px : re * px
-                                    ]
-                                )
+                                if id(cn) in cn_full_conds:
+                                    cn.set_controlnet_condition(
+                                        cn_full_conds[id(cn)][
+                                            :, :, ty * px : te * px, tx * px : re * px
+                                        ]
+                                    )
                             # crop inpainting conditions to matching tile region
                             if _full_mask_latents is not None:
                                 sd.mask_latents = _full_mask_latents[:, :, ty:te, tx:re]
@@ -535,6 +632,13 @@ def generate_single_image(
                                 sd.target_image_latents = _full_target_latents[
                                     :, :, ty:te, tx:re
                                 ]
+                            if _inpaint_feat_mod is not None:
+                                _inpaint_feat_mod.set_tile(
+                                    ty,
+                                    tx,
+                                    MULTIDIFFUSION_TILE_SIZE,
+                                    MULTIDIFFUSION_TILE_SIZE,
+                                )
                             tile_kwargs = tile_conditioning.get(
                                 (ty, tx), text_conditioning_kwargs
                             )
@@ -551,24 +655,34 @@ def generate_single_image(
                         lc.progress_latent_callback(x)
                 # restore full-size conditions
                 for cn, _ in controlnets:
-                    cn.set_controlnet_condition(cn_full_conds[id(cn)])
+                    if id(cn) in cn_full_conds:
+                        cn.set_controlnet_condition(cn_full_conds[id(cn)])
                 if _full_mask_latents is not None:
                     sd.mask_latents = _full_mask_latents
                 if _full_target_latents is not None:
                     sd.target_image_latents = _full_target_latents
+                if _inpaint_feat_mod is not None:
+                    _inpaint_feat_mod.clear_tile()
             else:
+                _noise_gen_std = (
+                    torch.Generator(device="cpu").manual_seed(prompt.seed + 1)
+                    if _patch_latent_mask is not None
+                    else None
+                )
                 for step in tqdm(
                     sd.steps, bar_format="    {l_bar}{bar}{r_bar}", leave=False
                 ):
                     log_latent(x, "noisy_latent")
                     if _patch_latent_mask is not None:
-                        # Per-step latent masking: blend noised original into unmasked region
-                        noised_orig = sd.scheduler.add_noise(
-                            x=init_latent.to(x.device, x.dtype),
-                            noise=noise,
-                            step=step,
+                        step_noise = torch.randn(
+                            shape, generator=_noise_gen_std, dtype=x.dtype
+                        ).to(x.device)
+                        noised_fill = sd.scheduler.add_noise(
+                            x=_patch_fill_latent,
+                            noise=step_noise,
+                            step=sd.scheduler.all_steps[step],
                         )
-                        x = x * _patch_latent_mask + noised_orig * (
+                        x = x * _patch_latent_mask + noised_fill * (
                             1 - _patch_latent_mask
                         )
                     x = sd(
@@ -578,10 +692,10 @@ def generate_single_image(
                         **text_conditioning_kwargs,
                     )
                     if _patch_latent_mask is not None:
-                        # Hard-set unmasked region to clean original after each step
-                        x = x * _patch_latent_mask + init_latent.to(
-                            x.device, x.dtype
-                        ) * (1 - _patch_latent_mask)
+                        # Hard-set keep region to clean fill latent
+                        x = x * _patch_latent_mask + _patch_fill_latent * (
+                            1 - _patch_latent_mask
+                        )
                     if lc.progress_latent_callback:
                         lc.progress_latent_callback(x)
             # trying to clear memory. not sure if this helps
@@ -596,14 +710,28 @@ def generate_single_image(
         with lc.timing("decode-img"):
             gen_img = sd.lda.decode_latents(x.to(dtype=sd.lda.dtype))
 
-        if mask_image_orig and init_image:
+        # Fooocus patch inpainting: resize crop back, paste, blend with morph mask
+        if _inpaint_crop is not None:
+            from imaginairy.modules.fooocus_inpaint import (
+                morphological_open_mask,
+                post_process_inpaint,
+            )
+
+            with lc.timing("combine-image"):
+                result_images["pre-reconstitution"] = gen_img
+                # Compute morph mask on full-size inpaint mask for smooth transitions
+                full_inpaint_mask = ImageOps.invert(_full_mask_image_orig)
+                morph_full = morphological_open_mask(full_inpaint_mask)
+                log_img(morph_full, "reconstituting mask (morphological)")
+                gen_img = post_process_inpaint(_inpaint_crop, gen_img, morph_full)
+                init_image = _full_init_image
+                mask_image_orig = _full_mask_image_orig
+                log_img(gen_img, "reconstituted image")
+        elif mask_image_orig and init_image:
             with lc.timing("combine-image"):
                 result_images["pre-reconstitution"] = gen_img
                 mask_final = mask_image_orig.copy()
-                # mask_final = ImageOps.invert(mask_final)
-
                 log_img(mask_final, "reconstituting mask")
-                # gen_img = Image.composite(gen_img, init_image, mask_final)
                 gen_img = combine_image(
                     original_img=init_image,
                     generated_img=gen_img,
@@ -687,13 +815,18 @@ def generate_single_image(
                 log(f"   Ending VRAM: {result.gpu_str('memory_end')}")
         for controlnet, _ in controlnets:
             controlnet.eject()
+        if lora_manager is not None:
+            lora_manager.unload()
+        if prompt.inpaint_method == "patch" and prompt.should_use_inpainting:
+            from imaginairy.modules.fooocus_inpaint import unapply_fooocus_patches
+
+            unapply_fooocus_patches(sd.unet)
         clear_gpu_cache()
         return result
 
 
-def prep_control_input(
-    control_input: ControlInput, sd, init_image_t, fit_width, fit_height
-):
+def _prep_control_image(control_input, sd, init_image_t, fit_width, fit_height):
+    """Shared image preprocessing for both ControlNet and T2I Adapter paths."""
     from PIL import ImageOps
 
     from imaginairy.utils import get_device
@@ -701,9 +834,7 @@ def prep_control_input(
         pillow_fit_image_within,
         pillow_img_to_torch_image,
     )
-    from imaginairy.utils.log_utils import (
-        log_img,
-    )
+    from imaginairy.utils.log_utils import log_img
 
     if control_input.image_raw is not None:
         control_image = control_input.image_raw
@@ -725,11 +856,15 @@ def prep_control_input(
     control_image_input_t = pillow_img_to_torch_image(control_image_input)
     control_image_input_t = control_image_input_t.to(get_device())
 
+    # For T2I adapters, use the preprocessor matching the control_type
+    t2i_config = T2I_ADAPTER_CONFIG_SHORTCUTS.get(control_input.mode)
+    preprocess_mode = t2i_config.control_type if t2i_config else control_input.mode
+
     if control_input.image_raw is None:
         from imaginairy.img_processors.control_modes import CONTROL_MODES
 
-        control_prep_function = CONTROL_MODES[control_input.mode]
-        if control_input.mode == "inpaint":
+        control_prep_function = CONTROL_MODES[preprocess_mode]
+        if preprocess_mode == "inpaint":
             control_image_t = control_prep_function(  # type: ignore
                 control_image_input_t, init_image_t
             )
@@ -739,26 +874,37 @@ def prep_control_input(
         control_image_t = (control_image_input_t + 1) / 2
 
     control_image_disp = control_image_t * 2 - 1
-
     log_img(control_image_disp, "control_image")
 
     if len(control_image_t.shape) == 3:
         raise ValueError("Control image must be 4D")
-
     if control_image_t.shape[1] != 3:
         raise ValueError("Control image must have 3 channels")
-
     if (
-        control_input.mode != "inpaint" and control_image_t.min() < 0
+        preprocess_mode != "inpaint" and control_image_t.min() < 0
     ) or control_image_t.max() > 1:
         msg = f"Control image must be in [0, 1] but we received {control_image_t.min()} and {control_image_t.max()}"
         raise ValueError(msg)
-
     if control_image_t.max() == control_image_t.min():
         msg = f"No control signal found in control image {control_input.mode}."
         raise ValueError(msg)
 
-    control_config = CONTROL_CONFIG_SHORTCUTS.get(control_input.mode, None)
+    control_image_t = control_image_t.to(device=sd.unet.device, dtype=sd.unet.dtype)
+    return control_image_t, control_image_disp
+
+
+def prep_control_input(
+    control_input: ControlInput, sd, init_image_t, fit_width, fit_height
+):
+    control_image_t, control_image_disp = _prep_control_image(
+        control_input, sd, init_image_t, fit_width, fit_height
+    )
+
+    if control_input.adapter_type == "t2i":
+        return _prep_t2i_adapter(control_input, sd, control_image_t, control_image_disp)
+
+    # ControlNet path (existing behavior)
+    control_config = CONTROL_CONFIG_SHORTCUTS.get(control_input.mode)
     if not control_config:
         msg = f"Unknown control mode: {control_input.mode}"
         raise ValueError(msg)
@@ -771,10 +917,77 @@ def prep_control_input(
         target=sd.unet,
         weights_location=control_config.weights_location,
     )
-
     controlnet.set_scale(control_input.strength)
-    control_image_t = control_image_t.to(device=sd.unet.device, dtype=sd.unet.dtype)
     return controlnet, control_image_t, control_image_disp
+
+
+def _prep_t2i_adapter(control_input, sd, control_image_t, control_image_disp):
+    """Build and configure a T2I Adapter for the given control input."""
+    from imaginairy.utils.model_manager import load_t2i_adapter_weights
+
+    t2i_config = T2I_ADAPTER_CONFIG_SHORTCUTS.get(control_input.mode)
+    if not t2i_config:
+        msg = f"Unknown T2I adapter mode: {control_input.mode}"
+        raise ValueError(msg)
+
+    is_sdxl = "sdxl" in control_input.mode
+    weights = load_t2i_adapter_weights(
+        t2i_config.weights_location, arch="sdxl" if is_sdxl else "sd15"
+    )
+
+    if is_sdxl:
+        from imaginairy.vendored.refiners.foundationals.latent_diffusion import (
+            SDXLT2IAdapter,
+        )
+
+        adapter = SDXLT2IAdapter(
+            target=sd.unet,
+            name=control_input.mode,
+            scale=control_input.strength,
+            weights=weights,
+        )
+    else:
+        from imaginairy.vendored.refiners.foundationals.latent_diffusion import (
+            SD1T2IAdapter,
+        )
+        from imaginairy.vendored.refiners.foundationals.latent_diffusion.t2i_adapter import (
+            ConditionEncoder,
+        )
+
+        # Detect in_channels from weight shape: Conv2d.weight is [out, in*downscale^2, kh, kw]
+        # SD1.5 downscale_factor=8, so in_channels = shape[1] / 64
+        conv_weight = weights["Conv2d.weight"]
+        in_channels = conv_weight.shape[1] // (8 * 8)
+        condition_encoder = ConditionEncoder(
+            in_channels=in_channels,
+            device=sd.unet.device,
+            dtype=sd.unet.dtype,
+        )
+        adapter = SD1T2IAdapter(
+            target=sd.unet,
+            name=control_input.mode,
+            condition_encoder=condition_encoder,
+            scale=control_input.strength,
+            weights=weights,
+        )
+
+    # Ensure control image has the right number of channels for the adapter
+    if not is_sdxl:
+        expected_channels = in_channels
+        if control_image_t.shape[1] != expected_channels:
+            if expected_channels == 1:
+                # Convert RGB to grayscale
+                control_image_t = control_image_t.mean(dim=1, keepdim=True)
+            elif expected_channels == 3 and control_image_t.shape[1] == 1:
+                control_image_t = control_image_t.repeat(1, 3, 1, 1)
+
+    # Compute condition features from the preprocessed control image
+    condition_features = adapter.compute_condition_features(control_image_t)
+    adapter.set_condition_features(condition_features)
+    logger.info(
+        f"T2I adapter '{control_input.mode}' loaded (strength={control_input.strength})"
+    )
+    return adapter, control_image_t, control_image_disp
 
 
 def _generate_composition_image(

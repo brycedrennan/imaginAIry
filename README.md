@@ -70,6 +70,9 @@ Options:
 [See full Changelog here](./docs/changelog.md)
 
 **15.0.0**
+- feature: SDXL inpainting via Fooocus patch with ROI cropping, fill compositing, and morphological mask blending
+- feature: T2I Adapter support (canny, depth, sketch) for SD1.5 and SDXL via `--control-mode t2i-*`
+- feature: LoRA support via `--lora` and `--lora-strength` CLI options
 - feature: MultiDiffusion tiling for coherent large image generation (>1024px)
 - feature: Flux auto-caps at ~1MP and upscales to target size
 - feature: model architecture included in output filenames
@@ -116,12 +119,10 @@ Options:
   - or use `aimg videogen` to generate a video from an image
 - 🎉 SDXL (Stable Diffusion Extra Large) models are now supported.
   - try `--model opendalle` or `--model sdxl`
-  - inpainting and controlnets are not yet supported for SDXL
+  - SDXL supports inpainting (via Fooocus patch) and structural control (via T2I Adapters)
 - 🎉 imaginairy is now backed by the [refiners library](https://github.com/finegrain-ai/refiners)
-  - This was a huge rewrite which is why some features are not yet supported.  On the plus side, refiners supports
-cutting edge features (SDXL, image prompts, etc) which will be added to imaginairy soon.
   - [self-attention guidance](https://github.com/SusungHong/Self-Attention-Guidance) which makes details of images more accurate
-- 🎉 feature: larger image generations now work MUCH better and stay faithful to the same image as it looks at a smaller size. 
+- 🎉 feature: larger image generations now work MUCH better and stay faithful to the same image as it looks at a smaller size.
 For example `--size 720p --seed 1` and `--size 1080p --seed 1` will produce the same image for SD15
 - 🎉 feature: loading diffusers based models now supported. Example `--model https://huggingface.co/ainz/diseny-pixar --model-architecture sd15`
 - 🎉 feature: qrcode controlnet!
@@ -136,9 +137,9 @@ Visit http://localhost:8000/ and http://localhost:8000/docs
 
 <img src="https://github.com/Stability-AI/StableStudio/blob/a65d4877ad7d309627808a169818f1add8c278ae/misc/GenerateScreenshot.png?raw=true" width="512">
 
-### Image Structure Control [by ControlNet](https://github.com/lllyasviel/ControlNet)
-#### (Not supported for SDXL yet)
+### Image Structure Control [by ControlNet](https://github.com/lllyasviel/ControlNet) and [T2I Adapters](https://github.com/TencentARC/T2I-Adapter)
 Generate images guided by body poses, depth maps, canny edges, hed boundaries, or normal maps.
+ControlNet modes work with SD1.5. For SDXL, use T2I Adapter modes (`--control-mode t2i-canny-sdxl`, `t2i-depth-sdxl`, `t2i-sketch-sdxl`).
 
 **Openpose Control**
 
@@ -379,8 +380,7 @@ Upscale images easily.
     img.save("colorful_smoke.upscaled.jpg")
 
     ```
-<img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" width="25%" height="auto"> ➡️ 
-<img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke_upscaled.jpg" width="50%" height="auto">
+<img src="docs/assets/000206_856637805_PLMS40_PS7.5_colorful_smoke.jpg" width="25%" height="auto">
 
 Upscaling uses [Spandrel](https://github.com/chaiNNer-org/spandrel) to make it easy to use different upscaling models.
 You can view different integrated models by running `aimg upscale --list-models`, and then use it with `--upscale-model <model-name>`.

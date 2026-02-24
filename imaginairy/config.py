@@ -378,6 +378,59 @@ for cc in CONTROL_CONFIGS:
 
 
 @dataclass
+class T2IAdapterConfig:
+    name: str
+    aliases: list[str]
+    control_type: str
+    weights_location: str
+
+
+T2I_ADAPTER_CONFIGS = [
+    T2IAdapterConfig(
+        name="T2I Canny (SDXL)",
+        aliases=["t2i-canny-sdxl"],
+        control_type="canny",
+        weights_location="https://huggingface.co/TencentARC/t2i-adapter-canny-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors",
+    ),
+    T2IAdapterConfig(
+        name="T2I Depth (SDXL)",
+        aliases=["t2i-depth-sdxl"],
+        control_type="depth",
+        weights_location="https://huggingface.co/TencentARC/t2i-adapter-depth-midas-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors",
+    ),
+    T2IAdapterConfig(
+        name="T2I Sketch (SDXL)",
+        aliases=["t2i-sketch-sdxl"],
+        control_type="hed",
+        weights_location="https://huggingface.co/TencentARC/t2i-adapter-sketch-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors",
+    ),
+    T2IAdapterConfig(
+        name="T2I Canny (SD1.5)",
+        aliases=["t2i-canny-sd15", "t2i-canny"],
+        control_type="canny",
+        weights_location="https://huggingface.co/TencentARC/t2iadapter_canny_sd15v2/resolve/main/diffusion_pytorch_model.bin",
+    ),
+    T2IAdapterConfig(
+        name="T2I Depth (SD1.5)",
+        aliases=["t2i-depth-sd15", "t2i-depth"],
+        control_type="depth",
+        weights_location="https://huggingface.co/TencentARC/t2iadapter_depth_sd15v2/resolve/main/diffusion_pytorch_model.bin",
+    ),
+    T2IAdapterConfig(
+        name="T2I Sketch (SD1.5)",
+        aliases=["t2i-sketch-sd15", "t2i-sketch"],
+        control_type="hed",
+        weights_location="https://huggingface.co/TencentARC/t2iadapter_sketch_sd15v2/resolve/main/diffusion_pytorch_model.bin",
+    ),
+]
+
+T2I_ADAPTER_CONFIG_SHORTCUTS: dict[str, T2IAdapterConfig] = {}
+for _t2i in T2I_ADAPTER_CONFIGS:
+    for _t2i_alias in _t2i.aliases:
+        T2I_ADAPTER_CONFIG_SHORTCUTS[_t2i_alias] = _t2i
+
+
+@dataclass
 class SolverConfig:
     name: str
     short_name: str

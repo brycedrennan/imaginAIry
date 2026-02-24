@@ -226,64 +226,33 @@ class LazyLoadingImage:
 
 
 class ControlInput(BaseModel):
-    """
-    A Pydantic model representing the input control parameters for an operation,
-    typically involving image processing.
+    """Input control parameters for ControlNet or T2I Adapter conditioning."""
 
-    This model includes parameters such as the operation mode, the image to be processed,
-    an alternative raw image, and a strength parameter. It validates these parameters to
-    ensure they meet specific criteria, such as the mode being one of the predefined valid modes
-    and ensuring that both 'image' and 'image_raw' are not provided simultaneously.
-
-    Attributes:
-        mode (str): The operation mode, which must be one of the predefined valid modes.
-        image (LazyLoadingImage, optional): An instance of LazyLoadingImage to be processed.
-                                            Defaults to None.
-        image_raw (LazyLoadingImage, optional): An alternative raw image instance of
-                                                LazyLoadingImage. Defaults to None.
-        strength (float): A float value representing the strength of the operation, must be
-                          between 0 and 1000 (inclusive). Defaults to 1.
-
-    Methods:
-        image_raw_validate: Validates that either 'image' or 'image_raw' is provided,
-                            but not both.
-        mode_validate: Validates that the 'mode' attribute is one of the predefined valid
-                       modes in the configuration.
-
-    Raises:
-        ValueError: Raised if both 'image' and 'image_raw' are specified, or if the
-                    'mode' is not a valid mode.
-    """
-
+    adapter_type: Literal["controlnet", "t2i"] = "controlnet"
     mode: str
     image: LazyLoadingImage | None = None
     image_raw: LazyLoadingImage | None = None
     strength: float = Field(1, ge=0, le=1000)
 
-    # @field_validator("image", "image_raw", mode="before")
-    # def validate_images(cls, v):
-    #     if isinstance(v, str):
-    #         return LazyLoadingImage(filepath=v)
-    #
-    #     return v
-
     @field_validator("image_raw")
     def image_raw_validate(cls, v, info: core_schema.FieldValidationInfo):
         if info.data.get("image") is not None and v is not None:
             raise ValueError("You cannot specify both image and image_raw")
-
-        # if v is None and values.get("image") is None:
-        #     raise ValueError("You must specify either image or image_raw")
-
         return v
 
     @field_validator("mode")
-    def mode_validate(cls, v):
-        if v not in config.CONTROL_CONFIG_SHORTCUTS:
-            valid_modes = list(config.CONTROL_CONFIG_SHORTCUTS.keys())
-            valid_modes = ", ".join(valid_modes)
-            msg = f"Invalid controlnet mode: '{v}'. Valid modes are: {valid_modes}"
-            raise ValueError(msg)
+    def mode_validate(cls, v, info: core_schema.FieldValidationInfo):
+        adapter_type = info.data.get("adapter_type", "controlnet")
+        if adapter_type == "t2i":
+            if v not in config.T2I_ADAPTER_CONFIG_SHORTCUTS:
+                valid_modes = ", ".join(config.T2I_ADAPTER_CONFIG_SHORTCUTS.keys())
+                msg = f"Invalid t2i adapter mode: '{v}'. Valid modes are: {valid_modes}"
+                raise ValueError(msg)
+        else:
+            if v not in config.CONTROL_CONFIG_SHORTCUTS:
+                valid_modes = ", ".join(config.CONTROL_CONFIG_SHORTCUTS.keys())
+                msg = f"Invalid controlnet mode: '{v}'. Valid modes are: {valid_modes}"
+                raise ValueError(msg)
         return v
 
 
@@ -370,8 +339,10 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         "", description="text to be overlaid on the image", validate_default=True
     )
     composition_strength: float = Field(ge=0, le=1, validate_default=True)
-    inpaint_method: InpaintMethod = "finetune"
+    inpaint_method: InpaintMethod | None = None
     multidiffusion: bool = True
+    lora_weights: str | None = None
+    lora_strength: float = Field(0.8, ge=0, le=2)
 
     def __init__(
         self,
@@ -405,8 +376,10 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         collect_progress_latents: bool = False,
         caption_text: str = "",
         composition_strength: float | None = 0.5,
-        inpaint_method: InpaintMethod = "finetune",
+        inpaint_method: InpaintMethod | None = None,
         multidiffusion: bool = True,
+        lora_weights: str | None = None,
+        lora_strength: float = 0.8,
     ):
         if image_prompt and not isinstance(image_prompt, list):
             image_prompt = [image_prompt]
@@ -446,6 +419,8 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
             composition_strength=composition_strength,
             inpaint_method=inpaint_method,
             multidiffusion=multidiffusion,
+            lora_weights=lora_weights,
+            lora_strength=lora_strength,
         )
         self._default_negative_prompt = None
 
@@ -619,8 +594,23 @@ class ImaginePrompt(BaseModel, protected_namespaces=()):
         should_use_inpainting = bool(
             data.get("mask_image") or data.get("mask_prompt") or data.get("outpaint")
         )
+
+        # Resolve inpaint_method: SDXL uses fooocus patch, others use finetune
+        inpaint_method = data.get("inpaint_method")
+        if inpaint_method is None and should_use_inpainting:
+            resolved = resolve_model_weights_config(
+                model_weights=model_weights,
+                default_model_architecture=None,
+                for_inpainting=False,
+            )
+            if resolved.architecture.primary_alias == "sdxl":
+                inpaint_method = "patch"
+            else:
+                inpaint_method = "finetune"
+            data["inpaint_method"] = inpaint_method
+
         should_use_inpainting_weights = (
-            should_use_inpainting and data.get("inpaint_method") == "finetune"
+            should_use_inpainting and inpaint_method == "finetune"
         )
         model_weights_config = resolve_model_weights_config(
             model_weights=model_weights,
