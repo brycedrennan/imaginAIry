@@ -12,8 +12,6 @@ AI imagined images. Pythonic generation of stable diffusion images **and videos*
 
 
 ```bash
-# on macOS, make sure rust is installed first
-# be sure to use Python 3.10, Python 3.11 is not supported at the moment
 >> pip install imaginairy
 >> imagine "a scenic landscape" "a photo of a dog" "photo of a fruit bowl" "portrait photo of a freckled woman" "a bluejay"
 # Make an AI video
@@ -60,17 +58,25 @@ Options:
 
 ### Images
 <p float="left">
-<img src="docs/assets/026882_1_ddim50_PS7.5_a_scenic_landscape_[generated].jpg" height="256">
-<img src="docs/assets/026884_1_ddim50_PS7.5_photo_of_a_dog_[generated].jpg" height="256">
-<img src="docs/assets/026890_1_ddim50_PS7.5_photo_of_a_bowl_of_fruit._still_life_[generated].jpg" height="256">
-<img src="docs/assets/026885_1_ddim50_PS7.5_girl_with_a_pearl_earring_[generated].jpg" height="256">
-<img src="docs/assets/026891_1_ddim50_PS7.5_close-up_photo_of_a_bluejay_[generated].jpg" height="256">
-<img src="docs/assets/026893_1_ddim50_PS7.5_macro_photo_of_a_flower_[generated].jpg" height="256">
+<img src="docs/assets/026882_1_ddim50_PS7.5_a_scenic_landscape_%5Bgenerated%5D.jpg" height="256">
+<img src="docs/assets/026884_1_ddim50_PS7.5_photo_of_a_dog_%5Bgenerated%5D.jpg" height="256">
+<img src="docs/assets/026890_1_ddim50_PS7.5_photo_of_a_bowl_of_fruit._still_life_%5Bgenerated%5D.jpg" height="256">
+<img src="docs/assets/026885_1_ddim50_PS7.5_girl_with_a_pearl_earring_%5Bgenerated%5D.jpg" height="256">
+<img src="docs/assets/026891_1_ddim50_PS7.5_close-up_photo_of_a_bluejay_%5Bgenerated%5D.jpg" height="256">
+<img src="docs/assets/026893_1_ddim50_PS7.5_macro_photo_of_a_flower_%5Bgenerated%5D.jpg" height="256">
 </p>
 
 ### Whats New
 [See full Changelog here](./docs/changelog.md)
 
+**15.0.0**
+- feature: MultiDiffusion tiling for coherent large image generation (>1024px)
+- feature: Flux auto-caps at ~1MP and upscales to target size
+- feature: model architecture included in output filenames
+- feature: `--compose-phase-controlnet` flag to toggle ControlNet tile during composition refinement
+- fix: compatibility with Pillow 12, transformers 5.x, and huggingface_hub 1.x
+- chore: migrate from setup.py to uv + pyproject.toml
+- chore: require CUDA 12.4+, Python 3.11+
 
 **14.3.0**
 - feature: integrates [spandrel](https://github.com/chaiNNer-org/spandrel) for upscaling 
@@ -189,7 +195,7 @@ imagine --control-image bird.jpg  --control-mode normal  "a bird"
 ```
 
 <p float="left">
-    <img src="docs/assets/013986_1_kdpmpp2m59_PS7.5_a_bluejay_[generated].jpg" height="256">
+    <img src="docs/assets/013986_1_kdpmpp2m59_PS7.5_a_bluejay_%5Bgenerated%5D.jpg" height="256">
     <img src="docs/assets/bird-normal.jpg" height="256">
     <img src="docs/assets/bird-normal-generated.jpg" height="256">
 </p>
@@ -256,7 +262,7 @@ Just tell imaginairy how to edit the image and it will do it for you!
 <img src="docs/assets/dog_red.jpg" height="256">
 <img src="docs/assets/bowl_of_fruit_strawberries.jpg" height="256">
 <img src="docs/assets/freckled_woman_cyborg.jpg" height="256">
-<img src="docs/assets/014214_51293814_kdpmpp2m30_PS10.0_img2img-1.0_make_the_bird_wear_a_cowboy_hat_[generated].jpg" height="256">
+<img src="docs/assets/014214_51293814_kdpmpp2m30_PS10.0_img2img-1.0_make_the_bird_wear_a_cowboy_hat_%5Bgenerated%5D.jpg" height="256">
 <img src="docs/assets/flower-make-the-flower-out-of-paper-origami.gif" height="256">
 <img src="docs/assets/girl-pearl-clown-compare.gif" height="256">
 <img src="docs/assets/mona-lisa-headshot-anim.gif" height="256">
@@ -353,8 +359,8 @@ When writing strength modifiers keep in mind that pixel values are between 0 and
 ```bash
 >> imagine "a couple smiling" --steps 40 --seed 1 --fix-faces
 ```
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> ➡️ 
-<img src="https://github.com/brycedrennan/imaginAIry/raw/master/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
+<img src="docs/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_nofix.png" height="256"> ➡️
+<img src="docs/assets/000178_1_PLMS40_PS7.5_a_couple_smiling_fixed.png" height="256"> 
 
 
 ## Image Upscaling
@@ -462,9 +468,9 @@ You can use `{}` to randomly pull values from lists.  A list of values separated
 
    `imagine "a {lime|blue|silver|aqua} colored dog" -r 4 --seed 0` (note that it generates a dog of each color without repetition)
 
-<img src="docs/assets/000184_0_plms40_PS7.5_a_silver_colored_dog_[generated].jpg" height="200"><img src="docs/assets/000186_0_plms40_PS7.5_a_aqua_colored_dog_[generated].jpg" height="200">
-<img src="docs/assets/000210_0_plms40_PS7.5_a_lime_colored_dog_[generated].jpg" height="200">
-<img src="docs/assets/000211_0_plms40_PS7.5_a_blue_colored_dog_[generated].jpg" height="200">
+<img src="docs/assets/000184_0_plms40_PS7.5_a_silver_colored_dog_%5Bgenerated%5D.jpg" height="200"><img src="docs/assets/000186_0_plms40_PS7.5_a_aqua_colored_dog_%5Bgenerated%5D.jpg" height="200">
+<img src="docs/assets/000210_0_plms40_PS7.5_a_lime_colored_dog_%5Bgenerated%5D.jpg" height="200">
+<img src="docs/assets/000211_0_plms40_PS7.5_a_blue_colored_dog_%5Bgenerated%5D.jpg" height="200">
 
    `imagine "a {_color_} dog" -r 4 --seed 0` will generate four, different colored dogs. The colors will be pulled from an included 
    phraselist of colors.
@@ -561,10 +567,8 @@ imagine_image_files(prompts, outdir="./my-art")
 
 ## Requirements
 - ~10 gb space for models to download
-- A CUDA supported graphics card with >= 11gb VRAM (and CUDA installed) or an M1 processor.
-- Python installed. Preferably Python 3.10.  (not conda)
-- For macOS [rust](https://www.rust-lang.org/tools/install) and setuptools-rust must be installed to compile the `tokenizer` library.
-They can be installed via: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh` and `pip install setuptools-rust`
+- A CUDA 12.4+ supported graphics card with >= 11gb VRAM, or an Apple Silicon Mac.
+- Python 3.11+
     
 
 ## Running in Docker

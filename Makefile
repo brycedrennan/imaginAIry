@@ -31,7 +31,10 @@ build-pkg:  ## Build the package
 
 deploy:  ## Deploy to pypi.org
 	rm -rf dist
-	uv build
+	HASH=$$(git rev-parse HEAD) && \
+	sed -i '' "s|<img src=\"|<img src=\"https://raw.githubusercontent.com/brycedrennan/imaginAIry/$$HASH/|g" README.md && \
+	uv build; \
+	git checkout README.md
 	uv publish
 	rm -rf dist
 	@echo "Deploy successful!"
